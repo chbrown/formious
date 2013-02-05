@@ -1,0 +1,3 @@
+[submodule "static/lib"]
+	path = static/lib
+	url = git://github.com/chbrown/static-lib.git

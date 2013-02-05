@@ -1,0 +1,22 @@
+{
+  "name": "turkserv",
+  "description": "Mech Turk question server.",
+  "version": "0.1.2",
+  "homepage": "https://github.com/chbrown/turkserv",
+  "repository": "git://github.com/chbrown/turkserv.git",
+  "author": "Christopher Brown <io@henrian.com>",
+  "dependencies": {
+    "amulet": "git://github.com/chbrown/amulet.git",
+    "cookies": "git://github.com/chbrown/cookies.git",
+    "fsm": "git://github.com/chbrown/fsm.git",
+    "regex-router": "*",
+    "optimist": "*",
+    "underscore": "*",
+    "js-yaml": "*",
+    "mongoose": "*",
+    "sprintf": "*",
+    "csv": "*",
+    "winston": "*",
+    "formidable": "*"
+  }
+}

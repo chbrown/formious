@@ -1,0 +1,301 @@
+---
+# the value of every id should be unique to the list it's in.
+# for each question's continuations, the following are default:
+#       falsifies-motion: false
+#       falsifies-possession: false
+#       falsifies-motion: false
+- id: 1
+  active: false
+  verb: give
+  category: caused-possession
+  subcategory: giving
+  base: John gave
+  recipient: Mary
+  object: a book
+  continuations:
+    - id: 1
+      text: ", but then she lost it."
+    - id: 2
+      text: ", but it never arrived."
+      falsifies-possession: true
+      falsifies-motion: true
+    - id: 3
+      text: ", but she didn't get it."
+      falsifies-possession: true
+
+- id: 2
+  active: false
+  verb: owe
+  category: caused-possession
+  subcategory: future having
+  base: John owed
+  recipient: Sarah
+  object: 20 dollars
+  continuations:
+    - id: 1
+      text: ", but he never paid it back."
+      falsifies-possession: true
+      falsifies-motion: true
+    - id: 2
+      text: ", but he didn't give her anything."
+      falsifies-possession: true
+      falsifies-motion: true
+    - id: 3
+      text: ", but he wasn't in debt to her."
+      # falsifies-premise: true
+    - id: 4
+      text: ", but she wasn't supposed to be paid anything."
+      # falsifies-premise: true
+
+- id: 3
+  active: false
+  verb: teach
+  category: caused-possession
+  subcategory: communication
+  base: Monica taught
+  recipient: the boys
+  object: algebra
+  continuations:
+    - id: 1
+      text: ", and they learned it quickly."
+    - id: 2
+      text: ", but she didn't know anything about math."
+      falsifies-motion: true
+    - id: 3
+      text: ", but they didn't understand any of it."
+      falsifies-possession: true
+    - id: 4
+      text: ", but didn't say a word."
+      falsifies-motion: true
+
+- id: 4
+  active: false
+  verb: email
+  category: caused-motion
+  subcategory: instrument of communication
+  base: Bill emailed
+  recipient: Joyce
+  object: an explanation
+  continuations:
+    - id: 1
+      text: ", but she deleted it."
+    - id: 2
+      text: ", but it got lost in her spam folder."
+      # falsifies-possession: true
+    - id: 3
+      text: ", but it never arrived."
+      falsifies-motion: true
+      falsifies-possession: true
+    - id: 4
+      text: ", but she never got it."
+      falsifies-possession: true
+
+- id: 5
+  active: false
+  verb: kick
+  category: caused-motion
+  subcategory: instantaneous causing of ballistic motion
+  base: Amelia kicked
+  recipient: Zidane
+  object: the ball
+  continuations:
+    - id: 1
+      text: ", and he trapped it easily."
+    - id: 2
+      text: ", but he missed it."
+      falsifies-possession: true
+    - id: 3
+      text: ", but it was intercepted."
+      falsifies-possession: true
+    - id: 4
+      text: ", but only made it halfway."
+      falsifies-possession: true
+
+- id: 6
+  active: false
+  verb: take
+  category: caused-motion
+  subcategory: causation of motion in a deictically specified direction
+  base: Rachel took
+  recipient: Paul
+  object: a pizza
+  continuations:
+    - id: 1
+      text: ", and left it with his mother."
+    - id: 2
+      text: ", but had an accident on the way."
+      falsifies-motion: true
+    - id: 3
+      text: ", but he wasn't home."
+      falsifies-possession: true
+    - id: 4
+      text: ", but forgot to put it in the car."
+      falsifies-possession: true
+      falsifies-motion: true
+
+- id: 7
+  active: false
+  verb: send
+  category: caused-motion
+  subcategory: sending
+  base: Sarah sent
+  recipient: her tenants
+  object: a lease
+  continuations:
+    - id: 1
+      text: ", but it got lost in the mail."
+      falsifies-possession: true
+      falsifies-motion: true
+    - id: 2
+      text: ", but to the wrong address."
+      falsifies-possession: true
+    - id: 3
+      text: ", but forgot to put a stamp on it."
+      falsifies-motion: true
+    - id: 4
+      text: ", but didn't put it in the mail."
+      falsifies-motion: true
+      falsifies-possession: true
+    - id: 5
+      text: ", but they didn't get it."
+      falsifies-possession: true
+
+- id: 8
+  active: false
+  verb: whisper
+  category: other
+  subcategory: manner of speaking
+  base: Emily whispered
+  recipient: her brother
+  object: a password
+  continuations:
+    - id: 1
+      text: ", but he forgot it."
+      falsifies-possession: true
+    - id: 2
+      text: ", but he didn't hear it."
+      falsifies-possession: true
+    - id: 3
+      text: ", but too quiet to hear."
+      falsifies-possession: true
+    - id: 4
+      text: ", but didn't produce any sound."
+      falsifies-motion: true
+
+# round two!
+
+- id: 9
+  active: true
+  verb: hand
+  category: caused-possession
+  subcategory: giving
+  base: John handed
+  recipient: Mary
+  object: the salt shaker
+  continuations:
+    - id: 1
+      text: ", but she dropped it."
+      falsifies-possession: true
+    - id: 2
+      text: ", but it broke when he set it down."
+      falsifies-possession: true
+    - id: 3
+      text: ", but he dropped it."
+      falsifies-possession: true
+      falsifies-motion: true
+    - id: 4
+      text: ", but kept it on his side of the table."
+      falsifies-motion: true
+
+- id: 10
+  active: true
+  verb: give-paint
+  category: caused-possession
+  subcategory: giving
+  base: I gave
+  recipient: the wall
+  object: a fresh coat of paint
+  continuations:
+    - id: 1
+      text: " before it dried."
+    - id: 2
+      text: " after it dried."
+    - id: 3
+      text: ", but the wallpaper just bunched up underneath."
+      falsifies-possession: true
+    - id: 4
+      text: ", but couldn't find the paint."
+      falsifies-possession: true
+      falsifies-motion: true
+
+# (10) #John gave/handed Mary the salt, but he dropped it before she got it.
+  # tag: From John Beavers' ditransitives working paper, marked ungrammatical in the DO (double obj) form.
+  # also: I gave the wall a fresh coat of paint
+  # and I gave the wall a swift kick
+  # and I gave the wall a warm handshake
+  # And then his (11), #John gave/bequeathed/credited the money to London. (also wrongly judged, IMhO)
+
+- id: 11
+  active: true
+  verb: give-kick
+  category: caused-possession
+  subcategory: giving
+  base: Terrance gave
+  recipient: the wall
+  object: a swift kick
+  continuations:
+    - id: 1
+      text: " but didn't make a dent."
+      falsifies-possession: true
+    - id: 2
+      text: " and stubbed his toe."
+
+- id: 12
+  active: true
+  verb: throw
+  category: caused-motion
+  subcategory: instantaneous causing of ballistic motion
+  base: Lisa threw
+  recipient: Beth
+  object: a volleyball
+  continuations:
+    - id: 1
+      text: " even though there was a net in the way."
+      falsifies-possession: true
+    - id: 2
+      text: ", but didn't realize there was a net in the way."
+      falsifies-possession: true
+    - id: 3
+      text: ", even though she knew there was a net in the way."
+      falsifies-possession: true
+    - id: 4
+      text: " even though she knew Beth wouldn't catch it."
+
+- id: 13
+  active: true
+  verb: bequeath
+  category: caused-possession
+  subcategory: future having
+  base: Lewis bequeathed
+  recipient: London
+  object: the money
+  continuations:
+    - id: 1
+      text: "."
+    - id: 2
+      text: ", but his lawyer awarded it to his widow instead."
+      falsifies-motion: true
+    - id: 3
+      text: " before he died."
+    - id: 4
+      text: ", but his lawyer soon realized his investments were worthless."
+
+# From JB:
+# #Carla handed the money to Norm, but he never received it.
+# (10) #John gave/handed Mary the salt, but he dropped it before she got it.
+# (15) #John carried/brought the treaty to the security council, but he/it did not arrive.
+# (44) a. John threw the ball to the other side of the room.
+#      b. #John threw the other side of the room the ball.
+# (65) a. John emailed the document to Mary, but it never reached her inbox.
+#      b. #John ftped the document to Mary, but it never reached her server.
+# (77) #John handed Sandy a quarter, but the quarter never left his hand.
