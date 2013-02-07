@@ -67,6 +67,7 @@ var names = ['Armstrong', 'Cardoso', 'Darlak', 'Gaouette', 'Hartman', 'Klein',
 var widths = [10, 25, 50, 75, 100, 150]; // from conv.py
 var prior_total = [0.1, 0.3, 0.5, 0.7, 0.9];
 var total_planes = 50;
+var number_of_scenes = 100;
 
 function renderAircraft(req, res, user, context) {
   // variables:
@@ -89,7 +90,7 @@ function renderAircraft(req, res, user, context) {
     };
   });
 
-  context.scenes = __.range(100).map(function(scene_index) {
+  context.scenes = __.range(number_of_scenes).map(function(scene_index) {
     var width = util.sample(widths);
     var image_id = (Math.random() * 100) | 0;
     var gold = (Math.random() < context.prior) ? 'friend' : 'enemy';

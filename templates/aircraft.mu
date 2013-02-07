@@ -25,13 +25,13 @@
 <h4><i>Scenario:</i></h4>
 <p>You are a battleship gunner in a WWII air battle. Your job is to
 identify aircraft and determine whether they are friends or enemies.
-You will receive feedback on your judgements.
+You will receive feedback on your judgments.
 
 <p>Your vision is sometimes limited due to angle or distance. Your allies are
 identifying the same aircraft and provide estimates to the best of their
 ability, given their positions.
 
-<p>You will see 100 images in total. You must advance through one at a time.
+<p>You will see {{scenes.length}} images in total. You must advance through one at a time.
 
 <hr />
 
@@ -66,8 +66,8 @@ ability, given their positions.
       <td><img src="/static/aircraft/pixelated/<%src%>" id="sight" /></td>
       <td style="padding-left: 20px">
         <table class="stats">
-          <tr><td>Total estimated number of friendly aircraft in the sky:</td><td>{{total_friendly}}</td></tr>
-          <tr><td>Total estimated number of enemy aircraft in the sky:</td><td>{{total_enemy}}</td></tr>
+          <tr><td>Estimated number of friendly aircraft in the sky:</td><td>{{total_friendly}}</td></tr>
+          <tr><td>Estimated number of enemy aircraft in the sky:</td><td>{{total_enemy}}</td></tr>
         </table>
 
         <h3>Allies:</h3>
@@ -95,6 +95,7 @@ ability, given their positions.
     <input type="hidden" name="assignmentId" value="{{assignmentId}}" />
     <input type="hidden" name="turkerId" value="{{workerId}}" />
     <input type="hidden" name="originalHitId" value="{{hitId}}" />
+    <input type="hidden" name="duration" value="<% duration %>" />
 
     <h3>Debriefing</h3>
     <p>Was this task unclear, mispriced, or frustrating? If we could make it better, let us know!</p>
@@ -126,7 +127,6 @@ function measureBox(selector) {
 };
 
 function now() { return (new Date()).getTime(); }
-
 
 var scenes = {{{JSON.stringify(scenes)}}};
 var task_started = {{task_started}};
@@ -201,7 +201,7 @@ function showScene(scene_index) {
 }
 
 function showConclusion() {
-  var conclusion_html = conclusion_template.render({});
+  var conclusion_html = conclusion_template.render({duration: now() - task_started});
   $('#scene').html(conclusion_html);
 }
 

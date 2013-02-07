@@ -33,7 +33,7 @@ button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0;}
 textarea{overflow:auto;vertical-align:top;}
 table{border-collapse:collapse;border-spacing:0;}
 .center{text-align:center;}
-body{padding:10px;font-size:95%;font-family:Tahoma,Helvetica,"Arial Unicode MS",sans-serif;}
+body{padding:10px;font:13px "Lucida Grande",Arial,sans-serif;}
 .vlabels,textarea{margin:5px 0 5px;}.vlabels label,textarea label{display:block;padding:2px 2px;}
 label[disabled]{color:#777;}
 p{margin:4px 0 4px;}
