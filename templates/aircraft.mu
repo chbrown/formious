@@ -109,20 +109,24 @@ ability, given their positions.
 </script>
 
 <script>
-$.fn.measureBox = function() {
+function measureBox(selector) {
+  var $el = $(selector);
   return {
-    width: this.width() +
-      parseInt(this.css('border-left-width'), 10) +
-      parseInt(this.css('border-right-width'), 10) +
-      parseInt(this.css('padding-left'), 10) +
-      parseInt(this.css('padding-right'), 10),
-    height: this.height() +
-      parseInt(this.css('border-top-width'), 10) +
-      parseInt(this.css('border-bottom-width'), 10) +
-      parseInt(this.css('padding-top'), 10) +
-      parseInt(this.css('padding-bottom'), 10)
+    width: $el.width() +
+      parseInt($el.css('border-left-width'), 10) +
+      parseInt($el.css('border-right-width'), 10) +
+      parseInt($el.css('padding-left'), 10) +
+      parseInt($el.css('padding-right'), 10),
+    height: $el.height() +
+      parseInt($el.css('border-top-width'), 10) +
+      parseInt($el.css('border-bottom-width'), 10) +
+      parseInt($el.css('padding-top'), 10) +
+      parseInt($el.css('padding-bottom'), 10)
   };
 };
+
+function now() { return (new Date()).getTime(); }
+
 
 var scenes = {{{JSON.stringify(scenes)}}};
 var task_started = {{task_started}};
@@ -138,7 +142,8 @@ function showFeedback(choice, scene_index) {
   var scene = scenes[scene_index];
   var correct = choice == scene.gold;
 
-  $('#scene').html('<div class="emoticon">' + (correct ? "☺" : "☹") + '</div>');
+  $('#scene').html('<div class="emoticon">' +
+    '<img src="/static/' + (correct ? "smile" : "frown") + '.gif" alt="' + (correct ? "☺" : "☹") + '" /></div>');
 
   setTimeout(function() {
     showScene(scene_index + 1);
@@ -149,18 +154,24 @@ function showFeedback(choice, scene_index) {
     task_started: task_started,
     prior: {{prior}},
     scene_index: scene.index,
-    reliabilities: scene.allies.map(function(ally) { return ally.reliability.toFixed(4); }),
+    reliabilities: _.map(scene.allies, function(ally) { return ally.reliability.toFixed(4); }),
     judgments: _.pluck(scene.allies, 'judgment'),
     gold: scene.gold,
     image_id: scene.image_id,
     width: scene.width,
     correct: correct,
-    time: Date.now() - scene_shown,
+    time: now() - scene_shown
   };
 
-  $.post('/save', JSON.stringify(response), function(data, textStatus) {
-    // response saved; any feedback?
-  }, 'json');
+  $.ajax({
+    url: '/save',
+    type: 'POST',
+    dataType: 'json',
+    data: JSON.stringify(response),
+    success: function(data, textStatus) {
+      // response saved; any feedback?
+    }
+  });
 }
 
 function prepareScene(scene_index) {
@@ -173,10 +184,10 @@ function showScene(scene_index) {
   if (scene) {
     var scene_html = scene_template.render(scene);
     $('#scene').html(scene_html);
-    var scene_size = $('#scene').measureBox();
+    var scene_size = measureBox('#scene');
     $('#scene').css('min-height', scene_size.height);
 
-    scene_shown = Date.now();
+    scene_shown = now();
     $('button').click(function() {
       showFeedback($(this).attr('data-id'), scene_index);
     });

@@ -1,6 +1,17 @@
+# Installation
+
+Get the repo and the [static-lib](https://github.com/chbrown/static-lib) submodule:
+
+    git clone --recursive https://github.com/chbrown/turkserv.git
+
+And install the Node dependencies:
+
+    cd turkserv
+    npm install
+
 # Configuration
 
-http://turk.enron.me/
+`Nginx` is used as a reverse-proxy and static file handler, and `supervisord` is used to monitor and restart the process.
 
 ## nginx
 
@@ -30,11 +41,18 @@ http://turk.enron.me/
 
 ## post-receive hook
 
+And just because Node and supervisord are so fast, kill the app when it needs to reload.
+
+    vim ~/git/turkserv.git/hooks/post-receive
+
     #!/bin/sh
     cd /var/www/turkserv
     env -i git pull
+    pkill -f turkserv.js
 
-## Symbols:
+### Notes:
+
+This repository should be at least served live from [http://turk.enron.me/]
 
 http://www.fileformat.info/info/unicode/char/2639/index.htm,
 http://www.fileformat.info/info/unicode/char/263a/index.htm
@@ -42,4 +60,4 @@ http://www.fileformat.info/info/unicode/char/263a/index.htm
 - Frown: &#9785;
 - Smile: &#9786;
 
-messerschmitt vs. spitfire
+The two planes are Messerschmitts and Spitfires, particularly, models taken from the Google Sketchup marketplace and rendered with Kerkythea.

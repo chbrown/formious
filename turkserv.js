@@ -36,6 +36,12 @@ function md5(string) {
   return md5sum.digest('hex');
 }
 
+function random(min, max) {
+  if (min === undefined && max === undefined) { min = 0; max = 1; }
+  if (max === undefined) { max = min; min = 0; }
+  return Math.random() * (max - min) + min;
+}
+
 Cookies.prototype.defaults = function() {
   var expires = new Date(Date.now() + (31 * 24 * 60 * 60 * 1000)); // 1 month
   return {expires: expires};
@@ -79,7 +85,7 @@ function renderAircraft(req, res, user, context) {
     return {
       title: 'Lt.',
       name: name,
-      reliability: Math.random() // maybe switch in a beta later
+      reliability: random(0.5, 1.0) // maybe switch in a beta later
     };
   });
 
