@@ -303,7 +303,7 @@ if (require.main === module) {
     };
 
     R.route(req, res);
-    logger.error(exc, {url: req ? req.url : null, stack: exc.stack});
+    // logger.error(exc, {url: req ? req.url : null, stack: exc.stack});
 
   }).listen(argv.port, argv.hostname);
   logger.info('Turkserv ready at ' + argv.hostname + ':' + argv.port);
