@@ -67,7 +67,7 @@ var names = ['Armstrong', 'Cardoso', 'Darlak', 'Gaouette', 'Hartman', 'Klein',
 var widths = [10, 25, 50, 75, 100, 150]; // from conv.py
 var prior_total = [0.1, 0.3, 0.5, 0.7, 0.9];
 var total_planes = 50;
-var number_of_scenes = 100;
+var number_of_scenes = 200;
 
 function renderAircraft(req, res, user, context) {
   // variables:
@@ -302,12 +302,9 @@ if (require.main === module) {
       http.ServerResponse.prototype.end.apply(res, arguments);
     };
 
-    try {
-      R.route(req, res);
-    }
-    catch (exc) {
-      logger.error(exc, {url: req ? req.url : null, stack: exc.stack});
-    }
+    R.route(req, res);
+    logger.error(exc, {url: req ? req.url : null, stack: exc.stack});
+
   }).listen(argv.port, argv.hostname);
   logger.info('Turkserv ready at ' + argv.hostname + ':' + argv.port);
 }
