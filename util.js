@@ -35,6 +35,13 @@ exports.clone = function(original, merge) {
   return copy;
 };
 
-exports.extend = function(list, new_items) {
-  return list.push.apply(list, new_items);
+exports.extend = function(list, other_list) {
+  return list.push.apply(list, other_list);
+};
+
+exports.repeat = function(item, count) {
+  var list = [];
+  for (var i = 0; i < count; i++)
+    list.push(item);
+  return list;
 };

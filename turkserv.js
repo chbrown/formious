@@ -67,7 +67,48 @@ var names = ['Armstrong', 'Cardoso', 'Darlak', 'Gaouette', 'Hartman', 'Klein',
 var widths = [10, 25, 50, 75, 100, 150]; // from conv.py
 var prior_total = [0.1, 0.3, 0.5, 0.7, 0.9];
 var total_planes = 50;
-var number_of_scenes = 200;
+var number_of_scenes = 100;
+
+
+var prior_queue = [];
+
+R.get(/\/priors.txt/, function(m, req, res) {
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+  var body = prior_queue.map(function(d) { return d.toString(); }).join('; ');
+  res.write(body);
+  res.end();
+});
+
+function updatePriorQueueHack() {
+  // group by prior and count
+  var priors = prior_total.map(function() { return 0; });
+  var two_weeks_ago = new Date(new Date().getTime() - 14*24*60*60*1000);
+  User.find({created: {$gt: two_weeks_ago}, $where: "this.responses.length == 100"}).exec(function(err, users) {
+    logerr(err);
+    users.forEach(function(user) {
+      priors[prior_total.indexOf(user.responses[0].prior)]++;
+    });
+  });
+
+  logger.info("Priors already tested (counts): " + priors);
+  prior_queue = [];
+  prior_total.forEach(function(prior, i) {
+    var missing = 10 - priors[i];
+    if (missing > 0)
+      util.extend(prior_queue, util.repeat(prior, missing));
+  });
+  util.shuffle(prior_queue);
+}
+
+updatePriorQueueHack();
+setInterval(updatePriorQueueHack, 60000); // once a minute
+
+function nextPrior() {
+  if (prior_queue.length) {
+    return prior_queue.pop();
+  }
+  return util.sample(prior_total);
+}
 
 function renderAircraft(req, res, user, context) {
   // variables:
@@ -78,7 +119,8 @@ function renderAircraft(req, res, user, context) {
   // 5. feedback or not
 
   context.task_started = Date.now();
-  context.prior = util.sample(prior_total); // probability of friend (same for whole task)
+  // probability of friend (same for whole task)
+  context.prior = nextPrior();
   context.total_friendly = (context.prior * total_planes) | 0;
   context.total_enemy = total_planes - context.total_friendly;
 
