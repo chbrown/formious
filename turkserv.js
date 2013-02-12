@@ -72,6 +72,12 @@ var number_of_scenes = 100;
 
 var prior_queue = [];
 
+R.get(/\/favicon.ico/, function(m, req, res) {
+  res.writeHead(404);
+  res.end();
+});
+
+
 R.get(/\/priors.txt/, function(m, req, res) {
   res.writeHead(200, {'Content-Type': 'text/plain'});
   var body = prior_queue.map(function(d) { return d.toString(); }).join('; ');
@@ -83,7 +89,7 @@ function updatePriorQueueHack() {
   // group by prior and count
   var priors = prior_total.map(function() { return 0; });
   var two_weeks_ago = new Date(new Date().getTime() - 14*24*60*60*1000);
-  User.find({created: {$gt: two_weeks_ago}, $where: "this.responses.length == 100"}).exec(function(err, users) {
+  User.find({created: {$gt: two_weeks_ago}}).where('responses.length').equals(100).exec(function(err, users) {
     logerr(err);
     users.forEach(function(user) {
       priors[prior_total.indexOf(user.responses[0].prior)]++;
