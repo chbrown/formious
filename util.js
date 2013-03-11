@@ -1,3 +1,5 @@
+var crypto = require('crypto');
+
 exports.shuffle = function(list) {
   // for(var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
   for (var i, tmp, j = list.length - 1; j > 0; j--) {
@@ -44,4 +46,16 @@ exports.repeat = function(item, count) {
   for (var i = 0; i < count; i++)
     list.push(item);
   return list;
+};
+
+exports.md5 = function(string) {
+  var md5sum = crypto.createHash('md5');
+  md5sum.update(string);
+  return md5sum.digest('hex');
+};
+
+exports.randRange = function(min, max) {
+  if (min === undefined && max === undefined) { min = 0; max = 1; }
+  if (max === undefined) { max = min; min = 0; }
+  return Math.random() * (max - min) + min;
 };

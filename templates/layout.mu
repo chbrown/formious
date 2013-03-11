@@ -4,9 +4,7 @@
 <title>Turkserv</title>
 <script>var started = new Date();</script>
 <link href="/static/site.css" rel="stylesheet" type="text/css" />
-<script src="/static/lib/js/jquery.js"></script>
-<script src="/static/lib/js/underscore.js"></script>
-<script src="/static/lib/js/hogan.js"></script>
+<script src="/static/lib/js/head.js"></script>
 <div id="container">
   <div id="content">
     {{<yield}}

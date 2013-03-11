@@ -31,7 +31,7 @@ You will receive feedback on your judgments.
 identifying the same aircraft and provide estimates to the best of their
 ability, given their positions.
 
-<p>You will see {{scenes.length}} images in total. You must advance through one at a time.
+<p>You will see a number of different scenes. You must advance through one at a time.
 
 <hr />
 
@@ -60,14 +60,14 @@ ability, given their positions.
 </script>
 
 <script type="text/mustache" id="scene_template">
-  <h3>Scene <%index%></h3>
+  <h3>Scene <%id%></h3>
   <table>
     <tr>
       <td><img src="/static/aircraft/pixelated/<%src%>" id="sight" /></td>
       <td style="padding-left: 20px">
         <table class="stats">
-          <tr><td>Estimated number of friendly aircraft in the sky:</td><td>{{total_friendly}}</td></tr>
-          <tr><td>Estimated number of enemy aircraft in the sky:</td><td>{{total_enemy}}</td></tr>
+          <tr><td>Estimated number of friendly aircraft in the sky:</td><td><%total_friendly%></td></tr>
+          <tr><td>Estimated number of enemy aircraft in the sky:</td><td><%total_enemy%></td></tr>
         </table>
 
         <h3>Allies:</h3>
@@ -91,11 +91,11 @@ ability, given their positions.
 </script>
 
 <script type="text/mustache" id="conclusion_template">
-  <form method="POST" action="{{host}}/mturk/externalSubmit">
-    <input type="hidden" name="assignmentId" value="{{assignmentId}}" />
-    <input type="hidden" name="turkerId" value="{{workerId}}" />
-    <input type="hidden" name="originalHitId" value="{{hitId}}" />
-    <input type="hidden" name="duration" value="<% duration %>" />
+  <form method="POST" action="<%host%>/mturk/externalSubmit">
+    <input type="hidden" name="assignmentId" value="<%assignmentId%>" />
+    <input type="hidden" name="turkerId" value="<%workerId%>" />
+    <input type="hidden" name="originalHitId" value="<%hitId%>" />
+    <input type="hidden" name="duration" value="<%duration%>" />
 
     <h3>Debriefing</h3>
     <p>Was this task unclear, mispriced, or frustrating? If we could make it better, let us know!</p>
@@ -110,131 +110,110 @@ ability, given their positions.
 </script>
 
 <script>
-function measureBox(selector) {
-  var $el = $(selector);
-  return {
-    width: $el.width() +
-      parseInt($el.css('border-left-width'), 10) +
-      parseInt($el.css('border-right-width'), 10) +
-      parseInt($el.css('padding-left'), 10) +
-      parseInt($el.css('padding-right'), 10),
-    height: $el.height() +
-      parseInt($el.css('border-top-width'), 10) +
-      parseInt($el.css('border-bottom-width'), 10) +
-      parseInt($el.css('padding-top'), 10) +
-      parseInt($el.css('padding-bottom'), 10)
-  };
+var task_started = {{task_started}};
+
+var config = {
+  assignmentId: "{{assignmentId}}",
+  workerId: "{{workerId}}",
+  host: "{{host}}",
+  hitId: "{{hitId}}",
 };
 
-function now() { return (new Date()).getTime(); }
-
-var scenes = {{{JSON.stringify(scenes)}}};
-var task_started = {{task_started}};
-var assignmentId = "{{assignmentId}}";
-var scene_template = Hogan.compile($('#scene_template').html(), {delimiters: '<% %>'});
-var conclusion_template = Hogan.compile($('#conclusion_template').html(), {delimiters: '<% %>'});
-var consent_template = Hogan.compile($('#consent_template').html(), {delimiters: '<% %>'});
-
+var feedback = { true: { img: '/static/smile.gif', text: '☺' }, false: { img: '/static/smile.gif', text: "☹" } };
 var feedback_duration = 2000;
-var scene_shown = -1;
+var scene_index = -1;
 
-function showFeedback(choice, scene_index) {
-  var scene = scenes[scene_index];
-  var correct = choice == scene.gold;
+var b = '/static/lib/js/';
+head.js(b+'jquery.js', b+'backbone_pkg.js', b+'hogan.js', b+'jquery.flags.js', '/static/local.js', function() {
+  var scene_template = hoganTemplate('#scene_template');
+  var conclusion_template = hoganTemplate('#conclusion_template');
+  var consent_template = hoganTemplate('#consent_template');
 
-  $('#scene').html('<div class="emoticon">' +
-    '<img src="/static/' + (correct ? "smile" : "frown") + '.gif" alt="' + (correct ? "☺" : "☹") + '" /></div>');
+  var Scene = Backbone.Model.extend({
+    next: function() {
+      return this.collection.get(this.id + 1);
+    },
+    prepare: function() {
+      $('#stage img').attr('src', '/static/aircraft/pixelated/' + this.get('src'));
+    },
+    feedback: function(choice) {
+      var self = this;
+      var correct = choice == this.get('gold');
+      $('#scene').html('<div class="emoticon"><img src="' + feedback[correct].img + '" alt="' + feedback[correct].text + '" /></div>');
 
-  setTimeout(function() {
-    showScene(scene_index + 1);
-  }, feedback_duration);
+      setTimeout(function() {
+        self.next().show()
+      }, feedback_duration);
 
-  var response = {
-    workerId: "{{workerId}}",
-    task_started: task_started,
-    prior: {{prior}},
-    scene_index: scene.index,
-    reliabilities: _.map(scene.allies, function(ally) { return ally.reliability.toFixed(4); }),
-    judgments: _.pluck(scene.allies, 'judgment'),
-    gold: scene.gold,
-    image_id: scene.image_id,
-    width: scene.width,
-    correct: correct,
-    time: now() - scene_shown
-  };
+      var response = {
+        workerId: config.workerId,
+        task_started: task_started,
+        prior: config.prior,
+        scene_index: this.id,
+        reliabilities: _.map(this.get('allies'), function(ally) { return ally.reliability.toFixed(4); }),
+        judgments: _.pluck(this.get('allies'), 'judgment'),
+        gold: this.get('gold'),
+        choice: choice,
+        correct: correct,
+        image_id: this.get('image_id'),
+        width: this.get('width'),
+        time: now() - scene_shown
+      };
 
-  $.ajax({
-    url: '/save',
-    type: 'POST',
-    dataType: 'json',
-    data: JSON.stringify(response),
-    success: function(data, textStatus) {
-      // response saved; any feedback?
+      $.ajax({
+        url: '/save',
+        type: 'POST',
+        dataType: 'json',
+        data: JSON.stringify(response)
+        // success: function(data, textStatus) {}
+      });
+    },
+    show: function() {
+      var self = this;
+      var scene_html = scene_template.render(this.toJSON());
+      $('#scene').html(scene_html);
+
+      // never shrink!
+      var scene_size = $('#scene').measureBox();
+      // console.log(scene_size);
+      $('#scene').css('min-height', scene_size.height);
+
+      scene_shown = now();
+      $('button').click(function() {
+        var choice = $(this).attr('data-id');
+        self.feedback(choice);
+      });
+
+      // prep the next image for instant loading
+      if (self.next()) self.next().prepare();
     }
   });
-}
+  var SceneCollection = Backbone.Collection.extend({model: Scene});
 
-function prepareScene(scene_index) {
-  var scene = scenes[scene_index];
-  $('#stage img').attr('src', scene ? '/static/aircraft/pixelated/' + scene.src : '');
-}
+  var scenes = new SceneCollection({{{JSON.stringify(scenes)}}});
+  window.scenes = scenes;
 
-function showScene(scene_index) {
-  var scene = scenes[scene_index];
-  if (scene) {
-    var scene_html = scene_template.render(scene);
-    $('#scene').html(scene_html);
-    var scene_size = measureBox('#scene');
-    $('#scene').css('min-height', scene_size.height);
+  function showConclusion() {
+    var ctx = _.extend({duration: now() - task_started}, config);
+    $('#scene').html(conclusion_template.render(ctx));
+  }
 
-    scene_shown = now();
+  function showConsent() {
+    $('#scene').html(consent_template.render({}));
     $('button').click(function() {
-      showFeedback($(this).attr('data-id'), scene_index);
+      scenes.first().show();
     });
-
-    // prep the next image for instant loading
-    prepareScene(scene_index + 1);
   }
-  else {
-    showConclusion();
-  }
-}
 
-function showConclusion() {
-  var conclusion_html = conclusion_template.render({duration: now() - task_started});
-  $('#scene').html(conclusion_html);
-}
-
-function showConsent() {
-  var consent_html = consent_template.render({});
-  $('#scene').html(consent_html);
-  $('button').click(function() {
-    showScene(0);
+  $(function() {
+    if (config.assignmentId == '' || config.assignmentId == "ASSIGNMENT_ID_NOT_AVAILABLE") {
+      scenes.first().show();
+    }
+    else {
+      showConsent();
+      scenes.first().prepare();
+    }
   });
-}
-
-$(function() {
-  if (assignmentId == '' || assignmentId == "ASSIGNMENT_ID_NOT_AVAILABLE") {
-    showScene(0);
-  }
-  else {
-    showConsent();
-    prepareScene(0);
-  }
-  // var assignmentId = $('[name=assignmentId]').val();
-  // var workerId = $('[name=turkerId]').val();
-  // if (assignmentId === "ASSIGNMENT_ID_NOT_AVAILABLE") {
-  //   if (workerId) {
-  //     // can inform the user, on the preview, that they can only do this a few more times.
-  //   }
-  // }
-  // else if (workerId) {
-  //   // mark things as seen after 5 seconds
-  //   setTimeout(function() {
-  //     // var questionIds = $('fieldset[id]').map(function(i, el) { return el.id; }).toArray();
-  //     // $.post('/seen', {workerId: workerId, questionIds: questionIds}, function(result) {});
-  //   }, 5000);
-  // }
 });
 
 </script>

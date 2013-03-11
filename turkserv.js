@@ -1,25 +1,21 @@
 #!/usr/bin/env node
-var fs = require('fs'),
-  path = require('path'),
-  http = require('http'),
-  url = require('url'),
-
-  __ = require('underscore'),
-  winston = require('winston'),
-  amulet = require('amulet'),
-  Cookies = require('cookies'),
-  Router = require('regex-router'),
-  formidable = require('formidable'),
-  crypto = require('crypto'),
-  vsprintf = require('sprintf').vsprintf,
-  R = new Router(),
-
-  yaml = require('js-yaml'),
-
-  util = require('./util'),
-  models = require('./models'),
-  User = models.User,
-  argv = require('optimist').default({port: 1451, hostname: '127.0.0.1'}).argv;
+var fs = require('fs');
+var path = require('path');
+var url = require('url');
+var __ = require('underscore');
+var winston = require('winston');
+var amulet = require('amulet');
+var http = require('./http-enhanced');
+var Cookies = require('cookies');
+var Router = require('regex-router');
+var formidable = require('formidable');
+var vsprintf = require('sprintf').vsprintf;
+var R = new Router();
+var yaml = require('js-yaml');
+var util = require('./util');
+var models = require('./models');
+var User = models.User;
+var argv = require('optimist').default({port: 1451, hostname: '127.0.0.1'}).argv;
 
 amulet.set({minify: true, root: path.join(__dirname, 'templates')});
 var logger = new (winston.Logger)({
@@ -30,95 +26,61 @@ var logger = new (winston.Logger)({
 });
 function logerr(err) { if (err) logger.error(err); }
 
-function md5(string) {
-  var md5sum = crypto.createHash('md5');
-  md5sum.update(string);
-  return md5sum.digest('hex');
-}
-
-function random(min, max) {
-  if (min === undefined && max === undefined) { min = 0; max = 1; }
-  if (max === undefined) { max = min; min = 0; }
-  return Math.random() * (max - min) + min;
-}
-
 Cookies.prototype.defaults = function() {
   var expires = new Date(Date.now() + (31 * 24 * 60 * 60 * 1000)); // 1 month
   return {expires: expires};
 };
 
-http.ServerResponse.prototype.writeEnd = function(s) { this.write(s); this.end(); };
-http.ServerResponse.prototype.writeAll = function(http_code, content_type, body) {
-  this.writeHead(http_code, {'Content-Type': content_type});
-  this.writeEnd(body);
-};
-http.ServerResponse.prototype.json = function(obj) {
-  this.writeAll(200, 'application/json', JSON.stringify(obj));
-};
-http.ServerResponse.prototype.text = function(str) {
-  this.writeAll(200, 'text/plain', str);
-};
-http.ServerResponse.prototype.die = function(err) {
-  this.writeAll(500, 'text/plain', 'Failure: ' + err.toString());
-};
-
 var names = ['Armstrong', 'Cardoso', 'Darlak', 'Gaouette', 'Hartman', 'Klein',
   'Marin', 'Parker', 'Riedel', 'Tannahill', 'Williams'];
 var widths = [10, 25, 50, 75, 100, 150]; // from conv.py
-var prior_total = [0.1, 0.3, 0.5, 0.7, 0.9];
+var priors = [0.1, 0.3, 0.5, 0.7, 0.9];
 var total_planes = 50;
-var number_of_scenes = 100;
+// var number_of_scenes = 100;
+// var prior_queue = [];
 
 
-var prior_queue = [];
+// R.get(/\/priors.txt/, function(m, req, res) {
+//   res.writeHead(200, {'Content-Type': 'text/plain'});
+//   var body = prior_queue.map(function(d) { return d.toString(); }).join('; ');
+//   res.write(body);
+//   res.end();
+// });
 
-R.get(/\/favicon.ico/, function(m, req, res) {
-  res.writeHead(404);
-  res.end();
-});
+// function updatePriorQueueHack() {
+//   // group by prior and count
+//   var priors = prior_total.map(function() { return 0; });
+//   var two_weeks_ago = new Date(new Date().getTime() - 14*24*60*60*1000);
 
+//   User.find({created: {$gt: two_weeks_ago}, $where: "this.responses.length == 100"}).exec(function(err, users) {
+//     // logger.info("Found #users: " + users.length);
+//     logerr(err);
+//     users.forEach(function(user) {
+//       priors[prior_total.indexOf(user.responses[0].prior)]++;
+//     });
 
-R.get(/\/priors.txt/, function(m, req, res) {
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  var body = prior_queue.map(function(d) { return d.toString(); }).join('; ');
-  res.write(body);
-  res.end();
-});
+//     logger.info("Priors already tested (counts): " + priors);
+//     prior_queue = [];
+//     prior_total.forEach(function(prior, i) {
+//       var missing = 10 - priors[i];
+//       if (missing > 0)
+//         util.extend(prior_queue, util.repeat(prior, missing));
+//     });
+//     util.shuffle(prior_queue);
+//   });
+// }
 
-function updatePriorQueueHack() {
-  // group by prior and count
-  var priors = prior_total.map(function() { return 0; });
-  var two_weeks_ago = new Date(new Date().getTime() - 14*24*60*60*1000);
+// updatePriorQueueHack();
+// setInterval(updatePriorQueueHack, 60000); // once a minute
 
-  User.find({created: {$gt: two_weeks_ago}, $where: "this.responses.length == 100"}).exec(function(err, users) {
-    // logger.info("Found #users: " + users.length);
-    logerr(err);
-    users.forEach(function(user) {
-      priors[prior_total.indexOf(user.responses[0].prior)]++;
-    });
+// function nextPrior() {
+//   if (prior_queue.length) {
+//     return prior_queue.pop();
+//   }
+//   return util.sample(prior_total);
+// }
 
-    logger.info("Priors already tested (counts): " + priors);
-    prior_queue = [];
-    prior_total.forEach(function(prior, i) {
-      var missing = 10 - priors[i];
-      if (missing > 0)
-        util.extend(prior_queue, util.repeat(prior, missing));
-    });
-    util.shuffle(prior_queue);
-  });
-}
-
-updatePriorQueueHack();
-setInterval(updatePriorQueueHack, 60000); // once a minute
-
-function nextPrior() {
-  if (prior_queue.length) {
-    return prior_queue.pop();
-  }
-  return util.sample(prior_total);
-}
-
-function renderAircraft(req, res, user, context) {
+function addBatchesContext(context) {
   // variables:
   // 1. number of allies providing judgments
   // 2. their history (shown, not show / good, not good)
@@ -127,41 +89,52 @@ function renderAircraft(req, res, user, context) {
   // 5. feedback or not
 
   context.task_started = Date.now();
-  // probability of friend (same for whole task)
-  context.prior = nextPrior();
-  context.total_friendly = (context.prior * total_planes) | 0;
-  context.total_enemy = total_planes - context.total_friendly;
 
   var allies = names.slice(0, 5).map(function(name) {
     return {
       title: 'Lt.',
       name: name,
-      reliability: random(0.5, 1.0) // maybe switch in a beta later
+      reliability: util.randRange(0.5, 1.0) // maybe switch in a beta later
     };
   });
 
-  context.scenes = __.range(number_of_scenes).map(function(scene_index) {
-    var width = util.sample(widths);
-    var image_id = (Math.random() * 100) | 0;
-    var gold = (Math.random() < context.prior) ? 'friend' : 'enemy';
-    var wrong = gold == 'enemy' ? 'friend' : 'enemy';
-    return {
-      index: scene_index + 1,
-      gold: gold,
-      image_id: image_id,
-      width: width,
-      src: vsprintf('%s-%02d-%03d.jpg', [gold, image_id, width]),
-      allies: allies.map(function(ally) {
-        var ally_with_judgment = __.clone(ally);
-        // with probability ally.reliability, pick the correct side of the gold standard which
-        // was picked on the friend_enemy declaration line
-        ally_with_judgment.judgment = Math.random() < ally.reliability ? gold : wrong;
-        return ally_with_judgment;
-      })
+  function batch(prior, number_of_scenes) {
+    var ctx = {
+      prior: prior,
+      total_friendly: (prior * total_planes) | 0
     };
-  });
+    ctx.total_enemy = total_planes - ctx.total_friendly;
 
-  amulet.render(res, ['layout.mu', 'aircraft.mu'], context);
+    ctx.scenes = __.range(number_of_scenes).map(function(scene_index) {
+      var width = util.sample(widths);
+      var image_id = (Math.random() * 100) | 0;
+      var gold = (Math.random() < prior) ? 'friend' : 'enemy';
+      var wrong = gold == 'enemy' ? 'friend' : 'enemy';
+      return {
+        id: scene_index + 1,
+        gold: gold,
+        image_id: image_id,
+        width: width,
+        src: vsprintf('%s-%02d-%03d.jpg', [gold, image_id, width]),
+        allies: allies.map(function(ally) {
+          var ally_with_judgment = __.clone(ally);
+          // with probability ally.reliability, pick the correct side of the gold standard which
+          // was picked on the friend_enemy declaration line
+          var ally_is_correct = Math.random() < ally.reliability;
+          var prior_is_correct = Math.random() < prior;
+          ally_with_judgment.judgment = (ally_is_correct || prior_is_correct) ? gold : wrong;
+          return ally_with_judgment;
+        })
+      };
+    });
+    return ctx;
+  }
+
+  // first is the training batch
+  context.batches.push(batch(0.5, 50));
+  util.shuffle(priors).forEach(function(prior) {
+    context.batches.push(batch(prior, 50));
+  });
 }
 
 R.default = function(m, req, res) {
@@ -186,24 +159,25 @@ R.default = function(m, req, res) {
 
   // a preview request will be the same, minus workerId and turkSubmitTo,
   // and assignmentId will always then be 'ASSIGNMENT_ID_NOT_AVAILABLE'
-  if (!context.workerId) {
-    renderAircraft(req, res, null, context);
-  }
-  else {
-    req.cookies.set('workerId', context.workerId);
-    User.findById(context.workerId, function(err, user) {
-      logerr(err);
-      // no difference for amount of questions seen, at the moment.
-      // if (user.seen && user.seen.length) {
-      //   context.remaining -= user.seen.length;
-      // }
-      if (!user) {
-        user = new User({_id: context.workerId});
-        user.save(logerr);
-      }
-      renderAircraft(req, res, user, context);
-    });
-  }
+  // if (!context.workerId) {
+  //   renderAircraft(req, res, null, context);
+  // }
+  // else {
+  req.cookies.set('workerId', context.workerId);
+  User.findById(context.workerId, function(err, user) {
+    logerr(err);
+    // no difference for amount of questions seen, at the moment.
+    // if (user.seen && user.seen.length) {
+    //   context.remaining -= user.seen.length;
+    // }
+    if (!user) {
+      user = new User({_id: context.workerId});
+      user.save(logerr);
+    }
+    addBatchesContext(context);
+    amulet.render(res, ['layout.mu', 'aircraft.mu'], context);
+  });
+  // }
 
 };
 
@@ -239,7 +213,7 @@ R.post(/seen/, function(m, req, res) {
 
 R.post(/\/mturk\/externalSubmit/, function(m, req, res) {
   new formidable.IncomingForm().parse(req, function(err, fields, files) {
-    res.writeAll(200, 'application/json', JSON.stringify(fields, undefined, '  '));
+    res.json(fields);
   });
 });
 
@@ -339,6 +313,11 @@ R.get(/\/responses/, function(m, req, res) {
 });
 
 
+R.get(/\/favicon.ico/, function(m, req, res) {
+  res.writeHead(404);
+  res.end();
+});
+
 // expose this module's methods incase anything wants them
 if (require.main === module) {
   http.createServer(function(req, res) {
@@ -353,8 +332,6 @@ if (require.main === module) {
     };
 
     R.route(req, res);
-    // logger.error(exc, {url: req ? req.url : null, stack: exc.stack});
-
   }).listen(argv.port, argv.hostname);
   logger.info('Turkserv ready at ' + argv.hostname + ':' + argv.port);
 }

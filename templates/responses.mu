@@ -1,24 +1,10 @@
 <style>
+  body {
+    font-size: 11px;
+  }
   button {
     font-size: 90%;
     text-transform: capitalize;
-  }
-  .emoticon {
-    text-align: center;
-    font-size: 20em;
-  }
-  .allies td {
-    padding: 8px 4px;
-  }
-  .allies .judgment {
-    font-weight: bold;
-    text-transform: capitalize;
-  }
-  .allies .judgment.friend {
-    color: #00C;
-  }
-  .allies .judgment.enemy {
-    color: #C00;
   }
 </style>
 
@@ -63,21 +49,27 @@
 <button>More</button>
 
 <script>
-var row_template = Hogan.compile($('#row_template').html(), {delimiters: '<% %>'});
-var page_index = -1;
+var b = '/static/lib/js/';
+head.js(b+'jquery.js', b+'backbone_pkg.js', b+'hogan.js', b+'jquery-flags.js', '/static/local.js', function() {
+  var scene_template = ('#scene_template');
 
-function more() {
-  page_index++;
-  console.log("loading page", page_index);
-  $.get('/responses/' + page_index + '.json', function(responses) {
-    console.log("got data", responses);
-    var html = responses.map(function(response) {
-      return row_template.render(response);
-    }).join(' ');
-    $('tbody').append(html);
-  });
-}
+  var row_template = hoganTemplate('#row_template');
+  var page_index = -1;
 
-$('button').click(more).click();
+  function more() {
+    page_index++;
+    console.log("loading page", page_index);
+    $.get('/responses/' + page_index + '.json', function(responses) {
+      console.log("got data", responses);
+      var html = responses.map(function(response) {
+        return row_template.render(response);
+      }).join(' ');
+      $('tbody').append(html);
+    });
+  }
 
+  $('button').click(more);
+
+  more();
+});
 </script>

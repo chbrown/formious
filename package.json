@@ -8,7 +8,7 @@
   "dependencies": {
     "amulet": "git://github.com/chbrown/amulet.git",
     "cookies": "git://github.com/chbrown/cookies.git",
-    "fsm": "git://github.com/chbrown/fsm.git",
+    "mturk": "git://github.com/chbrown/mturk.git",
     "regex-router": "*",
     "optimist": "*",
     "underscore": "*",

@@ -21,11 +21,11 @@ And install the Node dependencies:
       proxy_set_header X-Real-IP $remote_addr;
       gzip on;
 
-      set $turkserv /Users/chbrown/github/turkserv;
+      set $base /Users/chbrown/github/turkserv;
 
-      location /static    { root $turkserv; }
-      location /templates { root $turkserv; }
-      location /lib       { root $turkserv/static; }
+      location /static    { root $base; }
+      location /templates { root $base; }
+      location /lib       { root $base/static; }
       location / { proxy_pass http://127.0.0.1:1451; }
     }
 
@@ -61,3 +61,21 @@ http://www.fileformat.info/info/unicode/char/263a/index.htm
 - Smile: &#9786;
 
 The two planes are Messerschmitts and Spitfires, particularly, models taken from the Google Sketchup marketplace and rendered with Kerkythea.
+
+### A few queries for the database:
+
+    var two_weeks_ago = new Date(new Date().getTime() - 14*24*60*60*1000);
+    var priors = {};
+    db.users.find({created: {$gt: two_weeks_ago}, $where: "this.responses.length == 100"}).forEach(function(user) {
+      var prior = user.responses[0].prior;
+      priors[prior] = (priors[prior] || 0) + 1;
+    });
+
+    db.users.find({created: {$gt: two_weeks_ago}}).sort({created: -1}).forEach(function(user) {
+      var last = user.responses.length ? ' => ' + user.responses[0].prior : '';
+      print(user.created + ' - ' + user.responses.length + ': ' + user._id + last);
+    });
+
+## New survey layout
+
+1. Do 50 training examples with .5 prior
