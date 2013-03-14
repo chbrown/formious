@@ -1,6 +1,7 @@
 var crypto = require('crypto');
 
 exports.shuffle = function(list) {
+  // careful! shuffles in place (and returns given list)
   // for(var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
   for (var i, tmp, j = list.length - 1; j > 0; j--) {
     i = Math.random() * (j + 1) | 0;

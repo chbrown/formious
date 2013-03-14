@@ -15,4 +15,9 @@ http.ServerResponse.prototype.die = function(err) {
   this.writeAll(500, 'text/plain', 'Failure: ' + err.toString());
 };
 
+http.ServerResponse.prototype.redirect = function(location) {
+  this.writeHead(302, {'Location': location});
+  this.writeEnd('Redirecting to: ' + location);
+};
+
 module.exports = http;

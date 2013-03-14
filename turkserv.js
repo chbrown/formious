@@ -15,7 +15,6 @@ var yaml = require('js-yaml');
 var util = require('./util');
 var models = require('./models');
 var User = models.User;
-var argv = require('optimist').default({port: 1451, hostname: '127.0.0.1'}).argv;
 
 amulet.set({minify: true, root: path.join(__dirname, 'templates')});
 var logger = new (winston.Logger)({
@@ -31,11 +30,6 @@ Cookies.prototype.defaults = function() {
   return {expires: expires};
 };
 
-var names = ['Armstrong', 'Cardoso', 'Darlak', 'Gaouette', 'Hartman', 'Klein',
-  'Marin', 'Parker', 'Riedel', 'Tannahill', 'Williams'];
-var widths = [10, 25, 50, 75, 100, 150]; // from conv.py
-var priors = [0.1, 0.3, 0.5, 0.7, 0.9];
-var total_planes = 50;
 // var number_of_scenes = 100;
 // var prior_queue = [];
 
@@ -80,16 +74,32 @@ var total_planes = 50;
 //   return util.sample(prior_total);
 // }
 
-function addBatchesContext(context) {
-  // variables:
-  // 1. number of allies providing judgments
-  // 2. their history (shown, not show / good, not good)
-  // 3. degree of pixelation
-  // 4. scenario stating how many there of each type of aircraft are in the skies
-  // 5. feedback or not
+var names = ['Armstrong', 'Cardoso', 'Darlak', 'Gaouette', 'Hartman', 'Klein',
+  'Marin', 'Parker', 'Riedel', 'Tannahill', 'Williams'];
+var widths = [10, 25, 50, 75, 100, 150]; // from conv.py
+var priors = [0.1, 0.3, 0.5, 0.7, 0.9];
+var total_planes = 50;
+var scenes_per_batch = 50;
 
-  context.task_started = Date.now();
+R.get(/aircraft/, function(m, req, res) {
+  var urlObj = url.parse(req.url, true);
+  logger.info('request', {url: urlObj, headers: req.headers});
+  // a normal turk request looks like: urlObj.query =
+  // { assignmentId: '2NXNWAB543Q0EQ3C16EV1YB46I8620K',
+  //   hitId: '2939RJ85OZIZ4RKABAS998123Q9M8NEW85',
+  //   workerId: 'A9T1WQR9AL982W',
+  //   turkSubmitTo: 'https://www.mturk.com' },
+  var context = {
+    assignmentId: urlObj.query.assignmentId,
+    hitId: urlObj.query.hitId,
+    workerId: (urlObj.query.workerId || req.cookies.get('workerId') || '').replace(/\W+/g, ''),
+    host: urlObj.query.debug !== undefined ? '' : (urlObj.query.turkSubmitTo || 'https://www.mturk.com'),
+    task_started: Date.now()
+  };
+  req.cookies.set('workerId', context.workerId);
 
+  // a preview request will be the same, minus workerId and turkSubmitTo,
+  // and assignmentId will always then be 'ASSIGNMENT_ID_NOT_AVAILABLE'
   var allies = names.slice(0, 5).map(function(name) {
     return {
       title: 'Lt.',
@@ -98,14 +108,12 @@ function addBatchesContext(context) {
     };
   });
 
-  function batch(prior, number_of_scenes) {
-    var ctx = {
-      prior: prior,
-      total_friendly: (prior * total_planes) | 0
-    };
-    ctx.total_enemy = total_planes - ctx.total_friendly;
-
-    ctx.scenes = __.range(number_of_scenes).map(function(scene_index) {
+  function makeBatch(prior, number_of_scenes) {
+    var batch = {prior: prior};
+    batch.total_friendly = (prior * total_planes) | 0;
+    batch.total_enemy = total_planes - batch.total_friendly;
+    batch.scenes = __.range(number_of_scenes).map(function(scene_index) {
+      // create the scene:
       var width = util.sample(widths);
       var image_id = (Math.random() * 100) | 0;
       var gold = (Math.random() < prior) ? 'friend' : 'enemy';
@@ -127,43 +135,9 @@ function addBatchesContext(context) {
         })
       };
     });
-    return ctx;
+    return batch;
   }
 
-  // first is the training batch
-  context.batches.push(batch(0.5, 50));
-  util.shuffle(priors).forEach(function(prior) {
-    context.batches.push(batch(prior, 50));
-  });
-}
-
-R.default = function(m, req, res) {
-  var urlObj = url.parse(req.url, true);
-  logger.info('request', {url: urlObj, headers: req.headers});
-  // a normal turk request looks like: urlObj.query =
-  // { assignmentId: '2NXNWAB543Q0EQ3C16EV1YB46I8620K',
-  //   hitId: '2939RJ85OZIZ4RKABAS998123Q9M8NEW85',
-  //   workerId: 'A9T1WQR9AL982W',
-  //   turkSubmitTo: 'https://www.mturk.com' },
-  var context = {
-    assignmentId: urlObj.query.assignmentId,
-    hitId: urlObj.query.hitId,
-    workerId: (urlObj.query.workerId || req.cookies.get('workerId') || '').replace(/\W+/g, ''),
-    host: urlObj.query.turkSubmitTo || 'https://www.mturk.com'
-    // remaining: Math.min(per_page*10, questions.length)
-  };
-
-  if (urlObj.query.debug !== undefined) {
-    context.host = '';
-  }
-
-  // a preview request will be the same, minus workerId and turkSubmitTo,
-  // and assignmentId will always then be 'ASSIGNMENT_ID_NOT_AVAILABLE'
-  // if (!context.workerId) {
-  //   renderAircraft(req, res, null, context);
-  // }
-  // else {
-  req.cookies.set('workerId', context.workerId);
   User.findById(context.workerId, function(err, user) {
     logerr(err);
     // no difference for amount of questions seen, at the moment.
@@ -174,12 +148,19 @@ R.default = function(m, req, res) {
       user = new User({_id: context.workerId});
       user.save(logerr);
     }
-    addBatchesContext(context);
+
+    var batch_priors = __.shuffle(priors);
+    // first is the training batch
+    batch_priors.unshift(0.5);
+    context.batches = batch_priors.map(function(prior, i) {
+      var batch = makeBatch(prior, scenes_per_batch);
+      batch.bonus = i > 1 ? 0.25 : 0;
+      batch.id = i + 1;
+      return batch;
+    });
     amulet.render(res, ['layout.mu', 'aircraft.mu'], context);
   });
-  // }
-
-};
+});
 
 R.post(/seen/, function(m, req, res) {
   // a POST to /seen should have MIME type "application/x-www-form-urlencoded"
@@ -312,14 +293,18 @@ R.get(/\/responses/, function(m, req, res) {
   amulet.render(res, ['layout.mu', 'responses.mu'], {});
 });
 
-
 R.get(/\/favicon.ico/, function(m, req, res) {
   res.writeHead(404);
   res.end();
 });
 
+R.default = function(m, req, res) {
+  res.redirect('/aircraft');
+};
+
 // expose this module's methods incase anything wants them
 if (require.main === module) {
+  var argv = require('optimist').default({port: 1451, hostname: '127.0.0.1'}).argv;
   http.createServer(function(req, res) {
     req.data = ''; req.on('data', function(chunk) { req.data += chunk; });
     req.cookies = new Cookies(req, res);

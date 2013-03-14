@@ -26,11 +26,9 @@
 <p>You are a battleship gunner in a WWII air battle. Your job is to
 identify aircraft and determine whether they are friends or enemies.
 You will receive feedback on your judgments.
-
 <p>Your vision is sometimes limited due to angle or distance. Your allies are
 identifying the same aircraft and provide estimates to the best of their
 ability, given their positions.
-
 <p>You will see a number of different scenes. You must advance through one at a time.
 
 <hr />
@@ -60,7 +58,7 @@ ability, given their positions.
 </script>
 
 <script type="text/mustache" id="scene_template">
-  <h3>Scene <%id%></h3>
+  <h3>Batch <%batch_id%> / Scene <%id%></h3>
   <table>
     <tr>
       <td><img src="/static/aircraft/pixelated/<%src%>" id="sight" /></td>
@@ -109,17 +107,27 @@ ability, given their positions.
   </form>
 </script>
 
-<script>
-var task_started = {{task_started}};
+<script type="text/mustache" id="feedback_template">
+  <div class="emoticon">
+    <%#correct%>
+      <img src="/static/smile.gif" alt="☺" />
+    <%/correct%>
+    <%^correct%>
+      <img src="/static/frown.gif" alt="☹" />
+    <%/correct%>
+  </div>
+</script>
 
+<script>
 var config = {
+  started: {{task_started}},
   assignmentId: "{{assignmentId}}",
   workerId: "{{workerId}}",
   host: "{{host}}",
-  hitId: "{{hitId}}",
+  hitId: "{{hitId}}"
 };
+var raw_batches = (function() { return {{{JSON.stringify(batches)}}}; })();
 
-var feedback = { true: { img: '/static/smile.gif', text: '☺' }, false: { img: '/static/smile.gif', text: "☹" } };
 var feedback_duration = 2000;
 var scene_index = -1;
 
@@ -128,26 +136,38 @@ head.js(b+'jquery.js', b+'backbone_pkg.js', b+'hogan.js', b+'jquery.flags.js', '
   var scene_template = hoganTemplate('#scene_template');
   var conclusion_template = hoganTemplate('#conclusion_template');
   var consent_template = hoganTemplate('#consent_template');
+  var feedback_template = hoganTemplate('#feedback_template');
 
   var Scene = Backbone.Model.extend({
+    // allies: Array[5]
+    // gold: "enemy"
+    // id: 1
+    // image_id: 35
+    // src: "enemy-35-050.jpg"
+    // width: 50
     next: function() {
       return this.collection.get(this.id + 1);
     },
     prepare: function() {
       $('#stage img').attr('src', '/static/aircraft/pixelated/' + this.get('src'));
     },
-    feedback: function(choice) {
+    choose: function(choice) {
       var self = this;
       var correct = choice == this.get('gold');
-      $('#scene').html('<div class="emoticon"><img src="' + feedback[correct].img + '" alt="' + feedback[correct].text + '" /></div>');
+      $('#scene').html(feedback_template.render({correct: correct}));
 
-      setTimeout(function() {
-        self.next().show()
-      }, feedback_duration);
+      if (this.next()) {
+        setTimeout(function() {
+          self.next().show()
+        }, feedback_duration);
+      }
+      else {
+        this.collection.batch.next().show();
+      }
 
       var response = {
         workerId: config.workerId,
-        task_started: task_started,
+        task_started: config.started,
         prior: config.prior,
         scene_index: this.id,
         reliabilities: _.map(this.get('allies'), function(ally) { return ally.reliability.toFixed(4); }),
@@ -170,48 +190,70 @@ head.js(b+'jquery.js', b+'backbone_pkg.js', b+'hogan.js', b+'jquery.flags.js', '
     },
     show: function() {
       var self = this;
-      var scene_html = scene_template.render(this.toJSON());
-      $('#scene').html(scene_html);
+      var ctx = _.extend({}, this.collection.batch.toExtraJSON(), this.toJSON());
+      $('#scene').html(scene_template.render(ctx));
 
       // never shrink!
       var scene_size = $('#scene').measureBox();
-      // console.log(scene_size);
       $('#scene').css('min-height', scene_size.height);
 
       scene_shown = now();
       $('button').click(function() {
         var choice = $(this).attr('data-id');
-        self.feedback(choice);
+        self.choose(choice);
       });
 
       // prep the next image for instant loading
-      if (self.next()) self.next().prepare();
+      if (this.next()) this.next().prepare();
     }
   });
   var SceneCollection = Backbone.Collection.extend({model: Scene});
 
-  var scenes = new SceneCollection({{{JSON.stringify(scenes)}}});
-  window.scenes = scenes;
+  var Batch = Backbone.Model.extend({
+    // prior: 0.5
+    // scenes: Array[50]
+    // total_enemy: 25
+    // total_friendly: 25
+    next: function() {
+      return this.collection.get(this.id + 1);
+    },
+    initialize: function(opts) {
+      this.scenes = new SceneCollection(opts.scenes);
+      this.unset('scenes'); // is there a better way to ignore that?
+      this.scenes.batch = this;
+    },
+    show: function() {
+      this.scenes.first().show();
+    },
+    toExtraJSON: function() {
+      var json = this.toJSON();
+      json.batch_id = json.id;
+      return json;
+    }
+  });
+  var BatchCollection = Backbone.Collection.extend({model: Batch});
+
+  var batches = new BatchCollection(raw_batches);
 
   function showConclusion() {
-    var ctx = _.extend({duration: now() - task_started}, config);
+    var ctx = _.extend({duration: now() - config.started}, config);
     $('#scene').html(conclusion_template.render(ctx));
   }
 
   function showConsent() {
     $('#scene').html(consent_template.render({}));
     $('button').click(function() {
-      scenes.first().show();
+      batches.first().show();
     });
   }
 
   $(function() {
     if (config.assignmentId == '' || config.assignmentId == "ASSIGNMENT_ID_NOT_AVAILABLE") {
-      scenes.first().show();
+      batches.first().show()
     }
     else {
       showConsent();
-      scenes.first().prepare();
+      batches.first().prepare();
     }
   });
 });
