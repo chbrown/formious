@@ -33,12 +33,9 @@ ability, given their positions.
 
 <hr />
 
-<div id="scene"></div>
-<div id="stage" style="display: none">
-  <img src="" />
-</div>
+<div id="batch_display"></div>
 
-<script type="text/mustache" id="consent_template">
+<script type="text/mustache" id="template-consent">
   <h3>Consent form</h3>
   <p>
     You are invited to participate in a study, entitled "Learning in Social Networks". The study is being conducted by Colin Bannard in the Linguistics department of The University of Texas at Austin.
@@ -57,7 +54,11 @@ ability, given their positions.
   <button>I Consent</button>
 </script>
 
-<script type="text/mustache" id="scene_template">
+<script type="text/mustache" id="template-batch">
+  <div id="batch_root"></div>
+</script>
+
+<script type="text/mustache" id="template-scene">
   <h3>Batch <%batch_id%> / Scene <%id%></h3>
   <table>
     <tr>
@@ -80,15 +81,20 @@ ability, given their positions.
 
         <h3>Your decision:</h3>
         <div>
-          <button data-id="friend">Friend</button>
-          <button data-id="enemy">Enemy</button>
+          <button>Friend</button>
+          <button>Enemy</button>
         </div>
       </td>
     </tr>
   </table>
+  <div style="display: none">
+   <%#next%>
+      <img src="/static/aircraft/pixelated/<%src%>" />
+   <%/next%>
+  </div>
 </script>
 
-<script type="text/mustache" id="conclusion_template">
+<script type="text/mustache" id="template-conclusion">
   <form method="POST" action="<%host%>/mturk/externalSubmit">
     <input type="hidden" name="assignmentId" value="<%assignmentId%>" />
     <input type="hidden" name="turkerId" value="<%workerId%>" />
@@ -107,7 +113,7 @@ ability, given their positions.
   </form>
 </script>
 
-<script type="text/mustache" id="feedback_template">
+<script type="text/mustache" id="template-feedback">
   <div class="emoticon">
     <%#correct%>
       <img src="/static/smile.gif" alt="☺" />
@@ -120,7 +126,7 @@ ability, given their positions.
 
 <script>
 var config = {
-  started: {{task_started}},
+  task_started: {{task_started}},
   assignmentId: "{{assignmentId}}",
   workerId: "{{workerId}}",
   host: "{{host}}",
@@ -128,44 +134,30 @@ var config = {
 };
 var raw_batches = (function() { return {{{JSON.stringify(batches)}}}; })();
 
-var feedback_duration = 2000;
-var scene_index = -1;
+var feedback_duration = 200;
+// var scene_index = -1;
+// never shrink!
+// var scene_size = $('#scene').measureBox();
+// $('#scene').css('min-height', scene_size.height);
 
 var b = '/static/lib/js/';
 head.js(b+'jquery.js', b+'backbone_pkg.js', b+'hogan.js', b+'jquery.flags.js', '/static/local.js', function() {
-  var scene_template = hoganTemplate('#scene_template');
-  var conclusion_template = hoganTemplate('#conclusion_template');
-  var consent_template = hoganTemplate('#consent_template');
-  var feedback_template = hoganTemplate('#feedback_template');
+  var Response = Backbone.Model.extend({
+    url: '/responses'
+    // this.save();
+    // $.ajax({
+    //   url: '/responses',
+    //   type: 'POST',
+    //   dataType: 'json',
+    //   data: JSON.stringify(response)
+    //   // success: function(data, textStatus) {}
+    // });
+  });
 
   var Scene = Backbone.Model.extend({
-    // allies: Array[5]
-    // gold: "enemy"
-    // id: 1
-    // image_id: 35
-    // src: "enemy-35-050.jpg"
-    // width: 50
-    next: function() {
-      return this.collection.get(this.id + 1);
-    },
-    prepare: function() {
-      $('#stage img').attr('src', '/static/aircraft/pixelated/' + this.get('src'));
-    },
-    choose: function(choice) {
-      var self = this;
-      var correct = choice == this.get('gold');
-      $('#scene').html(feedback_template.render({correct: correct}));
-
-      if (this.next()) {
-        setTimeout(function() {
-          self.next().show()
-        }, feedback_duration);
-      }
-      else {
-        this.collection.batch.next().show();
-      }
-
-      var response = {
+    // allies: Array[5], gold: "enemy", id: 1, image_id: 35, src: "enemy-35-050.jpg", width: 50
+    saveResponse: function(choice, correct) {
+      var response = new Response({
         workerId: config.workerId,
         task_started: config.started,
         prior: config.prior,
@@ -177,85 +169,136 @@ head.js(b+'jquery.js', b+'backbone_pkg.js', b+'hogan.js', b+'jquery.flags.js', '
         correct: correct,
         image_id: this.get('image_id'),
         width: this.get('width'),
-        time: now() - scene_shown
-      };
-
-      $.ajax({
-        url: '/save',
-        type: 'POST',
-        dataType: 'json',
-        data: JSON.stringify(response)
-        // success: function(data, textStatus) {}
+        time: now() - this.get('shown')
       });
+      response.save();
     },
-    show: function() {
-      var self = this;
-      var ctx = _.extend({}, this.collection.batch.toExtraJSON(), this.toJSON());
-      $('#scene').html(scene_template.render(ctx));
-
-      // never shrink!
-      var scene_size = $('#scene').measureBox();
-      $('#scene').css('min-height', scene_size.height);
-
-      scene_shown = now();
-      $('button').click(function() {
-        var choice = $(this).attr('data-id');
-        self.choose(choice);
-      });
-
-      // prep the next image for instant loading
-      if (this.next()) this.next().prepare();
-    }
-  });
-  var SceneCollection = Backbone.Collection.extend({model: Scene});
-
-  var Batch = Backbone.Model.extend({
-    // prior: 0.5
-    // scenes: Array[50]
-    // total_enemy: 25
-    // total_friendly: 25
     next: function() {
       return this.collection.get(this.id + 1);
     },
+    toJSON: function() {
+      return _.extend(this.collection.batch.toJSON(), this.attributes);
+    }
+  });
+  var SceneCollection = Backbone.Collection.extend({model: Scene});
+  var SceneView = TemplateView.extend({
+    template_id: 'scene',
+    // a scene is given exactly a model
+    render: function(ctx) {
+      this.model.set('shown', now());
+      _.extend(ctx, this.model.toJSON());
+
+      // prep the next image for instant loading
+      var next = this.model.next();
+      ctx.next = next ? next.toJSON() : null;
+
+      console.log(ctx)
+
+      this.constructor.__super__.render.apply(this, [ctx]);
+      return this;
+    },
+    events: {
+      'click button': function(ev) {
+        this.trigger('end', ev);
+      }
+    }
+  });
+
+  var Batch = Backbone.Model.extend({
+    // prior: 0.5, scenes: Array[50], total_enemy: 25, total_friendly: 25
     initialize: function(opts) {
       this.scenes = new SceneCollection(opts.scenes);
       this.unset('scenes'); // is there a better way to ignore that?
       this.scenes.batch = this;
     },
-    show: function() {
-      this.scenes.first().show();
+    next: function() {
+      return this.collection.get(this.id + 1);
     },
-    toExtraJSON: function() {
-      var json = this.toJSON();
-      json.batch_id = json.id;
-      return json;
+    toJSON: function() {
+      return _.extend({batch_id: this.id}, this.attributes);
     }
   });
   var BatchCollection = Backbone.Collection.extend({model: Batch});
+  var BatchDisplay = TemplateView.extend({
+    template_id: 'batch',
+    // initialize: function(opts) {
+    //   // opts: {collection: some_batch_collection}
+    //   this.constructor.__super__.initialize.apply(this, opts);
+    //   this.collection = opts.collection;
+    // },
+    render: function(ctx) {
+      this.constructor.__super__.render.apply(this, [ctx]);
+      this.batch = this.collection.get((this.batch ? this.batch.id : 0) + 1);
+      this.nextScene();
+      // this.constructor.__super__.initialize.apply(this, opts);
+    },
+    nextScene: function() {
+      // advance scene
+      var self = this;
+      this.scene = this.batch.scenes.get((this.scene ? this.scene.id : 0) + 1);
 
-  var batches = new BatchCollection(raw_batches);
+      var scene_display = new SceneView({el: this.$('#batch_root'), model: this.scene});
+      scene_display.once('end', function(ev) {
+        var choice = $(ev.target).text().toLowerCase();
+        var correct = choice == self.scene.get('gold');
+        self.scene.saveResponse(choice, correct);
 
-  function showConclusion() {
-    var ctx = _.extend({duration: now() - config.started}, config);
-    $('#scene').html(conclusion_template.render(ctx));
-  }
+        new FeedbackView({el: self.$('#batch_root'), correct: correct})
 
-  function showConsent() {
-    $('#scene').html(consent_template.render({}));
-    $('button').click(function() {
-      batches.first().show();
-    });
+        setTimeout(function() {
+          // advance!
+          self.nextScene();
+        }, feedback_duration);
+        // if (this.render()) {
+        // }
+        // else {
+          // this.collection.batch.next().show();
+        // }
+      });
+    }
+  });
+
+
+  var ConclusionView = TemplateView.extend({
+    template_id: 'conclusion',
+    render: function() {
+      var ctx = _.extend({duration: now() - config.started}, config);
+      this.constructor.__super__.render.apply(this, ctx);
+    }
+  });
+
+  var ConsentView = TemplateView.extend({
+    template_id: 'consent',
+    events: {
+      'click button': start
+    }
+  });
+
+  var FeedbackView = TemplateView.extend({
+    template_id: 'feedback'
+  });
+
+  function start() {
+    var batch_collection = new BatchCollection(raw_batches);
+    // window.batch_collection = batch_collection;
+    var batch_view = new BatchDisplay({el: $('#batch_display'), collection: batch_collection});
   }
 
   $(function() {
     if (config.assignmentId == '' || config.assignmentId == "ASSIGNMENT_ID_NOT_AVAILABLE") {
-      batches.first().show()
+      start();
     }
     else {
-      showConsent();
-      batches.first().prepare();
+      new ConsentView({el: $('#batch_display')});
     }
   });
 });
 
 </script>
+<!--
+  A batch shows scenes, so we start with the batch.
+  When a batch starts, it's given a batchmodel, which contains a collection of scenes
+  A scene must attach inside a batch
+
+
+-->
