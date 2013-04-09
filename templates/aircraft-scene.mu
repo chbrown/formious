@@ -1,7 +1,7 @@
 <h3>Batch {{batch_id}} / Scene {{id}}</h3>
 <table>
   <tr>
-    <td><img src="/static/aircraft/pixelated/{{src}}" id="sight" /></td>
+    <td><img src="/static/aircraft/pixelated/{{src}}" /></td>
     <td style="padding-left: 20px">
       <table class="stats">
         <tr><td>Estimated number of friendly aircraft in the sky:</td><td>{{total_friendly}}</td></tr>
@@ -20,8 +20,8 @@
 
       <h3>Your decision:</h3>
       <div>
-        <button>Friend</button>
-        <button>Enemy</button>
+        <button data-id="friend">Friend</button>
+        <button data-id="enemy">Enemy</button>
       </div>
     </td>
   </tr>

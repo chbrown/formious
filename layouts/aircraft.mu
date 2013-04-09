@@ -48,9 +48,6 @@ var config = {
 var raw_batches = {{{JSON.stringify(batches)}}};
 
 var feedback_duration = 200;
-// never shrink!
-// var scene_size = $('#scene').measureBox();
-// $('#scene').css('min-height', scene_size.height);
 
 var Response = Backbone.Model.extend({
   url: '/responses'
@@ -100,75 +97,133 @@ var Batch = Backbone.Model.extend({
 });
 var BatchCollection = Backbone.Collection.extend({model: Batch});
 
+
+var TemplateView = Backbone.View.extend({
+  initialize: function(ctx) {
+    this.render(ctx);
+  },
+  render: function(ctx) {
+    if (this.preRender) this.preRender(ctx);
+    this.el.innerHTML = Handlebars.templates[this.template](ctx);
+    if (this.postRender) this.postRender(ctx);
+    return this;
+  }
+});
+
+// var BatchView = TemplateView.extend({
+//   template: 'aircraft-batch.mu',
+//   postRender: function(ctx) {
+//     this.showBatch(this.collection.first());
+//   },
+//   showBatch: function(batch) {
+//     var scene = batch.scenes.first();
+//     this.showScene(scene, batch);
+//   },
+//   showScene: function(scene, batch) {
+//     var self = this;
+//   }
+// });
+
 var SceneView = TemplateView.extend({
   template: 'aircraft-scene.mu',
   // a scene is given exactly a model
-  render: function(ctx) {
+  preRender: function(ctx) {
     this.model.set('shown', now());
     _.extend(ctx, this.model.toJSON());
 
     // prep the next image for instant loading
     var next = this.model.next();
     ctx.next = next ? next.toJSON() : null;
-
-    this.constructor.__super__.render.apply(this, [ctx]);
-    return this;
+  },
+  postRender: function(ctx) {
+    // purely aesthetic. never shrink!
+    setTimeout(function() {
+      var scene_size = $('#root').measureBox();
+      console.log(scene_size);
+      $('#root').css('min-height', scene_size.height);
+    }, 100);
   },
   events: {
     'click button': function(ev) {
       var self = this;
-      var choice = $(ev.target).text().toLowerCase();
-      var correct = choice == this.model.get('gold');
+      var choice = $(ev.target).attr('data-id');
+      var correct = (choice == this.model.get('gold'));
       this.model.saveResponse(choice, correct);
 
-      var feedback = new FeedbackView({correct: correct});
+      var feedback = new SceneFeedbackView({correct: correct, model: this.model});
       this.$el.replaceWith(feedback.$el);
-
-      setTimeout(function() {
-        self.trigger('end', ev);
-      }, feedback_duration);
     }
   }
 });
 
-var BatchView = TemplateView.extend({
-  template: 'aircraft-batch.mu',
-  render: function(ctx) {
-    this.constructor.__super__.render.apply(this, [ctx]);
-    this.showBatch(this.collection.first());
-  },
-  showBatch: function(batch) {
-    // this.batch = this.collection.get((this.batch ? this.batch.id : 0) + 1);
-    var scene = batch.scenes.first();
-    this.showScene(scene, batch);
-  },
-  showScene: function(scene, batch) {
+var SceneFeedbackView = TemplateView.extend({
+  template: 'aircraft-scene-feedback.mu',
+  postRender: function(ctx) {
     var self = this;
-    if (scene) {
-      var scene_display = new SceneView({model: scene});
-      scene_display.once('end', function(ev) {
-        self.showScene(scene.next(), batch);
-      });
-      this.$el.html(scene_display.$el);
+    setTimeout(function() {
+      self.next();
+    }, feedback_duration);
+  },
+  next: function() {
+    // if there is another scene in the batch, show it, otherwise, debrief
+    var next_scene = this.model.next();
+    if (next_scene) {
+      var view = new SceneView({model: next_scene});
+      this.$el.replaceWith(view.$el);
     }
     else {
-      var ctx = batch.toJSON();
-      console.log(ctx);
-      var scene_debriefing = new SceneDebriefingView(ctx);
-      scene_debriefing.once('end', function(ev) {
-        self.showBatch(batch.next());
-      });
-      this.$el.html(scene_debriefing.$el);
+      var view = new BatchDebriefingView({model: this.model.collection.batch});
+      this.$el.replaceWith(view.$el);
+    }
+  }
+});
+
+var BatchDebriefingView = TemplateView.extend({
+  template: 'aircraft-batch-debriefing.mu',
+  preRender: function(ctx) {
+    _.extend(ctx, this.model.toJSON());
+    ctx.bonus_available = ctx.bonus > 0;
+  },
+  events: {
+    'click button': function(ev) {
+      var choice = $(ev.target).attr('data-id');
+      var bonus = this.model.get('bonus');
+      if (bonus > 0) {
+        $.post('/request-bonus', {amount: bonus}, 'json')
+        .always(function(data, textStatus, jqXHR) {
+          noty({text: data.message, layout: "topRight", type: "information", timeout: 2500})
+          // $(ev.target).flag({text: });
+        });
+      }
+
+      if (choice === 'stop') {
+        var conclusion_view = new ConclusionView();
+        this.$el.replaceWith(conclusion_view.$el);
+      }
+      else {
+        this.next();
+      }
+    }
+  },
+  next: function() {
+    var next_batch = this.model.next();
+    if (next_batch) {
+      var scene = next_batch.scenes.first();
+      var scene_view = new SceneView({model: scene});
+      this.$el.replaceWith(scene_view.$el);
+    }
+    else {
+      var conclusion_view = new ConclusionView();
+      this.$el.replaceWith(conclusion_view.$el);
     }
   }
 });
 
 var ConclusionView = TemplateView.extend({
   template: 'aircraft-conclusion.mu',
-  render: function() {
-    var ctx = _.extend({duration: now() - config.started}, config);
-    this.constructor.__super__.render.apply(this, [ctx]);
-  }
+  preRender: function(ctx) {
+    _.extend(ctx, {duration: now() - config.started}, config);
+  },
 });
 
 var ConsentView = TemplateView.extend({
@@ -176,36 +231,14 @@ var ConsentView = TemplateView.extend({
   events: {
     'click button': function() {
       var batch_collection = new BatchCollection(raw_batches);
-      var batch_view = new BatchView({collection: batch_collection});
-      this.$el.replaceWith(batch_view.$el);
-      // console.log(this.$el.parent(), batch_view.$el.html());
+      var batch = batch_collection.first();
+      var scene = batch.scenes.first();
+
+      var scene_view = new SceneView({model: scene});
+      this.$el.replaceWith(scene_view.$el);
     }
   }
 });
-
-var FeedbackView = TemplateView.extend({
-  template: 'aircraft-feedback.mu'
-});
-
-var SceneDebriefingView = TemplateView.extend({
-  template: 'aircraft-scene-debriefing.mu',
-  render: function(ctx) {
-    // this.model.set('shown', now());
-
-    // prep the next image for instant loading
-    //   var next = this.model.next();
-    // ctx = next ? next.toJSON() : null;
-
-    this.constructor.__super__.render.apply(this, [ctx]);
-    return this;
-  },
-  events: {
-    'click button': function(ev) {
-      this.trigger('end', ev);
-    }
-  }
-});
-
 
 
 $(function() {

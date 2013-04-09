@@ -36,6 +36,9 @@ module.exports = function(grunt) {
             'static/lib/js/backbone.js',
             'static/lib/js/jquery.flags.js',
             'static/lib/js/handlebars.js',
+            'static/lib/js/jquery.noty.js',
+            'static/lib/js/jquery.noty-layouts.js',
+            'static/lib/js/jquery.noty-default-theme.js',
             'static/templates.js',
             'static/local.js',
           ]

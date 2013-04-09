@@ -30,7 +30,7 @@ var main = function(host_id, account_id) {
   var host = __.findWhere(hosts, {id: host_id});
   var account = __.findWhere(accounts, {id: account_id});
   var opts = {
-    url: host.url,
+    url: 'https://' + host.url,
     accessKeyId: account.accessKeyId,
     secretAccessKey: account.secretAccessKey
   };

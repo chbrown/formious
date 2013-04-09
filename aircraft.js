@@ -153,7 +153,7 @@ module.exports = function(R) {
       batch_priors.unshift(0.5);
       context.batches = batch_priors.map(function(prior, i) {
         var batch = makeBatch(prior, scenes_per_batch, allies, widths);
-        batch.bonus = i > 1 ? 0.25 : 0;
+        batch.bonus = i > 1 ? 0.25 : 0.01;
         batch.id = i + 1;
         return batch;
       });
@@ -222,7 +222,8 @@ module.exports = function(R) {
     });
   });
 
-  R.post(/\/bonus/, function(m, req, res) {
+  R.post(/\/request-bonus/, function(m, req, res) {
+    var unpaid_minimum = 50;
     new formidable.IncomingForm().parse(req, function(err, fields, files) {
       var workerId = (fields.workerId || req.cookies.get('workerId') || 'none').replace(/\W+/g, '');
       User.findById(workerId, function(err, user) {
@@ -230,14 +231,13 @@ module.exports = function(R) {
         // a user's first 100 responses are not bonused
         if (user) {
           var unpaid = user.responses.length - user.paid;
-          var bonus = 0.25;
-          if (unpaid > 49) {
-
+          var amount = Math.min(parseFloat(fields.amount || 0.25), 0.25);
+          if (unpaid >= unpaid_minimum) {
             var turk_client = mechturk('sandbox', 'ut');
             var params = {
               AssignmentId: fields.assignmentId,
               WorkerId: workerId,
-              BonusAmount: {CurrencyCode: 'USD', Amount: bonus},
+              BonusAmount: {CurrencyCode: 'USD', Amount: amount},
               Reason: 'Batch completion'
             };
             turk_client.GrantBonus(params, function(err, result) {
@@ -247,15 +247,16 @@ module.exports = function(R) {
               }
               else {
                 console.log(result);
-                user.paid = user.responses.length;
+                user.set('paid', user.responses.length);
                 user.save(logger.maybe);
-                res.json({success: true, message: 'Bonus awarded: ' + bonus, bonus: bonus});
+                res.json({success: true, message: 'Bonus awarded: ' + amount, amount: amount});
               }
             });
 
           }
           else {
-            res.json({success: false, message: 'Not yet eligible for bonus.', unpaid: unpaid});
+            var message = 'Not yet eligible for bonus. Must answer at least ' + (unpaid_minimum - unpaid) + ' more hits.';
+            res.json({success: false, message: message, unpaid: unpaid});
           }
         }
         else {
