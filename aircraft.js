@@ -1,5 +1,6 @@
 'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
 var url = require('url');
+var mechturk = require('./mechturk');
 var models = require('./models');
 var User = models.User;
 var __ = require('underscore');
@@ -67,33 +68,33 @@ function makeBatch(prior, number_of_scenes, allies, widths) {
   // thus prior=0.95 -> 95% marginal probability that an airplane is friendly.
   var total_friendly = (prior * number_of_scenes) | 0;
   var total_enemy = number_of_scenes - total_friendly;
+
   var scenes = __.range(number_of_scenes).map(function(scene_index) {
-    // create the scene:
     var width = util.sample(widths);
     var image_id = (Math.random() * 100) | 0;
     var gold = scene_index < total_friendly ? 'friend' : 'enemy';
     return {
-      id: scene_index + 1,
-      gold: gold,
       image_id: image_id,
+      gold: gold,
       width: width,
       src: vsprintf('%s-%02d-%03d.jpg', [gold, image_id, width]),
       allies: allies.map(function(ally) {
         var ally_with_judgment = __.clone(ally);
-        // with probability ally.reliability, pick the correct side of the gold standard which
-        // was picked on the friend_enemy declaration line
-        // var ally_is_correct = Math.random() < ally.reliability;
-        // var prior_on_correct = correct == 'friend' ? prior : 1 - prior;
-        // var prior_is_correct = Math.random() < prior_on_correct;
         ally_with_judgment.judgment = allyJudgment(gold, prior, ally.reliability);
         return ally_with_judgment;
       })
     };
   });
 
+  var shuffled_scenes = __.shuffle(scenes).map(function(scene, scene_index) {
+    scene.id = scene_index + 1;
+    return scene;
+  });
+  // console.log(shuffled_scenes.map(function(scene) { return __.pick(scene, 'gold', 'id'); }));
+
   return {
     prior: prior,
-    scenes: __.shuffle(scenes),
+    scenes: shuffled_scenes,
     total_friendly: total_friendly,
     total_enemy: total_enemy
   };
@@ -112,7 +113,7 @@ module.exports = function(R) {
     var widths = [10, 25, 50, 75, 100, 150]; // from conv.py
     var priors = [0.1, 0.3, 0.5, 0.7, 0.9];
     var total_planes = 50;
-    var scenes_per_batch = 50;
+    var scenes_per_batch = 4;
 
     var urlObj = url.parse(req.url, true);
     // logger.info('request', {url: urlObj, headers: req.headers});
@@ -160,56 +161,106 @@ module.exports = function(R) {
     });
   });
 
-  R.post(/seen/, function(m, req, res) {
-    // a POST to /seen should have MIME type "application/x-www-form-urlencoded"
-    // and the fields: workerId, and "questionIds[]" that equates to a list of strings
-    // which is just multiple 'questionIds[] = string1' fields (I think).
-    new formidable.IncomingForm().parse(req, function(err, fields, files) {
-      var workerId = fields.workerId; // || req.cookies.get('workerId') || null;
-      if (workerId) {
-        User.findById(workerId, function(err, user) {
-          logger.maybe(err);
-          if (user) {
-            var questionIds = fields['questionIds[]'];
-            if (Array.isArray(questionIds)) {
-              questionIds.forEach(function(questionId) {
-                user.seen.push(questionId);
-              });
-            }
-            user.save(logger.maybe);
-            res.text('success');
-          }
-          else {
-            res.text('no worker');
-          }
-        });
-      }
-      else {
-        res.text('no worker id');
-      }
-    });
-  });
+  // R.post(/seen/, function(m, req, res) {
+  //   // a POST to /seen should have MIME type "application/x-www-form-urlencoded"
+  //   // and the fields: workerId, and "questionIds[]" that equates to a list of strings
+  //   // which is just multiple 'questionIds[] = string1' fields (I think).
+  //   new formidable.IncomingForm().parse(req, function(err, fields, files) {
+  //     var workerId = fields.workerId; // || req.cookies.get('workerId') || null;
+  //     if (workerId) {
+  //       User.findById(workerId, function(err, user) {
+  //         logger.maybe(err);
+  //         if (user) {
+  //           var questionIds = fields['questionIds[]'];
+  //           if (Array.isArray(questionIds)) {
+  //             questionIds.forEach(function(questionId) {
+  //               user.seen.push(questionId);
+  //             });
+  //           }
+  //           user.save(logger.maybe);
+  //           res.text('success');
+  //         }
+  //         else {
+  //           res.text('no worker');
+  //         }
+  //       });
+  //     }
+  //     else {
+  //       res.text('no worker id');
+  //     }
+  //   });
+  // });
 
   R.post(/\/mturk\/externalSubmit/, function(m, req, res) {
+    var workerId = (req.cookies.get('workerId') || 'none').replace(/\W+/g, '');
     new formidable.IncomingForm().parse(req, function(err, fields, files) {
-      res.json(fields);
+      User.findById(workerId, function(err, user) {
+        logger.maybe(err);
+        if (user) {
+          user.responses.push(fields);
+          user.save(logger.maybe);
+        }
+        amulet.render(res, ['layout.mu', 'submit.mu'], {});
+      });
     });
   });
 
-  R.post(/\/save/, function(m, req, res) {
-    var urlObj = url.parse(req.url, true);
-    var workerId = (urlObj.query.workerId || req.cookies.get('workerId') || '').replace(/\W+/g, '');
+  R.post(/\/responses/, function(m, req, res) {
+    var workerId = (req.cookies.get('workerId') || 'none').replace(/\W+/g, '');
 
     req.on('end', function() {
       var response = JSON.parse(req.data);
       response.submitted = new Date();
-      User.findById(workerId || 'none', function(err, user) {
+      User.findById(workerId, function(err, user) {
         logger.maybe(err);
         if (user) {
           user.responses.push(response);
           user.save(logger.maybe);
         }
         res.json({success: true, message: 'Saved response for user: ' + workerId});
+      });
+    });
+  });
+
+  R.post(/\/bonus/, function(m, req, res) {
+    new formidable.IncomingForm().parse(req, function(err, fields, files) {
+      var workerId = (fields.workerId || req.cookies.get('workerId') || 'none').replace(/\W+/g, '');
+      User.findById(workerId, function(err, user) {
+        logger.maybe(err);
+        // a user's first 100 responses are not bonused
+        if (user) {
+          var unpaid = user.responses.length - user.paid;
+          var bonus = 0.25;
+          if (unpaid > 49) {
+
+            var turk_client = mechturk('sandbox', 'ut');
+            var params = {
+              AssignmentId: fields.assignmentId,
+              WorkerId: workerId,
+              BonusAmount: {CurrencyCode: 'USD', Amount: bonus},
+              Reason: 'Batch completion'
+            };
+            turk_client.GrantBonus(params, function(err, result) {
+              if (err) {
+                logger.error(err);
+                res.json({success: false, message: 'Error awarding bonus. ' + err.toString()});
+              }
+              else {
+                console.log(result);
+                user.paid = user.responses.length;
+                user.save(logger.maybe);
+                res.json({success: true, message: 'Bonus awarded: ' + bonus, bonus: bonus});
+              }
+            });
+
+          }
+          else {
+            res.json({success: false, message: 'Not yet eligible for bonus.', unpaid: unpaid});
+          }
+        }
+        else {
+          res.json({success: false, message: 'Could not find user: ' + workerId});
+        }
       });
     });
   });

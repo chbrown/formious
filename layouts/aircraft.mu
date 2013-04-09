@@ -33,11 +33,9 @@ ability, given their positions.
 
 <hr />
 
-<div id="batch_display"></div>
+<div id="root"></div>
 
-<script src="/static/lib.js"></script>
-<script src="/static/local.js"></script>
-<script src="/templates/compiled.js"></script>
+<script src="/static/compiled.js"></script>
 <script>
 var config = {
   task_started: {{task_started}},
@@ -46,32 +44,16 @@ var config = {
   host: "{{host}}",
   hitId: "{{hitId}}"
 };
-var raw_batches = (function() { return {{{JSON.stringify(batches)}}}; })();
+// (function() { return ...; })();
+var raw_batches = {{{JSON.stringify(batches)}}};
 
 var feedback_duration = 200;
-// var scene_index = -1;
 // never shrink!
 // var scene_size = $('#scene').measureBox();
 // $('#scene').css('min-height', scene_size.height);
 
-// Handlebars;
-
-// head.js(b+'handlebars.js', '/templates/compiled.js', function() {
-// });
-
-
-// var b = '/static/lib/js/';
-// head.js(b+'jquery.js', b+'backbone_pkg.js', b+'jquery.flags.js', '/static/local.js', function() { });
 var Response = Backbone.Model.extend({
   url: '/responses'
-  // this.save();
-  // $.ajax({
-  //   url: '/responses',
-  //   type: 'POST',
-  //   dataType: 'json',
-  //   data: JSON.stringify(response)
-  //   // success: function(data, textStatus) {}
-  // });
 });
 
 var Scene = Backbone.Model.extend({
@@ -101,26 +83,6 @@ var Scene = Backbone.Model.extend({
   }
 });
 var SceneCollection = Backbone.Collection.extend({model: Scene});
-var SceneView = TemplateView.extend({
-  template_id: 'scene',
-  // a scene is given exactly a model
-  render: function(ctx) {
-    this.model.set('shown', now());
-    _.extend(ctx, this.model.toJSON());
-
-    // prep the next image for instant loading
-    var next = this.model.next();
-    ctx.next = next ? next.toJSON() : null;
-
-    this.constructor.__super__.render.apply(this, [ctx]);
-    return this;
-  },
-  events: {
-    'click button': function(ev) {
-      this.trigger('end', ev);
-    }
-  }
-});
 
 var Batch = Backbone.Model.extend({
   // prior: 0.5, scenes: Array[50], total_enemy: 25, total_friendly: 25
@@ -137,77 +99,120 @@ var Batch = Backbone.Model.extend({
   }
 });
 var BatchCollection = Backbone.Collection.extend({model: Batch});
-var BatchDisplay = TemplateView.extend({
-  template_id: 'batch',
-  // initialize: function(opts) {
-  //   // opts: {collection: some_batch_collection}
-  //   this.constructor.__super__.initialize.apply(this, opts);
-  //   this.collection = opts.collection;
-  // },
+
+var SceneView = TemplateView.extend({
+  template: 'aircraft-scene.mu',
+  // a scene is given exactly a model
   render: function(ctx) {
+    this.model.set('shown', now());
+    _.extend(ctx, this.model.toJSON());
+
+    // prep the next image for instant loading
+    var next = this.model.next();
+    ctx.next = next ? next.toJSON() : null;
+
     this.constructor.__super__.render.apply(this, [ctx]);
-    this.batch = this.collection.get((this.batch ? this.batch.id : 0) + 1);
-    this.nextScene();
-    // this.constructor.__super__.initialize.apply(this, opts);
+    return this;
   },
-  nextScene: function() {
-    // advance scene
-    var self = this;
-    this.scene = this.batch.scenes.get((this.scene ? this.scene.id : 0) + 1);
-
-    var scene_display = new SceneView({el: this.$('#batch_root'), model: this.scene});
-    scene_display.once('end', function(ev) {
+  events: {
+    'click button': function(ev) {
+      var self = this;
       var choice = $(ev.target).text().toLowerCase();
-      var correct = choice == self.scene.get('gold');
-      self.scene.saveResponse(choice, correct);
+      var correct = choice == this.model.get('gold');
+      this.model.saveResponse(choice, correct);
 
-      new FeedbackView({el: self.$('#batch_root'), correct: correct})
+      var feedback = new FeedbackView({correct: correct});
+      this.$el.replaceWith(feedback.$el);
 
       setTimeout(function() {
-        // advance!
-        self.nextScene();
+        self.trigger('end', ev);
       }, feedback_duration);
-      // if (this.render()) {
-      // }
-      // else {
-        // this.collection.batch.next().show();
-      // }
-    });
+    }
   }
 });
 
+var BatchView = TemplateView.extend({
+  template: 'aircraft-batch.mu',
+  render: function(ctx) {
+    this.constructor.__super__.render.apply(this, [ctx]);
+    this.showBatch(this.collection.first());
+  },
+  showBatch: function(batch) {
+    // this.batch = this.collection.get((this.batch ? this.batch.id : 0) + 1);
+    var scene = batch.scenes.first();
+    this.showScene(scene, batch);
+  },
+  showScene: function(scene, batch) {
+    var self = this;
+    if (scene) {
+      var scene_display = new SceneView({model: scene});
+      scene_display.once('end', function(ev) {
+        self.showScene(scene.next(), batch);
+      });
+      this.$el.html(scene_display.$el);
+    }
+    else {
+      var ctx = batch.toJSON();
+      console.log(ctx);
+      var scene_debriefing = new SceneDebriefingView(ctx);
+      scene_debriefing.once('end', function(ev) {
+        self.showBatch(batch.next());
+      });
+      this.$el.html(scene_debriefing.$el);
+    }
+  }
+});
 
 var ConclusionView = TemplateView.extend({
-  template_id: 'conclusion',
+  template: 'aircraft-conclusion.mu',
   render: function() {
     var ctx = _.extend({duration: now() - config.started}, config);
-    this.constructor.__super__.render.apply(this, ctx);
+    this.constructor.__super__.render.apply(this, [ctx]);
   }
 });
 
 var ConsentView = TemplateView.extend({
-  template_id: 'consent',
+  template: 'aircraft-consent.mu',
   events: {
-    'click button': start
+    'click button': function() {
+      var batch_collection = new BatchCollection(raw_batches);
+      var batch_view = new BatchView({collection: batch_collection});
+      this.$el.replaceWith(batch_view.$el);
+      // console.log(this.$el.parent(), batch_view.$el.html());
+    }
   }
 });
 
 var FeedbackView = TemplateView.extend({
-  template_id: 'feedback'
+  template: 'aircraft-feedback.mu'
 });
 
-function start() {
-  var batch_collection = new BatchCollection(raw_batches);
-  // window.batch_collection = batch_collection;
-  var batch_view = new BatchDisplay({el: $('#batch_display'), collection: batch_collection});
-}
+var SceneDebriefingView = TemplateView.extend({
+  template: 'aircraft-scene-debriefing.mu',
+  render: function(ctx) {
+    // this.model.set('shown', now());
+
+    // prep the next image for instant loading
+    //   var next = this.model.next();
+    // ctx = next ? next.toJSON() : null;
+
+    this.constructor.__super__.render.apply(this, [ctx]);
+    return this;
+  },
+  events: {
+    'click button': function(ev) {
+      this.trigger('end', ev);
+    }
+  }
+});
+
+
 
 $(function() {
+  var consent_view = new ConsentView();
+  $('#root').append(consent_view.$el);
   if (config.assignmentId == '' || config.assignmentId == "ASSIGNMENT_ID_NOT_AVAILABLE") {
-    start();
-  }
-  else {
-    new ConsentView({el: $('#batch_display')});
+    consent_view.$('button').click();
   }
 });
 

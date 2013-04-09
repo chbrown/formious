@@ -1,4 +1,5 @@
 .DS_Store
 node_modules/
 .git-orig
-static/lib.js
+static/compiled.js
+static/templates.js

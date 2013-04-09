@@ -1,3 +1,4 @@
+'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
 var child_process = require('child_process');
 
 module.exports = function(grunt) {
@@ -19,7 +20,7 @@ module.exports = function(grunt) {
       all: {
         src: 'templates',
         ext: 'mu',
-        dest: 'templates/compiled.js'
+        dest: 'static/templates.js'
       }
     },
     uglify: {
@@ -28,13 +29,15 @@ module.exports = function(grunt) {
           mangle: false
         },
         files: {
-          'static/lib.js': [
+          'static/compiled.js': [
             'static/lib/js/json2.js',
             'static/lib/js/underscore.js',
             'static/lib/js/jquery.js',
             'static/lib/js/backbone.js',
             'static/lib/js/jquery.flags.js',
-            'static/lib/js/handlebars.js'
+            'static/lib/js/handlebars.js',
+            'static/templates.js',
+            'static/local.js',
           ]
         }
       }

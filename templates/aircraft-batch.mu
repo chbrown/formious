@@ -1,1 +1,1 @@
-<div id="batch_root"></div>
+<div></div>

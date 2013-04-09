@@ -1,56 +1,25 @@
-  'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
-var mechturk = require('mechturk');
+'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
+var mechturk = require('./mechturk');
 var logger = require('./logger');
 var amulet = require('amulet');
 var async = require('async');
 var __ = require('underscore');
 
-var accounts = [
-  {
-    id: 'chris',
-    accessKeyId: process.env.AWS_CHRIS_ID,
-    secretAccessKey: process.env.AWS_CHRIS_SECRET
-  },
-  {
-    id: 'ut',
-    accessKeyId: process.env.AWS_UT_ID,
-    secretAccessKey: process.env.AWS_UT_SECRET
-  }
-];
-
-var aws_hosts = [
-  {
-    id: 'deploy',
-    url: 'mechanicalturk.amazonaws.com',
-  },
-  {
-    id: 'sandbox',
-    url: 'mechanicalturk.sandbox.amazonaws.com'
-  }
-];
-
 module.exports = function(R) {
 
   R.post(/^\/accounts/, function(m, req, res) {
     res.json(res || 'error');
-
   });
-
 
   R.get(/^\/accounts\/(\w+)\/(\w+)/, function(m, req, res) {
     var ctx = {
-      accounts: accounts,
-      account: __.find(accounts, function(account) { return account.id == [m[1]]; }),
-      aws_hosts: aws_hosts,
-      aws_host: __.find(aws_hosts, function(host) { return host.id == [m[2]]; }),
+      accounts: mechturk.accounts,
+      account: __.findWhere(mechturk.accounts, {id: m[1]}),
+      aws_hosts: mechturk.hosts,
+      aws_host: __.findWhere(mechturk.hosts, {id: m[2]}),
     };
 
-    var turk_client = mechturk({
-      url: 'https://' + ctx.aws_host.url,
-      accessKeyId: ctx.account.accessKeyId,
-      secretAccessKey: ctx.account.secretAccessKey
-    });
-
+    var turk_client = mechturk('https://' + ctx.aws_host.url, ctx.account.accessKeyId, ctx.account.secretAccessKey);
     turk_client.GetAccountBalance({}, function(err, result) {
       logger.maybe(err);
       // {"GetAccountBalanceResponse":{"OperationRequest":{"RequestId":"9ef506b"},"GetAccountBalanceResult":{"Request":{"IsValid":"True"},"AvailableBalance":{"Amount":"10000.000","CurrencyCode":"USD","FormattedPrice":"$10,000.00"}}}}
@@ -58,7 +27,6 @@ module.exports = function(R) {
       amulet.render(res, ['layout.mu', 'admin.mu'], ctx);
     });
   });
-
 
 };
 
