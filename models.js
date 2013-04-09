@@ -1,3 +1,4 @@
+'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
 var mongoose = require('mongoose'),
   db = mongoose.createConnection('localhost', 'turkserv');
 

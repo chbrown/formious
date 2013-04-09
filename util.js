@@ -1,3 +1,4 @@
+'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
 var crypto = require('crypto');
 
 exports.shuffle = function(list) {
@@ -24,18 +25,6 @@ exports.sample = function(list, num) {
     }
     return samples;
   }
-};
-
-exports.clone = function(original, merge) {
-  // SHALLOW!
-  // if you specify a merge object, it'll use that as the base.
-  // so clone(queston, {index: 5}) is kind of like python's question.update(index=5)
-  var copy = merge || {};
-  for (var key in original) {
-    if (original.hasOwnProperty(key))
-      copy[key] = original[key];
-  }
-  return copy;
 };
 
 exports.extend = function(list, other_list) {

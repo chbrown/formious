@@ -1,6 +1,7 @@
-var fs = require('fs'),
-  csv = require('csv'),
-  yaml = require('js-yaml');
+'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
+var fs = require('fs');
+var csv = require('csv');
+var yaml = require('js-yaml');
 
 function Table() {
   // Table takes a list of dictionaries, collects the union of keys, and writes out a flat table
@@ -90,7 +91,7 @@ function loadCsv(csv, callback) {
   var header = lines[0].split(field_separator);
   var header_length = header.length;
   var rows = [];
-  for (var i = 1; (line = lines[i]); i++) {
+  for (var i = 1, line; (line = lines[i]); i++) {
     if (line.length > 0) {
       var obj = {}, cells = line.split(field_separator);
       for (var c = 0; c < header_length; c++) {

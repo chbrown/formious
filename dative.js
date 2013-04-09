@@ -1,3 +1,12 @@
+'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
+var fs = require('fs');
+var path = require('path');
+var yaml = require('js-yaml');
+var __ = require('underscore');
+var logger = require('./logger');
+var util = require('./util');
+
+var per_page = 10;
 var questions = [];
 fs.readFile(path.join(__dirname, 'stimuli.yaml'), 'utf8', function (err, stimuli_yaml) {
   yaml.loadAll(stimuli_yaml, function(stimuli) {
@@ -25,7 +34,7 @@ fs.readFile(path.join(__dirname, 'stimuli.yaml'), 'utf8', function (err, stimuli
         });
       }
     });
-    shuffle(questions);
+    util.shuffle(questions);
     var texts = questions.map(function(q) { return q.text; });
     console.log(questions.length + " active questions: \n  " + texts.join('\n  '));
   });
@@ -33,7 +42,7 @@ fs.readFile(path.join(__dirname, 'stimuli.yaml'), 'utf8', function (err, stimuli
 
 // reshuffle every 1 minute. this is kind of ridiculous.
 setInterval(function() {
-  shuffle(questions);
+  util.shuffle(questions);
 }, 1*60*1000);
 
 function renderVerbs(req, res, user, context) {
@@ -41,7 +50,7 @@ function renderVerbs(req, res, user, context) {
   context.questions = [];
   for (var question, q = 0, i = 0; (question = questions[q]) && (i < per_page); q++) {
     if (!user || user.seen.indexOf(question.id) === -1) {
-      var new_question = clone(question, {index: ++i});
+      var new_question = __.clone(question, {index: ++i});
       context.questions.push(new_question);
     }
   }
@@ -59,13 +68,15 @@ fs.readFile(path.join(__dirname, 'mbti.yaml'), 'utf8', function (err, mbti_yaml)
     stimuli.forEach(function(stimulus, index) {
       mbti.push({text: stimulus, id: index});
     });
-    shuffle(mbti);
+    util.shuffle(mbti);
   });
 });
 
 function renderMbti(req, res, user, context) {
   context.questions = mbti.map(function(question, i) {
-    return clone(question, {index: i + 1});
+    var cloned_question = __.clone(question);
+    cloned_question.index = i + 1;
+    return cloned_question;
   });
 
   amulet.render(res, ['layout.mu', 'mbti.mu'], context);

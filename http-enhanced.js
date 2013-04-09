@@ -1,3 +1,4 @@
+'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
 var http = require('http');
 
 http.ServerResponse.prototype.writeEnd = function(s) { this.write(s); this.end(); };
