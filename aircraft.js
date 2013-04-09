@@ -53,6 +53,52 @@ var logger = require('./logger');
 //   return util.sample(prior_total);
 // }
 
+function allyJudgment(gold, prior, reliability) {
+  if (gold == 'enemy') {
+    return (Math.random() < reliability + (1-reliability)*prior) ? 'enemy' : 'friend';
+  }
+  else { // if (gold == 'friend')
+    return (Math.random() < (1-reliability)*prior) ? 'enemy' : 'friend';
+  }
+}
+
+function makeBatch(prior, number_of_scenes, allies, widths) {
+  // prior describes the probability of a friend.
+  // thus prior=0.95 -> 95% marginal probability that an airplane is friendly.
+  var total_friendly = (prior * number_of_scenes) | 0;
+  var total_enemy = number_of_scenes - total_friendly;
+  var scenes = __.range(number_of_scenes).map(function(scene_index) {
+    // create the scene:
+    var width = util.sample(widths);
+    var image_id = (Math.random() * 100) | 0;
+    var gold = scene_index < total_friendly ? 'friend' : 'enemy';
+    return {
+      id: scene_index + 1,
+      gold: gold,
+      image_id: image_id,
+      width: width,
+      src: vsprintf('%s-%02d-%03d.jpg', [gold, image_id, width]),
+      allies: allies.map(function(ally) {
+        var ally_with_judgment = __.clone(ally);
+        // with probability ally.reliability, pick the correct side of the gold standard which
+        // was picked on the friend_enemy declaration line
+        // var ally_is_correct = Math.random() < ally.reliability;
+        // var prior_on_correct = correct == 'friend' ? prior : 1 - prior;
+        // var prior_is_correct = Math.random() < prior_on_correct;
+        ally_with_judgment.judgment = allyJudgment(gold, prior, ally.reliability);
+        return ally_with_judgment;
+      })
+    };
+  });
+
+  return {
+    prior: prior,
+    scenes: __.shuffle(scenes),
+    total_friendly: total_friendly,
+    total_enemy: total_enemy
+  };
+}
+
 module.exports = function(R) {
 
   R.get(/aircraft/, function(m, req, res) {
@@ -94,48 +140,6 @@ module.exports = function(R) {
       };
     });
 
-    function allyJudgment(gold, prior, reliability) {
-      if (gold == 'enemy') {
-        return (Math.random() < reliability + (1-reliability)*prior) ? 'enemy' : 'friend';
-      }
-      else { // if (gold == 'friend')
-        return (Math.random() < (1-reliability)*prior) ? 'enemy' : 'friend';
-      }
-    }
-
-    function makeBatch(prior, number_of_scenes) {
-      // prior describes the probability of a friend.
-      // thus prior=0.95 -> 95% marginal probability that an airplane is friendly.
-      var batch = {prior: prior};
-      batch.total_friendly = (prior * total_planes) | 0;
-      batch.total_enemy = total_planes - batch.total_friendly;
-      batch.scenes = __.range(number_of_scenes).map(function(scene_index) {
-        // create the scene:
-        var width = util.sample(widths);
-        var image_id = (Math.random() * 100) | 0;
-        var gold = (Math.random() < prior) ? 'friend' : 'enemy';
-        var wrong = gold == 'enemy' ? 'friend' : 'enemy';
-        return {
-          id: scene_index + 1,
-          gold: gold,
-          image_id: image_id,
-          width: width,
-          src: vsprintf('%s-%02d-%03d.jpg', [gold, image_id, width]),
-          allies: allies.map(function(ally) {
-            var ally_with_judgment = __.clone(ally);
-            // with probability ally.reliability, pick the correct side of the gold standard which
-            // was picked on the friend_enemy declaration line
-            // var ally_is_correct = Math.random() < ally.reliability;
-            // var prior_on_correct = correct == 'friend' ? prior : 1 - prior;
-            // var prior_is_correct = Math.random() < prior_on_correct;
-            ally_with_judgment.judgment = allyJudgment(gold, prior, ally.reliability);
-            return ally_with_judgment;
-          })
-        };
-      });
-      return batch;
-    }
-
     User.findById(context.workerId, function(err, user) {
       logger.maybe(err);
       if (!user) {
@@ -147,7 +151,7 @@ module.exports = function(R) {
       // first is the training batch
       batch_priors.unshift(0.5);
       context.batches = batch_priors.map(function(prior, i) {
-        var batch = makeBatch(prior, scenes_per_batch);
+        var batch = makeBatch(prior, scenes_per_batch, allies, widths);
         batch.bonus = i > 1 ? 0.25 : 0;
         batch.id = i + 1;
         return batch;

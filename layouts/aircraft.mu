@@ -29,7 +29,7 @@ You will receive feedback on your judgments.
 <p>Your vision is sometimes limited due to angle or distance. Your allies are
 identifying the same aircraft and provide estimates to the best of their
 ability, given their positions.
-<p>You will see a number of different scenes. You must advance through one at a time.
+<p>You will see a number of different scenes. You must advance through one at a time. Do not refresh the page.
 
 <hr />
 
@@ -111,8 +111,6 @@ var SceneView = TemplateView.extend({
     // prep the next image for instant loading
     var next = this.model.next();
     ctx.next = next ? next.toJSON() : null;
-
-    console.log(ctx)
 
     this.constructor.__super__.render.apply(this, [ctx]);
     return this;

@@ -41,10 +41,10 @@ module.exports = function(grunt) {
     }
   });
 
-
   // grunt.loadNpmTasks('grunt-handlebars');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-update-submodules');
 
   // Load the plugin that provides the "uglify" task.
-  grunt.registerTask('default', ['handlebars', 'uglify']);
+  grunt.registerTask('default', ['handlebars', 'uglify', 'update_submodules']);
 };

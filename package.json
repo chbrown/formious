@@ -23,6 +23,7 @@
   "devDependencies": {
     "grunt": "*",
     "grunt-contrib-uglify": "*",
+    "grunt-update-submodules": "*",
     "handlebars": "*"
   }
 }
