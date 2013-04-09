@@ -14,6 +14,20 @@ module.exports = function(grunt) {
     });
   });
 
+  grunt.registerTask('update_submodules', function() {
+    var done = this.async();
+    var update_args = ['submodule', 'update', '--init', '--recursive', '--merge'];
+    var pull_args = ['submodule', 'foreach', 'git', 'pull'];
+    grunt.util.spawn({cmd: 'git', args: update_args}, function (error1, result, code) {
+      grunt.util.spawn({cmd: 'git', args: pull_args}, function (error2, result, code) {
+        if (error1 || error2)
+          done(error1 || error2);
+        else
+          done();
+      });
+    });
+  });
+
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     handlebars: {
@@ -49,8 +63,7 @@ module.exports = function(grunt) {
 
   // grunt.loadNpmTasks('grunt-handlebars');
   grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-update-submodules');
 
-  // Load the plugin that provides the "uglify" task.
+  // Load the plugin that provides the 'uglify' task.
   grunt.registerTask('default', ['handlebars', 'uglify', 'update_submodules']);
 };
