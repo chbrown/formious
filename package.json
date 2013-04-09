@@ -8,7 +8,7 @@
   "dependencies": {
     "amulet": "git://github.com/chbrown/amulet.git",
     "cookies": "git://github.com/chbrown/cookies.git",
-    "mturk": "git://github.com/chbrown/mturk.git",
+    "mechturk": "git://github.com/chbrown/mechturk.git",
     "regex-router": "*",
     "optimist": "*",
     "underscore": "*",
@@ -17,6 +17,12 @@
     "sprintf": "*",
     "csv": "*",
     "winston": "*",
+    "async": "*",
     "formidable": "*"
+  },
+  "devDependencies": {
+    "grunt": "*",
+    "grunt-contrib-uglify": "*",
+    "handlebars": "*"
   }
 }

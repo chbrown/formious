@@ -79,3 +79,14 @@ The two planes are Messerschmitts and Spitfires, particularly, models taken from
 ## New survey layout
 
 1. Do 50 training examples with .5 prior
+
+    Colin's notes:
+    "prior" is proportion of enemies in the sky
+    if gold == enemy
+       if runif() < r + (1-r)*prior
+          say enemy
+    if gold == friend
+       if runif() < (1-r)*prior
+          say enemy
+    say friend
+
