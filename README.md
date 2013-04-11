@@ -9,6 +9,10 @@ And install the Node dependencies:
     cd turkserv
     npm install
 
+To bring your submodules (static-lib) up to date:
+
+    git submodule foreach git pull
+
 # Configuration
 
 `Nginx` is used as a reverse-proxy and static file handler, and `supervisord` is used to monitor and restart the process.
