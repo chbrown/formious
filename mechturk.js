@@ -1,5 +1,6 @@
 'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
 var __ = require('underscore');
+var logger = require('./logger');
 var mechturk = require('mechturk');
 
 var hosts = [
