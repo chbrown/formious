@@ -12,6 +12,8 @@ module.exports = function(R) {
   });
 
   R.get(/^\/accounts\/(\w+)\/(\w+)/, function(m, req, res) {
+    // /accounts/[account]/[host]
+    var turk_client = mechturk(m[1], m[2]);
     var ctx = {
       accounts: mechturk.accounts,
       account: __.findWhere(mechturk.accounts, {id: m[1]}),
@@ -19,11 +21,10 @@ module.exports = function(R) {
       aws_host: __.findWhere(mechturk.hosts, {id: m[2]}),
     };
 
-    var turk_client = mechturk('https://' + ctx.aws_host.url, ctx.account.accessKeyId, ctx.account.secretAccessKey);
     turk_client.GetAccountBalance({}, function(err, result) {
       logger.maybe(err);
       // {"GetAccountBalanceResponse":{"OperationRequest":{"RequestId":"9ef506b"},"GetAccountBalanceResult":{"Request":{"IsValid":"True"},"AvailableBalance":{"Amount":"10000.000","CurrencyCode":"USD","FormattedPrice":"$10,000.00"}}}}
-      ctx.available_price = result.GetAccountBalanceResponse.GetAccountBalanceResult.AvailableBalance;
+      ctx.available_price = result.AvailableBalance;
       amulet.render(res, ['layout.mu', 'admin.mu'], ctx);
     });
   });
