@@ -20,8 +20,8 @@
 
       <h3>Your decision:</h3>
       <div>
-        <button data-id="friend">Friend</button>
         <button data-id="enemy">Enemy</button>
+        <button data-id="friend">Pass</button>
       </div>
     </td>
   </tr>

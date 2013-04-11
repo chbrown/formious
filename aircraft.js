@@ -56,10 +56,10 @@ var logger = require('./logger');
 
 function allyJudgment(gold, prior, reliability) {
   if (gold == 'enemy') {
-    return (Math.random() < reliability + (1-reliability)*prior) ? 'enemy' : 'friend';
+    return (Math.random() < reliability + (1-reliability)*prior) ? 'enemy' : 'pass';
   }
   else { // if (gold == 'friend')
-    return (Math.random() < (1-reliability)*prior) ? 'enemy' : 'friend';
+    return (Math.random() < (1-reliability)*prior) ? 'enemy' : 'pass';
   }
 }
 
