@@ -58,9 +58,7 @@ head.js(b+'jquery.js', b+'backbone_pkg.js', b+'hogan.js', b+'jquery-flags.js', '
 
   function more() {
     page_index++;
-    console.log("loading page", page_index);
     $.get('/responses/' + page_index + '.json', function(responses) {
-      console.log("got data", responses);
       var html = responses.map(function(response) {
         return row_template.render(response);
       }).join(' ');

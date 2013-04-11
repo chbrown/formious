@@ -36,7 +36,6 @@ fs.readFile(path.join(__dirname, 'stimuli.yaml'), 'utf8', function (err, stimuli
     });
     util.shuffle(questions);
     var texts = questions.map(function(q) { return q.text; });
-    console.log(questions.length + " active questions: \n  " + texts.join('\n  '));
   });
 });
 

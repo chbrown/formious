@@ -1,7 +1,7 @@
 {
   "name": "turkserv",
   "description": "Mech Turk question server.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "homepage": "https://github.com/chbrown/turkserv",
   "repository": "git://github.com/chbrown/turkserv.git",
   "author": "Christopher Brown <io@henrian.com>",

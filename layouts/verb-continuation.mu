@@ -84,7 +84,6 @@ $(function() {
     setTimeout(function() {
       var questionIds = $('fieldset[id]').map(function(i, el) { return el.id; }).toArray();
       $.post('/seen', {workerId: workerId, questionIds: questionIds}, function(result) {
-        // console.log(result);
       });
     }, 5000);
   }

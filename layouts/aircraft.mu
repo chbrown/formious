@@ -47,7 +47,7 @@ var config = {
 // (function() { return ...; })();
 var raw_batches = {{{JSON.stringify(batches)}}};
 
-var feedback_duration = 200;
+var feedback_duration = 2000;
 
 var Response = Backbone.Model.extend({
   url: '/responses'
@@ -58,8 +58,8 @@ var Scene = Backbone.Model.extend({
   saveResponse: function(choice, correct) {
     var response = new Response({
       workerId: config.workerId,
-      task_started: config.started,
-      prior: config.prior,
+      task_started: config.task_started,
+      prior: this.collection.batch.get('prior'),
       scene_index: this.id,
       reliabilities: _.map(this.get('allies'), function(ally) { return ally.reliability.toFixed(4); }),
       judgments: _.pluck(this.get('allies'), 'judgment'),
@@ -99,8 +99,8 @@ var BatchCollection = Backbone.Collection.extend({model: Batch});
 
 
 var TemplateView = Backbone.View.extend({
-  initialize: function(ctx) {
-    this.render(ctx);
+  initialize: function(opts) {
+    this.render(opts || {});
   },
   render: function(ctx) {
     if (this.preRender) this.preRender(ctx);
@@ -139,7 +139,6 @@ var SceneView = TemplateView.extend({
     // purely aesthetic. never shrink!
     setTimeout(function() {
       var scene_size = $('#root').measureBox();
-      console.log(scene_size);
       $('#root').css('min-height', scene_size.height);
     }, 100);
   },
@@ -222,7 +221,8 @@ var BatchDebriefingView = TemplateView.extend({
 var ConclusionView = TemplateView.extend({
   template: 'aircraft-conclusion.mu',
   preRender: function(ctx) {
-    _.extend(ctx, {duration: now() - config.started}, config);
+    _.extend(ctx, {duration: now() - config.task_started}, config);
+    console.log("conclusion", ctx);
   },
 });
 

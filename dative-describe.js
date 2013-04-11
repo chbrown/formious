@@ -158,7 +158,6 @@ getStimuli(function(err, stimuli) {
             // the join:
             rating: parseInt(result[stimulus.id], 10),
           });
-          // console.log("English familiarity isNaN", result.english_familiarity);
         }
       });
       // stimulus.ratings = ratings.join('');
@@ -170,7 +169,6 @@ getStimuli(function(err, stimuli) {
 
     });
     // table.keys = {id: 1, text: 1};
-    console.log(table.toString()); // '\t', '\n', false
   });
 });
 
