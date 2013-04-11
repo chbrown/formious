@@ -136,7 +136,7 @@ module.exports = function(R) {
       return {
         title: 'Lt.',
         name: name,
-        reliability: util.randRange(0.5, 1.0) // maybe switch in a beta later
+        reliability: util.randRange(0.0, 1.0) // maybe switch in a beta later
       };
     });
 
