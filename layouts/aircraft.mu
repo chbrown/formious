@@ -232,6 +232,7 @@ var ConsentView = TemplateView.extend({
     'click button': function() {
       var batch_collection = new BatchCollection(raw_batches);
       var batch = batch_collection.first();
+      window.batch_collection = batch_collection; // for debugging
       var scene = batch.scenes.first();
 
       var scene_view = new SceneView({model: scene});
