@@ -188,7 +188,7 @@ var BatchDebriefingView = TemplateView.extend({
       var choice = $(ev.target).attr('data-id');
       var bonus = this.model.get('bonus');
       if (bonus > 0) {
-        $.post('/request-bonus', {amount: bonus}, 'json')
+        $.post('/request-bonus', {amount: bonus, assignmentId: config.assignmentId}, 'json')
         .always(function(data, textStatus, jqXHR) {
           noty({text: data.message, layout: "topRight", type: "information", timeout: 2500})
           // $(ev.target).flag({text: });
