@@ -29,6 +29,9 @@ module.exports = function(R) {
       aws_host: __.findWhere(mechturk.hosts, {id: m[2]}),
     };
 
+    // logger.debug(JSON.stringify(process.env));
+    // logger.debug(JSON.stringify(mechturk.accounts));
+    // logger.debug("ctx.account.secretAccessKey: " + ctx.account.secretAccessKey);
     // mechturk(host_id, account_id);
     var turk_client = mechturk(m[2], m[1]);
     turk_client.GetAccountBalance({}, function(err, result) {
