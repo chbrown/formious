@@ -56,10 +56,10 @@ var logger = require('./logger');
 
 function allyJudgment(gold, prior, reliability) {
   if (gold == 'enemy') {
-    return (Math.random() < reliability + (1-reliability)*prior) ? "fire" : "don't fire";
+    return (Math.random() < reliability + (1-reliability)*prior) ? 'enemy' : 'pass';
   }
   else { // if (gold == 'friend')
-    return (Math.random() < (1-reliability)*prior) ? "fire" : "don't fire";
+    return (Math.random() < (1-reliability)*prior) ? 'enemy' : 'pass';
   }
 }
 
@@ -111,7 +111,6 @@ module.exports = function(R) {
       'Marin', 'Parker', 'Riedel', 'Tannahill', 'Williams'];
     var widths = [10, 25, 50, 75, 100, 150]; // from conv.py
     var priors = [0.1, 0.3, 0.5, 0.7, 0.9];
-    // var total_planes = 50;
     var scenes_per_batch = 50;
 
     var urlObj = url.parse(req.url, true);

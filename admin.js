@@ -6,12 +6,21 @@ var async = require('async');
 var __ = require('underscore');
 
 module.exports = function(R) {
+  function authenticate(req, res) {
+    // document.cookie = 'wepEdYrVaigs=true';
+    var cookie_name = process.env.MT_PASSWORD || 'wepEdYrVaigs';
+    if (!req.cookies.get(cookie_name)) {
+      res.die("Unauthenticated.");
+    }
+  }
 
   R.post(/^\/accounts/, function(m, req, res) {
+    authenticate(req, res);
     res.json(res || 'error');
   });
 
   R.get(/^\/accounts\/(\w+)\/(\w+)/, function(m, req, res) {
+    authenticate(req, res);
     // /accounts/[account]/[host]
     var ctx = {
       accounts: mechturk.accounts,
@@ -24,7 +33,9 @@ module.exports = function(R) {
     var turk_client = mechturk(m[2], m[1]);
     turk_client.GetAccountBalance({}, function(err, result) {
       logger.maybe(err);
-      // {"GetAccountBalanceResponse":{"OperationRequest":{"RequestId":"9ef506b"},"GetAccountBalanceResult":{"Request":{"IsValid":"True"},"AvailableBalance":{"Amount":"10000.000","CurrencyCode":"USD","FormattedPrice":"$10,000.00"}}}}
+      // {"GetAccountBalanceResponse":{"OperationRequest":{"RequestId":"9ef506b"},
+      // "GetAccountBalanceResult": {"Request":{"IsValid":"True"},"AvailableBalance":
+      // {"Amount":"10000.000","CurrencyCode":"USD","FormattedPrice":"$10,000.00"}}}}
       ctx.available_price = result.AvailableBalance;
       amulet.render(res, ['layout.mu', 'admin.mu'], ctx);
     });

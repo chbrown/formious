@@ -23,11 +23,11 @@
 </style>
 
 <h4><i>Scenario:</i></h4>
-<p>You are a battleship gunner in a WWII air battle. Your job is to
-identify aircraft and determine whether they are friends or enemies.
+<p>You are an aircraft spotter in WWII air battles. Your job is to
+identify aircraft and determine whether they are enemies or not.
 You will receive feedback on your judgments.
 <p>Your vision is sometimes limited due to angle or distance. Your allies are
-identifying the same aircraft and provide estimates to the best of their
+identifying the same aircraft and give judgments to the best of their
 ability, given their positions.
 <p>You will see a number of different scenes. You must advance through one at a time. Do not refresh the page.
 
