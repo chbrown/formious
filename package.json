@@ -18,7 +18,8 @@
     "csv": "*",
     "winston": "*",
     "async": "*",
-    "formidable": "*"
+    "formidable": "*",
+    "moment": "git://github.com/chbrown/moment.git#develop"
   },
   "devDependencies": {
     "grunt": "*",

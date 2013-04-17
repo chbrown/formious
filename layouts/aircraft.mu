@@ -97,19 +97,6 @@ var Batch = Backbone.Model.extend({
 });
 var BatchCollection = Backbone.Collection.extend({model: Batch});
 
-
-var TemplateView = Backbone.View.extend({
-  initialize: function(opts) {
-    this.render(opts || {});
-  },
-  render: function(ctx) {
-    if (this.preRender) this.preRender(ctx);
-    this.el.innerHTML = Handlebars.templates[this.template](ctx);
-    if (this.postRender) this.postRender(ctx);
-    return this;
-  }
-});
-
 // var BatchView = TemplateView.extend({
 //   template: 'aircraft-batch.mu',
 //   postRender: function(ctx) {
@@ -152,7 +139,11 @@ var SceneView = TemplateView.extend({
       var feedback = new SceneFeedbackView({correct: correct, model: this.model});
       this.$el.replaceWith(feedback.$el);
     }
-  }
+  },
+  disable: function() {
+    this.$('button').prop('disabled', true);
+    this.$('button:last').after('Disabled (Unclaimed HIT)');
+  },
 });
 
 var SceneFeedbackView = TemplateView.extend({
@@ -191,7 +182,6 @@ var BatchDebriefingView = TemplateView.extend({
         $.post('/request-bonus', {amount: bonus, assignmentId: config.assignmentId}, 'json')
         .always(function(data, textStatus, jqXHR) {
           noty({text: data.message, layout: "topRight", type: "information", timeout: 2500})
-          // $(ev.target).flag({text: });
         });
       }
 
@@ -229,15 +219,19 @@ var ConclusionView = TemplateView.extend({
 var ConsentView = TemplateView.extend({
   template: 'aircraft-consent.mu',
   events: {
-    'click button': function() {
-      var batch_collection = new BatchCollection(raw_batches);
-      var batch = batch_collection.first();
-      window.batch_collection = batch_collection; // for debugging
-      var scene = batch.scenes.first();
+    'click button': 'start'
+  },
+  start: function() {
+    var batch_collection = new BatchCollection(raw_batches);
+    var batch = batch_collection.first();
+    window.batch_collection = batch_collection; // for debugging
+    var scene = batch.scenes.first();
 
-      var scene_view = new SceneView({model: scene});
-      this.$el.replaceWith(scene_view.$el);
+    var scene_view = new SceneView({model: scene});
+    if (config.assignmentId == 'ASSIGNMENT_ID_NOT_AVAILABLE') {
+      scene_view.disable();
     }
+    this.$el.replaceWith(scene_view.$el);
   }
 });
 
@@ -245,8 +239,8 @@ var ConsentView = TemplateView.extend({
 $(function() {
   var consent_view = new ConsentView();
   $('#root').append(consent_view.$el);
-  if (config.assignmentId == '' || config.assignmentId == "ASSIGNMENT_ID_NOT_AVAILABLE") {
-    consent_view.$('button').click();
+  if (config.assignmentId == '' || config.assignmentId == 'ASSIGNMENT_ID_NOT_AVAILABLE') {
+    consent_view.start();
   }
 });
 

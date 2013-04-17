@@ -1,9 +1,8 @@
 'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
 var __ = require('underscore');
-var logger = require('./logger');
 var mechturk = require('mechturk');
 
-var hosts = [
+var hosts = exports.hosts = [
   {
     id: 'deploy',
     url: 'mechanicalturk.amazonaws.com',
@@ -14,7 +13,7 @@ var hosts = [
   },
 ];
 
-var accounts = [
+var accounts = exports.accounts = [
   {
     id: 'chris',
     accessKeyId: process.env.AWS_CHRIS_ID,
@@ -27,7 +26,10 @@ var accounts = [
   },
 ];
 
-var main = function(host_id, account_id) {
+
+var logger = require('./logger');
+
+exports.mechturk = function(host_id, account_id, extra_config) {
   var host = __.findWhere(hosts, {id: host_id});
   var account = __.findWhere(accounts, {id: account_id});
   var opts = {
@@ -35,9 +37,6 @@ var main = function(host_id, account_id) {
     accessKeyId: account.accessKeyId,
     secretAccessKey: account.secretAccessKey
   };
+  __.extend(opts, extra_config);
   return mechturk(opts);
 };
-
-main.accounts = accounts;
-main.hosts = hosts;
-module.exports = main;

@@ -1,47 +1,90 @@
 'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
-var mechturk = require('./mechturk');
+var mechturk_params = require('./mechturk-params');
+var mechturk = require('mechturk');
 var logger = require('./logger');
 var amulet = require('amulet');
 var async = require('async');
+var formidable = require('formidable');
 var __ = require('underscore');
+var moment = require('moment');
+
+var durationStringToSeconds = function(s) {
+  // takes a string like "5h" and returns 5*60*60 (number of seconds)
+  var matches = s.match(/\d+\w/g);
+  var duration = moment.duration(0);
+  matches.forEach(function(match) {
+    var parts = match.match(/(\d+)(\w)/);
+    // console.log('+', parts[1], parts[2]);
+    duration.add(parseInt(parts[1], 10), parts[2]);
+  });
+  return duration.asSeconds();
+};
+// flattenDuration('5h');
 
 module.exports = function(R) {
   function authenticate(req, res) {
-    // document.cookie = 'wepEdYrVaigs=true';
+    // document.cookie = 'wepEdYrVaigs=true;path=/';
     var cookie_name = process.env.MT_PASSWORD || 'wepEdYrVaigs';
     if (!req.cookies.get(cookie_name)) {
       res.die("Unauthenticated.");
+      return true;
     }
+    return false;
   }
 
-  R.post(/^\/accounts/, function(m, req, res) {
-    authenticate(req, res);
-    res.json(res || 'error');
+  // R.post(/^\/accounts\/(\w+)\/(\w+)\/(\w+)/, function(m, req, res) {
+    // e.g., m[3] == CreateHit
+  R.post(/^\/accounts\/(\w+)\/(\w+)\/CreateHIT/, function(m, req, res) {
+    var turk_client = mechturk_params.mechturk(m[2], m[1], {logger: logger});
+    new formidable.IncomingForm().parse(req, function(err, fields, files) {
+      console.dir(fields);
+      var params = {
+        MaxAssignments: parseInt(fields.MaxAssignments, 10),
+        Title: fields.Title,
+        Description: fields.Description,
+        Reward: new mechturk.models.Price(parseFloat(fields.Reward)),
+        Keywords: fields.Keywords,
+        Question: new mechturk.models.ExternalQuestion(fields.ExternalURL, parseInt(fields.FrameHeight, 10)),
+        AssignmentDurationInSeconds: durationStringToSeconds(fields.AssignmentDuration || 0),
+        LifetimeInSeconds: durationStringToSeconds(fields.Lifetime || 0),
+        AutoApprovalDelayInSeconds: durationStringToSeconds(fields.AutoApprovalDelay || 0),
+      };
+      turk_client.CreateHIT(params, function(err, result) {
+        logger.maybe(err);
+        res.json(result || 'error');
+      });
+    });
   });
 
   R.get(/^\/accounts\/(\w+)\/(\w+)/, function(m, req, res) {
     authenticate(req, res);
     // /accounts/[account]/[host]
     var ctx = {
-      accounts: mechturk.accounts,
-      account: __.findWhere(mechturk.accounts, {id: m[1]}),
-      aws_hosts: mechturk.hosts,
-      aws_host: __.findWhere(mechturk.hosts, {id: m[2]}),
+      accounts: mechturk_params.accounts,
+      account: __.findWhere(mechturk_params.accounts, {id: m[1]}),
+      aws_hosts: mechturk_params.hosts,
+      aws_host: __.findWhere(mechturk_params.hosts, {id: m[2]}),
     };
 
     // logger.debug(JSON.stringify(process.env));
     // logger.debug(JSON.stringify(mechturk.accounts));
     // logger.debug("ctx.account.secretAccessKey: " + ctx.account.secretAccessKey);
     // mechturk(host_id, account_id);
-    var turk_client = mechturk(m[2], m[1]);
+    var turk_client = mechturk_params.mechturk(m[2], m[1], {logger: logger});
     turk_client.GetAccountBalance({}, function(err, result) {
       logger.maybe(err);
       // {"GetAccountBalanceResponse":{"OperationRequest":{"RequestId":"9ef506b"},
       // "GetAccountBalanceResult": {"Request":{"IsValid":"True"},"AvailableBalance":
       // {"Amount":"10000.000","CurrencyCode":"USD","FormattedPrice":"$10,000.00"}}}}
-      ctx.available_price = result.AvailableBalance;
+      // console.log('result', result);
+      ctx.available_price = result.GetAccountBalanceResult.AvailableBalance;
       amulet.render(res, ['layout.mu', 'admin.mu'], ctx);
     });
+  });
+
+  R.post(/^\/accounts/, function(m, req, res) {
+    authenticate(req, res);
+    res.json('Accounts index. Hi.');
   });
 
 };
@@ -110,30 +153,6 @@ def collect(title, exclude=None):
             stdout('%s,' % cell)
         stdout('\n')
 */
-
-/*
-def make_hit(url):
-    frameheight = 580
-    ext_question = ExternalQuestion(url, frameheight)
-    hit_set = turk.create_hit(
-        question=ext_question,
-        max_assignments=18,
-        reward=0.75,
-        title='Airplane Identification',
-        description='Identify photos of planes as enemy or friend, '
-            'factoring in the numbers of planes in the sky and judgments from your allies. '
-            '100 friend / enemy responses.',
-        keywords=['airplane', 'identification', 'visual', 'pictures'],
-        duration=timedelta(hours=5),  # worker must complete in how long?
-        lifetime=timedelta(hours=24),  # stay on mech turk for how long?
-        approval_delay=timedelta(days=3)  # auto-approve after 3 days
-    )
-
-    stderr('Added %d HITs\n' % len(hit_set))
-    for hit in hit_set:
-        stderr('- hit_id: %s (hit_type: %s)\n' % (hit.HITId, hit.HITTypeId))
-*/
-
 
 // make_hit(opts.url)
 // # collect('English Language Grammaticality Judgments', exclude=['jsenabled', 'ghostkiller', 'originalHitId', 'pageload'])

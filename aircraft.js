@@ -1,6 +1,7 @@
 'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
 var url = require('url');
-var mechturk = require('./mechturk');
+var mechturk = require('mechturk');
+var mechturk_params = require('./mechturk-params');
 var models = require('./models');
 var User = models.User;
 var __ = require('underscore');
@@ -231,11 +232,11 @@ module.exports = function(R) {
           var unpaid = user.responses.length - user.paid;
           var amount = Math.min(parseFloat(fields.amount || 0.25), 0.25);
           if (unpaid >= unpaid_minimum) {
-            var turk_client = mechturk('sandbox', 'ut');
+            var turk_client = mechturk_params.mechturk('sandbox', 'ut', {logger: logger});
             var params = {
               AssignmentId: fields.assignmentId,
               WorkerId: workerId,
-              BonusAmount: {CurrencyCode: 'USD', Amount: amount},
+              BonusAmount: new mechturk.models.Price(amount),
               Reason: 'Batch completion'
             };
             turk_client.GrantBonus(params, function(err, result) {
