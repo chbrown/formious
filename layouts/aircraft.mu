@@ -33,7 +33,9 @@ ability, given their positions.
 
 <hr />
 
-<div id="root"></div>
+<div id="root">
+  <!-- <div id="notices" style="position: absolute; width: 280px; height: 0; right: 10px; bottom: 0"></div> -->
+</div>
 
 <script src="/static/compiled.js"></script>
 <script>
@@ -142,7 +144,7 @@ var SceneView = TemplateView.extend({
   },
   disable: function() {
     this.$('button').prop('disabled', true);
-    this.$('button:last').after('Disabled (Unclaimed HIT)');
+    noty({text: 'Disabled (Unclaimed HIT)', type: 'error', layout: 'bottomRight'});
   },
 });
 
@@ -181,7 +183,7 @@ var BatchDebriefingView = TemplateView.extend({
       if (bonus > 0) {
         $.post('/request-bonus', {amount: bonus, assignmentId: config.assignmentId}, 'json')
         .always(function(data, textStatus, jqXHR) {
-          noty({text: data.message, layout: "topRight", type: "information", timeout: 2500})
+          noty({text: data.message, type: 'information', layout: 'bottomRight', timeout: 5000});
         });
       }
 
