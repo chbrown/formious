@@ -4,10 +4,11 @@ var db = mongoose.createConnection('localhost', 'turkserv');
 
 var user_schema = new mongoose.Schema({
   _id: String, // AWS workerId
-  created: {type: Date, "default": Date.now},
+  created: {type: Date, 'default': Date.now},
   seen: [String],
   responses: [],
-  paid: {type: Number, "default": 0},
+  bonus_paid: {type: Number, 'default': 0},
+  bonus_owed: {type: Number, 'default': 0},
 });
 
 var User = db.model('User', user_schema);

@@ -222,42 +222,54 @@ module.exports = function(R) {
   });
 
   R.post(/\/request-bonus/, function(m, req, res) {
-    var unpaid_minimum = 49;
+    // var unpaid_minimum = 49;
     new formidable.IncomingForm().parse(req, function(err, fields, files) {
       var workerId = (fields.workerId || req.cookies.get('workerId') || 'none').replace(/\W+/g, '');
       User.findById(workerId, function(err, user) {
         logger.maybe(err);
-        // a user's first 100 responses are not bonused
         if (user) {
-          var unpaid = user.responses.length - user.paid;
+          // var unpaid = user.responses.length - user.paid;
           var amount = Math.min(parseFloat(fields.amount || 0.25), 0.25);
-          if (unpaid >= unpaid_minimum) {
-            var turk_client = mechturk_params.mechturk('sandbox', 'ut', {logger: logger});
-            var params = {
-              AssignmentId: fields.assignmentId,
-              WorkerId: workerId,
-              BonusAmount: new mechturk.models.Price(amount),
-              Reason: 'Batch completion'
-            };
-            turk_client.GrantBonus(params, function(err, result) {
-              if (err) {
-                logger.error(err);
-                res.json({success: false, message: 'Error awarding bonus. ' + err.toString()});
-              }
-              else {
-                var result_string = util.inspect(result, {showHidden: true, depth: 5});
-                logger.info('Bonus of ' + amount + ' granted to worker: ' + workerId + '. ' + result_string);
-                user.set('paid', user.responses.length);
-                user.save(logger.maybe);
-                res.json({success: true, message: 'Bonus awarded: $' + amount, amount: amount});
-              }
-            });
+          var previous_bonus_owed = user.get('bonus_owed');
+          user.set('bonus_owed', previous_bonus_owed + amount);
+          user.save(function(err) {
+            if (err) {
+              logger.error(err);
+              res.json({success: false, message: 'Error assigning bonus: ' + err.toString(), amount: amount});
+            }
+            else {
+              logger.info('User bonus_owed increased from ' + previous_bonus_owed +
+                ' by ' + amount + ' to ' + (previous_bonus_owed + amount) + '.');
+              res.json({success: true, message: 'Bonus awarded: $' + amount, amount: amount});
+            }
+          });
+          // if (unpaid >= unpaid_minimum) {
+          //   var turk_client = mechturk_params.mechturk('sandbox', 'ut', {logger: logger});
+          //   var params = {
+          //     AssignmentId: fields.assignmentId,
+          //     WorkerId: workerId,
+          //     BonusAmount: new mechturk.models.Price(amount),
+          //     Reason: 'Batch completion'
+          //   };
+          //   turk_client.GrantBonus(params, function(err, result) {
+          //     if (err) {
+          //       logger.error(err);
+          //       res.json({success: false, message: 'Error awarding bonus. ' + err.toString()});
+          //     }
+          //     else {
+          //       var result_string = util.inspect(result, {showHidden: true, depth: 5});
+          //       logger.info('Bonus of ' + amount + ' granted to worker: ' + workerId + '. ' + result_string);
+          //       user.set('paid', user.responses.length);
+          //       user.save(logger.maybe);
+          //       res.json({success: true, message: 'Bonus awarded: $' + amount, amount: amount});
+          //     }
+          //   });
 
-          }
-          else {
-            var message = 'Not yet eligible for bonus. Must answer at least ' + (unpaid_minimum - unpaid) + ' more hits.';
-            res.json({success: false, message: message, unpaid: unpaid});
-          }
+          // }
+          // else {
+          //   var message = 'Not yet eligible for bonus. Must answer at least ' + (unpaid_minimum - unpaid) + ' more hits.';
+          //   res.json({success: false, message: message, unpaid: unpaid});
+          // }
         }
         else {
           res.json({success: false, message: 'Could not find user: ' + workerId});

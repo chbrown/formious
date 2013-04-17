@@ -219,9 +219,9 @@ var ConclusionView = TemplateView.extend({
 var ConsentView = TemplateView.extend({
   template: 'aircraft-consent.mu',
   events: {
-    'click button': 'start'
+    'click button': 'next'
   },
-  start: function() {
+  next: function() {
     var batch_collection = new BatchCollection(raw_batches);
     var batch = batch_collection.first();
     window.batch_collection = batch_collection; // for debugging
@@ -240,7 +240,7 @@ $(function() {
   var consent_view = new ConsentView();
   $('#root').append(consent_view.$el);
   if (config.assignmentId == '' || config.assignmentId == 'ASSIGNMENT_ID_NOT_AVAILABLE') {
-    consent_view.start();
+    consent_view.next();
   }
 });
 
