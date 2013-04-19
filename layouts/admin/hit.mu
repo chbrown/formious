@@ -3,15 +3,32 @@
   <div id="assignments"></div>
 </div>
 
+<div class="bonuses">
+  <table>
+    <thead><tr><th>WorkerId</th><th>BonusAmount</th><th>Reason</th><th>GrantTime</th></tr></thead>
+    <tbody>
+    {{#BonusPayments}}
+      <tr>
+        <td>{{WorkerId}}</td>
+        <td>{{BonusAmount.FormattedPrice}}</td>
+        <td>{{Reason}}</td>
+        <td>{{GrantTime}}</td>
+      </tr>
+    {{/BonusPayments}}
+    </tbody>
+  </table>
+</div>
+
 <script src="/static/compiled.js"></script>
 <script src="/static/templates.js"></script>
 <script>
 'use strict'; /*jslint nomen: true, indent: 2, es5: true */
-// var Assignment = Backbone.Model.extend({
-//   url: 'assignments'
-// });
+var Assignment = Backbone.Model.extend({
+  idAttribute: 'AssignmentId'
+});
 var AssignmentCollection = TemplatedCollection.extend({
-  url: '../Assignments'
+  model: Assignment,
+  url: '../Assignments',
 });
 
 var Worker = Backbone.Model.extend({
@@ -32,15 +49,23 @@ function makeTable(cols, data) {
 
 var AssignmentView = TemplateView.extend({
   template: 'assignment.mu',
+  preRender: function(ctx) {
+    // AssignmentStatus is one of Submitted | Approved | Rejected
+    ctx[ctx.AssignmentStatus] = true;
+    ctx.reason = localStorage.reason;
+  },
   events: {
-    'click button.responses': function(ev) {
+    'change input[name="reason"]': function(ev) {
+      localStorage.reason = ev.target.value;
+    },
+    'click button.load-responses': function(ev) {
       var workerId = this.model.get('WorkerId');
       var worker = new Worker({id: workerId});
       worker.fetch({
         success: function(model, user, options) {
           console.log('user', user);
           var keys = {};
-          user.responses.slice(0, 10).forEach(function(response) {
+          user.responses.slice(0, 50).forEach(function(response) {
             _.extend(keys, response);
           });
 
@@ -55,13 +80,17 @@ var AssignmentView = TemplateView.extend({
         }
       });
     },
-    'click button.approve': function(ev) {
+    'click button[data-action]': function(ev) {
       // $.post( url [, data ] [, success(data, textStatus, jqXHR) ] [, dataType ] )
-      var approve_url = this.model.url() + '/Approve';
-      console.log('approve_url', approve_url);
-      $.post(approve_url, function(data, textStatus, jqXHR) {
-        console.log('data, textStatus, jqXHR');
-        $(ev.target).flag({html: 'Approved', fade: 5000});
+      var action = $(ev.target).attr('data-action')
+      var params = {};
+      if (action == 'GrantBonus') {
+        params.BonusAmount = this.$('.bonus input[name="amount"]').val();
+        params.Reason = this.$('.bonus input[name="reason"]').val();
+        params.WorkerId = this.model.get('WorkerId');
+      }
+      $.post(this.model.url() + '/' + action, params, function(data, textStatus, jqXHR) {
+        $(ev.target).flag({html: data.message, fade: 5000});
       })
     }
   }

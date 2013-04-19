@@ -50,16 +50,12 @@ R.post(/CreateHIT/, function(m, req, res) {
 
 R.get(/Workers\/(\w+)/, function(m, req, res) {
   User.findById(m[1], function(err, user) {
-    console.log('user', user);
-    if (err) {
-      logger.error(err);
-      throw err;
-    }
+    logger.maybe(err);
+    // console.log('user', user);
     // if (!user) {
     // user = new User({_id: context.workerId});
     // user.save(logger.maybe);
     // }
-    console.log('user.responses.length', user.responses.length);
     res.json(user);
   });
 });
@@ -70,38 +66,101 @@ R.post(/Assignments\/(\w+)\/Approve/, function(m, req, res) {
     var params = {AssignmentId: AssignmentId};
     if (fields.RequesterFeedback) params.RequesterFeedback = fields.RequesterFeedback;
     req.turk_client.ApproveAssignment(params, function(err, result) {
-      logger.maybe(err);
-      res.json(result || 'error');
+      if (err) {
+        logger.error(err);
+        res.json({success: false, message: err.toString()});
+      }
+      else {
+        res.json({success: true, message: 'Approved Assignment: ' + AssignmentId});
+      }
     });
   });
 });
 
+R.post(/Assignments\/(\w+)\/GrantBonus/, function(m, req, res) {
+  var AssignmentId = m[1];
+  new formidable.IncomingForm().parse(req, function(err, fields, files) {
+    var UniqueRequestToken = AssignmentId + ':' + fields.WorkerId + ':bonus';
+    var amount = Math.min(parseFloat(fields.BonusAmount), 5);
+    var WorkerId = fields.WorkerId;
+    var params = {
+      WorkerId: WorkerId,
+      AssignmentId: AssignmentId,
+      BonusAmount: new mechturk.models.Price(amount),
+      UniqueRequestToken: UniqueRequestToken
+    };
+
+    if (fields.Reason) params.Reason = fields.Reason;
+
+    console.log("params");
+    console.dir(params);
+    req.turk_client.GrantBonus(params, function(err, result) {
+      if (err) {
+        logger.error(err);
+        res.json({success: false, message: err.toString()});
+      }
+      else {
+        User.findById(WorkerId, function(err, user) {
+          if (err) {
+            logger.error(err);
+            res.json({success: false, message: err.toString()});
+          }
+          else {
+            user.bonus_owed -= amount;
+            user.bonus_paid += amount;
+            user.save(function(err) {
+              if (err) {
+                res.json({success: false, message: err.toString()});
+              }
+              else {
+                var message = 'Granted bonus to user: ' + WorkerId;
+                res.json({success: true, message: message});
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+});
+
+
 R.get(/HITs\/(\w+)/, function(m, req, res) {
   var HITId = m[1];
-  var params = {HITId: HITId, PageSize: 100, SortProperty: 'SubmitTime', SortDirection: 'Ascending'};
-  req.turk_client.GetAssignmentsForHIT(params, function(err, result) {
+  var ctx = {HITId: HITId};
+  var params = {HITId: HITId, PageSize: 100};
+  var sort_params = {SortProperty: 'SubmitTime', SortDirection: 'Ascending'};
+  req.turk_client.GetAssignmentsForHIT(__.extend({}, params, sort_params), function(err, result) {
     logger.maybe(err);
-
     var raw_assigments = result.GetAssignmentsForHITResult.Assignment;
-    async.map(raw_assigments, function fillAssignment(assignment, callback) {
-      assignment.Answer = mechturk.xml2json(assignment.Answer).QuestionFormAnswers.Answer;
+    req.turk_client.GetBonusPayments(params, function(err, result) {
+      ctx.BonusPayments = result.GetBonusPaymentsResult.BonusPayment;
 
-      User.findById(assignment.WorkerId, function(err, user) {
-        logger.maybe(err);
+      async.map(raw_assigments, function fillAssignment(assignment, callback) {
+        assignment.Answer = mechturk.xml2json(assignment.Answer).QuestionFormAnswers.Answer;
 
-        var user_hash = user ? user.toObject() : {error: 'Could not find user'};
-        if (user_hash.responses) user_hash.responses = user_hash.responses.length;
-        assignment.user_fields = __.map(user_hash, function(value, key) {
-          return {key: key, value: value};
+        User.findById(assignment.WorkerId, function(err, user) {
+          logger.maybe(err);
+
+          var user_hash = {error: 'Could not find user'};
+          if (user) {
+            user_hash = user.toObject();
+            user_hash.responses_length = user_hash.responses.length;
+            delete user_hash.responses;
+            // __.extend(assignment, user_hash);
+            assignment.bonus_owed = user.get('bonus_owed');
+          }
+          assignment.user_fields = __.map(user_hash, function(value, key) {
+            return {key: key, value: value};
+          });
+
+          callback(null, assignment);
         });
-
-        callback(null, assignment);
+      }, function(err, assignments) {
+        logger.maybe(err);
+        ctx.assignments = assignments;
+        amulet.render(res, ['layout.mu', 'admin/hit.mu'], ctx);
       });
-
-    }, function(err, assignments) {
-      logger.maybe(err);
-      var ctx = {assignments: assignments, HITId: HITId};
-      amulet.render(res, ['layout.mu', 'admin/hit.mu'], ctx);
     });
   });
 });
@@ -109,7 +168,6 @@ R.get(/HITs\/(\w+)/, function(m, req, res) {
 R.get(/HITs/, function(m, req, res) {
   req.turk_client.SearchHITs({SortDirection: 'Descending', PageSize: 100}, function(err, result) {
     logger.maybe(err);
-    console.log(util.inspect(result, {depth: null}));
     var ctx = {hits: result.SearchHITsResult.HIT};
     // {"GetAccountBalanceResponse":{"OperationRequest":{"RequestId":"9ef506b"},
     // "GetAccountBalanceResult": {"Request":{"IsValid":"True"},"AvailableBalance":
@@ -138,7 +196,6 @@ R.default = function(m, req, res) {
     // {"GetAccountBalanceResponse":{"OperationRequest":{"RequestId":"9ef506b"},
     // "GetAccountBalanceResult": {"Request":{"IsValid":"True"},"AvailableBalance":
     // {"Amount":"10000.000","CurrencyCode":"USD","FormattedPrice":"$10,000.00"}}}}
-    // console.log('result', result);
     ctx.available_price = result.GetAccountBalanceResult.AvailableBalance;
     amulet.render(res, ['layout.mu', 'admin/default.mu'], ctx);
   });

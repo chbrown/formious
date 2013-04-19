@@ -48,6 +48,9 @@ button{margin:5px 10px;}
 .review h2{display:inline-block;border-top:1px solid gray;}
 .review .times,.review .ids{font-size:90%;}
 .review .details{font-size:90%;}.review .details dfn{display:inline-block;font-weight:bold;font-style:normal;padding-right:5px;}
+.review .status span{font-size:110%;font-weight:bold;}.review .status span.Submitted{color:#CCC;}
+.review .status span.Approved{color:darkgreen;}
+.review .status span.Rejected{color:darkred;}
 .flag{position:absolute;background-color:black;border-radius:4px;padding:2px;color:white;font-size:90%;}.flag .triangle{display:inline-block;position:absolute;border:6px solid transparent;width:0;height:0;}
 .flag .subflag{display:inline-block;}.flag .subflag span,.flag .subflag a{display:inline-block;padding:0 4px;}
 .flag .subflag a{background-color:white;border-radius:2px;}

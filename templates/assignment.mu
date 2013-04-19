@@ -1,16 +1,37 @@
 <h2 title="AssignmentId">{{AssignmentId}}</h2>
 
-<p class="ids" title="WorkerId">{{WorkerId}} <a href="../Workers/{{WorkerId}}">json</a></p>
+<div class="ids" title="WorkerId">
+  {{WorkerId}} <a href="../Workers/{{WorkerId}}">json</a>
+</div>
 
-<p class="times details">
+<div class="times details">
   <div><dfn>AutoApprovalTime</dfn> {{AutoApprovalTime}}</div>
   <div><dfn>AcceptTime</dfn> {{AcceptTime}}</div>
   <div><dfn>SubmitTime</dfn> {{SubmitTime}}</div>
-</p>
+
+  {{#Approved}}
+    <div><dfn>ApprovalTime</dfn> {{ApprovalTime}}</div>
+  {{/Approved}}
+  {{#Rejected}}
+    <div><dfn>RejectionTime</dfn> {{RejectionTime}}</div>
+  {{/Rejected}}
+</div>
 
 <div class="status">
-  <h3>{{AssignmentStatus}}</h3>
-  <button class="approve">Approve</button>
+  <span class="{{AssignmentStatus}}">{{AssignmentStatus}}</span>
+  {{#Submitted}}
+    <button data-action="ApproveAssignment">Approve</button>
+    <button data-action="RejectAssignment">Reject</button>
+  {{/Submitted}}
+  {{#Rejected}}
+    <button data-action="ApproveRejectedAssignment">Unreject and Approve</button>
+  {{/Rejected}}
+</div>
+
+<div class="bonus">
+  <label>Amount: <input name="amount" value="{{bonus_owed}}" /></label>
+  <label>Reason: <input name="reason" value="{{reason}}" /></label>
+  <button data-action="GrantBonus">Grant Bonus</button>
 </div>
 
 <div class="details">
@@ -22,4 +43,4 @@
   {{/user_fields}}
 </div>
 
-<button class="responses">Load responses</button>
+<button class="load-responses">Load responses</button>
