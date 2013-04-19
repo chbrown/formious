@@ -99,7 +99,7 @@ The two planes are Messerschmitts and Spitfires, particularly, models taken from
 // for (var x in _.range(47)) ;
 
 cd(frames[0]) // Firefox
-_.range(1, 6).forEach(function(i) {
+_.range(1, 7).forEach(function(i) {
   console.log('Shortening batch#', i);
   var scenes = batch_collection.get(i).scenes;
   scenes.remove(scenes.slice(3));

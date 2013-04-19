@@ -3,26 +3,19 @@
   <h2>Accounts</h2>
   <ul>
   {{#accounts}}
-    <li><a href="/accounts/{{id}}/{{aws_host.id}}/dashboard">{{id}}</a> ({{accessKeyId}})
+    <li><a href="/accounts/{{id}}/{{aws_host_id}}/dashboard">{{id}}</a> ({{accessKeyId}})
   {{/}}
   </ul>
 
   <h2>Hosts</h2>
   <ul>
   {{#aws_hosts}}
-    <li><a href="/accounts/{{account.id}}/{{id}}/dashboard">{{id}}</a> ({{url}})
+    <li><a href="/accounts/{{account_id}}/{{id}}/dashboard">{{id}}</a> ({{url}})
   {{/}}
   </ul>
 
   <h3>Available Funds</h3>
   {{available_price.FormattedPrice}}
-
-  <h3>HITs</h3
-  <ul>
-    {{#hits}}
-
-    {{/}}
-  </ul>
 
   <h3>Create Hit</h3>
   <form method="POST" action="CreateHIT" id="create">

@@ -24,6 +24,7 @@
   "devDependencies": {
     "grunt": "*",
     "grunt-contrib-uglify": "*",
-    "handlebars": "*"
+    "handlebars": "*",
+    "glob": "*"
   }
 }

@@ -12,3 +12,16 @@ var TemplateView = Backbone.View.extend({
     return this;
   }
 });
+
+var TemplatedCollection = Backbone.Collection.extend({
+  renderTo: function($el, View) {
+    var fragment = document.createDocumentFragment();
+    this.each(function(model) {
+      var ctx = model.toJSON();
+      ctx.model = model;
+      var view = new View(ctx);
+      fragment.appendChild(view.el);
+    });
+    $el.append(fragment);
+  }
+});

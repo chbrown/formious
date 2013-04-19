@@ -38,6 +38,7 @@ ability, given their positions.
 </div>
 
 <script src="/static/compiled.js"></script>
+<script src="/static/templates.js"></script>
 <script>
 var config = {
   task_started: {{task_started}},
