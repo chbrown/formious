@@ -27,6 +27,7 @@
 
 
 <script src="/static/compiled.js"></script>
+<script src="/static/templates.js"></script>
 <script>
 var Response = Backbone.Model.extend({
   url: '/responses'
