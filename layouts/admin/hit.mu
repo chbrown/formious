@@ -3,6 +3,7 @@
   <div id="assignments"></div>
 </div>
 
+<h1>Bonuses</h1>
 <div class="bonuses">
   <table>
     <thead><tr><th>WorkerId</th><th>BonusAmount</th><th>Reason</th><th>GrantTime</th></tr></thead>

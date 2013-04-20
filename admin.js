@@ -1,4 +1,5 @@
 'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
+var csv = require('csv');
 var mechturk_params = require('./mechturk-params');
 var mechturk = require('mechturk');
 var logger = require('./logger');
@@ -124,6 +125,39 @@ R.post(/Assignments\/(\w+)\/GrantBonus/, function(m, req, res) {
   });
 });
 
+R.get(/HITs\/(\w+)\.(c|t)sv/, function(m, req, res) {
+  var HITId = m[1];
+  var delimiter = m[2] == 'c' ? ',' : '\t';
+  // should really peek to learn the columns
+  var columns = ['workerId', 'duration'].concat(['choice', 'correct', 'gold', 'image_id', 'prior', 'judgments', 'reliabilities', 'scene_index', 'submitted', 'task_started', 'time', 'width', 'workerId']);
+  var csv_writer = csv().to.stream(res, {delimiter: delimiter, header: true, columns: columns});
+  var params = {HITId: HITId, PageSize: 100, SortProperty: 'SubmitTime', SortDirection: 'Ascending'};
+  req.turk_client.GetAssignmentsForHIT(params, function(err, assignments_result) {
+    logger.maybe(err);
+    var raw_assigments = assignments_result.GetAssignmentsForHITResult.Assignment;
+    // for each assignment
+    async.eachSeries(raw_assigments, function fillAssignment(assignment, callback) {
+      var assignment_answers = {};
+      // pull in the Assignment level POST that AMT stores:
+      mechturk.xml2json(assignment.Answer).QuestionFormAnswers.Answer.forEach(function(question_answer) {
+        assignment_answers[question_answer.QuestionIdentifier] = question_answer.FreeText;
+      });
+      // For each response recorded for this user, merge in those assignment details and write to csv
+      User.findById(assignment.WorkerId, function(err, user) {
+        if (err) return callback(err);
+        var responses = (user ? user.responses : null) || [];
+        responses.forEach(function(response) {
+          __.extend(response, assignment_answers);
+          csv_writer.write(response);
+        });
+        callback(null);
+      });
+    }, function(err) {
+      logger.maybe(err);
+      csv_writer.end();
+    });
+  });
+});
 
 R.get(/HITs\/(\w+)/, function(m, req, res) {
   var HITId = m[1];
@@ -202,7 +236,7 @@ R.default = function(m, req, res) {
 };
 
 module.exports = function(universalR) {
-  // /accounts/account_id/host_id
+  // /accounts/{account_id}/{host_id}
   universalR.any(/^\/accounts\/(\w+)\/(\w+)/, function(m, req, res) {
     // document.cookie = 'wepEdYrVaigs=true;path=/';
     var cookie_name = process.env.MT_PASSWORD || 'wepEdYrVaigs';
@@ -216,74 +250,3 @@ module.exports = function(universalR) {
     }
   });
 };
-
-/*
-def interactive_review():
-    hits = turk.get_all_hits()
-    for hit in hits:
-        print 'Hit: %s (%s)' % (hit.Title, hit.HITId)
-        assignments = turk.get_assignments(hit.HITId)
-        for a in assignments:
-            print '  AcceptTime: %s, SubmitTime: %s, AutoApprovalTime: %s' % (
-                a.AcceptTime, a.SubmitTime, a.AutoApprovalTime)
-            print '  Worker: %s, AssignmentId: %s, AssignmentStatus: %s' % (a.WorkerId, a.AssignmentId, a.AssignmentStatus)
-
-            answers = a.answers[0]
-            for answer in sorted(answers, key=lambda n: n.qid):
-                print '    ', answer.qid, answer.fields[0]
-
-            if hasattr(a, 'ApprovalTime'):
-                print '  ApprovalTime: %s' % a.ApprovalTime
-            elif hasattr(a, 'RejectionTime'):
-                print '  RejectionTime: %s' % a.RejectionTime
-            else:
-                print 'y to approve, n to reject, anything else to skip'
-                c = getch()
-                if c == 'y':
-                    print 'Approving', a.AssignmentId
-                    turk.approve_assignment(a.AssignmentId)
-                elif c == 'n':
-                    print 'Rejecting', a.AssignmentId
-                    turk.reject_assignment(a.AssignmentId)
-
-
-def answers_in_hit(title):
-    for hit in turk.get_all_hits():
-        if title in hit.Title:
-            stderr('Matched HIT: %s (%s)\n' % (hit.Title, hit.HITId))
-            page_size = 10
-            for page_number in range(1, 100):
-                assignments = turk.get_assignments(hit.HITId, page_number=page_number, page_size=page_size)
-                for assignment in assignments:
-                    if hasattr(assignment, 'ApprovalTime'):
-                        for answer_set in assignment.answers:
-                            vals = dict(submitted=assignment.SubmitTime)
-                            for question in answer_set:
-                                assert len(question.fields) == 1
-                                vals[question.qid] = question.fields[0]
-                            yield vals
-
-                if page_number * page_size >= int(assignments.TotalNumResults):
-                    break
-*/
-
-/*
-def collect(title, exclude=None):
-    records = list(answers_in_hit(title))
-    colset = set(col for record in records for col in record.keys() + ['submitted']) - set(exclude or [])
-    cols = sorted(list(colset))
-    stdout('%s\n' % ','.join(cols))
-    for record in records:
-        for col in cols:
-            cell = record.get(col, '')
-            if ',' in cell:
-                cell = ''%s'' % cell.replace(''', r'''')
-            stdout('%s,' % cell)
-        stdout('\n')
-*/
-
-// make_hit(opts.url)
-// # collect('English Language Grammaticality Judgments', exclude=['jsenabled', 'ghostkiller', 'originalHitId', 'pageload'])
-// # interactive_review()
-
-// # $ py botox.py --credentials ut --url http://turk.enron.me/ --deploy

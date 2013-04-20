@@ -2,14 +2,14 @@
 var url = require('url');
 var mechturk = require('mechturk');
 var mechturk_params = require('./mechturk-params');
-var models = require('./models');
-var User = models.User;
 var __ = require('underscore');
-var util = require('./util');
 var amulet = require('amulet');
 var formidable = require('formidable');
 var vsprintf = require('sprintf').vsprintf;
 
+var util = require('./util');
+var models = require('./models');
+var User = models.User;
 var logger = require('./logger');
 
 // var number_of_scenes = 100;
@@ -157,50 +157,6 @@ module.exports = function(R) {
         return batch;
       });
       amulet.render(res, ['layout.mu', 'aircraft.mu'], context);
-    });
-  });
-
-  // R.post(/seen/, function(m, req, res) {
-  //   // a POST to /seen should have MIME type "application/x-www-form-urlencoded"
-  //   // and the fields: workerId, and "questionIds[]" that equates to a list of strings
-  //   // which is just multiple 'questionIds[] = string1' fields (I think).
-  //   new formidable.IncomingForm().parse(req, function(err, fields, files) {
-  //     var workerId = fields.workerId; // || req.cookies.get('workerId') || null;
-  //     if (workerId) {
-  //       User.findById(workerId, function(err, user) {
-  //         logger.maybe(err);
-  //         if (user) {
-  //           var questionIds = fields['questionIds[]'];
-  //           if (Array.isArray(questionIds)) {
-  //             questionIds.forEach(function(questionId) {
-  //               user.seen.push(questionId);
-  //             });
-  //           }
-  //           user.save(logger.maybe);
-  //           res.text('success');
-  //         }
-  //         else {
-  //           res.text('no worker');
-  //         }
-  //       });
-  //     }
-  //     else {
-  //       res.text('no worker id');
-  //     }
-  //   });
-  // });
-
-  R.post(/\/mturk\/externalSubmit/, function(m, req, res) {
-    var workerId = (req.cookies.get('workerId') || 'none').replace(/\W+/g, '');
-    new formidable.IncomingForm().parse(req, function(err, fields, files) {
-      User.findById(workerId, function(err, user) {
-        logger.maybe(err);
-        if (user) {
-          user.responses.push(fields);
-          user.save(logger.maybe);
-        }
-        amulet.render(res, ['layout.mu', 'submit.mu'], {});
-      });
     });
   });
 
