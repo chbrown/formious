@@ -45,7 +45,8 @@ var config = {
   assignmentId: "{{assignmentId}}",
   workerId: "{{workerId}}",
   host: "{{host}}",
-  hitId: "{{hitId}}"
+  hitId: "{{hitId}}",
+  version: 'v05a'
 };
 // (function() { return ...; })();
 var raw_batches = {{{JSON.stringify(batches)}}};
@@ -63,6 +64,7 @@ var Scene = Backbone.Model.extend({
       workerId: config.workerId,
       task_started: config.task_started,
       prior: this.collection.batch.get('prior'),
+      batch_index: this.collection.batch.id,
       scene_index: this.id,
       reliabilities: _.map(this.get('allies'), function(ally) { return ally.reliability.toFixed(4); }),
       judgments: _.pluck(this.get('allies'), 'judgment'),
@@ -71,7 +73,8 @@ var Scene = Backbone.Model.extend({
       correct: correct,
       image_id: this.get('image_id'),
       width: this.get('width'),
-      time: now() - this.get('shown')
+      time: now() - this.get('shown'),
+      version: config.version
     });
     response.save();
   },

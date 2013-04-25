@@ -212,6 +212,80 @@ R.get(/HITs/, function(m, req, res) {
   });
 });
 
+R.get(/\/responses.tsv/, function(m, req, res) {
+  var writeRow = function(out, cells) {
+    out.write(cells.join('\t'));
+    out.write('\n');
+  };
+
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+
+  var user_stream = User.find({responses: {$ne: []}}).sort('-created').stream();
+  var headers = [
+    'workerId',
+    'task_started',
+    'prior',
+    'scene_index',
+    'reliability1',
+    'reliability2',
+    'reliability3',
+    'reliability4',
+    'reliability5',
+    'judgment1',
+    'judgment2',
+    'judgment3',
+    'judgment4',
+    'judgment5',
+    'gold',
+    'image_id',
+    'width',
+    'correct',
+    'time',
+    'submitted'
+  ];
+  writeRow(res, headers);
+
+  user_stream.on('data', function (user) {
+    user.responses.filter(function(r) {
+      // test_user_ids.indexOf(r.workerId) === -1 &&
+      return r.workerId && r.workerId.match(/^A/);
+    }).forEach(function(r) {
+      var submit = r.submitted ? r.submitted.toISOString().replace(/\..+$/, '') : '';
+      var cells = [].concat(
+        r.workerId,
+        r.task_started,
+        r.prior,
+        r.scene_index,
+        r.reliabilities, // array
+        r.judgments, // array
+        r.gold,
+        r.image_id,
+        r.width,
+        r.correct,
+        r.time,
+        submit
+      );
+      writeRow(res, cells);
+    });
+  });
+  user_stream.on('error', logger.maybe);
+  user_stream.on('close', function () {
+    res.end();
+  });
+});
+
+R.get(/\/responses\/(\d+)\.json/, function(m, req, res) {
+  var page = parseInt(m[1], 10);
+  var per_page = 10;
+  User.find({responses: {$ne: []}}).skip(page*per_page).limit(per_page).sort('-created').exec(function(err, users) {
+    var responses = [];
+    users.forEach(function(user) {
+      util.extend(responses, user.responses);
+    });
+    res.json(responses);
+  });
+});
+
 R.default = function(m, req, res) {
   // /accounts/[account]/[host]
   m = req.url.match(/^\/accounts\/(\w+)\/(\w+)/);

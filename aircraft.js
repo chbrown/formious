@@ -12,77 +12,38 @@ var models = require('./models');
 var User = models.User;
 var logger = require('./logger');
 
-// var number_of_scenes = 100;
-// var prior_queue = [];
 
-// R.get(/\/priors.txt/, function(m, req, res) {
-//   res.writeHead(200, {'Content-Type': 'text/plain'});
-//   var body = prior_queue.map(function(d) { return d.toString(); }).join('; ');
-//   res.write(body);
-//   res.end();
-// });
-
-// function updatePriorQueueHack() {
-//   // group by prior and count
-//   var priors = prior_total.map(function() { return 0; });
-//   var two_weeks_ago = new Date(new Date().getTime() - 14*24*60*60*1000);
-
-//   User.find({created: {$gt: two_weeks_ago}, $where: "this.responses.length == 100"}).exec(function(err, users) {
-//     // logger.info("Found #users: " + users.length);
-//     logger.maybe(err);
-//     users.forEach(function(user) {
-//       priors[prior_total.indexOf(user.responses[0].prior)]++;
-//     });
-
-//     logger.info("Priors already tested (counts): " + priors);
-//     prior_queue = [];
-//     prior_total.forEach(function(prior, i) {
-//       var missing = 10 - priors[i];
-//       if (missing > 0)
-//         util.extend(prior_queue, util.repeat(prior, missing));
-//     });
-//     util.shuffle(prior_queue);
-//   });
-// }
-
-// updatePriorQueueHack();
-// setInterval(updatePriorQueueHack, 60000); // once a minute
-
-// function nextPrior() {
-//   if (prior_queue.length) {
-//     return prior_queue.pop();
-//   }
-//   return util.sample(prior_total);
-// }
-
-function allyJudgment(gold, prior, reliability) {
-  if (gold == 'enemy') {
-    return (Math.random() < reliability + (1-reliability)*prior) ? 'enemy' : 'pass';
+function allyJudgment(reliability, truth, prior_on_enemy) {
+  // var prior_on_enemy = 1 - prior_on_friend;
+  // var prior_on_truth = truth == 'enemy' ? prior_on_enemy : prior_on_friend;
+  // var ally_is_correct = Math.random() < reliability + (1-reliability)*prior_on_truth;
+  // var other = truth == 'enemy' ? 'pass' : 'enemy';
+  // return ally_is_correct ? truth : other;
+  if (truth == 'enemy') {
+    return Math.random() < reliability + (1 - reliability)*prior_on_enemy ? 'enemy' : 'pass';
   }
-  else { // if (gold == 'friend')
-    return (Math.random() < (1-reliability)*prior) ? 'enemy' : 'pass';
+  else {
+    return Math.random() < reliability + (1 - reliability)*(1 - prior_on_enemy) ? 'pass' : 'enemy';
   }
 }
 
-function makeBatch(prior, number_of_scenes, allies, widths) {
-  // prior describes the probability of a friend.
-  // thus prior=0.95 -> 95% marginal probability that an airplane is friendly.
-  var total_friendly = (prior * number_of_scenes) | 0;
-  var total_enemy = number_of_scenes - total_friendly;
+function makeBatch(prior_on_enemy, number_of_scenes, allies, widths) {
+  // thus prior_on_enemy=0.95 -> 95% marginal probability that an airplane is friendly.
+  var total_enemy = (prior_on_enemy * number_of_scenes) | 0;
+  var total_friendly = number_of_scenes - total_enemy;
 
   var scenes = __.range(number_of_scenes).map(function(scene_index) {
     var width = util.sample(widths);
     var image_id = (Math.random() * 100) | 0;
-    var gold = scene_index < total_friendly ? 'friend' : 'enemy';
+    var truth = scene_index < total_enemy ? 'enemy' : 'friend';
     return {
       image_id: image_id,
-      gold: gold,
+      truth: truth,
       width: width,
-      src: vsprintf('%s-%02d-%03d.jpg', [gold, image_id, width]),
+      src: vsprintf('%s-%02d-%03d.jpg', [truth, image_id, width]),
       allies: allies.map(function(ally) {
-        var ally_with_judgment = __.clone(ally);
-        ally_with_judgment.judgment = allyJudgment(gold, prior, ally.reliability);
-        return ally_with_judgment;
+        var judgment = allyJudgment(ally.reliability, truth, prior_on_enemy);
+        return __.extend({judgment: judgment}, ally);
       })
     };
   });
@@ -93,7 +54,7 @@ function makeBatch(prior, number_of_scenes, allies, widths) {
   });
 
   return {
-    prior: prior,
+    prior: prior_on_enemy,
     scenes: shuffled_scenes,
     total_friendly: total_friendly,
     total_enemy: total_enemy
@@ -231,81 +192,6 @@ module.exports = function(R) {
           res.json({success: false, message: 'Could not find user: ' + workerId});
         }
       });
-    });
-  });
-
-  R.get(/\/responses.tsv/, function(m, req, res) {
-    var writeRow = function(out, cells) {
-      out.write(cells.join('\t'));
-      out.write('\n');
-    };
-
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-
-    var user_stream = User.find({responses: {$ne: []}}).sort('-created').stream();
-    var headers = [
-      'workerId',
-      'task_started',
-      'prior',
-      'scene_index',
-      'reliability1',
-      'reliability2',
-      'reliability3',
-      'reliability4',
-      'reliability5',
-      'judgment1',
-      'judgment2',
-      'judgment3',
-      'judgment4',
-      'judgment5',
-      'gold',
-      'image_id',
-      'width',
-      'correct',
-      'time',
-      'submitted'
-    ];
-    writeRow(res, headers);
-
-    user_stream.on('data', function (user) {
-      user.responses.filter(function(r) {
-        // test_user_ids.indexOf(r.workerId) === -1 &&
-        return r.workerId && r.workerId.match(/^A/);
-      }).forEach(function(r) {
-        var cells = [
-          r.workerId,
-          r.task_started,
-          r.prior,
-          r.scene_index
-        ];
-        util.extend(cells, r.reliabilities);
-        util.extend(cells, r.judgments);
-        util.extend(cells, [
-          r.gold,
-          r.image_id,
-          r.width,
-          r.correct,
-          r.time,
-          r.submitted ? r.submitted.toISOString().replace(/\..+$/, '') : ''
-        ]);
-        writeRow(res, cells);
-      });
-    });
-    user_stream.on('error', logger.maybe);
-    user_stream.on('close', function () {
-      res.end();
-    });
-  });
-
-  R.get(/\/responses\/(\d+)\.json/, function(m, req, res) {
-    var page = parseInt(m[1], 10);
-    var per_page = 10;
-    User.find({responses: {$ne: []}}).skip(page*per_page).limit(per_page).sort('-created').exec(function(err, users) {
-      var responses = [];
-      users.forEach(function(user) {
-        util.extend(responses, user.responses);
-      });
-      res.json(responses);
     });
   });
 
