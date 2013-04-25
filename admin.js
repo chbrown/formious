@@ -125,7 +125,7 @@ R.get(/HITs\/(\w+)\.(c|t)sv/, function(m, req, res) {
   var HITId = m[1];
   var delimiter = m[2] == 'c' ? ',' : '\t';
   // should really peek to learn the columns
-  var columns = ['workerId', 'duration'].concat(['choice', 'correct', 'gold',
+  var columns = ['workerId', 'duration'].concat(['choice', 'correct', 'truth',
     'image_id', 'prior', 'judgments', 'reliabilities', 'scene_index',
     'submitted', 'task_started', 'time', 'width', 'workerId']);
   // res.setHeader('Content-Type', delimiter == ',' ? 'text/csv' : 'text/tab-separated-values');
@@ -241,7 +241,7 @@ R.get(/\/responses.tsv/, function(m, req, res) {
     'judgment3',
     'judgment4',
     'judgment5',
-    'gold',
+    'truth',
     'image_id',
     'width',
     'correct',
@@ -263,7 +263,7 @@ R.get(/\/responses.tsv/, function(m, req, res) {
         r.scene_index,
         r.reliabilities, // array
         r.judgments, // array
-        r.gold,
+        r.truth,
         r.image_id,
         r.width,
         r.correct,
