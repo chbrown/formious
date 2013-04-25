@@ -166,7 +166,7 @@ R.get(/HITs\/(\w+)/, function(m, req, res) {
   var sort_params = {SortProperty: 'SubmitTime', SortDirection: 'Ascending'};
   req.turk_client.GetAssignmentsForHIT(__.extend({}, params, sort_params), function(err, result) {
     logger.maybe(err);
-    var raw_assigments = result.GetAssignmentsForHITResult.Assignment;
+    var raw_assigments = result.GetAssignmentsForHITResult.Assignment || [];
     req.turk_client.GetBonusPayments(params, function(err, result) {
       ctx.BonusPayments = result.GetBonusPaymentsResult.BonusPayment;
 
@@ -286,7 +286,8 @@ R.get(/\/responses\/(\d+)\.json/, function(m, req, res) {
   });
 });
 
-R.default = function(m, req, res) {
+
+R.get(/dashboard/, function(m, req, res) {
   // /accounts/[account]/[host]
   m = req.url.match(/^\/accounts\/(\w+)\/(\w+)/);
   var ctx = {
@@ -296,9 +297,6 @@ R.default = function(m, req, res) {
     aws_host_id: m[2],
   };
 
-  // logger.debug(JSON.stringify(process.env));
-  // logger.debug(JSON.stringify(mechturk.accounts));
-  // logger.debug("ctx.account.secretAccessKey: " + ctx.account.secretAccessKey);
   req.turk_client.GetAccountBalance({}, function(err, result) {
     logger.maybe(err);
     // {"GetAccountBalanceResponse":{"OperationRequest":{"RequestId":"9ef506b"},
@@ -307,6 +305,13 @@ R.default = function(m, req, res) {
     ctx.available_price = result.GetAccountBalanceResult.AvailableBalance;
     amulet.render(res, ['layout.mu', 'admin/default.mu'], ctx);
   });
+});
+
+
+R.default = function(m, req, res) {
+  // /accounts/[account]/[host]
+  m = req.url.match(/^\/accounts\/(\w+)\/(\w+)/);
+  res.redirect('/accounts/' + m[1] + '/' + m[2] + '/dashboard');
 };
 
 module.exports = function(universalR) {
