@@ -58,7 +58,7 @@ var Response = Backbone.Model.extend({
 });
 
 var Scene = Backbone.Model.extend({
-  // allies: Array[5], gold: "enemy", id: 1, image_id: 35, src: "enemy-35-050.jpg", width: 50
+  // allies: Array[5], truth: "enemy", id: 1, image_id: 35, src: "enemy-35-050.jpg", width: 50
   saveResponse: function(choice, correct) {
     var response = new Response({
       workerId: config.workerId,
@@ -68,7 +68,7 @@ var Scene = Backbone.Model.extend({
       scene_index: this.id,
       reliabilities: _.map(this.get('allies'), function(ally) { return ally.reliability.toFixed(4); }),
       judgments: _.pluck(this.get('allies'), 'judgment'),
-      gold: this.get('gold'),
+      truth: this.get('truth'),
       choice: choice,
       correct: correct,
       image_id: this.get('image_id'),
@@ -139,7 +139,7 @@ var SceneView = TemplateView.extend({
     'click button': function(ev) {
       var self = this;
       var choice = $(ev.target).attr('data-id');
-      var correct = (choice == this.model.get('gold'));
+      var correct = (choice == this.model.get('truth'));
       this.model.saveResponse(choice, correct);
 
       var feedback = new SceneFeedbackView({correct: correct, model: this.model});
