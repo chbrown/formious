@@ -1,52 +1,39 @@
-<h1>HIT: {{HITId}}</h1>
-<div class="review">
-  <div id="assignments"></div>
-</div>
+<div class="admin review">
+  <div id="hit"></div>
 
-<h1>Bonuses</h1>
-<div class="bonuses">
-  <table>
-    <thead><tr><th>WorkerId</th><th>BonusAmount</th><th>Reason</th><th>GrantTime</th></tr></thead>
-    <tbody>
-    {{#BonusPayments}}
-      <tr>
-        <td>{{WorkerId}}</td>
-        <td>{{BonusAmount.FormattedPrice}}</td>
-        <td>{{Reason}}</td>
-        <td>{{GrantTime}}</td>
-      </tr>
-    {{/BonusPayments}}
-    </tbody>
-  </table>
+  <h3>Download</h3>
+  <ul>
+    <li><a href="{{hit.HITId}}.csv">{{hit.HITId}}.csv</a></li>
+    <li><a href="{{hit.HITId}}.tsv">{{hit.HITId}}.tsv</a></li>
+  </ul>
+
+  <h2>Bonuses</h2>
+  <div class="bonuses">
+    <table>
+      <thead><tr><th>WorkerId</th><th>BonusAmount</th><th>Reason</th><th>GrantTime</th></tr></thead>
+      <tbody>
+      {{#BonusPayments}}
+        <tr>
+          <td>{{WorkerId}}</td>
+          <td>{{BonusAmount.FormattedPrice}}</td>
+          <td>{{Reason}}</td>
+          <td>{{GrantTime}}</td>
+        </tr>
+      {{/BonusPayments}}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Assignments</h2>
+  <div id="assignments"></div>
 </div>
 
 <script src="/static/compiled.js"></script>
 <script src="/static/templates.js"></script>
 <script>
-'use strict'; /*jslint nomen: true, indent: 2, es5: true */
-var Assignment = Backbone.Model.extend({
-  idAttribute: 'AssignmentId'
-});
-var AssignmentCollection = TemplatedCollection.extend({
-  model: Assignment,
-  url: '../Assignments',
-});
 
-var Worker = Backbone.Model.extend({
-  urlRoot: '../Workers'
-});
-// var WorkerCollection = TemplatedCollection.extend({
-//   url: '../Workers'
-// });
-
-function makeTable(cols, data) {
-  var trs = data.map(function(cells) {
-    return '<td>' + cells.join('</td><td>') + '</td>';
-  });
-  var thead = '<thead><tr><th>' + cols.join('</th><th>') + '</th></tr></thead>';
-  var tbody = '<tbody><tr>' + trs.join('</tr><tr>') + '</tr></tbody>';
-  return '<table>' + thead + tbody + '</table>';
-}
+var hit = new HIT({{{JSON.stringify(hit)}}});
+var hit_view = new HITView({model: hit, el: $('#hit')});
 
 var AssignmentView = TemplateView.extend({
   template: 'assignment.mu',
@@ -59,7 +46,7 @@ var AssignmentView = TemplateView.extend({
     'change input[name="reason"]': function(ev) {
       localStorage.reason = ev.target.value;
     },
-    'click button.load-responses': function(ev) {
+    'click button.responses': function(ev) {
       var workerId = this.model.get('WorkerId');
       var worker = new Worker({id: workerId});
       worker.fetch({

@@ -122,7 +122,6 @@ var SceneView = TemplateView.extend({
   // a scene is given exactly a model
   preRender: function(ctx) {
     this.model.set('shown', now());
-    _.extend(ctx, this.model.toJSON());
 
     // prep the next image for instant loading
     var next = this.model.next();
@@ -177,7 +176,6 @@ var SceneFeedbackView = TemplateView.extend({
 var BatchDebriefingView = TemplateView.extend({
   template: 'aircraft-batch-debriefing.mu',
   preRender: function(ctx) {
-    _.extend(ctx, this.model.toJSON());
     ctx.bonus_available = ctx.bonus > 0;
   },
   events: {

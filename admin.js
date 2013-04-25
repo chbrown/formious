@@ -52,11 +52,6 @@ R.post(/CreateHIT/, function(m, req, res) {
 R.get(/Workers\/(\w+)/, function(m, req, res) {
   User.findById(m[1], function(err, user) {
     logger.maybe(err);
-    // console.log('user', user);
-    // if (!user) {
-    // user = new User({_id: context.workerId});
-    // user.save(logger.maybe);
-    // }
     res.json(user);
   });
 });
@@ -125,11 +120,15 @@ R.post(/Assignments\/(\w+)\/GrantBonus/, function(m, req, res) {
   });
 });
 
+// HIT/show tsv
 R.get(/HITs\/(\w+)\.(c|t)sv/, function(m, req, res) {
   var HITId = m[1];
   var delimiter = m[2] == 'c' ? ',' : '\t';
   // should really peek to learn the columns
-  var columns = ['workerId', 'duration'].concat(['choice', 'correct', 'gold', 'image_id', 'prior', 'judgments', 'reliabilities', 'scene_index', 'submitted', 'task_started', 'time', 'width', 'workerId']);
+  var columns = ['workerId', 'duration'].concat(['choice', 'correct', 'gold',
+    'image_id', 'prior', 'judgments', 'reliabilities', 'scene_index',
+    'submitted', 'task_started', 'time', 'width', 'workerId']);
+  // res.setHeader('Content-Type', delimiter == ',' ? 'text/csv' : 'text/tab-separated-values');
   var csv_writer = csv().to.stream(res, {delimiter: delimiter, header: true, columns: columns});
   var params = {HITId: HITId, PageSize: 100, SortProperty: 'SubmitTime', SortDirection: 'Ascending'};
   req.turk_client.GetAssignmentsForHIT(params, function(err, assignments_result) {
@@ -159,46 +158,51 @@ R.get(/HITs\/(\w+)\.(c|t)sv/, function(m, req, res) {
   });
 });
 
+// HITs/show
 R.get(/HITs\/(\w+)/, function(m, req, res) {
   var HITId = m[1];
-  var ctx = {HITId: HITId};
+  var ctx = {};
   var params = {HITId: HITId, PageSize: 100};
   var sort_params = {SortProperty: 'SubmitTime', SortDirection: 'Ascending'};
-  req.turk_client.GetAssignmentsForHIT(__.extend({}, params, sort_params), function(err, result) {
-    logger.maybe(err);
-    var raw_assigments = result.GetAssignmentsForHITResult.Assignment || [];
-    req.turk_client.GetBonusPayments(params, function(err, result) {
-      ctx.BonusPayments = result.GetBonusPaymentsResult.BonusPayment;
+  req.turk_client.GetHIT({HITId:  HITId}, function(err, result) {
+    ctx.hit = result.HIT;
+    req.turk_client.GetAssignmentsForHIT(__.extend({}, params, sort_params), function(err, result) {
+      logger.maybe(err);
+      var raw_assigments = result.GetAssignmentsForHITResult.Assignment || [];
+      req.turk_client.GetBonusPayments(params, function(err, result) {
+        ctx.BonusPayments = result.GetBonusPaymentsResult.BonusPayment;
 
-      async.map(raw_assigments, function fillAssignment(assignment, callback) {
-        assignment.Answer = mechturk.xml2json(assignment.Answer).QuestionFormAnswers.Answer;
+        async.map(raw_assigments, function fillAssignment(assignment, callback) {
+          assignment.Answer = mechturk.xml2json(assignment.Answer).QuestionFormAnswers.Answer;
 
-        User.findById(assignment.WorkerId, function(err, user) {
-          logger.maybe(err);
+          User.findById(assignment.WorkerId, function(err, user) {
+            logger.maybe(err);
 
-          var user_hash = {error: 'Could not find user'};
-          if (user) {
-            user_hash = user.toObject();
-            user_hash.responses_length = user_hash.responses.length;
-            delete user_hash.responses;
-            // __.extend(assignment, user_hash);
-            assignment.bonus_owed = user.get('bonus_owed');
-          }
-          assignment.user_fields = __.map(user_hash, function(value, key) {
-            return {key: key, value: value};
+            var user_hash = {error: 'Could not find user'};
+            if (user) {
+              user_hash = user.toObject();
+              user_hash.responses_length = user_hash.responses.length;
+              delete user_hash.responses;
+              // __.extend(assignment, user_hash);
+              assignment.bonus_owed = user.get('bonus_owed');
+            }
+            assignment.user_fields = __.map(user_hash, function(value, key) {
+              return {key: key, value: value};
+            });
+
+            callback(null, assignment);
           });
-
-          callback(null, assignment);
+        }, function(err, assignments) {
+          logger.maybe(err);
+          ctx.assignments = assignments;
+          amulet.render(res, ['layout.mu', 'admin/hit.mu'], ctx);
         });
-      }, function(err, assignments) {
-        logger.maybe(err);
-        ctx.assignments = assignments;
-        amulet.render(res, ['layout.mu', 'admin/hit.mu'], ctx);
       });
     });
   });
 });
 
+// HITs/index
 R.get(/HITs/, function(m, req, res) {
   req.turk_client.SearchHITs({SortDirection: 'Descending', PageSize: 100}, function(err, result) {
     logger.maybe(err);
@@ -212,6 +216,7 @@ R.get(/HITs/, function(m, req, res) {
   });
 });
 
+// Unused
 R.get(/\/responses.tsv/, function(m, req, res) {
   var writeRow = function(out, cells) {
     out.write(cells.join('\t'));
@@ -274,6 +279,7 @@ R.get(/\/responses.tsv/, function(m, req, res) {
   });
 });
 
+// Unused
 R.get(/\/responses\/(\d+)\.json/, function(m, req, res) {
   var page = parseInt(m[1], 10);
   var per_page = 10;
@@ -287,6 +293,7 @@ R.get(/\/responses\/(\d+)\.json/, function(m, req, res) {
 });
 
 
+// admin/dashboard
 R.get(/dashboard/, function(m, req, res) {
   // /accounts/[account]/[host]
   m = req.url.match(/^\/accounts\/(\w+)\/(\w+)/);

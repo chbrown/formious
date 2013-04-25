@@ -36,18 +36,14 @@ table{border-collapse:collapse;border-spacing:0;}
 body{padding:10px;font:13px "Lucida Grande",Arial,sans-serif;}
 .vlabels,textarea{margin:5px 0 5px;}.vlabels label,textarea label{display:block;padding:2px 2px;}
 label[disabled]{color:#777;}
-p{margin:4px 0 4px;}
-fieldset{margin:10px 0 5px;padding:2px 8px;border:1px solid #ddd;}
-table{margin:5px 0 5px;}
-table td{padding:2px 12px 2px 2px;vertical-align:top;}
-h2,h3,h4{margin:0.5em 0;}
-button{margin:5px 10px;}
-.demo{background-color:#e2e2e2;}.demo legend{background-color:white;padding:1px 3px;border:1px solid silver;}
+.admin h2{border-top:1px solid #BBB;}
 .admin label{display:block;font-size:80%;margin:8px 0 2px;}
-.admin input{font-size:80%;}
-.review h2{display:inline-block;border-top:1px solid gray;}
-.review .times,.review .ids{font-size:90%;}
-.review .details{font-size:90%;}.review .details dfn{display:inline-block;font-weight:bold;font-style:normal;padding-right:5px;}
+.admin fieldset{margin:0 0 10px 0;}.admin fieldset button{margin:10px 10px 0 0;}
+.review .assignment{margin:20px 0;padding:10px;border:1px dotted #ddd;}.review .assignment>h3{margin:0 0 5px 0;}
+.review .assignment table.keyval td:first-child{width:130px;}
+.review table{margin:0 10px;}.review table th{text-align:left;}
+.review table td{font-size:90%;padding-right:5px;}
+.review table.keyval td:first-child{font-weight:bold;}
 .review .status span{font-size:110%;font-weight:bold;}.review .status span.Submitted{color:#CCC;}
 .review .status span.Approved{color:darkgreen;}
 .review .status span.Rejected{color:darkred;}

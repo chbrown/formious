@@ -7,7 +7,7 @@
   {{/}}
   </ul>
 
-  <h2>Hosts</h2>
+  <h3>Hosts</h3>
   <ul>
   {{#aws_hosts}}
     <li><a href="/accounts/{{account_id}}/{{id}}/dashboard">{{id}}</a> ({{url}})
@@ -17,10 +17,17 @@
   <h3>Available Funds</h3>
   {{available_price.FormattedPrice}}
 
-  <h3>Create Hit</h3>
+  <h2>HITs</h2>
+  <ul>
+    <li><a href="HITs">View HITs</a></li>
+  </ul>
+
   <form method="POST" action="CreateHIT" id="create">
-    <div class="inputs"></div>
-    <button>Create HIT</button>
+    <fieldset>
+      <legend>Create Hit</legend>
+      <div class="inputs"></div>
+      <button>Create HIT</button>
+    </fieldset>
   </form>
 
 </div>

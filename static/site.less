@@ -18,66 +18,83 @@ body {
 label[disabled] {
   color: #777;
 }
-p {
-  margin: 4px 0 4px;
-}
-fieldset {
-  margin: 10px 0 5px;
-  padding: 2px 8px;
-  border: 1px solid #ddd;
-}
-table {
-  margin: 5px 0 5px;
-}
-table td {
-  padding: 2px 12px 2px 2px;
-  vertical-align: top;
-}
 
-h2, h3, h4 {
-  margin: 0.5em 0;
-}
+// .aircraft {
+//   p {
+//     margin: 4px 0 4px;
+//   }
+//   fieldset {
+//     margin: 10px 0 5px;
+//     padding: 2px 8px;
+//     border: 1px solid #ddd;
+//   }
+//   table {
+//     margin: 5px 0 5px;
+//   }
+//   table td {
+//     padding: 2px 12px 2px 2px;
+//     vertical-align: top;
+//   }
 
-button {
-  margin: 5px 10px;
-}
+//   h2, h3, h4 {
+//     margin: 0.5em 0;
+//   }
 
-.demo {
-  background-color: #e2e2e2;
-  legend {
-    background-color: white;
-    padding: 1px 3px;
-    border: 1px solid silver;
-  }
-}
+//   button {
+//     margin: 5px 10px;
+//   }
+// }
+
+// .demo {
+//   background-color: #e2e2e2;
+//   legend {
+//     background-color: white;
+//     padding: 1px 3px;
+//     border: 1px solid silver;
+//   }
+// }
 
 .admin {
+  h2 {
+    border-top: 1px solid #BBB;
+  }
   label {
     display: block;
     font-size: 80%;
     margin: 8px 0 2px;
   }
-  input {
-    font-size: 80%;
+  fieldset {
+    margin: 0 0 10px 0;
+    button {
+      margin: 10px 10px 0 0;
+    }
   }
 }
 
 .review {
-  h2 {
-    display: inline-block;
-    border-top: 1px solid gray;
+  .assignment {
+    margin: 20px 0;
+    padding: 10px;
+    border: 1px dotted #ddd;
+    & > h3 {
+      margin: 0 0 5px 0;
+    }
+    table.keyval td:first-child {
+      width: 130px;
+    }
   }
-  .times, .ids {
-    font-size: 90%;
-  }
-  .details {
-    font-size: 90%;
-    dfn {
-      display: inline-block;
-      font-weight: bold;
-      font-style: normal;
+  table {
+    margin: 0 10px;
+    th {
+      text-align: left;
+    }
+    td {
+      font-size: 90%;
       padding-right: 5px;
     }
+  }
+  table.keyval td:first-child {
+    font-weight: bold;
   }
   .status {
     span {
