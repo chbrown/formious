@@ -126,8 +126,8 @@ R.get(/HITs\/(\w+)\.(c|t)sv/, function(m, req, res) {
   var delimiter = m[2] == 'c' ? ',' : '\t';
   // should really peek to learn the columns
   var columns = ['workerId', 'duration'].concat(['choice', 'correct', 'truth',
-    'image_id', 'prior', 'judgments', 'reliabilities', 'scene_index',
-    'submitted', 'task_started', 'time', 'width', 'workerId']);
+    'image_id', 'prior', 'judgments', 'reliabilities', 'batch_index', 'scene_index',
+    'submitted', 'task_started', 'time', 'width', 'workerId', 'version']);
   // res.setHeader('Content-Type', delimiter == ',' ? 'text/csv' : 'text/tab-separated-values');
   var csv_writer = csv().to.stream(res, {delimiter: delimiter, header: true, columns: columns});
   var params = {HITId: HITId, PageSize: 100, SortProperty: 'SubmitTime', SortDirection: 'Ascending'};
@@ -231,6 +231,7 @@ R.get(/\/responses.tsv/, function(m, req, res) {
     'task_started',
     'prior',
     'scene_index',
+    'batch_index',
     'reliability1',
     'reliability2',
     'reliability3',
