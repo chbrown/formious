@@ -13,12 +13,11 @@ function makeTable(cols, data) {
 // requires Backbone and Handlebards to be loaded
 var TemplateView = Backbone.View.extend({
   initialize: function(opts) {
-    this.render(opts || {});
-  },
-  preRender: function(ctx) {
+    // prePreRender
     if (this.model) {
-      _.extend(ctx, this.model.toJSON());
+      _.extend(opts, this.model.toJSON());
     }
+    this.render(opts || {});
   },
   render: function(ctx) {
     if (this.preRender) this.preRender(ctx);
