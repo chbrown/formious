@@ -46,7 +46,7 @@ var config = {
   workerId: "{{workerId}}",
   host: "{{host}}",
   hitId: "{{hitId}}",
-  version: 'v05a'
+  version: 'v05b'
 };
 // (function() { return ...; })();
 var raw_batches = {{{JSON.stringify(batches)}}};
