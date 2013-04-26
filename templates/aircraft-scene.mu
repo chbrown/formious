@@ -19,7 +19,7 @@
       </table>
 
       <h3>Your decision:</h3>
-      <div>
+      <div class="spaced-buttons">
         <button data-id="enemy">Enemy</button>
         <button data-id="friend">Pass</button>
       </div>

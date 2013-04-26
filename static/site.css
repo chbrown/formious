@@ -36,6 +36,7 @@ table{border-collapse:collapse;border-spacing:0;}
 body{padding:10px;font:13px "Lucida Grande",Arial,sans-serif;}
 .vlabels,textarea{margin:5px 0 5px;}.vlabels label,textarea label{display:block;padding:2px 2px;}
 label[disabled]{color:#777;}
+.spaced-buttons button{margin:5px;}
 .admin h2{border-top:1px solid #BBB;}
 .admin label{display:block;font-size:80%;margin:8px 0 2px;}
 .admin fieldset{margin:0 0 10px 0;}.admin fieldset button{margin:10px 10px 0 0;}

@@ -206,7 +206,7 @@ var BatchDebriefingView = TemplateView.extend({
       this.$el.replaceWith(scene_view.$el);
     }
     else {
-      var conclusion_view = new ConclusionView();
+      var conclusion_view = new ConclusionView({model: this.model});
       this.$el.replaceWith(conclusion_view.$el);
     }
   }
@@ -215,8 +215,15 @@ var BatchDebriefingView = TemplateView.extend({
 var ConclusionView = TemplateView.extend({
   template: 'aircraft-conclusion.mu',
   preRender: function(ctx) {
-    _.extend(ctx, {duration: now() - config.task_started}, config);
-    console.log("conclusion", ctx);
+    var allies = this.model.scenes.first().get('allies');
+    var ally_names = allies.map(function(ally, i) {
+      var connector = (i + 1) == allies.length ? 'and ' : '';
+      return connector + ally.title + ' ' + ally.name;
+    });
+    _.extend(ctx, config, {
+      duration: now() - config.task_started,
+      all_allies_string: ally_names.join(', ')
+    });
   },
 });
 
