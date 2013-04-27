@@ -11,9 +11,9 @@
       <h3>Allies:</h3>
       <table class="allies">
         {{#allies}}
-        <tr>
+        <tr class="{{judgment}}">
           <td>{{title}}&nbsp;{{name}}:</td>
-          <td><span class="judgment {{judgment}}">{{judgment}}</span></td>
+          <td><span>{{judgment}}</span></td>
         </tr>
         {{/allies}}
       </table>

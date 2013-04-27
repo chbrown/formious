@@ -10,15 +10,18 @@
   .allies td {
     padding: 8px 4px;
   }
-  .allies .judgment {
+  .allies span {
     font-weight: bold;
     text-transform: capitalize;
   }
-  .allies .judgment.friend {
+  .allies .friend span {
     color: #00C;
   }
-  .allies .judgment.enemy {
+  .allies .enemy span {
     color: #C00;
+  }
+  .allies .pass {
+    visibility: hidden;
   }
 </style>
 
