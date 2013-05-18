@@ -24,7 +24,6 @@
   "devDependencies": {
     "grunt": "*",
     "grunt-contrib-handlebars": "git://github.com/chbrown/grunt-contrib-handlebars.git",
-    "grunt-contrib-uglify": "*",
-    "glob": "*"
+    "grunt-contrib-uglify": "*"
   }
 }

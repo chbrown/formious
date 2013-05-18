@@ -1,5 +1,4 @@
 'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
-var child_process = require('child_process');
 
 module.exports = function(grunt) {
   grunt.registerTask('update_submodules', function() {
