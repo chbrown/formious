@@ -9,12 +9,13 @@ var Cookies = require('cookies');
 var Router = require('regex-router');
 var logger = require('./logger');
 var models = require('./models');
+// var wrappers = require('wrappers');
 var User = models.User;
 
 amulet.set({minify: true, root: path.join(__dirname, 'layouts')});
 
 Cookies.prototype.defaults = function() {
-  var expires = new Date(Date.now() + (31 * 24 * 60 * 60 * 1000)); // 1 month
+  var expires = new Date(Date.now() + 31*86400 *1000); // 1 month
   return {expires: expires};
 };
 
