@@ -1,22 +1,7 @@
 'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
-var glob = require('glob');
 var child_process = require('child_process');
 
 module.exports = function(grunt) {
-
-  grunt.registerMultiTask('handlebars', 'Precompile Handlebars template', function() {
-    var done = this.async();
-    var opts = this.data;
-    var handlebars = __dirname + '/node_modules/.bin/handlebars';
-    glob(opts.src + '/*.' + (opts.ext || 'handlebars'), function (err, matches) {
-      var args = [].concat(['-m'], matches, ['-f', opts.dest]);
-      grunt.util.spawn({cmd: handlebars, args: args}, function (err, result, code) {
-        if (err) grunt.fail.fatal(result);
-        done();
-      });
-    });
-  });
-
   grunt.registerTask('update_submodules', function() {
     var done = this.async();
     var update_args = ['submodule', 'update', '--init', '--recursive', '--merge'];
@@ -66,7 +51,7 @@ module.exports = function(grunt) {
     }
   });
 
-  // grunt.loadNpmTasks('grunt-handlebars');
+  grunt.loadNpmTasks('grunt-contrib-handlebars');
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
   // Load the plugin that provides the 'uglify' task.

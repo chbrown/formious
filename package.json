@@ -7,24 +7,24 @@
   "author": "Christopher Brown <io@henrian.com>",
   "dependencies": {
     "amulet": "git://github.com/chbrown/amulet.git",
-    "cookies": "git://github.com/chbrown/cookies.git",
-    "mechturk": "git://github.com/chbrown/mechturk.git",
-    "regex-router": "*",
-    "optimist": "*",
-    "underscore": "*",
-    "js-yaml": "*",
-    "mongoose": "*",
-    "sprintf": "*",
-    "csv": "*",
-    "winston": "*",
     "async": "*",
+    "cookies": "git://github.com/chbrown/cookies.git",
+    "csv": "*",
     "formidable": "*",
-    "moment": "git://github.com/chbrown/moment.git#develop"
+    "js-yaml": "*",
+    "mechturk": "git://github.com/chbrown/mechturk.git",
+    "moment": "git://github.com/chbrown/moment.git#develop",
+    "mongoose": "*",
+    "optimist": "*",
+    "regex-router": "*",
+    "sprintf": "*",
+    "underscore": "*",
+    "winston": "*"
   },
   "devDependencies": {
     "grunt": "*",
+    "grunt-contrib-handlebars": "git://github.com/chbrown/grunt-contrib-handlebars.git",
     "grunt-contrib-uglify": "*",
-    "handlebars": "*",
     "glob": "*"
   }
 }
