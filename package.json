@@ -27,7 +27,7 @@
     "grunt-contrib-handlebars": "git://github.com/chbrown/grunt-contrib-handlebars.git",
     "grunt-contrib-uglify": "*"
   },
-  "staticPattern": "",
+  "staticPattern": "static/lib/{file}",
   "staticDependencies": {
     "json2": "*",
     "underscore": "*",
@@ -35,6 +35,6 @@
     "backbone": "*",
     "handlebars": "*",
     "jquery-noty": "*",
-    "jquery-chbrown": "git://github.com/chbrown/static-lib.git"
+    "jquery-plugins": "git://github.com/chbrown/jquery-plugins.git"
   }
 }
