@@ -11,6 +11,7 @@
     "cookies": "git://github.com/chbrown/cookies.git",
     "csv": "*",
     "formidable": "*",
+    "http-enhanced": "*",
     "js-yaml": "*",
     "mechturk": "git://github.com/chbrown/mechturk.git",
     "moment": "git://github.com/chbrown/moment.git#develop",
@@ -25,5 +26,15 @@
     "grunt": "*",
     "grunt-contrib-handlebars": "git://github.com/chbrown/grunt-contrib-handlebars.git",
     "grunt-contrib-uglify": "*"
+  },
+  "staticPattern": "",
+  "staticDependencies": {
+    "json2": "*",
+    "underscore": "*",
+    "jquery": "*",
+    "backbone": "*",
+    "handlebars": "*",
+    "jquery-noty": "*",
+    "jquery-chbrown": "git://github.com/chbrown/static-lib.git"
   }
 }

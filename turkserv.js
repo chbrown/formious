@@ -4,7 +4,7 @@
 var path = require('path');
 var amulet = require('amulet');
 var formidable = require('formidable');
-var http = require('./http-enhanced');
+var http = require('http-enhanced');
 var Cookies = require('cookies');
 var Router = require('regex-router');
 var logger = require('./logger');
@@ -73,10 +73,9 @@ R.post(/\/mturk\/externalSubmit/, function(m, req, res) {
 
 var argv = require('optimist').default({port: 1451, hostname: '127.0.0.1'}).argv;
 http.createServer(function(req, res) {
-  req.data = '';
-  req.on('data', function(chunk) { req.data += chunk; });
+  req.saveData();
   req.cookies = new Cookies(req, res);
-  logger.info(req.method +  ': ' + req.url);
+  // logger.info(req.method +  ': ' + req.url);
 
   var started = Date.now();
   res.end = function() {
