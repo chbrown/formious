@@ -11,8 +11,9 @@ var random = require('./random');
 var User = require('./models').User;
 var logger = require('./logger');
 
-var names = ['Banks', 'Jacob', 'Kimball', 'Marin', 'Parker', 'Riedel', 'Tannahill', 'Williams'];
-var batches_per_HIT = 3;
+var names = ['Banks', 'Barkley', 'Bowers', 'Dean', 'Frederick', 'Henderson',
+  'Jacob', 'Kimball', 'Malackany', 'Malcom', 'Marin', 'Parker', 'Riedel',
+  'Tannahill', 'Thibault', 'Wakerfield', 'Williams'];
 
 var digit_segments = [
   [1, 1, 1, 0, 1, 1, 1], // 0
@@ -89,12 +90,13 @@ module.exports = function(R) {
     };
     req.cookies.set('workerId', context.workerId);
 
-    var number_of_allies = parseInt(urlObj.query.allies, 10) || 5;
-    var scenes_per_batch = parseInt(urlObj.query.digits, 10) || 5; // i.e., digits per screen
+    var batches_per_HIT = parseInt(urlObj.query.batches, 10) || 5;
+    var scenes_per_batch = parseInt(urlObj.query.scenes, 10) || 4; // i.e., digits per screen
+    var allies_per_scene = parseInt(urlObj.query.allies, 10) || 5;
 
     // a preview request will be the same, minus workerId and turkSubmitTo,
     // and assignmentId will always then be 'ASSIGNMENT_ID_NOT_AVAILABLE'
-    var allies = _.shuffle(names).slice(0, number_of_allies).map(function(name) {
+    var allies = _.shuffle(names).slice(0, allies_per_scene).map(function(name) {
       return {
         title: 'Sgt.',
         name: name,
