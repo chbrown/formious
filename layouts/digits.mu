@@ -28,8 +28,8 @@
 
 <h4><i>Scenario:</i></h4>
 <p>Your task is to disarm a bomb, but to do so, you must read the deactivation code from a broken digital display.
-Your colleagues on the bomb squad are disarming bombs in other countries, but <i>all the bombs have the same code</i>,
-though the displays that each of your colleagues see may be more or less broken than the one you have access to.
+Your colleagues on the bomb squad are disarming bombs in nearby locations, but <i>all the bombs have the same code</i>.
+The displays that each of your colleagues see may be more or less broken than the one you have access to.
 <p>These are trying times. You will have to disarm more than one bomb.
 Luckily, you and your allies are operating remotely; while lives depend on your diligence, yours does not,
 and you will receive feedback on whether your guess was correct.

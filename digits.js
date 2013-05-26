@@ -11,25 +11,8 @@ var random = require('./random');
 var User = require('./models').User;
 var logger = require('./logger');
 
-
-// function allyJudgment(reliability, truth, prior_on_enemy) {
-//   // var prior_on_enemy = 1 - prior_on_friend;
-//   // var prior_on_truth = truth == 'enemy' ? prior_on_enemy : prior_on_friend;
-//   // var ally_is_correct = Math.random() < reliability + (1-reliability)*prior_on_truth;
-//   // var other = truth == 'enemy' ? 'pass' : 'enemy';
-//   // return ally_is_correct ? truth : other;
-//   if (truth == 'enemy') {
-//
-//   }
-//   else {
-//     return Math.random() < reliability + (1 - reliability)*(1 - prior_on_enemy) ? 'pass' : 'enemy';
-//   }
-// }
-
 var names = ['Banks', 'Jacob', 'Kimball', 'Marin', 'Parker', 'Riedel', 'Tannahill', 'Williams'];
-var number_of_allies = 7;
-var scenes_per_batch = 5; // i.e., digits per screen
-var batches_per_HIT = 2;
+var batches_per_HIT = 3;
 
 var digit_segments = [
   [1, 1, 1, 0, 1, 1, 1], // 0
@@ -78,7 +61,7 @@ function makeScene(allies, number_of_degradations) {
   };
 }
 
-function makeBatch(allies) {
+function makeBatch(allies, scenes_per_batch) {
   var scenes = _.range(scenes_per_batch).map(function(scene_index) {
     var number_of_degradations = Math.random() * 5 | 0;
     var scene = makeScene(allies, number_of_degradations);
@@ -106,6 +89,9 @@ module.exports = function(R) {
     };
     req.cookies.set('workerId', context.workerId);
 
+    var number_of_allies = parseInt(urlObj.query.allies, 10) || 5;
+    var scenes_per_batch = parseInt(urlObj.query.digits, 10) || 5; // i.e., digits per screen
+
     // a preview request will be the same, minus workerId and turkSubmitTo,
     // and assignmentId will always then be 'ASSIGNMENT_ID_NOT_AVAILABLE'
     var allies = _.shuffle(names).slice(0, number_of_allies).map(function(name) {
@@ -124,7 +110,7 @@ module.exports = function(R) {
       }
 
       context.batches = _.range(batches_per_HIT).map(function(batch_index) {
-        var batch = makeBatch(allies);
+        var batch = makeBatch(allies, scenes_per_batch);
         batch.id = batch_index + 1;
         return batch;
       });
