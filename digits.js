@@ -62,8 +62,8 @@ function makeScene(allies, number_of_degradations) {
 }
 
 function makeBatch(allies, scenes_per_batch) {
+  var number_of_degradations = Math.random() * 5 | 0;
   var scenes = _.range(scenes_per_batch).map(function(scene_index) {
-    var number_of_degradations = Math.random() * 5 | 0;
     var scene = makeScene(allies, number_of_degradations);
     scene.id = scene_index + 1;
     return scene;

@@ -78,7 +78,7 @@ R.post(/^\/mturk\/externalSubmit/, function(m, req, res) {
 
 R.any(/^\/responses/, function(m, req, res) {
   var workerId = (req.cookies.get('workerId') || 'none').replace(/\W+/g, '');
-  logger.info('Saving response: ', workerId);
+  logger.info('Saving response.', {workerId: workerId});
   req.on('end', function() {
     // need to check this json parse
     var response = JSON.parse(req.data);
