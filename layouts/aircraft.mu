@@ -42,6 +42,7 @@ ability, given their positions.
 
 <script src="/static/compiled.js"></script>
 <script src="/static/templates.js"></script>
+<script src="/static/local.js"></script>
 <script>
 var config = {
   task_started: {{task_started}},
@@ -155,7 +156,7 @@ var SceneView = TemplateView.extend({
 });
 
 var SceneFeedbackView = TemplateView.extend({
-  template: 'aircraft-scene-feedback.mu',
+  template: 'feedback.mu',
   postRender: function(ctx) {
     var self = this;
     setTimeout(function() {
@@ -186,7 +187,7 @@ var BatchDebriefingView = TemplateView.extend({
       var choice = $(ev.target).attr('data-id');
       var bonus = this.model.get('bonus');
       if (bonus > 0) {
-        $.post('/request-bonus', {amount: bonus, assignmentId: config.assignmentId}, 'json')
+        $.post('/addbonus', {amount: bonus, assignmentId: config.assignmentId}, 'json')
         .always(function(data, textStatus, jqXHR) {
           noty({text: data.message, type: 'information', layout: 'bottomRight', timeout: 5000});
         });
@@ -231,7 +232,7 @@ var ConclusionView = TemplateView.extend({
 });
 
 var ConsentView = TemplateView.extend({
-  template: 'aircraft-consent.mu',
+  template: 'consent.mu',
   events: {
     'click button': 'next'
   },

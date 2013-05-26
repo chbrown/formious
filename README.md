@@ -82,15 +82,66 @@ The two planes are Messerschmitts and Spitfires, particularly, models taken from
 
 ### Debug shortcut:
 
-// for (var x in _.range(47)) ;
+    // for (var x in _.range(47)) ;
 
-cd(frames[0]) // Firefox
+    cd(frames[0]) // Firefox
 
-_.range(1, 7).forEach(function(i) {
-  console.log('Shortening batch#', i);
-  var scenes = batch_collection.get(i).scenes;
-  scenes.remove(scenes.slice(3));
-});
-batch_collection.remove(batch_collection.slice(1));
+    _.range(1, 7).forEach(function(i) {
+      console.log('Shortening batch#', i);
+      var scenes = batch_collection.get(i).scenes;
+      scenes.remove(scenes.slice(3));
+    });
+    batch_collection.remove(batch_collection.slice(1));
 
-feedback_duration = 100
+    feedback_duration = 100
+
+### Quick MD5
+
+    var crypto = require('crypto');
+    function md5(string) {
+      var md5sum = crypto.createHash('md5');
+      md5sum.update(string);
+      return md5sum.digest('hex');
+    }
+
+#### Some other snippets:
+
+    function repeat(item, count) {
+      var list = [];
+      for (var i = 0; i < count; i++)
+        list.push(item);
+      return list;
+    }
+    function extend(list, other_list) {
+      return list.push.apply(list, other_list);
+    }
+
+#### Not yet relevant, since MTurk doesn't allow bonuses during incomplete assignments.
+
+    if (unpaid >= unpaid_minimum) {
+      var turk_client = mechturk_params.mechturk('sandbox', 'ut', {logger: logger});
+      var params = {
+        AssignmentId: fields.assignmentId,
+        WorkerId: workerId,
+        BonusAmount: new mechturk.models.Price(amount),
+        Reason: 'Batch completion'
+      };
+      turk_client.GrantBonus(params, function(err, result) {
+        if (err) {
+          logger.error(err);
+          res.json({success: false, message: 'Error awarding bonus. ' + err.toString()});
+        }
+        else {
+          var result_string = util.inspect(result, {showHidden: true, depth: 5});
+          logger.info('Bonus of ' + amount + ' granted to worker: ' + workerId + '. ' + result_string);
+          user.set('paid', user.responses.length);
+          user.save(logger.maybe);
+          res.json({success: true, message: 'Bonus awarded: $' + amount, amount: amount});
+        }
+      });
+
+    }
+    else {
+      var message = 'Not yet eligible for bonus. Must answer at least ' + (unpaid_minimum - unpaid) + ' more hits.';
+      res.json({success: false, message: message, unpaid: unpaid});
+    }

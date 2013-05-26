@@ -4,8 +4,4 @@
 <title>Turkserv</title>
 <script>var started = new Date();</script>
 <link href="/static/site.css" rel="stylesheet" type="text/css" />
-<div id="container">
-  <div id="content">
-    {{<yield}}
-  </div>
-</div>
+{{<yield}}

@@ -1,12 +1,15 @@
-@import 'lib/css/normalize';
-
-.center {
-  text-align: center;
-}
+@import 'lib/normalize';
+.left {text-align: left;}
+.center {text-align: center;}
+.right {text-align: right;}
+// .auto-hmargin {margin: 0 auto;}
 
 body {
   padding: 10px;
   font: 13px "Lucida Grande", Arial, sans-serif;
+}
+h1, h2, h3, h4 {
+  margin: 0.75em 0;
 }
 .vlabels, textarea {
   margin: 5px 0 5px;
@@ -22,6 +25,10 @@ label[disabled] {
   button {
     margin: 5px;
   }
+}
+.focus {
+  box-shadow: 0 0 6px rgba(81, 203, 238, 1);
+  // border: 1px solid rgba(81, 203, 238, 1);
 }
 
 // .aircraft {
@@ -39,10 +46,6 @@ label[disabled] {
 //   table td {
 //     padding: 2px 12px 2px 2px;
 //     vertical-align: top;
-//   }
-
-//   h2, h3, h4 {
-//     margin: 0.5em 0;
 //   }
 
 //   button {

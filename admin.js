@@ -6,9 +6,8 @@ var logger = require('./logger');
 var amulet = require('amulet');
 var async = require('async');
 var formidable = require('formidable');
-var __ = require('underscore');
+var _ = require('underscore');
 var moment = require('moment');
-var util = require('./util');
 var Router = require('regex-router');
 var models = require('./models');
 var User = models.User;
@@ -146,7 +145,7 @@ R.get(/HITs\/(\w+)\.(c|t)sv/, function(m, req, res) {
         if (err) return callback(err);
         var responses = (user ? user.responses : null) || [];
         responses.forEach(function(response) {
-          __.extend(response, assignment_answers);
+          _.extend(response, assignment_answers);
           csv_writer.write(response);
         });
         callback(null);
@@ -166,7 +165,7 @@ R.get(/HITs\/(\w+)/, function(m, req, res) {
   var sort_params = {SortProperty: 'SubmitTime', SortDirection: 'Ascending'};
   req.turk_client.GetHIT({HITId:  HITId}, function(err, result) {
     ctx.hit = result.HIT;
-    req.turk_client.GetAssignmentsForHIT(__.extend({}, params, sort_params), function(err, result) {
+    req.turk_client.GetAssignmentsForHIT(_.extend({}, params, sort_params), function(err, result) {
       logger.maybe(err);
       var raw_assigments = result.GetAssignmentsForHITResult.Assignment || [];
       req.turk_client.GetBonusPayments(params, function(err, result) {
@@ -183,10 +182,9 @@ R.get(/HITs\/(\w+)/, function(m, req, res) {
               user_hash = user.toObject();
               user_hash.responses_length = user_hash.responses.length;
               delete user_hash.responses;
-              // __.extend(assignment, user_hash);
               assignment.bonus_owed = user.get('bonus_owed');
             }
-            assignment.user_fields = __.map(user_hash, function(value, key) {
+            assignment.user_fields = _.map(user_hash, function(value, key) {
               return {key: key, value: value};
             });
 
@@ -285,10 +283,7 @@ R.get(/\/responses\/(\d+)\.json/, function(m, req, res) {
   var page = parseInt(m[1], 10);
   var per_page = 10;
   User.find({responses: {$ne: []}}).skip(page*per_page).limit(per_page).sort('-created').exec(function(err, users) {
-    var responses = [];
-    users.forEach(function(user) {
-      util.extend(responses, user.responses);
-    });
+    var responses = [].concat(_.pluck(users, 'responses'));
     res.json(responses);
   });
 });

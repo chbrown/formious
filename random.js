@@ -1,9 +1,6 @@
-'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
-var crypto = require('crypto');
-var util = require('util');
-var __ = require('underscore');
+'use strict'; /*jslint node: true, es5: true, indent: 2 */
 
-function shuffle(list) {
+exports.shuffle = function(list) {
   // careful! shuffles in place (and returns given list)
   // for(var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
   for (var i, tmp, j = list.length - 1; j > 0; j--) {
@@ -13,9 +10,9 @@ function shuffle(list) {
     list[j] = tmp;
   }
   return list;
-}
+};
 
-function sample(list, num) {
+exports.sample = function(list, num) {
   // with replacement.
   if (num === undefined) {
     return list[(Math.random() * list.length) | 0];
@@ -27,36 +24,10 @@ function sample(list, num) {
     }
     return samples;
   }
-}
+};
 
-function extend(list, other_list) {
-  return list.push.apply(list, other_list);
-}
-
-function repeat(item, count) {
-  var list = [];
-  for (var i = 0; i < count; i++)
-    list.push(item);
-  return list;
-}
-
-function md5(string) {
-  var md5sum = crypto.createHash('md5');
-  md5sum.update(string);
-  return md5sum.digest('hex');
-}
-
-function randRange(min, max) {
+exports.range = function(min, max) {
   if (min === undefined && max === undefined) { min = 0; max = 1; }
   if (max === undefined) { max = min; min = 0; }
   return Math.random() * (max - min) + min;
-}
-
-module.exports = __.extend({
-  shuffle: shuffle,
-  sample: sample,
-  extend: extend,
-  repeat: repeat,
-  md5: md5,
-  randRange: randRange,
-}, util);
+};

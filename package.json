@@ -20,12 +20,13 @@
     "regex-router": "*",
     "sprintf": "*",
     "underscore": "*",
-    "winston": "*"
+    "winston": "0.6.x"
   },
   "devDependencies": {
     "grunt": "*",
     "grunt-contrib-handlebars": "git://github.com/chbrown/grunt-contrib-handlebars.git",
-    "grunt-contrib-uglify": "*"
+    "grunt-contrib-uglify": "*",
+    "grunt-contrib-watch": "*"
   },
   "staticPattern": "static/lib/{file}",
   "staticDependencies": {
@@ -34,6 +35,7 @@
     "jquery": "*",
     "backbone": "*",
     "handlebars": "*",
+    "normalize": "*",
     "jquery-noty": "*",
     "jquery-plugins": "git://github.com/chbrown/jquery-plugins.git"
   }

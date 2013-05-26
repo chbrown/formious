@@ -3,21 +3,17 @@
   <input type="hidden" name="turkerId" value="{{workerId}}" />
   <input type="hidden" name="duration" value="{{duration}}" />
 
-  <h3>Comments</h3>
+  <p>Comments are optional, but much appreciated.</p>
+
   <label>
-    <div>Did you find one of the allies more useful than others?
-      Please discuss any overall thoughts on the allies: {{all_allies_string}}.</div>
+    <div>Did you find one of your colleagues more useful than others?
+      Please discuss whether they ({{all_allies_string}}) were helpful or not.</div>
     <textarea rows="4" cols="80" name="allies_comments"></textarea>
   </label>
 
   <label>
-    <div>What characterized enemy planes?</div>
-    <textarea rows="2" cols="80" name="enemy_comments"></textarea>
-  </label>
-
-  <label>
-    <div>What characterized friendly planes?</div>
-    <textarea rows="2" cols="80" name="friendly_comments"></textarea>
+    <div>What strategy worked the best?</div>
+    <textarea rows="2" cols="80" name="strategy_comments"></textarea>
   </label>
 
   <label>

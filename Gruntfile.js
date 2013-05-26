@@ -1,58 +1,41 @@
 'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
-
 module.exports = function(grunt) {
-  grunt.registerTask('update_submodules', function() {
-    var done = this.async();
-    var update_args = ['submodule', 'update', '--init', '--recursive', '--merge'];
-    var pull_args = ['submodule', 'foreach', 'git', 'pull'];
-    grunt.util.spawn({cmd: 'git', args: update_args}, function (error1, result, code) {
-      grunt.util.spawn({cmd: 'git', args: pull_args}, function (error2, result, code) {
-        if (error1 || error2) {
-          grunt.fail.fatal(result);
-        }
-        else {
-          done();
-        }
-      });
-    });
-  });
-
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     handlebars: {
       all: {
-        src: 'templates',
-        ext: 'mu',
+        glob: 'templates/*.mu',
         dest: 'static/templates.js'
       }
     },
     uglify: {
       all: {
         options: {
-          mangle: false
+          mangle: false,
+          beautify: true
         },
         files: {
           'static/compiled.js': [
-            'static/lib/js/json2.js',
-            'static/lib/js/underscore.js',
-            'static/lib/js/jquery.js',
-            'static/lib/js/backbone.js',
-            'static/lib/js/jquery.flags.js',
-            'static/lib/js/handlebars.js',
-            'static/lib/js/jquery.noty.js',
-            'static/lib/js/jquery.noty-layouts.js',
-            'static/lib/js/jquery.noty-default-theme.js',
-            // 'static/templates.js',
-            'static/local.js',
+            'static/lib/json2.js',
+            'static/lib/underscore.js',
+            'static/lib/jquery.js',
+            'static/lib/backbone.js',
+            'static/lib/jquery.flags.js',
+            'static/lib/handlebars.js',
+            'static/lib/jquery-noty.js',
+            'static/lib/jquery-noty.theme.js',
+            'static/lib/layouts/top.js', // the required one
+            'static/lib/layouts/bottomRight.js',
+            'static/templates.js',
+            // 'static/local.js',
           ]
         }
       }
     }
   });
 
+  // grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-handlebars');
   grunt.loadNpmTasks('grunt-contrib-uglify');
-
-  // Load the plugin that provides the 'uglify' task.
-  grunt.registerTask('default', ['handlebars', 'uglify', 'update_submodules']);
+  grunt.registerTask('default', ['handlebars', 'uglify']);
 };

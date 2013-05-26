@@ -1,8 +1,7 @@
 <div class="emoticon">
-  {{#correct}}
+  {{#if correct}}
     <img src="/static/smile.gif" alt="☺" />
-  {{/correct}}
-  {{^correct}}
+  {{else}}
     <img src="/static/frown.gif" alt="☹" />
-  {{/correct}}
+  {{/if}}
 </div>
