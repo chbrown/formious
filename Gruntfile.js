@@ -11,8 +11,8 @@ module.exports = function(grunt) {
     uglify: {
       all: {
         options: {
-          mangle: false,
-          beautify: true
+          // beautify: true,
+          mangle: false
         },
         files: {
           'static/compiled.js': [
