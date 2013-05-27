@@ -52,11 +52,13 @@ var assignmentId = "{{assignmentId}}";
 var config = {
   task_started: {{task_started}},
   host: '{{host}}',
+  batches_per_HIT: {{batches_per_HIT}},
+  scenes_per_batch: {{scenes_per_batch}},
+  allies_per_scene: {{allies_per_scene}},
+  feedback_duration: {{feedback_duration}},
   workerId: '{{workerId}}',
   version: 'digits_v1'
 };
-
-var feedback_duration = 2000;
 
 var Scene = Backbone.Model.extend({
   // allies: Array[5], truth: "enemy", id: 1, image_id: 35, src: "enemy-35-050.jpg", width: 50
@@ -71,7 +73,7 @@ var Scene = Backbone.Model.extend({
       time: now() - this.get('shown'),
     });
     var response = new Response(attrs);
-    console.log('response', response.isNew());
+    // console.log('response', response.isNew());
     response.save();
   },
   next: function() {
@@ -111,7 +113,11 @@ var BatchView = TemplateView.extend({
       $digits.append(scene_view.el);
       return scene_view;
     });
-    $digits.find('input:first').prop('autofocus', true);
+    var first_scene_view = this.scene_views[0];
+    setTimeout(function() {
+      console.log(first_scene_view.$('input').length);
+      first_scene_view.$('input').focus();
+    }, 100);
     // purely aesthetic. never shrink!
     setTimeout(function() {
       var scene_size = $('.container').measureBox();
@@ -161,7 +167,7 @@ var SceneView = TemplateView.extend({
   postRender: function(ctx) {
     var scene = this.model;
     this.$('.image').digit(scene.get('degraded_segments'),
-      {width: 100, height: 135, background: 'brown', foreground: 'orange', noise: 32});
+      {hmargin: 20, width: 110, height: 145, background: 'brown', foreground: 'orange', noise: 32});
   },
   events: {
     'focus input': function(ev) {
@@ -183,7 +189,7 @@ var BatchFeedbackView = TemplateView.extend({
     var self = this;
     setTimeout(function() {
       self.next();
-    }, feedback_duration);
+    }, config.feedback_duration);
   },
   next: function() {
     // if there is another scene in the batch, show it, otherwise, debrief
