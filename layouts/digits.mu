@@ -73,7 +73,6 @@ var Scene = Backbone.Model.extend({
       time: now() - this.get('shown'),
     });
     var response = new Response(attrs);
-    // console.log('response', response.isNew());
     response.save();
   },
   next: function() {
@@ -115,7 +114,6 @@ var BatchView = TemplateView.extend({
     });
     var first_scene_view = this.scene_views[0];
     setTimeout(function() {
-      console.log(first_scene_view.$('input').length);
       first_scene_view.$('input').focus();
     }, 100);
     // purely aesthetic. never shrink!
@@ -135,7 +133,6 @@ var BatchView = TemplateView.extend({
         scene_view.model.saveResponse(choice);
         // we want fuzzy equivalence here, since choice is a string and truth is a number
         correct = correct && (scene.get('truth') == choice);
-        console.log(scene.get('truth'), choice, correct);
       });
       new BatchFeedbackView({correct: correct, model: this.model, replace: this.$el});
     },
@@ -206,7 +203,6 @@ var BatchFeedbackView = TemplateView.extend({
 var ConclusionView = TemplateView.extend({
   template: 'digits-conclusion.mu',
   preRender: function(ctx) {
-    console.log ("ConclusionView", this.model, ctx);
     var allies = this.model.get('scenes').first().get('allies');
     var ally_names = allies.map(function(ally, i) {
       var connector = (i + 1) == allies.length ? 'and ' : '';
