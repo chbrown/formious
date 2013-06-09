@@ -36,7 +36,6 @@
     "jquery-noty": "*",
     "jquery-plugins": "git://github.com/chbrown/jquery-plugins.git",
     "json2": "*",
-    "normalize": "*",
     "underscore": "*"
   }
 }

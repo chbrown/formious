@@ -43,7 +43,6 @@ function renderHandlebars(template_name, context, ajax) {
 
 
 
-
 function makeTable(cols, data) {
   var trs = data.map(function(cells) {
     return '<td>' + cells.join('</td><td>') + '</td>';
@@ -52,9 +51,6 @@ function makeTable(cols, data) {
   var tbody = '<tbody><tr>' + trs.join('</tr><tr>') + '</tr></tbody>';
   return '<table>' + thead + tbody + '</table>';
 }
-
-
-
 
 
 // requires Backbone and Handlebars to be loaded
