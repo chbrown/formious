@@ -1,53 +1,51 @@
-# Installation
+# turkserv
 
-Get the repo and the [static-lib](https://github.com/chbrown/static-lib) submodule:
+Turkserv is a [node.js](http://nodejs.org/) [Mechanical Turk](https://requester.mturk.com/) server layer.
+The main purpose is to provide a framework for External Questions, but there are also some tools to replace parts of the AWS MT interface that are available via the [API](http://aws.amazon.com/mturk/).
 
-    git clone --recursive https://github.com/chbrown/turkserv.git
+## Installation
 
-And install the Node dependencies:
-
+    git clone https://github.com/chbrown/turkserv.git
     cd turkserv
     npm install
+    birdie
+    grunt
 
-To bring your submodules (static-lib) up to date:
+## Suggested Configuration
 
-    git submodule foreach git pull
+* Use [nginx](http://nginx.org/) as a reverse-proxy and static file handler.
+* Use [supervisord](http://supervisord.org/) to monitor and restart the process if it dies.
 
-# Configuration
+### nginx
 
-`Nginx` is used as a reverse-proxy and static file handler, and `supervisord` is used to monitor and restart the process.
-
-## nginx
+`/etc/nginx/sites/turkserv` (e.g.):
 
     server {
-      listen 1450;
-      server_name kl;
+      listen 80;
+      server_name localhost;
       proxy_set_header X-Real-IP $remote_addr;
       gzip on;
 
-      set $base /Users/chbrown/github/turkserv;
-
-      location /static    { root $base; }
-      location /templates { root $base; }
-      location /lib       { root $base/static; }
+      set $root /var/www/turkserv;
+      location /static    { root $root; }
+      location /templates { root $root; }
       location / { proxy_pass http://127.0.0.1:1451; }
     }
 
-## supervisord
+### supervisord
 
-    vim /etc/supervisor.d/turkserv.ini
+`/etc/supervisor.d/turkserv` (e.g.):
 
     [program:turkserv]
     directory=/var/www/turkserv
-    user=chbrown
     command=/usr/local/bin/node turkserv.js
-    autorestart=true
+    user=chbrown
 
-## post-receive hook
+## post-receive hook for quick development
 
 And just because Node and supervisord are so fast, kill the app when it needs to reload.
 
-    vim ~/git/turkserv.git/hooks/post-receive
+`~/git/turkserv.git/hooks/post-receive` (e.g.):
 
     #!/bin/sh
     cd /var/www/turkserv

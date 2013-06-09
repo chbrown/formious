@@ -1,16 +1,15 @@
 'use strict'; /*jslint node: true, indent: 2, vars: true, es5: true */
 var url = require('url');
 var mechturk = require('mechturk');
-var mechturk_params = require('./mechturk-params');
 var _ = require('underscore');
 var amulet = require('amulet');
 var formidable = require('formidable');
 var vsprintf = require('sprintf').vsprintf;
 
-var random = require('./random');
-var models = require('./models');
+var random = require('../random');
+var models = require('../models');
 var User = models.User;
-var logger = require('./logger');
+var logger = require('../logger');
 
 
 function allyJudgment(reliability, truth, prior_on_enemy) {

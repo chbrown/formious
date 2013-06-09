@@ -1,6 +1,24 @@
-'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
+'use strict'; /*jslint node: true, es5: true, indent: 2 */
+var crypto = require('crypto');
 var mongoose = require('mongoose');
+var logger = require('./logger');
 var db = mongoose.createConnection('localhost', 'turkserv');
+var _ = require('underscore');
+
+var SALT = 'rNxROdgCbAkBI2WvZJtH';
+function _sha256(s) {
+  var shasum = crypto.createHash('sha256');
+  shasum.update(SALT, 'utf8');
+  shasum.update(s, 'utf8');
+  return shasum.digest('hex');
+}
+
+function _ticket() {
+  var store = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+  return _.range(40).map(function() {
+    return store[(Math.random() * store.length) | 0];
+  }).join('');
+}
 
 var user_schema = new mongoose.Schema({
   _id: String, // AWS workerId
@@ -9,8 +27,64 @@ var user_schema = new mongoose.Schema({
   responses: [],
   bonus_paid: {type: Number, 'default': 0},
   bonus_owed: {type: Number, 'default': 0},
+  password: String,
+  superuser: {type: Boolean, 'default': false},
+  tickets: {type: [String], 'default': []},
 });
 
-var User = db.model('User', user_schema);
+user_schema.statics.fromId = function(workerId, callback) {
+  // callback signature: function(err, user)
+  var Self = this;
+  this.findById(workerId, function(err, user) {
+    if (!user) {
+      user = new Self({_id: workerId});
+      user.save(logger.maybe);
+    }
+    callback(err, user);
+  });
+};
 
-module.exports.User = User;
+user_schema.statics.withTicket = function(workerId, ticket, callback) {
+  // callback signature: function(err, user || null)
+  workerId = (workerId || '').replace(/\W+/g, '');
+  ticket = (ticket || '').replace(/\W+/g, '');
+  this.findOne({_id: workerId, tickets: ticket}, callback);
+};
+
+user_schema.statics.withPassword = function(workerId, password, callback) {
+  // callback signature: function(err, user || null)
+  this.findOne({_id: workerId, password: _sha256(password)}, function(err, user) {
+    if (err || !user) {
+      callback(err);
+    }
+    else {
+      // create new ticket
+      user.tickets.push(_ticket());
+      user.save(function(err) {
+        callback(err, user);
+      });
+    }
+  });
+};
+
+user_schema.methods.setPassword = function(password, callback) {
+  // callback signature: function(err, user)
+  var self = this;
+  this.password = _sha256(password);
+  // create new ticket, too
+  this.tickets.push(_ticket());
+  this.save(function(err) {
+    callback(err, self);
+  });
+};
+
+var User = exports.User = db.model('User', user_schema);
+
+var account_schema = new mongoose.Schema({
+  _id: String, // name
+  accessKeyId: String, // accessKeyId
+  secretAccessKey: String, // secretAccessKey
+  created: {type: Date, 'default': Date.now},
+});
+
+var Account = exports.Account = db.model('Account', account_schema);

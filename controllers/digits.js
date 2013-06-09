@@ -1,15 +1,11 @@
-'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
+'use strict'; /*jslint node: true, es5: true, indent: 2 */
 var url = require('url');
-var mechturk = require('mechturk');
-var mechturk_params = require('./mechturk-params');
 var _ = require('underscore');
 var amulet = require('amulet');
-var formidable = require('formidable');
-var vsprintf = require('sprintf').vsprintf;
 
-var random = require('./random');
-var User = require('./models').User;
-var logger = require('./logger');
+var random = require('../random');
+var User = require('../models').User;
+var logger = require('../logger');
 
 var names = ['Banks', 'Barkley', 'Bowers', 'Dean', 'Frederick', 'Henderson',
   'Jacob', 'Kimball', 'Malackany', 'Malcom', 'Marin', 'Parker', 'Riedel',
@@ -73,7 +69,7 @@ function makeBatch(allies, scenes_per_batch) {
 }
 
 module.exports = function(R) {
-  R.any(/digits/, function(m, req, res) {
+  R.get(/digits/, function(m, req, res) {
     var urlObj = url.parse(req.url, true);
     // logger.info('request', {url: urlObj, headers: req.headers});
     // a normal turk request looks like: urlObj.query =

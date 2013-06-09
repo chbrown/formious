@@ -1,4 +1,4 @@
-'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
+'use strict'; /*jslint node: true, es5: true, indent: 2 */
 var fs = require('fs');
 var csv = require('csv');
 var yaml = require('js-yaml');

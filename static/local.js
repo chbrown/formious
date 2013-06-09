@@ -1,22 +1,27 @@
-"use strict"; /*jslint indent: 2, es5: true */ /*globals _, $, Backbone, Handlebars */
+"use strict"; /*jslint indent: 2 */ /*globals _, $, Backbone, Handlebars */
 function now() { return (new Date()).getTime(); }
 
-
-
+$(document).on('click', 'a[data-method]', function(ev) {
+  ev.preventDefault();
+  $.ajax({
+    url: this.href,
+    method: this.getAttribute('data-method')
+  }).done(function(data, textStatus, jqXHR) {
+    $(ev.target).flag({anchor: 'r', align: 'm', text: data.message, fade: 3000});
+  });
+});
 
 
 // handlebars debug / caching
 var _cache = {};
-function renderHandlebars(template_name, context, debug) {
-  // returns html
-  // not necessarily truly async
-  if (debug === undefined) {
-    // DEBUG is a special global, which may be missing.
-    debug = typeof(DEBUG) != 'undefined' && DEBUG;
+function renderHandlebars(template_name, context, ajax) {
+  // returns html, sync
+  if (ajax === undefined) {
+    ajax = window.DEBUG; // DEBUG is a special global, which may be missing.
   }
 
   var template;
-  if (debug) {
+  if (ajax) {
     // only cache once per page load (this is debug, after all)
     template = _cache[template_name];
     if (template === undefined) {
@@ -89,15 +94,38 @@ var TemplatedCollection = Backbone.Collection.extend({
 
 
 
-
-
-
+var FormInput = TemplateView.extend({
+  template: 'form-input.mu',
+  preRender: function(ctx) {
+    this.id = ctx.id;
+    ctx.label = ctx.label || this.id;
+    ctx.value = localStorage[this.id];
+  },
+  postRender: function(ctx) {
+    // window.form = this;
+    // console.log(this.$('input'),
+    this.$('input').css({width: ctx.width});
+  },
+  events: {
+    'change input': function(ev) {
+      // this.$('input')
+      var value = ev.target.value;
+      localStorage[this.id] = value;
+    }
+  }
+});
 
 // ####### ADMIN #######
 var HIT = Backbone.Model.extend({});
 var HITCollection = TemplatedCollection.extend({url: 'hits'});
 var HITView = TemplateView.extend({
-  template: 'hit.mu',
+  template: 'hit.mu'
+});
+var MTWorker = Backbone.Model.extend({
+  urlRoot: '../Workers'
+});
+var MTWorkerCollection = TemplatedCollection.extend({
+  url: '../Workers'
 });
 
 var Assignment = Backbone.Model.extend({
@@ -105,17 +133,59 @@ var Assignment = Backbone.Model.extend({
 });
 var AssignmentCollection = TemplatedCollection.extend({
   model: Assignment,
-  url: '../Assignments',
+  url: '../Assignments'
 });
+var AssignmentView = TemplateView.extend({
+  className: 'assignment',
+  template: 'assignment.mu',
+  preRender: function(ctx) {
+    // AssignmentStatus is one of Submitted | Approved | Rejected
+    ctx[ctx.AssignmentStatus] = true;
+    ctx.reason = localStorage.current_reason;
+  },
+  events: {
+    'change input[name="reason"]': function(ev) {
+      localStorage.current_reason = ev.target.value;
+    },
+    'click button.responses': function(ev) {
+      var workerId = this.model.get('WorkerId');
+      var worker = new MTWorker({id: workerId});
+      worker.fetch({
+        success: function(model, user, options) {
+          var keys = {};
+          user.responses.slice(0, 50).forEach(function(response) {
+            _.extend(keys, response);
+          });
 
-var TurkWorker = Backbone.Model.extend({
-  urlRoot: '../Workers'
+          var cols = _.keys(keys).sort();
+          var data = user.responses.map(function(response) {
+            return cols.map(function(col) {
+              return response[col];
+            });
+          });
+
+          $(ev.target).replaceWith(makeTable(cols, data));
+        }
+      });
+    },
+    'click button[data-action]': function(ev) {
+      var action = $(ev.target).attr('data-action');
+      var params = {};
+      if (action == 'GrantBonus') {
+        params.BonusAmount = this.$('.bonus input[name="amount"]').val();
+        params.Reason = this.$('.bonus input[name="reason"]').val();
+        params.WorkerId = this.model.get('WorkerId');
+      }
+      // $.post( url [, data ] [, success(data, textStatus, jqXHR) ] [, dataType ] )
+      $.post(this.model.url() + '/' + action, params, function(data, textStatus, jqXHR) {
+        $(ev.target).flag({html: data.message, fade: 5000});
+      });
+    }
+  }
 });
-// var WorkerCollection = TemplatedCollection.extend({
-//   url: '../Workers'
-// });
 
 // ####### EXPERIMENT #######
 var Response = Backbone.Model.extend({
   url: '/responses'
 });
+

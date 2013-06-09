@@ -6,37 +6,37 @@
   "repository": "git://github.com/chbrown/turkserv.git",
   "author": "Christopher Brown <io@henrian.com>",
   "dependencies": {
-    "amulet": "git://github.com/chbrown/amulet.git",
+    "amulet": "0.2.9",
     "async": "*",
     "cookies": "git://github.com/chbrown/cookies.git",
     "csv": "*",
     "formidable": "*",
     "http-enhanced": "*",
     "js-yaml": "*",
-    "mechturk": "git://github.com/chbrown/mechturk.git",
-    "moment": "git://github.com/chbrown/moment.git#develop",
+    "mechturk": "*",
+    "moment": "git://github.com/timrwood/moment.git#develop",
     "mongoose": "*",
     "optimist": "*",
     "regex-router": "*",
     "sprintf": "*",
+    "sv": "*",
     "underscore": "*",
     "winston": "0.6.x"
   },
   "devDependencies": {
     "grunt": "*",
     "grunt-contrib-handlebars": "git://github.com/chbrown/grunt-contrib-handlebars.git",
-    "grunt-contrib-uglify": "*",
-    "grunt-contrib-watch": "*"
+    "grunt-contrib-uglify": "*"
   },
   "staticPattern": "static/lib/{file}",
   "staticDependencies": {
-    "json2": "*",
-    "underscore": "*",
-    "jquery": "*",
     "backbone": "*",
     "handlebars": "*",
-    "normalize": "*",
+    "jquery": "*",
     "jquery-noty": "*",
-    "jquery-plugins": "git://github.com/chbrown/jquery-plugins.git"
+    "jquery-plugins": "git://github.com/chbrown/jquery-plugins.git",
+    "json2": "*",
+    "normalize": "*",
+    "underscore": "*"
   }
 }

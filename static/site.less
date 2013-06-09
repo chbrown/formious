@@ -1,16 +1,113 @@
-@import 'lib/normalize';
 .left {text-align: left;}
 .center {text-align: center;}
 .right {text-align: right;}
-// .auto-hmargin {margin: 0 auto;}
+.nowrap {white-space: nowrap;}
+h1, h2, h3, h4, h5, h6 {margin: 0.75em 0 0.25em 0;}
 
 body {
-  padding: 10px;
+  margin: 0;
   font: 13px "Lucida Grande", Arial, sans-serif;
 }
-h1, h2, h3, h4 {
-  margin: 0.75em 0;
+.navbar {
+  position: fixed;
+  top: 0;
+  background: #FFF;
+  width: 100%;
+  border-bottom: 1px solid #CCC;
+  a {
+    display: inline-block;
+    border-radius: 3px;
+    border: 1px solid #555;
+    &:hover {
+      background-color: #EEE;
+    }
+    padding: 2px 6px;
+    margin: 2px;
+  }
 }
+.admin {
+  padding: 30px 10px 10px;
+  label {
+    display: block;
+    span {
+      font-weight: bold;
+    }
+  }
+  button {
+    margin: 5px 0;
+  }
+  label {
+    display: block;
+    font-size: 90%;
+    margin: 4px 0 2px;
+  }
+  fieldset {
+    margin: 0 0 10px 0;
+    border: 1px solid #CCC;
+    button {
+      margin: 10px 10px 0 0;
+    }
+  }
+  .hform label span {
+    display: inline-block;
+    width: 75px;
+  }
+  .vform label span {
+    display: block;
+  }
+  table {
+    border-collapse: collapse;
+    th {
+      text-align: left;
+      .nowrap;
+    }
+    td {
+      border-bottom: 1px solid #DDD;
+      font-size: 90%;
+      padding: 1px 4px;
+      vertical-align: top;
+    }
+  }
+  .assignment {
+    margin-top: 10px;
+    padding-left: 10px;
+    border: 1px dotted #ddd;
+    .controls {
+      float: left;
+      width: 30%;
+    }
+    .keyval {
+      float: left;
+      width: 64%;
+      margin-left: 10px;
+      td:first-child {
+        width: 120px;
+      }
+    }
+    input {
+      width: 200px;
+    }
+  }
+  .keyval {
+    th {
+      padding-top: 4px;
+      border-bottom: 1px solid #777;
+    }
+    td:first-child {
+      font-weight: bold;
+    }
+  }
+  .status {
+    span {
+      font-size: 110%;
+      font-weight: bold;
+      &.Submitted { color: #CCC; }
+      &.Approved { color: darkgreen; }
+      &.Rejected { color: darkred; }
+    }
+  }
+}
+
 .vlabels, textarea {
   margin: 5px 0 5px;
   label {
@@ -31,28 +128,6 @@ label[disabled] {
   // border: 1px solid rgba(81, 203, 238, 1);
 }
 
-// .aircraft {
-//   p {
-//     margin: 4px 0 4px;
-//   }
-//   fieldset {
-//     margin: 10px 0 5px;
-//     padding: 2px 8px;
-//     border: 1px solid #ddd;
-//   }
-//   table {
-//     margin: 5px 0 5px;
-//   }
-//   table td {
-//     padding: 2px 12px 2px 2px;
-//     vertical-align: top;
-//   }
-
-//   button {
-//     margin: 5px 10px;
-//   }
-// }
-
 // .demo {
 //   background-color: #e2e2e2;
 //   legend {
@@ -62,59 +137,6 @@ label[disabled] {
 //   }
 // }
 
-.admin {
-  h2 {
-    border-top: 1px solid #BBB;
-  }
-  label {
-    display: block;
-    font-size: 80%;
-    margin: 8px 0 2px;
-  }
-  fieldset {
-    margin: 0 0 10px 0;
-    button {
-      margin: 10px 10px 0 0;
-    }
-  }
-}
-
-.review {
-  .assignment {
-    margin: 20px 0;
-    padding: 10px;
-    border: 1px dotted #ddd;
-    & > h3 {
-      margin: 0 0 5px 0;
-    }
-    table.keyval td:first-child {
-      width: 130px;
-    }
-  }
-  table {
-    margin: 0 10px;
-    th {
-      text-align: left;
-    }
-    td {
-      font-size: 90%;
-      padding-right: 5px;
-    }
-  }
-  table.keyval td:first-child {
-    font-weight: bold;
-  }
-  .status {
-    span {
-      font-size: 110%;
-      font-weight: bold;
-      &.Submitted { color: #CCC; }
-      &.Approved { color: darkgreen; }
-      &.Rejected { color: darkred; }
-    }
-  }
-}
-
 .flag {
   position: absolute;
   background-color: black;
@@ -122,7 +144,7 @@ label[disabled] {
   padding: 2px;
   color: white;
   font-size: 90%;
-  // like a diamond -- half-diameter measure
+  // like a diaond -- half-diameter measure
   .triangle {
     display: inline-block;
     position: absolute;

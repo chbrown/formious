@@ -26,13 +26,9 @@
 }
 </style>
 
-<h4><i>Scenario:</i></h4>
-<p>Your task is to disarm a bomb, but to do so, you must read the deactivation code from a broken digital display.
-Your colleagues on the bomb squad are disarming bombs in nearby locations, but <i>all the bombs have the same code</i>.
-The displays that each of your colleagues see may be more or less broken than the one you have access to.
-<p>These are trying times. You will have to disarm more than one bomb.
-Luckily, you and your allies are operating remotely; while lives depend on your diligence, yours does not,
-and you will receive feedback on whether your guess was correct.
+<h4>Instructions</h4>
+<p>You will see a series of phrases. Some of these phrases have been taken from real English texts. Others were produced by randomly combining English words. Your task is to identify the real phrases.
+<p>You will see judgements from others to help you in making your decision. The number of other people whose judgement you see will vary from phrase to phrase.
 
 <hr />
 
@@ -41,7 +37,10 @@ and you will receive feedback on whether your guess was correct.
 </div>
 
 <script src="/static/compiled.js"></script>
+
+<!-- <script>DEBUG=true</script> -->
 <script src="/static/templates.js"></script>
+
 <script src="/static/local.js"></script>
 <script src="http://chbrown.github.io/clock-js/clock.js"></script>
 <script>

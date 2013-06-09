@@ -1,4 +1,4 @@
-'use strict'; /*jslint nomen: true, node: true, indent: 2, debug: true, vars: true, es5: true */
+'use strict'; /*jslint node: true, es5: true, indent: 2 */
 module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -11,7 +11,7 @@ module.exports = function(grunt) {
     uglify: {
       all: {
         options: {
-          // beautify: true,
+          beautify: true,
           mangle: false
         },
         files: {
@@ -34,7 +34,6 @@ module.exports = function(grunt) {
     }
   });
 
-  // grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-handlebars');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.registerTask('default', ['handlebars', 'uglify']);

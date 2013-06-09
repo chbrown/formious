@@ -7,3 +7,4 @@ var logger = module.exports = new winston.Logger({
   ]
 });
 logger.maybe = function (err) { if (err) logger.error(err); };
+logger.level = 'verbose';
