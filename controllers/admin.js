@@ -42,8 +42,8 @@ R.get(/^\/admin\/users\/(\w+)/, function(m, req, res) {
   var workerId = m[1].replace(/\W+/g, '');
   models.User.fromId(workerId, function(err, user) {
     logger.maybe(err);
-    var ctx = {user: user, authorized: req.user && req.user._id == user._id};
-    amulet.render(res, ['layout.mu', 'admin/users/login.mu'], ctx);
+    var ctx = {user: user};
+    amulet.stream(['layout.mu', 'admin/users/login.mu'], ctx).pipe(res);
   });
 });
 
@@ -64,7 +64,7 @@ R.post(/^\/admin\/users\/(\w+)\/claim/, function(m, req, res) {
           req.cookies.set('workerId', user._id);
           req.cookies.set('ticket', ticket);
           var ctx = {user: user, authorized: true};
-          amulet.render(res, ['layout.mu', 'admin/users/one.mu'], ctx);
+          amulet.stream(['layout.mu', 'admin/users/one.mu'], ctx).pipe(res);
         });
       }
     });
@@ -85,7 +85,7 @@ R.post(/^\/admin\/users\/(\w+)\/become/, function(m, req, res) {
         req.cookies.set('workerId', user._id);
         req.cookies.set('ticket', ticket);
         var ctx = {user: user, authorized: true};
-        amulet.render(res, ['layout.mu', 'admin/users/one.mu'], ctx);
+        amulet.stream(['layout.mu', 'admin/users/one.mu'], ctx).pipe(res);
       }
     });
   });
@@ -106,23 +106,23 @@ authR.default = function(m, req, res) {
 };
 
 // ------------
-// /admin/users
+// GET /admin/users -> list all users.
+authR.get(/^\/admin\/users$/, function(m, req, res) {
+  models.User.find({}).exec(function(err, users) {
+    logger.maybe(err);
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/users/all.mu'], {users: users}).pipe(res);
+  });
+});
+
+// GET /admin/users/:user -> show single user
 authR.get(/^\/admin\/users\/(\w+)/, function(m, req, res) {
   var workerId = m[1].replace(/\W+/g, '');
   models.User.fromId(workerId, function(err, user) {
     logger.maybe(err);
-    var ctx = {user: user, authorized: req.user && req.user._id == user._id};
-    amulet.render(res, ['layout.mu', 'admin/layout.mu', 'admin/users/one.mu'], ctx);
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/users/one.mu'], {user: user}).pipe(res);
   });
 });
 
-authR.get(/^\/admin\/users/, function(m, req, res) {
-  models.User.find({}).exec(function(err, users) {
-    logger.maybe(err);
-    var ctx = {users: users};
-    amulet.render(res, ['layout.mu', 'admin/layout.mu', 'admin/users/all.mu'], ctx);
-  });
-});
 
 // ---------------
 // /admin/mt
@@ -134,7 +134,7 @@ authR.get(/^\/admin\/mt$/, function(m, req, res) {
       user: req.user,
       accounts: accounts,
     };
-    amulet.render(res, ['layout.mu', 'admin/layout.mu', 'admin/mt/all.mu'], ctx);
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/mt/all.mu'], ctx).pipe(res);
   });
 });
 // GET /admin/mt/:account
@@ -146,7 +146,7 @@ authR.get(/^\/admin\/mt\/(\w*)$/, function(m, req, res) {
       account: account,
       hosts: ['deploy', 'sandbox'],
     };
-    amulet.render(res, ['layout.mu', 'admin/layout.mu', 'admin/mt/one.mu'], ctx);
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/mt/one.mu'], ctx).pipe(res);
   });
 });
 // DELETE /admin/mt/:account -> List all AWS MTurk Accounts and show creation form

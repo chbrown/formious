@@ -1,1 +1,496 @@
-(function(){var a=Handlebars.template,b=Handlebars.templates=Handlebars.templates||{};b["aircraft-batch-debriefing.mu"]=a(function(a,b,c,d,e){function k(a,b){var d="",e;return d+="\n<p> Based on your performance, you have an available bonus of $",(e=c.bonus)?e=e.call(a,{hash:{},data:b}):(e=a.bonus,e=typeof e===h?e.apply(a):e),d+=i(e)+'.\n<div>\n  <button data-id="continue">Claim bonus and continue</button>\n  <!-- <button data-id="stop">Claim bonus and quit task</button> -->\n</div>\n',d}function l(a,b){return'\n<div>\n  <button data-id="continue">Continue</button>\n  <!-- <button data-id="stop">Quit task</button> -->\n</div>\n'}this.compilerInfo=[3,">= 1.0.0-rc.4"],c=c||a.helpers,e=e||{};var f="",g,h="function",i=this.escapeExpression,j=this;f+="<h3>End of Batch ",(g=c.id)?g=g.call(b,{hash:{},data:e}):(g=b.id,g=typeof g===h?g.apply(b):g),f+=i(g)+"</h3>\n\n",g=c["if"].call(b,b.bonus_available,{hash:{},inverse:j.program(3,l,e),fn:j.program(1,k,e),data:e});if(g||g===0)f+=g;return f+="\n\n<p>Note that the number of estimated aircraft in the sky may change in the next series of scenes.\n",f}),b["aircraft-conclusion.mu"]=a(function(a,b,c,d,e){this.compilerInfo=[3,">= 1.0.0-rc.4"],c=c||a.helpers,e=e||{};var f="",g,h="function",i=this.escapeExpression;return f+='<form method="POST" action="',(g=c.host)?g=g.call(b,{hash:{},data:e}):(g=b.host,g=typeof g===h?g.apply(b):g),f+=i(g)+'/mturk/externalSubmit">\n  <input type="hidden" name="assignmentId" value="',(g=c.assignmentId)?g=g.call(b,{hash:{},data:e}):(g=b.assignmentId,g=typeof g===h?g.apply(b):g),f+=i(g)+'" />\n  <input type="hidden" name="turkerId" value="',(g=c.workerId)?g=g.call(b,{hash:{},data:e}):(g=b.workerId,g=typeof g===h?g.apply(b):g),f+=i(g)+'" />\n  <input type="hidden" name="duration" value="',(g=c.duration)?g=g.call(b,{hash:{},data:e}):(g=b.duration,g=typeof g===h?g.apply(b):g),f+=i(g)+'" />\n\n  <h3>Comments</h3>\n  <label>\n    <div>Did you find one of the allies more useful than others?\n      Please discuss any overall thoughts on the allies: ',(g=c.all_allies_string)?g=g.call(b,{hash:{},data:e}):(g=b.all_allies_string,g=typeof g===h?g.apply(b):g),f+=i(g)+'.</div>\n    <textarea rows="4" cols="80" name="allies_comments"></textarea>\n  </label>\n\n  <label>\n    <div>What characterized enemy planes?</div>\n    <textarea rows="2" cols="80" name="enemy_comments"></textarea>\n  </label>\n\n  <label>\n    <div>What characterized friendly planes?</div>\n    <textarea rows="2" cols="80" name="friendly_comments"></textarea>\n  </label>\n\n  <label>\n    <div>Was this task unclear, mispriced, or frustrating? If we could make it better, let us know!</div>\n    <textarea rows="4" cols="80" name="task_comments"></textarea>\n  </label>\n\n  <p class="clear">\n    <input type="submit" value="Submit Responses and Finish Task" />\n  </p>\n</form>\n',f}),b["aircraft-scene.mu"]=a(function(a,b,c,d,e){function m(a,b){var d="",e;return d+='\n        <tr class="',(e=c.judgment)?e=e.call(a,{hash:{},data:b}):(e=a.judgment,e=typeof e===i?e.apply(a):e),d+=j(e)+'">\n          <td>',(e=c.title)?e=e.call(a,{hash:{},data:b}):(e=a.title,e=typeof e===i?e.apply(a):e),d+=j(e)+"&nbsp;",(e=c.name)?e=e.call(a,{hash:{},data:b}):(e=a.name,e=typeof e===i?e.apply(a):e),d+=j(e)+":</td>\n          <td><span>",(e=c.judgment)?e=e.call(a,{hash:{},data:b}):(e=a.judgment,e=typeof e===i?e.apply(a):e),d+=j(e)+"</span></td>\n        </tr>\n        ",d}function n(a,b){var d="",e;return d+='\n    <img src="/static/aircraft/pixelated/',(e=c.src)?e=e.call(a,{hash:{},data:b}):(e=a.src,e=typeof e===i?e.apply(a):e),d+=j(e)+'" />\n ',d}this.compilerInfo=[3,">= 1.0.0-rc.4"],c=c||a.helpers,e=e||{};var f="",g,h,i="function",j=this.escapeExpression,k=this,l=c.blockHelperMissing;f+="<h3>Batch ",(g=c.batch_id)?g=g.call(b,{hash:{},data:e}):(g=b.batch_id,g=typeof g===i?g.apply(b):g),f+=j(g)+" / Scene ",(g=c.id)?g=g.call(b,{hash:{},data:e}):(g=b.id,g=typeof g===i?g.apply(b):g),f+=j(g)+'</h3>\n<table>\n  <tr>\n    <td><img src="/static/aircraft/pixelated/',(g=c.src)?g=g.call(b,{hash:{},data:e}):(g=b.src,g=typeof g===i?g.apply(b):g),f+=j(g)+'" /></td>\n    <td style="padding-left: 20px; vertical-align: top;">\n      <table class="stats">\n        <tr><td>Estimated number of friendly aircraft in the sky:</td><td>',(g=c.total_friendly)?g=g.call(b,{hash:{},data:e}):(g=b.total_friendly,g=typeof g===i?g.apply(b):g),f+=j(g)+"</td></tr>\n        <tr><td>Estimated number of enemy aircraft in the sky:</td><td>",(g=c.total_enemy)?g=g.call(b,{hash:{},data:e}):(g=b.total_enemy,g=typeof g===i?g.apply(b):g),f+=j(g)+'</td></tr>\n      </table>\n\n      <h3>Allies:</h3>\n      <table class="allies">\n        ',h={hash:{},inverse:k.noop,fn:k.program(1,m,e),data:e},(g=c.allies)?g=g.call(b,h):(g=b.allies,g=typeof g===i?g.apply(b):g),c.allies||(g=l.call(b,g,h));if(g||g===0)f+=g;f+='\n      </table>\n\n      <h3>Your decision:</h3>\n      <div class="spaced-buttons">\n        <button data-id="enemy">Enemy</button>\n        <button data-id="friend">Pass</button>\n      </div>\n    </td>\n  </tr>\n</table>\n<div style="display: none">\n ',h={hash:{},inverse:k.noop,fn:k.program(3,n,e),data:e},(g=c.next)?g=g.call(b,h):(g=b.next,g=typeof g===i?g.apply(b):g),c.next||(g=l.call(b,g,h));if(g||g===0)f+=g;return f+="\n</div>\n",f}),b["assignment.mu"]=a(function(a,b,c,d,e){function m(a,b){return'\n        <button data-action="ApproveAssignment">Approve</button>\n        <button data-action="RejectAssignment">Reject</button>\n      '}function n(a,b){return'\n        <button data-action="ApproveRejectedAssignment">Unreject and Approve</button>\n      '}function o(a,b){var d="",e;return d+="\n      <tr><td>ApprovalTime</td><td>",(e=c.ApprovalTime)?e=e.call(a,{hash:{},data:b}):(e=a.ApprovalTime,e=typeof e===i?e.apply(a):e),d+=j(e)+"</td></tr>\n    ",d}function p(a,b){var d="",e;return d+="\n      <tr><td>RejectionTime</td><td>",(e=c.RejectionTime)?e=e.call(a,{hash:{},data:b}):(e=a.RejectionTime,e=typeof e===i?e.apply(a):e),d+=j(e)+"</td></tr>\n    ",d}function q(a,b){var d="",e;return d+="\n      <tr><td>",(e=c.QuestionIdentifier)?e=e.call(a,{hash:{},data:b}):(e=a.QuestionIdentifier,e=typeof e===i?e.apply(a):e),d+=j(e)+"</td><td>",(e=c.FreeText)?e=e.call(a,{hash:{},data:b}):(e=a.FreeText,e=typeof e===i?e.apply(a):e),d+=j(e)+"</td></tr>\n    ",d}function r(a,b){var d="",e;return d+="\n      <tr><td>",(e=c.key)?e=e.call(a,{hash:{},data:b}):(e=a.key,e=typeof e===i?e.apply(a):e),d+=j(e)+"</td><td>",(e=c.value)?e=e.call(a,{hash:{},data:b}):(e=a.value,e=typeof e===i?e.apply(a):e),d+=j(e)+"</td></tr>\n    ",d}this.compilerInfo=[3,">= 1.0.0-rc.4"],c=c||a.helpers,e=e||{};var f="",g,h,i="function",j=this.escapeExpression,k=this,l=c.blockHelperMissing;f+='<div class="assignment">\n  <h3>Assignment: ',(g=c.AssignmentId)?g=g.call(b,{hash:{},data:e}):(g=b.AssignmentId,g=typeof g===i?g.apply(b):g),f+=j(g)+'</h3>\n\n  <div class="controls" style="float: left; width: 32%;">\n    <fieldset class="status">\n      <legend>Status</legend>\n      <span class="',(g=c.AssignmentStatus)?g=g.call(b,{hash:{},data:e}):(g=b.AssignmentStatus,g=typeof g===i?g.apply(b):g),f+=j(g)+'">',(g=c.AssignmentStatus)?g=g.call(b,{hash:{},data:e}):(g=b.AssignmentStatus,g=typeof g===i?g.apply(b):g),f+=j(g)+"</span>\n      ",h={hash:{},inverse:k.noop,fn:k.program(1,m,e),data:e},(g=c.Submitted)?g=g.call(b,h):(g=b.Submitted,g=typeof g===i?g.apply(b):g),c.Submitted||(g=l.call(b,g,h));if(g||g===0)f+=g;f+="\n      ",h={hash:{},inverse:k.noop,fn:k.program(3,n,e),data:e},(g=c.Rejected)?g=g.call(b,h):(g=b.Rejected,g=typeof g===i?g.apply(b):g),c.Rejected||(g=l.call(b,g,h));if(g||g===0)f+=g;f+='\n    </fieldset>\n\n    <fieldset class="bonus">\n      <legend>Bonus</legend>\n      <label>Amount: <input name="amount" value="',(g=c.bonus_owed)?g=g.call(b,{hash:{},data:e}):(g=b.bonus_owed,g=typeof g===i?g.apply(b):g),f+=j(g)+'" /></label>\n      <label>Reason: <input name="reason" value="',(g=c.reason)?g=g.call(b,{hash:{},data:e}):(g=b.reason,g=typeof g===i?g.apply(b):g),f+=j(g)+'" style="width: 200px" /></label>\n      <button data-action="GrantBonus">Grant Bonus</button>\n    </fieldset>\n  </div>\n\n  <table class="keyval" style="float: left; width: 64%;">\n    <tr><td>WorkerId</td><td>',(g=c.WorkerId)?g=g.call(b,{hash:{},data:e}):(g=b.WorkerId,g=typeof g===i?g.apply(b):g),f+=j(g)+' <a href="../Workers/',(g=c.WorkerId)?g=g.call(b,{hash:{},data:e}):(g=b.WorkerId,g=typeof g===i?g.apply(b):g),f+=j(g)+'">json</a></td></tr>\n    <tr><td>AutoApprovalTime</td><td>',(g=c.AutoApprovalTime)?g=g.call(b,{hash:{},data:e}):(g=b.AutoApprovalTime,g=typeof g===i?g.apply(b):g),f+=j(g)+"</td></tr>\n    <tr><td>AcceptTime</td><td>",(g=c.AcceptTime)?g=g.call(b,{hash:{},data:e}):(g=b.AcceptTime,g=typeof g===i?g.apply(b):g),f+=j(g)+"</td></tr>\n    <tr><td>SubmitTime</td><td>",(g=c.SubmitTime)?g=g.call(b,{hash:{},data:e}):(g=b.SubmitTime,g=typeof g===i?g.apply(b):g),f+=j(g)+"</td></tr>\n    ",h={hash:{},inverse:k.noop,fn:k.program(5,o,e),data:e},(g=c.Approved)?g=g.call(b,h):(g=b.Approved,g=typeof g===i?g.apply(b):g),c.Approved||(g=l.call(b,g,h));if(g||g===0)f+=g;f+="\n    ",h={hash:{},inverse:k.noop,fn:k.program(7,p,e),data:e},(g=c.Rejected)?g=g.call(b,h):(g=b.Rejected,g=typeof g===i?g.apply(b):g),c.Rejected||(g=l.call(b,g,h));if(g||g===0)f+=g;f+='\n    <tr><th colspan="2">Responses</th></tr>\n    ',h={hash:{},inverse:k.noop,fn:k.program(9,q,e),data:e},(g=c.Answer)?g=g.call(b,h):(g=b.Answer,g=typeof g===i?g.apply(b):g),c.Answer||(g=l.call(b,g,h));if(g||g===0)f+=g;f+="\n    ",h={hash:{},inverse:k.noop,fn:k.program(11,r,e),data:e},(g=c.user_fields)?g=g.call(b,h):(g=b.user_fields,g=typeof g===i?g.apply(b):g),c.user_fields||(g=l.call(b,g,h));if(g||g===0)f+=g;return f+='\n  </table>\n\n  <div style="clear: both">\n    <button class="responses">Load responses</button>\n  </div>\n</div>\n\n',f}),b["consent.mu"]=a(function(a,b,c,d,e){return this.compilerInfo=[3,">= 1.0.0-rc.4"],c=c||a.helpers,e=e||{},'<h3>Consent form</h3>\n<p>\n  You are invited to participate in a study, entitled "Learning in Social Networks". The study is being conducted by Colin Bannard in the Linguistics department of The University of Texas at Austin.\n<p>\n  Department of Linguistics<br/>\n  University of Texas at Austin,<br/>\n  305 E. 23rd Street B5100,<br/>\n  Austin, TX 78712, USA<br/>\n  (512) 471-9022\n<p>The purpose of this study is to examine how people learn. We estimate that it will take about half a minute of your time to complete each question, and you will be paid 2 cents for each question you respond to. You are free to contact the investigator at the above address and phone number to discuss the survey.\n<p>Risks to participants are considered minimal. There will be no costs for participating. You will be paid for each HIT you complete, but will not otherwise benefit from participating. Your Amazon Mechanical Turk identification will be kept while we collect data for tracking purposes only. A limited number of research team members will have access to the data during data collection. This information will be stripped from the final dataset.\n<p>Your participation in this survey is voluntary. You may decline to answer any question and you have the right to withdraw from participation at any time without penalty. If you wish to withdraw from the study or have any questions, contact the investigator listed above.\n<p>If you have any questions, please email Colin Bannard at bannard@utexas.edu. You may also request a hard copy of the survey from the contact information above.\n<p>This study has been reviewed and approved by The University of Texas at Austin Institutional Review Board (IRB Study Number 2010-10-0051). If you have questions about your rights as a study participant, or are dissatisfied at any time with any aspect of this study, you may contact - anonymously, if you wish - the Institutional Review Board by phone at (512) 471-8871 or email at orsc@uts.cc.utexas.edu.\n<p>\n<button>I Consent</button>\n'}),b["digits-batch.mu"]=a(function(a,b,c,d,e){this.compilerInfo=[3,">= 1.0.0-rc.4"],c=c||a.helpers,e=e||{};var f="",g,h,i="function",j=this.escapeExpression;return f+='<table cellpadding="0" cellspacing="0" style="margin: 0 auto">\n  <tr>\n    <th colspan="'+j((g=(g=b.scenes,g==null||g===!1?g:g.length),typeof g===i?g.apply(b):g))+'" class="left">\n      <h3>Bomb ',(h=c.id)?h=h.call(b,{hash:{},data:e}):(h=b.id,h=typeof h===i?h.apply(b):h),f+=j(h)+'</h3>\n    </th>\n  </tr>\n  <tr id="digits"></tr>\n  <tr>\n    <td colspan="'+j((g=(g=b.scenes,g==null||g===!1?g:g.length),typeof g===i?g.apply(b):g))+'" class="right" style="padding: 20px 0">\n      <button disabled="true">Submit</button>\n    </td>\n  </tr>\n</table>\n',f}),b["digits-conclusion.mu"]=a(function(a,b,c,d,e){this.compilerInfo=[3,">= 1.0.0-rc.4"],c=c||a.helpers,e=e||{};var f="",g,h="function",i=this.escapeExpression;return f+='<form method="POST" action="',(g=c.host)?g=g.call(b,{hash:{},data:e}):(g=b.host,g=typeof g===h?g.apply(b):g),f+=i(g)+'/mturk/externalSubmit">\n  <input type="hidden" name="assignmentId" value="',(g=c.assignmentId)?g=g.call(b,{hash:{},data:e}):(g=b.assignmentId,g=typeof g===h?g.apply(b):g),f+=i(g)+'" />\n  <input type="hidden" name="turkerId" value="',(g=c.workerId)?g=g.call(b,{hash:{},data:e}):(g=b.workerId,g=typeof g===h?g.apply(b):g),f+=i(g)+'" />\n  <input type="hidden" name="duration" value="',(g=c.duration)?g=g.call(b,{hash:{},data:e}):(g=b.duration,g=typeof g===h?g.apply(b):g),f+=i(g)+'" />\n\n  <p>Comments are optional, but much appreciated.</p>\n\n  <label>\n    <div>Did you find one of your colleagues more useful than others?\n      Please discuss whether they (',(g=c.all_allies_string)?g=g.call(b,{hash:{},data:e}):(g=b.all_allies_string,g=typeof g===h?g.apply(b):g),f+=i(g)+') were helpful or not.</div>\n    <textarea rows="4" cols="80" name="allies_comments"></textarea>\n  </label>\n\n  <label>\n    <div>What strategy worked the best?</div>\n    <textarea rows="2" cols="80" name="strategy_comments"></textarea>\n  </label>\n\n  <label>\n    <div>Was this task unclear, mispriced, or frustrating? If we could make it better, let us know!</div>\n    <textarea rows="4" cols="80" name="task_comments"></textarea>\n  </label>\n\n  <p class="clear">\n    <input type="submit" value="Submit Responses and Finish Task" />\n  </p>\n</form>\n',f}),b["digits-scene.mu"]=a(function(a,b,c,d,e){function m(a,b){var d="",e;return d+='\n    <tr class="',(e=c.judgment)?e=e.call(a,{hash:{},data:b}):(e=a.judgment,e=typeof e===i?e.apply(a):e),d+=j(e)+'">\n      <td>',(e=c.title)?e=e.call(a,{hash:{},data:b}):(e=a.title,e=typeof e===i?e.apply(a):e),d+=j(e)+"&nbsp;",(e=c.name)?e=e.call(a,{hash:{},data:b}):(e=a.name,e=typeof e===i?e.apply(a):e),d+=j(e)+":</td>\n      <td><span>",(e=c.judgment)?e=e.call(a,{hash:{},data:b}):(e=a.judgment,e=typeof e===i?e.apply(a):e),d+=j(e)+"</span></td>\n    </tr>\n    ",d}this.compilerInfo=[3,">= 1.0.0-rc.4"],c=c||a.helpers,e=e||{};var f="",g,h,i="function",j=this.escapeExpression,k=this,l=c.blockHelperMissing;f+='<div class="image"><!-- fill in with canvas rendering --></div>\n\n<div class="allies">\n  <h3>Colleagues:</h3>\n  <table>\n    ',h={hash:{},inverse:k.noop,fn:k.program(1,m,e),data:e},(g=c.allies)?g=g.call(b,h):(g=b.allies,g=typeof g===i?g.apply(b):g),c.allies||(g=l.call(b,g,h));if(g||g===0)f+=g;return f+='\n  </table>\n</div>\n\n<div class="user-judgment">\n  <h3>Your<br/> judgment:</h3>\n  <input type="text" maxlength="1" min="0" max="10" required />\n</div>\n',f}),b["feedback.mu"]=a(function(a,b,c,d,e){function i(a,b){return'\n    <img src="/static/smile.gif" alt="☺" />\n  '}function j(a,b){return'\n    <img src="/static/frown.gif" alt="☹" />\n  '}this.compilerInfo=[3,">= 1.0.0-rc.4"],c=c||a.helpers,e=e||{};var f="",g,h=this;f+='<div class="emoticon">\n  ',g=c["if"].call(b,b.correct,{hash:{},inverse:h.program(3,j,e),fn:h.program(1,i,e),data:e});if(g||g===0)f+=g;return f+="\n</div>\n",f}),b["form-input.mu"]=a(function(a,b,c,d,e){this.compilerInfo=[3,">= 1.0.0-rc.4"],c=c||a.helpers,e=e||{};var f="",g,h="function",i=this.escapeExpression;return f+="<label>",(g=c.label)?g=g.call(b,{hash:{},data:e}):(g=b.label,g=typeof g===h?g.apply(b):g),f+=i(g)+'</label><input name="',(g=c.id)?g=g.call(b,{hash:{},data:e}):(g=b.id,g=typeof g===h?g.apply(b):g),f+=i(g)+'" value="',(g=c.value)?g=g.call(b,{hash:{},data:e}):(g=b.value,g=typeof g===h?g.apply(b):g),f+=i(g)+'" />',f}),b["hit.mu"]=a(function(a,b,c,d,e){this.compilerInfo=[3,">= 1.0.0-rc.4"],c=c||a.helpers,e=e||{};var f="",g,h,i="function",j=this.escapeExpression;return f+='<div class="hit">\n  <h2>HIT: ',(g=c.Title)?g=g.call(b,{hash:{},data:e}):(g=b.Title,g=typeof g===i?g.apply(b):g),f+=j(g)+'</h2>\n  <table class="keyval">\n    <tr><td>HITId</td><td><a href="HITs/',(g=c.HITId)?g=g.call(b,{hash:{},data:e}):(g=b.HITId,g=typeof g===i?g.apply(b):g),f+=j(g)+'">',(g=c.HITId)?g=g.call(b,{hash:{},data:e}):(g=b.HITId,g=typeof g===i?g.apply(b):g),f+=j(g)+"</a></td></tr>\n    <tr><td>HITTypeId</td><td>",(g=c.HITTypeId)?g=g.call(b,{hash:{},data:e}):(g=b.HITTypeId,g=typeof g===i?g.apply(b):g),f+=j(g)+"</td></tr>\n    <tr><td>CreationTime</td><td>",(g=c.CreationTime)?g=g.call(b,{hash:{},data:e}):(g=b.CreationTime,g=typeof g===i?g.apply(b):g),f+=j(g)+"</td></tr>\n    <tr><td>Expiration</td><td>",(g=c.Expiration)?g=g.call(b,{hash:{},data:e}):(g=b.Expiration,g=typeof g===i?g.apply(b):g),f+=j(g)+"</td></tr>\n    <tr><td>Keywords</td><td>",(g=c.Keywords)?g=g.call(b,{hash:{},data:e}):(g=b.Keywords,g=typeof g===i?g.apply(b):g),f+=j(g)+"</td></tr>\n    <tr><td>Description</td><td>",(g=c.Description)?g=g.call(b,{hash:{},data:e}):(g=b.Description,g=typeof g===i?g.apply(b):g),f+=j(g)+"</td></tr>\n    <tr><td>HITStatus</td><td>",(g=c.HITStatus)?g=g.call(b,{hash:{},data:e}):(g=b.HITStatus,g=typeof g===i?g.apply(b):g),f+=j(g)+"</td></tr>\n    <tr><td>HITReviewStatus</td><td>",(g=c.HITReviewStatus)?g=g.call(b,{hash:{},data:e}):(g=b.HITReviewStatus,g=typeof g===i?g.apply(b):g),f+=j(g)+"</td></tr>\n    <tr><td>MaxAssignments</td><td>",(g=c.MaxAssignments)?g=g.call(b,{hash:{},data:e}):(g=b.MaxAssignments,g=typeof g===i?g.apply(b):g),f+=j(g)+"</td></tr>\n    <tr><td>Reward</td><td>"+j((g=(g=b.Reward,g==null||g===!1?g:g.FormattedPrice),typeof g===i?g.apply(b):g))+"</td></tr>\n    <tr><td>AssignmentDurationInSeconds</td><td>",(h=c.AssignmentDurationInSeconds)?h=h.call(b,{hash:{},data:e}):(h=b.AssignmentDurationInSeconds,h=typeof h===i?h.apply(b):h),f+=j(h)+"</td></tr>\n    <tr><td>AutoApprovalDelayInSeconds</td><td>",(h=c.AutoApprovalDelayInSeconds)?h=h.call(b,{hash:{},data:e}):(h=b.AutoApprovalDelayInSeconds,h=typeof h===i?h.apply(b):h),f+=j(h)+"</td></tr>\n    <tr><td>NumberOfAssignmentsPending</td><td>",(h=c.NumberOfAssignmentsPending)?h=h.call(b,{hash:{},data:e}):(h=b.NumberOfAssignmentsPending,h=typeof h===i?h.apply(b):h),f+=j(h)+"</td></tr>\n    <tr><td>NumberOfAssignmentsAvailable</td><td>",(h=c.NumberOfAssignmentsAvailable)?h=h.call(b,{hash:{},data:e}):(h=b.NumberOfAssignmentsAvailable,h=typeof h===i?h.apply(b):h),f+=j(h)+"</td></tr>\n    <tr><td>NumberOfAssignmentsCompleted</td><td>",(h=c.NumberOfAssignmentsCompleted)?h=h.call(b,{hash:{},data:e}):(h=b.NumberOfAssignmentsCompleted,h=typeof h===i?h.apply(b):h),f+=j(h)+"</td></tr>\n  </table>\n</div>\n",f})})()
+(function() {
+  var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
+templates['admin/HITs/one'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
+helpers = helpers || Handlebars.helpers; data = data || {};
+  var buffer = "", stack1, stack2, functionType="function", escapeExpression=this.escapeExpression;
+
+
+  buffer += "<div class=\"hit\">\n  <h2>HIT: ";
+  if (stack1 = helpers.Title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.Title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</h2>\n  <table class=\"keyval\">\n    <tr><td>HITId</td><td><a href=\"HITs/";
+  if (stack1 = helpers.HITId) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.HITId; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\">";
+  if (stack1 = helpers.HITId) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.HITId; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</a></td></tr>\n    <tr><td>HITTypeId</td><td>";
+  if (stack1 = helpers.HITTypeId) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.HITTypeId; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td></tr>\n    <tr><td>CreationTime</td><td>";
+  if (stack1 = helpers.CreationTime) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.CreationTime; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td></tr>\n    <tr><td>Expiration</td><td>";
+  if (stack1 = helpers.Expiration) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.Expiration; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td></tr>\n    <tr><td>Keywords</td><td>";
+  if (stack1 = helpers.Keywords) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.Keywords; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td></tr>\n    <tr><td>Description</td><td>";
+  if (stack1 = helpers.Description) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.Description; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td></tr>\n    <tr><td>HITStatus</td><td>";
+  if (stack1 = helpers.HITStatus) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.HITStatus; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td></tr>\n    <tr><td>HITReviewStatus</td><td>";
+  if (stack1 = helpers.HITReviewStatus) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.HITReviewStatus; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td></tr>\n    <tr><td>MaxAssignments</td><td>";
+  if (stack1 = helpers.MaxAssignments) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.MaxAssignments; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td></tr>\n    <tr><td>Reward</td><td>"
+    + escapeExpression(((stack1 = ((stack1 = depth0.Reward),stack1 == null || stack1 === false ? stack1 : stack1.FormattedPrice)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</td></tr>\n    <tr><td>AssignmentDurationInSeconds</td><td>";
+  if (stack2 = helpers.AssignmentDurationInSeconds) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
+  else { stack2 = depth0.AssignmentDurationInSeconds; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
+  buffer += escapeExpression(stack2)
+    + "</td></tr>\n    <tr><td>AutoApprovalDelayInSeconds</td><td>";
+  if (stack2 = helpers.AutoApprovalDelayInSeconds) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
+  else { stack2 = depth0.AutoApprovalDelayInSeconds; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
+  buffer += escapeExpression(stack2)
+    + "</td></tr>\n    <tr><td>NumberOfAssignmentsPending</td><td>";
+  if (stack2 = helpers.NumberOfAssignmentsPending) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
+  else { stack2 = depth0.NumberOfAssignmentsPending; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
+  buffer += escapeExpression(stack2)
+    + "</td></tr>\n    <tr><td>NumberOfAssignmentsAvailable</td><td>";
+  if (stack2 = helpers.NumberOfAssignmentsAvailable) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
+  else { stack2 = depth0.NumberOfAssignmentsAvailable; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
+  buffer += escapeExpression(stack2)
+    + "</td></tr>\n    <tr><td>NumberOfAssignmentsCompleted</td><td>";
+  if (stack2 = helpers.NumberOfAssignmentsCompleted) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
+  else { stack2 = depth0.NumberOfAssignmentsCompleted; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
+  buffer += escapeExpression(stack2)
+    + "</td></tr>\n  </table>\n</div>\n";
+  return buffer;
+  });
+templates['admin/assignments/one'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
+helpers = helpers || Handlebars.helpers; data = data || {};
+  var buffer = "", stack1, options, functionType="function", escapeExpression=this.escapeExpression, self=this, blockHelperMissing=helpers.blockHelperMissing;
+
+function program1(depth0,data) {
+  
+  
+  return "\n      <button data-action=\"ApproveAssignment\">Approve</button>\n      <button data-action=\"RejectAssignment\">Reject</button>\n    ";
+  }
+
+function program3(depth0,data) {
+  
+  
+  return "\n      <button data-action=\"ApproveRejectedAssignment\">Unreject and Approve</button>\n    ";
+  }
+
+function program5(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n    <tr><td>ApprovalTime</td><td>";
+  if (stack1 = helpers.ApprovalTime) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.ApprovalTime; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td></tr>\n  ";
+  return buffer;
+  }
+
+function program7(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n    <tr><td>RejectionTime</td><td>";
+  if (stack1 = helpers.RejectionTime) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.RejectionTime; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td></tr>\n  ";
+  return buffer;
+  }
+
+function program9(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n    <tr><td>";
+  if (stack1 = helpers.key) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.key; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td><td>";
+  if (stack1 = helpers.value) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.value; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td></tr>\n  ";
+  return buffer;
+  }
+
+function program11(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n    <tr><td>";
+  if (stack1 = helpers.QuestionIdentifier) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.QuestionIdentifier; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td><td>";
+  if (stack1 = helpers.FreeText) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.FreeText; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td></tr>\n  ";
+  return buffer;
+  }
+
+  buffer += "<h3>Assignment: ";
+  if (stack1 = helpers.AssignmentId) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.AssignmentId; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</h3>\n\n<div class=\"controls\">\n  <fieldset class=\"status\"><legend>Status</legend>\n    <span class=\"";
+  if (stack1 = helpers.AssignmentStatus) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.AssignmentStatus; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\">";
+  if (stack1 = helpers.AssignmentStatus) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.AssignmentStatus; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</span>\n    ";
+  options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data};
+  if (stack1 = helpers.Submitted) { stack1 = stack1.call(depth0, options); }
+  else { stack1 = depth0.Submitted; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (!helpers.Submitted) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n    ";
+  options = {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data};
+  if (stack1 = helpers.Rejected) { stack1 = stack1.call(depth0, options); }
+  else { stack1 = depth0.Rejected; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (!helpers.Rejected) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n  </fieldset>\n\n  <fieldset class=\"bonus hform\"><legend>Bonus</legend>\n    <label><span>Amount:</span> <input name=\"amount\" value=\"";
+  if (stack1 = helpers.bonus_owed) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.bonus_owed; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" /></label>\n    <label><span>Reason:</span> <input name=\"reason\" value=\"";
+  if (stack1 = helpers.reason) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.reason; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" /></label>\n    <button data-action=\"GrantBonus\">Grant Bonus</button>\n  </fieldset>\n</div>\n\n<table class=\"keyval\">\n  <tr><th colspan=\"2\">AWS</th></tr>\n  <tr><td>WorkerId</td><td>";
+  if (stack1 = helpers.WorkerId) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.WorkerId; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + " <a href=\"../Workers/";
+  if (stack1 = helpers.WorkerId) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.WorkerId; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\">json</a></td></tr>\n  <tr><td>AutoApprovalTime</td><td>";
+  if (stack1 = helpers.AutoApprovalTime) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.AutoApprovalTime; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td></tr>\n  <tr><td>AcceptTime</td><td>";
+  if (stack1 = helpers.AcceptTime) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.AcceptTime; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td></tr>\n  <tr><td>SubmitTime</td><td>";
+  if (stack1 = helpers.SubmitTime) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.SubmitTime; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td></tr>\n  ";
+  options = {hash:{},inverse:self.noop,fn:self.program(5, program5, data),data:data};
+  if (stack1 = helpers.Approved) { stack1 = stack1.call(depth0, options); }
+  else { stack1 = depth0.Approved; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (!helpers.Approved) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n  ";
+  options = {hash:{},inverse:self.noop,fn:self.program(7, program7, data),data:data};
+  if (stack1 = helpers.Rejected) { stack1 = stack1.call(depth0, options); }
+  else { stack1 = depth0.Rejected; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (!helpers.Rejected) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n  <tr><th colspan=\"2\">User</th></tr>\n  ";
+  options = {hash:{},inverse:self.noop,fn:self.program(9, program9, data),data:data};
+  if (stack1 = helpers.user_fields) { stack1 = stack1.call(depth0, options); }
+  else { stack1 = depth0.user_fields; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (!helpers.user_fields) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n  <tr><th colspan=\"2\">Responses</th></tr>\n  ";
+  options = {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data};
+  if (stack1 = helpers.Answer) { stack1 = stack1.call(depth0, options); }
+  else { stack1 = depth0.Answer; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (!helpers.Answer) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n</table>\n\n<div style=\"clear: both\">\n  <button class=\"responses\">Load responses</button>\n</div>\n";
+  return buffer;
+  });
+templates['form-input'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
+helpers = helpers || Handlebars.helpers; data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+
+
+  buffer += "<label>";
+  if (stack1 = helpers.label) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.label; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</label><input name=\"";
+  if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" value=\"";
+  if (stack1 = helpers.value) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.value; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" />";
+  return buffer;
+  });
+templates['stims/aircraft/batch-debriefing'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
+helpers = helpers || Handlebars.helpers; data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression, self=this;
+
+function program1(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n<p> Based on your performance, you have an available bonus of $";
+  if (stack1 = helpers.bonus) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.bonus; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + ".\n<div>\n  <button data-id=\"continue\">Claim bonus and continue</button>\n  <!-- <button data-id=\"stop\">Claim bonus and quit task</button> -->\n</div>\n";
+  return buffer;
+  }
+
+function program3(depth0,data) {
+  
+  
+  return "\n<div>\n  <button data-id=\"continue\">Continue</button>\n  <!-- <button data-id=\"stop\">Quit task</button> -->\n</div>\n";
+  }
+
+  buffer += "<h3>End of Batch ";
+  if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</h3>\n\n";
+  stack1 = helpers['if'].call(depth0, depth0.bonus_available, {hash:{},inverse:self.program(3, program3, data),fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n\n<p>Note that the number of estimated aircraft in the sky may change in the next series of scenes.\n";
+  return buffer;
+  });
+templates['stims/aircraft/conclusion'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
+helpers = helpers || Handlebars.helpers; data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+
+
+  buffer += "<form method=\"POST\" action=\"";
+  if (stack1 = helpers.host) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.host; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "/mturk/externalSubmit\">\n  <input type=\"hidden\" name=\"assignmentId\" value=\"";
+  if (stack1 = helpers.assignmentId) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.assignmentId; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" />\n  <input type=\"hidden\" name=\"turkerId\" value=\"";
+  if (stack1 = helpers.workerId) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.workerId; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" />\n  <input type=\"hidden\" name=\"duration\" value=\"";
+  if (stack1 = helpers.duration) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.duration; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" />\n\n  <h3>Comments</h3>\n  <label>\n    <div>Did you find one of the allies more useful than others?\n      Please discuss any overall thoughts on the allies: ";
+  if (stack1 = helpers.all_allies_string) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.all_allies_string; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + ".</div>\n    <textarea rows=\"4\" cols=\"80\" name=\"allies_comments\"></textarea>\n  </label>\n\n  <label>\n    <div>What characterized enemy planes?</div>\n    <textarea rows=\"2\" cols=\"80\" name=\"enemy_comments\"></textarea>\n  </label>\n\n  <label>\n    <div>What characterized friendly planes?</div>\n    <textarea rows=\"2\" cols=\"80\" name=\"friendly_comments\"></textarea>\n  </label>\n\n  <label>\n    <div>Was this task unclear, mispriced, or frustrating? If we could make it better, let us know!</div>\n    <textarea rows=\"4\" cols=\"80\" name=\"task_comments\"></textarea>\n  </label>\n\n  <p class=\"clear\">\n    <input type=\"submit\" value=\"Submit Responses and Finish Task\" />\n  </p>\n</form>\n";
+  return buffer;
+  });
+templates['stims/aircraft/scene'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
+helpers = helpers || Handlebars.helpers; data = data || {};
+  var buffer = "", stack1, options, functionType="function", escapeExpression=this.escapeExpression, self=this, blockHelperMissing=helpers.blockHelperMissing;
+
+function program1(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n        <tr class=\"";
+  if (stack1 = helpers.judgment) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.judgment; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\">\n          <td>";
+  if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "&nbsp;";
+  if (stack1 = helpers.name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + ":</td>\n          <td><span>";
+  if (stack1 = helpers.judgment) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.judgment; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</span></td>\n        </tr>\n        ";
+  return buffer;
+  }
+
+function program3(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n    <img src=\"/static/aircraft/pixelated/";
+  if (stack1 = helpers.src) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.src; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" />\n ";
+  return buffer;
+  }
+
+  buffer += "<h3>Batch ";
+  if (stack1 = helpers.batch_id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.batch_id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + " / Scene ";
+  if (stack1 = helpers.id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</h3>\n<table>\n  <tr>\n    <td><img src=\"/static/aircraft/pixelated/";
+  if (stack1 = helpers.src) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.src; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" /></td>\n    <td style=\"padding-left: 20px; vertical-align: top;\">\n      <table class=\"stats\">\n        <tr><td>Estimated number of friendly aircraft in the sky:</td><td>";
+  if (stack1 = helpers.total_friendly) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.total_friendly; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td></tr>\n        <tr><td>Estimated number of enemy aircraft in the sky:</td><td>";
+  if (stack1 = helpers.total_enemy) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.total_enemy; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</td></tr>\n      </table>\n\n      <h3>Allies:</h3>\n      <table class=\"allies\">\n        ";
+  options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data};
+  if (stack1 = helpers.allies) { stack1 = stack1.call(depth0, options); }
+  else { stack1 = depth0.allies; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (!helpers.allies) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n      </table>\n\n      <h3>Your decision:</h3>\n      <div class=\"spaced-buttons\">\n        <button data-id=\"enemy\">Enemy</button>\n        <button data-id=\"friend\">Pass</button>\n      </div>\n    </td>\n  </tr>\n</table>\n<div style=\"display: none\">\n ";
+  options = {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data};
+  if (stack1 = helpers.next) { stack1 = stack1.call(depth0, options); }
+  else { stack1 = depth0.next; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (!helpers.next) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n</div>\n";
+  return buffer;
+  });
+templates['stims/consent'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
+helpers = helpers || Handlebars.helpers; data = data || {};
+  
+
+
+  return "<h3>Consent form</h3>\n<p>\n  You are invited to participate in a study, entitled \"Learning in Social Networks\". The study is being conducted by Colin Bannard in the Linguistics department of The University of Texas at Austin.\n<p>\n  Department of Linguistics<br/>\n  University of Texas at Austin,<br/>\n  305 E. 23rd Street B5100,<br/>\n  Austin, TX 78712, USA<br/>\n  (512) 471-9022\n<p>The purpose of this study is to examine how people learn. We estimate that it will take about half a minute of your time to complete each question, and you will be paid 2 cents for each question you respond to. You are free to contact the investigator at the above address and phone number to discuss the survey.\n<p>Risks to participants are considered minimal. There will be no costs for participating. You will be paid for each HIT you complete, but will not otherwise benefit from participating. Your Amazon Mechanical Turk identification will be kept while we collect data for tracking purposes only. A limited number of research team members will have access to the data during data collection. This information will be stripped from the final dataset.\n<p>Your participation in this survey is voluntary. You may decline to answer any question and you have the right to withdraw from participation at any time without penalty. If you wish to withdraw from the study or have any questions, contact the investigator listed above.\n<p>If you have any questions, please email Colin Bannard at bannard@utexas.edu. You may also request a hard copy of the survey from the contact information above.\n<p>This study has been reviewed and approved by The University of Texas at Austin Institutional Review Board (IRB Study Number 2010-10-0051). If you have questions about your rights as a study participant, or are dissatisfied at any time with any aspect of this study, you may contact - anonymously, if you wish - the Institutional Review Board by phone at (512) 471-8871 or email at orsc@uts.cc.utexas.edu.\n<p>\n<button>I Consent</button>\n";
+  });
+templates['stims/digits/batch'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
+helpers = helpers || Handlebars.helpers; data = data || {};
+  var buffer = "", stack1, stack2, functionType="function", escapeExpression=this.escapeExpression;
+
+
+  buffer += "<table cellpadding=\"0\" cellspacing=\"0\" style=\"margin: 0 auto\">\n  <tr>\n    <th colspan=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.scenes),stack1 == null || stack1 === false ? stack1 : stack1.length)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" class=\"left\">\n      <h3>Bomb ";
+  if (stack2 = helpers.id) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
+  else { stack2 = depth0.id; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
+  buffer += escapeExpression(stack2)
+    + "</h3>\n    </th>\n  </tr>\n  <tr id=\"digits\"></tr>\n  <tr>\n    <td colspan=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.scenes),stack1 == null || stack1 === false ? stack1 : stack1.length)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" class=\"right\" style=\"padding: 20px 0\">\n      <button disabled=\"true\">Submit</button>\n    </td>\n  </tr>\n</table>\n";
+  return buffer;
+  });
+templates['stims/digits/conclusion'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
+helpers = helpers || Handlebars.helpers; data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+
+
+  buffer += "<form method=\"POST\" action=\"";
+  if (stack1 = helpers.host) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.host; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "/mturk/externalSubmit\">\n  <input type=\"hidden\" name=\"assignmentId\" value=\"";
+  if (stack1 = helpers.assignmentId) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.assignmentId; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" />\n  <input type=\"hidden\" name=\"turkerId\" value=\"";
+  if (stack1 = helpers.workerId) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.workerId; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" />\n  <input type=\"hidden\" name=\"duration\" value=\"";
+  if (stack1 = helpers.duration) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.duration; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" />\n\n  <p>Comments are optional, but much appreciated.</p>\n\n  <label>\n    <div>Did you find one of your colleagues more useful than others?\n      Please discuss whether they (";
+  if (stack1 = helpers.all_allies_string) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.all_allies_string; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + ") were helpful or not.</div>\n    <textarea rows=\"4\" cols=\"80\" name=\"allies_comments\"></textarea>\n  </label>\n\n  <label>\n    <div>What strategy worked the best?</div>\n    <textarea rows=\"2\" cols=\"80\" name=\"strategy_comments\"></textarea>\n  </label>\n\n  <label>\n    <div>Was this task unclear, mispriced, or frustrating? If we could make it better, let us know!</div>\n    <textarea rows=\"4\" cols=\"80\" name=\"task_comments\"></textarea>\n  </label>\n\n  <p class=\"clear\">\n    <input type=\"submit\" value=\"Submit Responses and Finish Task\" />\n  </p>\n</form>\n";
+  return buffer;
+  });
+templates['stims/digits/scene'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
+helpers = helpers || Handlebars.helpers; data = data || {};
+  var buffer = "", stack1, options, functionType="function", escapeExpression=this.escapeExpression, self=this, blockHelperMissing=helpers.blockHelperMissing;
+
+function program1(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n    <tr class=\"";
+  if (stack1 = helpers.judgment) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.judgment; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\">\n      <td>";
+  if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "&nbsp;";
+  if (stack1 = helpers.name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + ":</td>\n      <td><span>";
+  if (stack1 = helpers.judgment) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.judgment; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</span></td>\n    </tr>\n    ";
+  return buffer;
+  }
+
+  buffer += "<div class=\"image\"><!-- fill in with canvas rendering --></div>\n\n<div class=\"allies\">\n  <h3>Colleagues:</h3>\n  <table>\n    ";
+  options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data};
+  if (stack1 = helpers.allies) { stack1 = stack1.call(depth0, options); }
+  else { stack1 = depth0.allies; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (!helpers.allies) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n  </table>\n</div>\n\n<div class=\"user-judgment\">\n  <h3>Your<br/> judgment:</h3>\n  <input type=\"text\" maxlength=\"1\" min=\"0\" max=\"10\" required />\n</div>\n";
+  return buffer;
+  });
+templates['stims/feedback'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
+helpers = helpers || Handlebars.helpers; data = data || {};
+  var buffer = "", stack1, self=this;
+
+function program1(depth0,data) {
+  
+  
+  return "\n    <img src=\"/static/smile.gif\" alt=\"☺\" />\n  ";
+  }
+
+function program3(depth0,data) {
+  
+  
+  return "\n    <img src=\"/static/frown.gif\" alt=\"☹\" />\n  ";
+  }
+
+  buffer += "<div class=\"emoticon\">\n  ";
+  stack1 = helpers['if'].call(depth0, depth0.correct, {hash:{},inverse:self.program(3, program3, data),fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n</div>\n";
+  return buffer;
+  });
+})();

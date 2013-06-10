@@ -107,22 +107,8 @@ var Batch = Backbone.Model.extend({
 });
 var BatchCollection = Backbone.Collection.extend({model: Batch});
 
-// var BatchView = TemplateView.extend({
-//   template: 'aircraft-batch.mu',
-//   postRender: function(ctx) {
-//     this.showBatch(this.collection.first());
-//   },
-//   showBatch: function(batch) {
-//     var scene = batch.scenes.first();
-//     this.showScene(scene, batch);
-//   },
-//   showScene: function(scene, batch) {
-//     var self = this;
-//   }
-// });
-
 var SceneView = TemplateView.extend({
-  template: 'aircraft-scene.mu',
+  template: 'stims/aircraft/scene',
   // a scene is given exactly a model
   preRender: function(ctx) {
     this.model.set('shown', now());
@@ -156,7 +142,7 @@ var SceneView = TemplateView.extend({
 });
 
 var SceneFeedbackView = TemplateView.extend({
-  template: 'feedback.mu',
+  template: 'stims/feedback',
   postRender: function(ctx) {
     var self = this;
     setTimeout(function() {
@@ -178,7 +164,7 @@ var SceneFeedbackView = TemplateView.extend({
 });
 
 var BatchDebriefingView = TemplateView.extend({
-  template: 'aircraft-batch-debriefing.mu',
+  template: 'stims/aircraft/batch-debriefing',
   preRender: function(ctx) {
     ctx.bonus_available = ctx.bonus > 0;
   },
@@ -217,7 +203,7 @@ var BatchDebriefingView = TemplateView.extend({
 });
 
 var ConclusionView = TemplateView.extend({
-  template: 'aircraft-conclusion.mu',
+  template: 'stims/aircraft/conclusion',
   preRender: function(ctx) {
     var allies = this.model.scenes.first().get('allies');
     var ally_names = allies.map(function(ally, i) {
@@ -232,7 +218,7 @@ var ConclusionView = TemplateView.extend({
 });
 
 var ConsentView = TemplateView.extend({
-  template: 'consent.mu',
+  template: 'stims/consent',
   events: {
     'click button': 'next'
   },

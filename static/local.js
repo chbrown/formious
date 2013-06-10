@@ -26,7 +26,7 @@ function renderHandlebars(template_name, context, ajax) {
     template = _cache[template_name];
     if (template === undefined) {
       $.ajax({
-        url: '/templates/' + template_name,
+        url: '/templates/' + template_name + '.bars',
         async: false,
         success: function(template_src) {
           template = _cache[template_name] = Handlebars.compile(template_src);
@@ -88,10 +88,8 @@ var TemplatedCollection = Backbone.Collection.extend({
   }
 });
 
-
-
 var FormInput = TemplateView.extend({
-  template: 'form-input.mu',
+  template: 'form-input',
   preRender: function(ctx) {
     this.id = ctx.id;
     ctx.label = ctx.label || this.id;
@@ -115,7 +113,7 @@ var FormInput = TemplateView.extend({
 var HIT = Backbone.Model.extend({});
 var HITCollection = TemplatedCollection.extend({url: 'hits'});
 var HITView = TemplateView.extend({
-  template: 'hit.mu'
+  template: 'admin/HITs/one'
 });
 var MTWorker = Backbone.Model.extend({
   urlRoot: '../Workers'
@@ -133,7 +131,7 @@ var AssignmentCollection = TemplatedCollection.extend({
 });
 var AssignmentView = TemplateView.extend({
   className: 'assignment',
-  template: 'assignment.mu',
+  template: 'admin/assignments/one',
   preRender: function(ctx) {
     // AssignmentStatus is one of Submitted | Approved | Rejected
     ctx[ctx.AssignmentStatus] = true;

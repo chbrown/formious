@@ -4,14 +4,16 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
     handlebars: {
       all: {
-        glob: 'templates/*.mu',
-        dest: 'static/templates.js'
+        templates: 'templates/**/*.bars',
+        root: 'templates',
+        extension: 'bars',
+        output: 'static/templates.js',
       }
     },
     uglify: {
       all: {
         options: {
-          beautify: true,
+          // beautify: true,
           mangle: false
         },
         files: {
@@ -19,14 +21,14 @@ module.exports = function(grunt) {
             'static/lib/json2.js',
             'static/lib/underscore.js',
             'static/lib/jquery.js',
-            'static/lib/backbone.js',
             'static/lib/jquery.flags.js',
-            'static/lib/handlebars.js',
             'static/lib/jquery-noty.js',
             'static/lib/jquery-noty.theme.js',
             'static/lib/layouts/top.js', // the required one
             'static/lib/layouts/bottomRight.js',
-            'static/templates.js',
+            'static/lib/backbone.js',
+            'static/lib/handlebars.js',
+            // 'static/templates.js',
             // 'static/local.js',
           ]
         }

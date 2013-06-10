@@ -195,7 +195,7 @@ R.get(/HITs\/(\w+)\.(c|t)sv/, function(m, req, res) {
 
 // GET /admin/mt/:account/:host/HITs/new -> form to create new HIT
 R.get(/HITs\/new/, function(m, req, res) {
-  amulet.render(res, ['layout.mu', 'admin/layout.mu', 'admin/HITs/new.mu'], {});
+  amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/HITs/new.mu']).pipe(res);
 });
 
 // HITs/show
@@ -235,7 +235,7 @@ R.get(/HITs\/(\w+)/, function(m, req, res) {
         }, function(err, assignments) {
           logger.maybe(err);
           ctx.assignments = assignments;
-          amulet.render(res, ['layout.mu', 'admin/layout.mu', 'admin/HITs/one.mu'], ctx);
+          amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/HITs/one.mu'], ctx).pipe(res);
         });
       });
     });
@@ -247,7 +247,7 @@ R.get(/HITs/, function(m, req, res) {
   req.turk.SearchHITs({SortDirection: 'Descending', PageSize: 100}, function(err, result) {
     logger.maybe(err);
     var ctx = {hits: result.SearchHITsResult.HIT};
-    amulet.render(res, ['layout.mu', 'admin/layout.mu', 'admin/HITs/all.mu'], ctx);
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/HITs/all.mu'], ctx).pipe(res);
   });
 });
 

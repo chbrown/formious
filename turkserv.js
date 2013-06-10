@@ -9,7 +9,7 @@ var argv = require('optimist').default({port: 1451, hostname: '127.0.0.1'}).argv
 var Router = require('regex-router');
 var R = new Router();
 
-amulet.set({minify: true, root: path.join(__dirname, 'layouts')});
+amulet.set({minify: true, root: path.join(__dirname, 'templates')});
 
 Cookies.prototype.defaults = function() {
   var expires = new Date(Date.now() + 31*86400 *1000); // 1 month

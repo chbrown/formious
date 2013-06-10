@@ -100,7 +100,7 @@ var BatchCollection = Backbone.Collection.extend({model: Batch});
 var batches = new BatchCollection({{{JSON.stringify(batches)}}});
 
 var BatchView = TemplateView.extend({
-  template: 'digits-batch.mu',
+  template: 'stims/digits/batch',
   // className: 'auto-hmargin',
   postRender: function(ctx) {
     var $digits = this.$('#digits');
@@ -154,7 +154,7 @@ var BatchView = TemplateView.extend({
 
 var SceneView = TemplateView.extend({
   tagName: 'td',
-  template: 'digits-scene.mu',
+  template: 'stims/digits/scene',
   preRender: function(ctx) {
     this.model.set('shown', now());
   },
@@ -178,7 +178,7 @@ var SceneView = TemplateView.extend({
 });
 
 var BatchFeedbackView = TemplateView.extend({
-  template: 'feedback.mu',
+  template: 'stims/feedback',
   postRender: function(ctx) {
     var self = this;
     setTimeout(function() {
@@ -198,7 +198,7 @@ var BatchFeedbackView = TemplateView.extend({
 });
 
 var ConclusionView = TemplateView.extend({
-  template: 'digits-conclusion.mu',
+  template: 'stims/digits/conclusion',
   preRender: function(ctx) {
     var allies = this.model.get('scenes').first().get('allies');
     var ally_names = allies.map(function(ally, i) {
@@ -213,7 +213,7 @@ var ConclusionView = TemplateView.extend({
 });
 
 var ConsentView = TemplateView.extend({
-  template: 'consent.mu',
+  template: 'stims/consent',
   events: {
     'click button': 'next'
   },

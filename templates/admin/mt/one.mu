@@ -22,7 +22,7 @@
         <td>{{.}}</td>
         <td class="right"></td>
         <td><a href="/admin/mt/{{account._id}}/{{.}}/HITs">View HITs</a></td>
-        <td><a href="/admin/mt/{{account._id}}/{{.}}/new">Create new HIT</a></td>
+        <td><a href="/admin/mt/{{account._id}}/{{.}}/HITs/new">Create new HIT</a></td>
       </tr>
     {{/hosts}}
   </tbody>

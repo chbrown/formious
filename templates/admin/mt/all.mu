@@ -27,5 +27,5 @@
       <td>{{created}}</td>
       <td><a href="/admin/mt/{{_id}}" data-method="delete">delete</a></td>
     </tr>
-  {{/}}
+  {{/accounts}}
 </table>
