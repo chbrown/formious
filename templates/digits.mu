@@ -1,12 +1,14 @@
 <style>
-.input {
-  text-align: center;
+body {
+  padding: 10px;
 }
 .emoticon {
   text-align: center;
   font-size: 20em;
 }
-
+.input {
+  text-align: center;
+}
 .allies {
   visibility: hidden;
 }

@@ -6,7 +6,7 @@
   "repository": "git://github.com/chbrown/turkserv.git",
   "author": "Christopher Brown <io@henrian.com>",
   "dependencies": {
-    "amulet": "0.2.9",
+    "amulet": "*",
     "async": "*",
     "cookies": "git://github.com/chbrown/cookies.git",
     "csv": "*",

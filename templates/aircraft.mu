@@ -1,28 +1,30 @@
 <style>
-  button {
-    font-size: 90%;
-    text-transform: capitalize;
-  }
-  .emoticon {
-    text-align: center;
-    font-size: 20em;
-  }
-  .allies td {
-    padding: 8px 4px;
-  }
-  .allies span {
-    font-weight: bold;
-    text-transform: capitalize;
-  }
-  .allies .friend span {
-    color: #00C;
-  }
-  .allies .enemy span {
-    color: #C00;
-  }
-  .allies .pass {
-    visibility: hidden;
-  }
+body {
+  padding: 10px;
+}
+button {
+  font-size: 90%;
+}
+.emoticon {
+  text-align: center;
+  font-size: 20em;
+}
+.allies td {
+  padding: 6px 4px;
+}
+.allies span {
+  font-weight: bold;
+  text-transform: capitalize;
+}
+.allies .friend span {
+  color: #00C;
+}
+.allies .enemy span {
+  color: #C00;
+}
+.allies .pass {
+  visibility: hidden;
+}
 </style>
 
 <h4><i>Scenario:</i></h4>

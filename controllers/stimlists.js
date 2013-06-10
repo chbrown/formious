@@ -3,26 +3,54 @@ var url = require('url');
 var mechturk = require('mechturk');
 var _ = require('underscore');
 var amulet = require('amulet');
-var formidable = require('formidable');
-var User = require('../models').User;
+var models = require('../models');
 var logger = require('../logger');
 var Router = require('regex-router');
-var R = new Router();
 
-// /stimlist
+var R = new Router();
+var authR = new Router();
+
+// /stimlists
 module.exports = function(m, req, res) {
-  var workerId = (req.cookies.get('workerId') || '').replace(/\W+/g, '');
-  User.fromId(workerId, function(err, user) {
-    req.user = user;
-    R.route(req, res);
+  var workerId = req.cookies.get('workerId');
+  var ticket = req.cookies.get('ticket');
+  models.User.withTicket(workerId, ticket, function(err, user) {
+    logger.maybe(err);
+    if (user && user.superuser) {
+      req.user = user;
+      authR.route(req, res);
+    }
+    else {
+      R.route(req, res);
+    }
   });
 };
 
-
-R.get(/^\/stimlist\/new/, function(m, req, res) {
+// /stimlists/new -> create new Stimlist and redirect to edit it.
+authR.get(/^\/stimlists\/new/, function(m, req, res) {
+  // console.log(req.user, typeof(req.user._id));
+  var stimlist = new models.Stimlist({creator: req.user._id});
+  stimlist.save(function(err) {
+    logger.maybe(err);
+    // console.log('-->' + '/stimlists/' + stimlist._id + '/edit');
+    res.redirect('/stimlists/' + stimlist._id + '/edit');
+  });
 });
 
-R.get(/^\/stimlist\/(.+)/, function(m, req, res) {
+// /stimlists/:stimlist_id/edit -> create new Stimlist and redirect to edit it.
+authR.get(/^\/stimlists\/(\w+)\/edit/, function(m, req, res) {
+  models.Stimlist.findById(m[1], function(err, stimlist) {
+    logger.maybe(err);
+    console.log("Rendering");
+    amulet.stream(['layout.mu', 'stimlists/edit.mu'], {stimlist: stimlist}).pipe(res);
+  });
+});
+
+authR.default = function(m, req, res) {
+  R.route(req, res);
+};
+
+R.get(/^\/stimlists\/(.+)/, function(m, req, res) {
   var urlObj = url.parse(req.url, true);
   var spreadsheet = m[1];
   // logger.info('request', {url: urlObj, headers: req.headers});
@@ -38,10 +66,6 @@ R.get(/^\/stimlist\/(.+)/, function(m, req, res) {
     workerId: workerId,
     host: urlObj.query.debug !== undefined ? '' : (urlObj.query.turkSubmitTo || 'https://www.mturk.com'),
     task_started: Date.now(),
-    batches_per_HIT: parseInt(urlObj.query.batches, 10) || 5,
-    scenes_per_batch: parseInt(urlObj.query.scenes, 10) || 4, // i.e., digits per screen
-    allies_per_scene: parseInt(urlObj.query.allies, 10) || 5,
-    feedback_duration: parseInt(urlObj.query.feedback, 10) || 2000, // how long to show the smiley, in ms
   };
   req.cookies.set('workerId', workerId);
 
@@ -55,7 +79,7 @@ R.get(/^\/stimlist\/(.+)/, function(m, req, res) {
     };
   });
 
-  User.findById(workerId, function(err, user) {
+  models.User.findById(workerId, function(err, user) {
     logger.maybe(err);
     if (!user) {
       user = new User({_id: workerId});
@@ -67,6 +91,5 @@ R.get(/^\/stimlist\/(.+)/, function(m, req, res) {
       batch.id = batch_index + 1;
       return batch;
     });
-    amulet.render(res, ['layout.mu', 'digits.mu'], ctx);
   });
 });

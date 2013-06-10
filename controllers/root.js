@@ -6,6 +6,15 @@ var User = require('../models').User;
 var Router = require('regex-router');
 var R = new Router();
 
+function parseJSON(s) {
+  try {
+    return JSON.parse(s);
+  }
+  catch (exc) {
+    return exc;
+  }
+}
+
 // /
 module.exports = function(m, req, res) {
   R.route(req, res);
@@ -59,16 +68,20 @@ R.any(/^\/responses/, function(m, req, res) {
   logger.info('Saving response.', {workerId: workerId});
   req.on('end', function() {
     // need to check this json parse
-    var response = JSON.parse(req.data);
-    response.submitted = new Date();
-    User.findById(workerId, function(err, user) {
-      logger.maybe(err);
-      if (user) {
+    var response = parseJSON(req.data);
+    if (response instanceof Error) {
+      logger.error('Could not parse response, "' + req.data + '". Error: ' + response.toString());
+      res.json({success: true, message: 'Saved response for user: ' + workerId});
+    }
+    else {
+      response.submitted = new Date();
+      User.fromId(workerId, function(err, user) {
+        logger.maybe(err);
         user.responses.push(response);
         user.save(logger.maybe);
-      }
-      res.json({success: true, message: 'Saved response for user: ' + workerId});
-    });
+        res.json({success: true, message: 'Saved response for user: ' + workerId});
+      });
+    }
   });
 });
 

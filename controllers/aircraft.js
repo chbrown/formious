@@ -3,14 +3,11 @@ var url = require('url');
 var mechturk = require('mechturk');
 var _ = require('underscore');
 var amulet = require('amulet');
-var formidable = require('formidable');
 var vsprintf = require('sprintf').vsprintf;
 
 var random = require('../random');
-var models = require('../models');
-var User = models.User;
+var User = require('../models').User;
 var logger = require('../logger');
-
 
 function allyJudgment(reliability, truth, prior_on_enemy) {
   // var prior_on_enemy = 1 - prior_on_friend;
@@ -60,61 +57,52 @@ function makeBatch(prior_on_enemy, number_of_scenes, allies, widths) {
   };
 }
 
-module.exports = function(R) {
+module.exports = function(m, req, res) {
+  // A batch shows scenes, so we start with the batch.
+  // When a batch starts, it's given a batchmodel, which contains a collection of scenes
+  // A scene must attach inside a batch
+  var names = ['Armstrong', 'Cardoso', 'Darlak', 'Gaouette', 'Hartman', 'Klein',
+    'Marin', 'Parker', 'Riedel', 'Tannahill', 'Williams'];
+  var widths = [10, 25, 50, 75, 100, 150]; // from conv.py
+  var priors = [0.1, 0.3, 0.5, 0.7, 0.9];
+  var scenes_per_batch = 50;
 
-  R.any(/aircraft/, function(m, req, res) {
-    // A batch shows scenes, so we start with the batch.
-    // When a batch starts, it's given a batchmodel, which contains a collection of scenes
-    // A scene must attach inside a batch
-    var names = ['Armstrong', 'Cardoso', 'Darlak', 'Gaouette', 'Hartman', 'Klein',
-      'Marin', 'Parker', 'Riedel', 'Tannahill', 'Williams'];
-    var widths = [10, 25, 50, 75, 100, 150]; // from conv.py
-    var priors = [0.1, 0.3, 0.5, 0.7, 0.9];
-    var scenes_per_batch = 50;
+  var urlObj = url.parse(req.url, true);
+  // a normal turk request looks like: urlObj.query =
+  // { assignmentId: '2NXNWAB543Q0EQ3C16EV1YB46I8620K',
+  //   hitId: '2939RJ85OZIZ4RKABAS998123Q9M8NEW85',
+  //   workerId: 'A9T1WQR9AL982W',
+  //   turkSubmitTo: 'https://www.mturk.com' },
+  var context = {
+    assignmentId: urlObj.query.assignmentId,
+    hitId: urlObj.query.hitId,
+    workerId: (urlObj.query.workerId || req.cookies.get('workerId') || '').replace(/\W+/g, ''),
+    host: urlObj.query.debug !== undefined ? '' : (urlObj.query.turkSubmitTo || 'https://www.mturk.com'),
+    task_started: Date.now()
+  };
+  req.cookies.set('workerId', context.workerId);
 
-    var urlObj = url.parse(req.url, true);
-    // a normal turk request looks like: urlObj.query =
-    // { assignmentId: '2NXNWAB543Q0EQ3C16EV1YB46I8620K',
-    //   hitId: '2939RJ85OZIZ4RKABAS998123Q9M8NEW85',
-    //   workerId: 'A9T1WQR9AL982W',
-    //   turkSubmitTo: 'https://www.mturk.com' },
-    var context = {
-      assignmentId: urlObj.query.assignmentId,
-      hitId: urlObj.query.hitId,
-      workerId: (urlObj.query.workerId || req.cookies.get('workerId') || '').replace(/\W+/g, ''),
-      host: urlObj.query.debug !== undefined ? '' : (urlObj.query.turkSubmitTo || 'https://www.mturk.com'),
-      task_started: Date.now()
+  // a preview request will be the same, minus workerId and turkSubmitTo,
+  // and assignmentId will always then be 'ASSIGNMENT_ID_NOT_AVAILABLE'
+  var allies = names.slice(0, 5).map(function(name) {
+    return {
+      title: 'Lt.',
+      name: name,
+      reliability: random.range(0.0, 1.0) // maybe switch in a beta later
     };
-    req.cookies.set('workerId', context.workerId);
-
-    // a preview request will be the same, minus workerId and turkSubmitTo,
-    // and assignmentId will always then be 'ASSIGNMENT_ID_NOT_AVAILABLE'
-    var allies = names.slice(0, 5).map(function(name) {
-      return {
-        title: 'Lt.',
-        name: name,
-        reliability: random.range(0.0, 1.0) // maybe switch in a beta later
-      };
-    });
-
-    User.findById(context.workerId, function(err, user) {
-      logger.maybe(err);
-      if (!user) {
-        user = new User({_id: context.workerId});
-        user.save(logger.maybe);
-      }
-
-      var batch_priors = _.shuffle(priors);
-      // first is the training batch
-      batch_priors.unshift(0.5);
-      context.batches = batch_priors.map(function(prior, i) {
-        var batch = makeBatch(prior, scenes_per_batch, allies, widths);
-        batch.bonus = i > 1 ? 0.25 : 0.00;
-        batch.id = i + 1;
-        return batch;
-      });
-      amulet.render(res, ['layout.mu', 'aircraft.mu'], context);
-    });
   });
 
+  User.fromId(context.workerId, function(err, user) {
+    logger.maybe(err);
+    var batch_priors = _.shuffle(priors);
+    // first is the training batch
+    batch_priors.unshift(0.5);
+    context.batches = batch_priors.map(function(prior, i) {
+      var batch = makeBatch(prior, scenes_per_batch, allies, widths);
+      batch.bonus = i > 1 ? 0.25 : 0.00;
+      batch.id = i + 1;
+      return batch;
+    });
+    amulet.stream(['layout.mu', 'aircraft.mu'], context).pipe(res);
+  });
 };

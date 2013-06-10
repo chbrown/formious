@@ -3,7 +3,6 @@ var url = require('url');
 var mechturk = require('mechturk');
 var _ = require('underscore');
 var amulet = require('amulet');
-var formidable = require('formidable');
 var vsprintf = require('sprintf').vsprintf;
 
 var random = require('./random');

@@ -22,7 +22,7 @@ R.get(/^\/favicon.ico/, function(m, req, res) {
 });
 
 // attach independent routes
-R.any(/^\/stimlist/, require('./controllers/stimlist'));
+R.any(/^\/stimlists/, require('./controllers/stimlists'));
 R.any(/^\/aircraft/, require('./controllers/aircraft'));
 R.any(/^\/digits/, require('./controllers/digits'));
 R.any(/^\/admin/, require('./controllers/admin'));

@@ -24,7 +24,27 @@ var user_schema = new mongoose.Schema({
   _id: String, // AWS workerId
   created: {type: Date, 'default': Date.now},
   seen: [String],
-  responses: [],
+  responses: [
+    /* e.g. {
+      // generic:
+      workerId: config.workerId,
+      task_started: config.task_started,
+      correct: correct,
+      time: now() - this.get('shown'),
+      version: config.version
+
+      prior: this.collection.batch.get('prior'),
+      batch_index: this.collection.batch.id,
+      scene_index: this.id,
+      reliabilities: _.map(this.get('allies'), function(ally) { return ally.reliability.toFixed(4); }),
+      judgments: _.pluck(this.get('allies'), 'judgment'),
+      truth: this.get('truth'),
+      choice: choice,
+      image_id: this.get('image_id'),
+      width: this.get('width'),
+    }, ...
+    */
+  ],
   bonus_paid: {type: Number, 'default': 0},
   bonus_owed: {type: Number, 'default': 0},
   password: String,
@@ -88,3 +108,25 @@ var account_schema = new mongoose.Schema({
 });
 
 var Account = exports.Account = db.model('Account', account_schema);
+
+var stimlist_schema = new mongoose.Schema({
+  created: {type: Date, 'default': Date.now},
+  creator: String, // should be mongoose.Schema.Types.ObjectId,
+  slug: String,
+  csv: String, // original text, unadulterated. Could be used to re-generated states list.
+  states: [
+    /* e.g., {
+      stim: 'consent'
+    }, {
+      // required
+      stim: 'digits',
+      preview: true, // defaults to true
+      // freeform
+      digits: '5,9,7,4,6',
+      allies: 'lucy,menard,george',
+      judgments: 'yes,yes,no',
+    }, ... */
+  ],
+});
+
+var Stimlist = exports.Stimlist = db.model('Stimlist', stimlist_schema);
