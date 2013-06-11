@@ -51,7 +51,6 @@ R.post(/^\/admin\/users\/(\w+)\/claim/, function(m, req, res) {
   var workerId = m[1].replace(/\W+/g, '');
   req.wait(function() {
     var fields = querystring.parse(req.data);
-    // logger.debug(req.url + ' :: ' + workerId, fields);
     models.User.fromId(workerId, function(err, user) {
       logger.maybe(err);
       if (user.password) {

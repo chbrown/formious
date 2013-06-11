@@ -43,8 +43,8 @@ function renderHandlebars(template_name, context, ajax) {
 
 
 
-function makeTable(cols, data) {
-  var trs = data.map(function(cells) {
+function makeTable(cols, rows) {
+  var trs = rows.map(function(cells) {
     return '<td>' + cells.join('</td><td>') + '</td>';
   });
   var thead = '<thead><tr><th>' + cols.join('</th><th>') + '</th></tr></thead>';

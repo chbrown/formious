@@ -37,10 +37,7 @@
 </div>
 
 <script src="/static/compiled.js"></script>
-
-<!-- <script>DEBUG=true</script> -->
 <script src="/static/templates.js"></script>
-
 <script src="/static/local.js"></script>
 <script src="http://chbrown.github.io/clock-js/clock.js"></script>
 <script>

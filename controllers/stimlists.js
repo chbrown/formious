@@ -37,12 +37,12 @@ authR.get(/^\/stimlists\/new/, function(m, req, res) {
   });
 });
 
-// /stimlists/:stimlist_id/edit -> create new Stimlist and redirect to edit it.
+// /stimlists/:stimlist_id/edit -> edit existing Stimlist
 authR.get(/^\/stimlists\/(\w+)\/edit/, function(m, req, res) {
   models.Stimlist.findById(m[1], function(err, stimlist) {
     logger.maybe(err);
-    console.log("Rendering");
-    amulet.stream(['layout.mu', 'stimlists/edit.mu'], {stimlist: stimlist}).pipe(res);
+    // console.log("Rendering");
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'stimlists/edit.mu'], {stimlist: stimlist}).pipe(res);
   });
 });
 

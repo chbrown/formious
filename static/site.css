@@ -5,11 +5,12 @@
 h1,h2,h3,h4,h5,h6{margin:0.75em 0 0.25em 0;}
 p{margin:0.5em 0;}
 body{margin:0;font:13px "Lucida Grande",Arial,sans-serif;}
+fieldset{border:1px solid #CCC;}
 .navbar{position:fixed;top:0;background:#FFF;width:100%;border-bottom:1px solid #CCC;}.navbar a{display:inline-block;border-radius:3px;border:1px solid #555;padding:2px 6px;margin:2px;}.navbar a:hover{background-color:#EEE;}
-.admin{padding:30px 10px 10px;}.admin label{display:block;}.admin label span{font-weight:bold;}
+.admin{padding:30px 10px 10px;}.admin label{display:block;font-size:90%;margin:4px 0 2px;}.admin label span{margin-right:4px;font-weight:bold;}
 .admin button{margin:5px 0;}
-.admin label{display:block;font-size:90%;margin:4px 0 2px;}
-.admin fieldset{margin:0 0 10px 0;border:1px solid #CCC;}.admin fieldset button{margin:10px 10px 0 0;}
+.admin textarea{vertical-align:middle;overflow:hidden;}
+.admin fieldset{margin:0 0 10px 0;}.admin fieldset button{margin:10px 10px 0 0;}
 .admin .hform label span{display:inline-block;width:75px;}
 .admin .vform label span{display:block;}
 .admin table{border-collapse:collapse;}.admin table th{text-align:left;white-space:nowrap;}

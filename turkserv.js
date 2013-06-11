@@ -29,14 +29,13 @@ R.any(/^\/admin/, require('./controllers/admin'));
 R.default = require('./controllers/root');
 
 http.createServer(function(req, res) {
-  req.saveData();
+  // req.saveData();
   req.cookies = new Cookies(req, res);
 
   var started = Date.now();
-  res.end = function() {
+  res.on('finish', function() {
     logger.info('duration', {url: req.url, method: req.method, ms: Date.now() - started});
-    http.ServerResponse.prototype.end.apply(res, arguments);
-  };
+  });
 
   R.route(req, res);
 }).listen(argv.port, argv.hostname, function() {

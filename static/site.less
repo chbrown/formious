@@ -9,6 +9,9 @@ body {
   margin: 0;
   font: 13px "Lucida Grande", Arial, sans-serif;
 }
+fieldset {
+  border: 1px solid #CCC;
+}
 .navbar {
   position: fixed;
   top: 0;
@@ -30,21 +33,22 @@ body {
   padding: 30px 10px 10px;
   label {
     display: block;
+    font-size: 90%;
+    margin: 4px 0 2px;
     span {
+      margin-right: 4px;
       font-weight: bold;
     }
   }
   button {
     margin: 5px 0;
   }
-  label {
-    display: block;
-    font-size: 90%;
-    margin: 4px 0 2px;
+  textarea {
+    vertical-align: middle;
+    overflow: hidden;
   }
   fieldset {
     margin: 0 0 10px 0;
-    border: 1px solid #CCC;
     button {
       margin: 10px 10px 0 0;
     }

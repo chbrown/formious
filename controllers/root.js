@@ -1,6 +1,7 @@
 'use strict'; /*jslint node: true, es5: true, indent: 2 */
 var formidable = require('formidable');
 var amulet = require('amulet');
+var sv = require('sv');
 var logger = require('../logger');
 var User = require('../models').User;
 var Router = require('regex-router');
@@ -114,4 +115,20 @@ R.post(/^\/addbonus/, function(m, req, res) {
       }
     });
   });
+});
+
+R.post(/^\/sv$/, function(m, req, res) {
+  // res.writeHead(200, {'Content-Type': 'text/csv'});
+  // req
+  //   .pipe(new sv.Parser());
+  //   .pipe(new sv.Stringifier({delimiter: ','}))
+  //   .pipe(res);
+  var rows = [];
+  req.pipe(new sv.Parser())
+    .on('data', function(row) {
+      rows.push(row);
+    })
+    .on('end', function() {
+      res.json(rows);
+    });
 });
