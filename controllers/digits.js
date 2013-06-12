@@ -3,8 +3,8 @@ var url = require('url');
 var _ = require('underscore');
 var amulet = require('amulet');
 
-var random = require('../random');
 var User = require('../models').User;
+var misc = require('../misc');
 var logger = require('../logger');
 
 var names = ['Banks', 'Barkley', 'Bowers', 'Dean', 'Frederick', 'Henderson',
@@ -96,7 +96,7 @@ module.exports = function(m, req, res) {
     return {
       title: 'Sgt.',
       name: name,
-      reliability: random.range(0.0, 1.0) // maybe switch in a beta later
+      reliability: misc.randRange(0.0, 1.0) // maybe switch in a beta later
     };
   });
 

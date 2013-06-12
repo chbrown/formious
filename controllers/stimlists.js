@@ -3,6 +3,7 @@ var url = require('url');
 var mechturk = require('mechturk');
 var _ = require('underscore');
 var amulet = require('amulet');
+var misc = require('../misc');
 var models = require('../models');
 var logger = require('../logger');
 var Router = require('regex-router');
@@ -41,8 +42,47 @@ authR.get(/^\/stimlists\/new/, function(m, req, res) {
 authR.get(/^\/stimlists\/(\w+)\/edit/, function(m, req, res) {
   models.Stimlist.findById(m[1], function(err, stimlist) {
     logger.maybe(err);
+    amulet.stream(['layout.mu', 'stimlists/edit.mu'], {stimlist: stimlist}).pipe(res);
+  });
+});
+
+// /stimlists/:stimlist_id/:index -> show single existing Stimlist
+authR.get(/^\/stimlists\/(\w+)\/edit/, function(m, req, res) {
+  models.Stimlist.findById(m[1], function(err, stimlist) {
+    logger.maybe(err);
     // console.log("Rendering");
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'stimlists/edit.mu'], {stimlist: stimlist}).pipe(res);
+    amulet.stream(['stimlists/edit.mu'], {stimlist: stimlist}).pipe(res);
+  });
+});
+
+authR.patch(/^\/stimlists\/(\w+)/, function(m, req, res) {
+  req.readToEnd(function(err, stimlist_json) {
+    logger.maybe(err);
+    console.log('#stimlist_json', stimlist_json.length);
+    var fields = misc.parseJSON(stimlist_json);
+    // console.log(data.length, m[1], data);
+    if (fields instanceof Error) {
+      var message = 'Could not parse stimlist. Error: ' + fields.toString();
+      logger.error(message);
+      res.json({success: false, message: message});
+    }
+    else {
+      models.Stimlist.findById(m[1], function(err, stimlist) {
+        logger.maybe(err);
+        _.extend(stimlist, fields);
+        stimlist.save();
+        res.json(stimlist);
+      });
+    }
+  });
+});
+
+authR.get(/^\/stimlists\/(\w+)\/(\d+)/, function(m, req, res) {
+  models.Stimlist.findById(m[1], function(err, stimlist) {
+    logger.maybe(err);
+    var index = parseInt(m[2], 10);
+    var state = stimlist.states[index];
+    amulet.stream(['stimlists/one.mu'], {state: state}).pipe(res);
   });
 });
 

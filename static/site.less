@@ -12,6 +12,44 @@ body {
 fieldset {
   border: 1px solid #CCC;
 }
+label {
+  display: block;
+  font-size: 90%;
+  margin: 4px 0 2px;
+  span {
+    margin-right: 4px;
+    font-weight: bold;
+  }
+  label[disabled] {
+    color: #777;
+  }
+}
+fieldset {
+  margin: 0 0 10px 0;
+  button {
+    margin: 10px 10px 0 0;
+  }
+}
+button {
+  margin: 5px 0;
+}
+table {
+  border-collapse: collapse;
+  th {
+    text-align: left;
+    .nowrap;
+  }
+  td {
+    padding: 1px 4px;
+    vertical-align: top;
+  }
+}
+.panes {
+  & > div {
+    padding: 10px;
+  }
+}
+
 .navbar {
   position: fixed;
   top: 0;
@@ -29,70 +67,44 @@ fieldset {
     margin: 2px;
   }
 }
+.hform label span {
+  display: inline-block;
+  width: 75px;
+}
+.vform label span {
+  display: block;
+}
+.assignment {
+  margin-top: 10px;
+  padding-left: 10px;
+  border: 1px dotted #ddd;
+  .controls {
+    float: left;
+    width: 30%;
+  }
+  .keyval {
+    float: left;
+    width: 64%;
+    margin-left: 10px;
+    td:first-child {
+      width: 120px;
+    }
+  }
+  input {
+    width: 200px;
+  }
+}
+textarea {
+  vertical-align: middle;
+  overflow: hidden;
+}
 .admin {
   padding: 30px 10px 10px;
-  label {
-    display: block;
+  td {
+    border-bottom: 1px solid #DDD;
     font-size: 90%;
-    margin: 4px 0 2px;
-    span {
-      margin-right: 4px;
-      font-weight: bold;
-    }
   }
-  button {
-    margin: 5px 0;
-  }
-  textarea {
-    vertical-align: middle;
-    overflow: hidden;
-  }
-  fieldset {
-    margin: 0 0 10px 0;
-    button {
-      margin: 10px 10px 0 0;
-    }
-  }
-  .hform label span {
-    display: inline-block;
-    width: 75px;
-  }
-  .vform label span {
-    display: block;
-  }
-  table {
-    border-collapse: collapse;
-    th {
-      text-align: left;
-      .nowrap;
-    }
-    td {
-      border-bottom: 1px solid #DDD;
-      font-size: 90%;
-      padding: 1px 4px;
-      vertical-align: top;
-    }
-  }
-  .assignment {
-    margin-top: 10px;
-    padding-left: 10px;
-    border: 1px dotted #ddd;
-    .controls {
-      float: left;
-      width: 30%;
-    }
-    .keyval {
-      float: left;
-      width: 64%;
-      margin-left: 10px;
-      td:first-child {
-        width: 120px;
-      }
-    }
-    input {
-      width: 200px;
-    }
-  }
+
   .keyval {
     th {
       padding-top: 4px;
@@ -102,14 +114,12 @@ fieldset {
       font-weight: bold;
     }
   }
-  .status {
-    span {
-      font-size: 110%;
-      font-weight: bold;
-      &.Submitted { color: #CCC; }
-      &.Approved { color: darkgreen; }
-      &.Rejected { color: darkred; }
-    }
+  .status span {
+    font-size: 110%;
+    font-weight: bold;
+    &.Submitted { color: #CCC; }
+    &.Approved { color: darkgreen; }
+    &.Rejected { color: darkred; }
   }
 }
 
@@ -119,9 +129,6 @@ fieldset {
     display: block;
     padding: 2px 2px;
   }
-}
-label[disabled] {
-  color: #777;
 }
 .spaced-buttons {
   button {

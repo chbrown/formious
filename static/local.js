@@ -42,7 +42,6 @@ function renderHandlebars(template_name, context, ajax) {
 
 
 
-
 function makeTable(cols, rows) {
   var trs = rows.map(function(cells) {
     return '<td>' + cells.join('</td><td>') + '</td>';
@@ -55,16 +54,19 @@ function makeTable(cols, rows) {
 
 // requires Backbone and Handlebars to be loaded
 var TemplateView = Backbone.View.extend({
+  // TemplateView has hooks called (pre|post)(Initialize|Render), each of which take a context
+  //   that context is just the model and whatever options the view is initialized with.
+  // preInitialize, postInitialize, preRender, postRender
   initialize: function(opts) {
     // prePreRender
     var ctx = _.extend(this.model ? this.model.toJSON() : {}, opts);
+    if (this.preInitialize) this.preInitialize(ctx);
     this.render(ctx);
     if (this.postInitialize) this.postInitialize(ctx);
   },
   render: function(ctx) {
-    var self = this;
     if (this.preRender) this.preRender(ctx);
-    self.el.innerHTML = renderHandlebars(this.template, ctx);
+    this.el.innerHTML = renderHandlebars(this.template, ctx);
     if (this.postRender) this.postRender(ctx);
     if (ctx.replace) {
       // if .replace is given, it's the parent node that this new view should
@@ -108,6 +110,88 @@ var FormInput = TemplateView.extend({
     }
   }
 });
+
+
+var PaneManager = function(opts) {
+  this.$el = $(opts.el);
+  // initialize stuff
+  this.$el.css({width: '100%', height: '100%'});
+};
+PaneManager.prototype.add = function($pane) {
+  // $pane could actually be html, just as well
+  this.$el.append($pane);
+  this.layout();
+};
+PaneManager.prototype.set = function(index, $pane) {
+  var $panes = this.$el.children();
+  // console.log(index, $pane, $panes.length);
+  if (index == $panes.length) {
+    this.add($pane);
+  }
+  else {
+    // throw error or just don't do anything if $panes.length == 2 and we set(4, '<br/>'), e.g.
+    $panes.eq(index).replaceWith($pane);
+    // don't layout
+  }
+};
+// PaneManager.prototype.get = function(index) {
+//   // $pane could actually be html, just as well
+// };
+PaneManager.prototype.layout = function(orientation) {
+  if (orientation === undefined) orientation = 'v';
+  var $panes = this.$el.children().attr('style', '').css({overflow: 'hidden'});
+  // console.log('layout -> ', $panes.length);
+  if ($panes.length == 1) {
+    // $panes.css({width: '', height: ''});
+    $panes.css({
+      width: '100%',
+      height: '100%'
+    });
+  }
+  else if ($panes.length == 2) {
+    if (orientation == 'v') {
+      $panes.eq(0).css({width: '50%'});
+      $panes.eq(1).css({position: 'absolute', left: '50%', top: 0});
+    }
+    else {
+      $panes.eq(0).css({height: '50%'});
+      $panes.eq(1).css({position: 'absolute', top: '50%'});
+    }
+  }
+  else if ($panes.length == 3) {
+    // the first is the biggest
+    // var $panes.eq(1) = $panes.eq(2);
+    if (orientation == 'v') {
+      /*  +--+--+
+          |  |  |
+          |  +--+
+          |  |  |
+          +--+--+  */
+      $panes.eq(0).css({width: '50%'});
+      $panes.eq(1).css({left: '50%', height: '50%'});
+      $panes.eq(2).css({left: '50%'});
+    }
+    else {
+      /*  +--+--+
+          |     |
+          +--+--+
+          |  |  |
+          +--+--+  */
+      $panes.eq(0).css({height: '50%'});
+      $panes.eq(1).css({width: '50%'});
+      $panes.eq(2).css({left: '50%'});
+    }
+  }
+  else {
+    throw new Error('Too many panes. Maximum is 3.');
+  }
+};
+
+$.fn.panes = function(opts) {
+  // only use the first item
+  return new PaneManager({el: this[0]});
+};
+
 
 // ####### ADMIN #######
 var HIT = Backbone.Model.extend({});

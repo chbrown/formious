@@ -1,0 +1,7 @@
+<h5>{{_id}}</h5>
+<dl>
+{{#each keyvals}}
+  <dt>{{key}}</dt>
+  <dd>{{val}}</dd>
+{{/each}}
+</dl>

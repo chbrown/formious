@@ -6,25 +6,27 @@ h1,h2,h3,h4,h5,h6{margin:0.75em 0 0.25em 0;}
 p{margin:0.5em 0;}
 body{margin:0;font:13px "Lucida Grande",Arial,sans-serif;}
 fieldset{border:1px solid #CCC;}
+label{display:block;font-size:90%;margin:4px 0 2px;}label span{margin-right:4px;font-weight:bold;}
+label label[disabled]{color:#777;}
+fieldset{margin:0 0 10px 0;}fieldset button{margin:10px 10px 0 0;}
+button{margin:5px 0;}
+table{border-collapse:collapse;}table th{text-align:left;white-space:nowrap;}
+table td{padding:1px 4px;vertical-align:top;}
+.panes>div{padding:10px;}
 .navbar{position:fixed;top:0;background:#FFF;width:100%;border-bottom:1px solid #CCC;}.navbar a{display:inline-block;border-radius:3px;border:1px solid #555;padding:2px 6px;margin:2px;}.navbar a:hover{background-color:#EEE;}
-.admin{padding:30px 10px 10px;}.admin label{display:block;font-size:90%;margin:4px 0 2px;}.admin label span{margin-right:4px;font-weight:bold;}
-.admin button{margin:5px 0;}
-.admin textarea{vertical-align:middle;overflow:hidden;}
-.admin fieldset{margin:0 0 10px 0;}.admin fieldset button{margin:10px 10px 0 0;}
-.admin .hform label span{display:inline-block;width:75px;}
-.admin .vform label span{display:block;}
-.admin table{border-collapse:collapse;}.admin table th{text-align:left;white-space:nowrap;}
-.admin table td{border-bottom:1px solid #DDD;font-size:90%;padding:1px 4px;vertical-align:top;}
-.admin .assignment{margin-top:10px;padding-left:10px;border:1px dotted #ddd;}.admin .assignment .controls{float:left;width:30%;}
-.admin .assignment .keyval{float:left;width:64%;margin-left:10px;}.admin .assignment .keyval td:first-child{width:120px;}
-.admin .assignment input{width:200px;}
+.hform label span{display:inline-block;width:75px;}
+.vform label span{display:block;}
+.assignment{margin-top:10px;padding-left:10px;border:1px dotted #ddd;}.assignment .controls{float:left;width:30%;}
+.assignment .keyval{float:left;width:64%;margin-left:10px;}.assignment .keyval td:first-child{width:120px;}
+.assignment input{width:200px;}
+textarea{vertical-align:middle;overflow:hidden;}
+.admin{padding:30px 10px 10px;}.admin td{border-bottom:1px solid #DDD;font-size:90%;}
 .admin .keyval th{padding-top:4px;border-bottom:1px solid #777;}
 .admin .keyval td:first-child{font-weight:bold;}
 .admin .status span{font-size:110%;font-weight:bold;}.admin .status span.Submitted{color:#CCC;}
 .admin .status span.Approved{color:darkgreen;}
 .admin .status span.Rejected{color:darkred;}
 .vlabels,textarea{margin:5px 0 5px;}.vlabels label,textarea label{display:block;padding:2px 2px;}
-label[disabled]{color:#777;}
 .spaced-buttons button{margin:5px;}
 .focus{box-shadow:0 0 6px #51cbee;}
 .flag{position:absolute;background-color:black;border-radius:4px;padding:2px;color:white;font-size:90%;}.flag .triangle{display:inline-block;position:absolute;border:6px solid transparent;width:0;height:0;}

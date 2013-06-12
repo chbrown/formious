@@ -5,9 +5,22 @@ var _ = require('underscore');
 var amulet = require('amulet');
 var vsprintf = require('sprintf').vsprintf;
 
-var random = require('../random');
 var User = require('../models').User;
 var logger = require('../logger');
+
+function sample(list, num) {
+  // with replacement.
+  if (num === undefined) {
+    return list[(Math.random() * list.length) | 0];
+  }
+  else {
+    var samples = [];
+    for (var i = 0; i < num; i++) {
+      samples.push(list[(Math.random() * list.length) | 0]);
+    }
+    return samples;
+  }
+}
 
 function allyJudgment(reliability, truth, prior_on_enemy) {
   // var prior_on_enemy = 1 - prior_on_friend;
@@ -29,7 +42,7 @@ function makeBatch(prior_on_enemy, number_of_scenes, allies, widths) {
   var total_friendly = number_of_scenes - total_enemy;
 
   var scenes = _.range(number_of_scenes).map(function(scene_index) {
-    var width = random.sample(widths);
+    var width = sample(widths);
     var image_id = (Math.random() * 100) | 0;
     var truth = scene_index < total_enemy ? 'enemy' : 'friend';
     return {

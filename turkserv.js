@@ -28,8 +28,24 @@ R.any(/^\/digits/, require('./controllers/digits'));
 R.any(/^\/admin/, require('./controllers/admin'));
 R.default = require('./controllers/root');
 
+http.IncomingMessage.prototype.readToEnd = function(callback) {
+  // callback signature: function(err, string)
+  var self = this;
+  var buffer = new Buffer(0);
+  this
+  .on('readable', function() {
+    var chunk = this.read();
+    buffer = Buffer.concat([buffer, chunk]);
+  })
+  .on('error', function(err) {
+    callback(err);
+  })
+  .on('end', function() {
+    callback(null, buffer.toString());
+  });
+};
+
 http.createServer(function(req, res) {
-  // req.saveData();
   req.cookies = new Cookies(req, res);
 
   var started = Date.now();

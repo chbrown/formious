@@ -2,19 +2,11 @@
 var formidable = require('formidable');
 var amulet = require('amulet');
 var sv = require('sv');
+var misc = require('../misc');
 var logger = require('../logger');
 var User = require('../models').User;
 var Router = require('regex-router');
 var R = new Router();
-
-function parseJSON(s) {
-  try {
-    return JSON.parse(s);
-  }
-  catch (exc) {
-    return exc;
-  }
-}
 
 // /
 module.exports = function(m, req, res) {
@@ -69,10 +61,11 @@ R.any(/^\/responses/, function(m, req, res) {
   logger.info('Saving response.', {workerId: workerId});
   req.on('end', function() {
     // need to check this json parse
-    var response = parseJSON(req.data);
+    var response = misc.parseJSON(req.data);
     if (response instanceof Error) {
-      logger.error('Could not parse response, "' + req.data + '". Error: ' + response.toString());
-      res.json({success: true, message: 'Saved response for user: ' + workerId});
+      var message = 'Could not parse response, "' + req.data + '". Error: ' + response.toString();
+      logger.error(message);
+      res.json({success: false, message: message});
     }
     else {
       response.submitted = new Date();
