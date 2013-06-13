@@ -24,20 +24,16 @@ R.post(/^\/seen$/, function(m, req, res) {
     // and the fields: workerId, and "questionIds[]" that equates to a list of strings
     // which is just multiple 'questionIds[] = string1' fields (I think).
     var workerId = (req.cookies.get('workerId') || fields.workerId || 'none').replace(/\W+/g, '');
-    User.findById(workerId, function(err, user) {
+    User.fromId(workerId, function(err, user) {
       logger.maybe(err);
-      if (user) {
-        var questionIds = fields['questionIds[]'];
-        if (!Array.isArray(questionIds)) questionIds = questionIds ? [questionIds] : [];
-        questionIds.forEach(function(questionId) {
-          user.seen.push(questionId);
-        });
-        user.save(logger.maybe);
-        res.json({success: true, message: 'Added ' + questionIds.length + ' to seen.'});
-      }
-      else {
-        res.json({success: false, message: 'Could not find worker with ID: "' + workerId + '"'});
-      }
+      var questionIds = fields['questionIds[]'];
+      if (!Array.isArray(questionIds)) questionIds = questionIds ? [questionIds] : [];
+      questionIds.forEach(function(questionId) {
+        user.seen.push(questionId);
+      });
+      user.save(logger.maybe);
+      // res.json({success: false, message: 'Could not find worker with ID: "' + workerId + '"'});
+      res.json({success: true, message: 'Added ' + questionIds.length + ' to seen.'});
     });
   });
 });
@@ -45,12 +41,10 @@ R.post(/^\/seen$/, function(m, req, res) {
 R.post(/^\/mturk\/externalSubmit/, function(m, req, res) {
   new formidable.IncomingForm().parse(req, function(err, fields, files) {
     var workerId = (fields.workerId || req.cookies.get('workerId') || 'none').replace(/\W+/g, '');
-    User.findById(workerId, function(err, user) {
+    User.fromId(workerId, function(err, user) {
       logger.maybe(err);
-      if (user) {
-        user.responses.push(fields);
-        user.save(logger.maybe);
-      }
+      user.responses.push(fields);
+      user.save(logger.maybe);
       amulet.render(res, ['layout.mu', 'done.mu'], {});
     });
   });
@@ -59,11 +53,13 @@ R.post(/^\/mturk\/externalSubmit/, function(m, req, res) {
 R.any(/^\/responses/, function(m, req, res) {
   var workerId = (req.cookies.get('workerId') || 'none').replace(/\W+/g, '');
   logger.info('Saving response.', {workerId: workerId});
-  req.on('end', function() {
+  req.readBuffer(function(err, buffer) {
+  // req.on('end', function() {
     // need to check this json parse
-    var response = misc.parseJSON(req.data);
+    var string = buffer.toString();
+    var response = misc.parseJSON(string);
     if (response instanceof Error) {
-      var message = 'Could not parse response, "' + req.data + '". Error: ' + response.toString();
+      var message = 'Could not parse response, "' + string + '". Error: ' + response.toString();
       logger.error(message);
       res.json({success: false, message: message});
     }
@@ -85,27 +81,23 @@ R.post(/^\/addbonus/, function(m, req, res) {
   // var unpaid_minimum = 49;
   new formidable.IncomingForm().parse(req, function(err, fields, files) {
     var workerId = (fields.workerId || req.cookies.get('workerId') || 'none').replace(/\W+/g, '');
-    User.findById(workerId, function(err, user) {
+    User.fromId(workerId, function(err, user) {
       logger.maybe(err);
-      if (user) {
-        var amount = Math.min(parseFloat(fields.amount || default_bonus), max_bonus);
-        var previous_bonus_owed = user.bonus_owed;
-        user.bonus_owed = previous_bonus_owed + amount;
-        user.save(function(err) {
-          if (err) {
-            logger.error(err);
-            res.json({success: false, message: 'Error assigning bonus: ' + err.toString(), amount: amount});
-          }
-          else {
-            logger.info('User bonus_owed increased from ' + previous_bonus_owed +
-              ' by ' + amount + ' to ' + (previous_bonus_owed + amount) + '.');
-            res.json({success: true, message: 'Bonus awarded: $' + amount, amount: amount});
-          }
-        });
-      }
-      else {
-        res.json({success: false, message: 'Could not find user: ' + workerId});
-      }
+      var amount = Math.min(parseFloat(fields.amount || default_bonus), max_bonus);
+      var previous_bonus_owed = user.bonus_owed;
+      // res.json({success: false, message: 'Could not find user: ' + workerId});
+      user.bonus_owed = previous_bonus_owed + amount;
+      user.save(function(err) {
+        if (err) {
+          logger.error(err);
+          res.json({success: false, message: 'Error assigning bonus: ' + err.toString(), amount: amount});
+        }
+        else {
+          logger.info('User bonus_owed increased from ' + previous_bonus_owed +
+            ' by ' + amount + ' to ' + (previous_bonus_owed + amount) + '.');
+          res.json({success: true, message: 'Bonus awarded: $' + amount, amount: amount});
+        }
+      });
     });
   });
 });

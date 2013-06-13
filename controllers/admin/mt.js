@@ -35,7 +35,7 @@ module.exports = function(m, req, res) {
   var host_id = m[2];
 
   // assert req.user && req.user.superuser
-  models.Account.findById(account_id, function(err, account) {
+  models.AWSAccount.findById(account_id, function(err, account) {
     logger.maybe(err);
     req.turk = mechturk({
       url: '' + hosts[host_id],
@@ -63,8 +63,9 @@ R.post(/GetAccountBalance/, function(m, req, res) {
 });
 
 R.post(/CreateHIT/, function(m, req, res) {
-  req.wait(function() {
-    var fields = querystring.parse(req.data);
+  req.readToEnd('utf8', function(err, data) {
+    logger.maybe(err);
+    var fields = querystring.parse(data);
     var params = {
       MaxAssignments: parseInt(fields.MaxAssignments, 10),
       Title: fields.Title,
@@ -92,8 +93,9 @@ R.get(/Workers\/(\w+)/, function(m, req, res) {
 
 R.post(/Assignments\/(\w+)\/Approve/, function(m, req, res) {
   var AssignmentId = m[1];
-  req.wait(function() {
-    var fields = querystring.parse(req.data);
+  req.readToEnd('utf8', function(err, data) {
+    logger.maybe(err);
+    var fields = querystring.parse(data);
     var params = {AssignmentId: AssignmentId};
     if (fields.RequesterFeedback) params.RequesterFeedback = fields.RequesterFeedback;
     req.turk.ApproveAssignment(params, function(err, result) {
@@ -110,8 +112,9 @@ R.post(/Assignments\/(\w+)\/Approve/, function(m, req, res) {
 
 R.post(/Assignments\/(\w+)\/GrantBonus/, function(m, req, res) {
   var AssignmentId = m[1];
-  req.wait(function() {
-    var fields = querystring.parse(req.data);
+  req.readToEnd('utf8', function(err, data) {
+    logger.maybe(err);
+    var fields = querystring.parse(data);
     var UniqueRequestToken = AssignmentId + ':' + fields.WorkerId + ':bonus';
     var amount = Math.min(parseFloat(fields.BonusAmount), 5);
     var WorkerId = fields.WorkerId;

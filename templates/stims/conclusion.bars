@@ -1,0 +1,14 @@
+<form method="POST" action="{{host}}/mturk/externalSubmit">
+  <input type="hidden" name="assignmentId" value="{{assignmentId}}" />
+  <input type="hidden" name="turkerId" value="{{workerId}}" />
+  <input type="hidden" name="duration" value="{{duration}}" />
+
+  <label>
+    <div>Was this task unclear, mispriced, or frustrating? If we could make it better, let us know! (optional)</div>
+    <textarea rows="4" cols="80" name="task_comments"></textarea>
+  </label>
+
+  <p class="clear">
+    <input type="submit" value="Submit Responses and Finish Task" />
+  </p>
+</form>

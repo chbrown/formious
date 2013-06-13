@@ -101,7 +101,7 @@ module.exports = function(m, req, res) {
     return {
       title: 'Lt.',
       name: name,
-      reliability: random.range(0.0, 1.0) // maybe switch in a beta later
+      reliability: Math.random() // = misc.randRange(0.0, 1.0), maybe switch in a beta later
     };
   });
 

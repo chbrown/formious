@@ -56,7 +56,7 @@ authR.get(/^\/stimlists\/(\w+)\/edit/, function(m, req, res) {
 });
 
 authR.patch(/^\/stimlists\/(\w+)/, function(m, req, res) {
-  req.readToEnd(function(err, stimlist_json) {
+  req.readToEnd('utf8', function(err, stimlist_json) {
     logger.maybe(err);
     console.log('#stimlist_json', stimlist_json.length);
     var fields = misc.parseJSON(stimlist_json);
@@ -103,14 +103,15 @@ R.default = function(m, req, res) {
 };
 
 R.get(/^\/stimlists\/(.+)/, function(m, req, res) {
-  var urlObj = url.parse(req.url, true);
-  var spreadsheet = m[1];
+  var slug = m[1];
   // logger.info('request', {url: urlObj, headers: req.headers});
   // a normal turk request looks like: urlObj.query =
   // { assignmentId: '2NXNWAB543Q0EQ3C16EV1YB46I8620K',
   //   hitId: '2939RJ85OZIZ4RKABAS998123Q9M8NEW85',
   //   workerId: 'A9T1WQR9AL982W',
   //   turkSubmitTo: 'https://www.mturk.com' },
+
+  var urlObj = url.parse(req.url, true);
   var workerId = (urlObj.query.workerId || req.cookies.get('workerId') || '').replace(/\W+/g, '');
   var ctx = {
     assignmentId: urlObj.query.assignmentId,
@@ -123,25 +124,19 @@ R.get(/^\/stimlists\/(.+)/, function(m, req, res) {
 
   // a preview request will be the same, minus workerId and turkSubmitTo,
   // and assignmentId will always then be 'ASSIGNMENT_ID_NOT_AVAILABLE'
-  var allies = _.shuffle(names).slice(0, ctx.allies_per_scene).map(function(name) {
-    return {
-      title: 'Sgt.',
-      name: name,
-      reliability: random.range(0.0, 1.0) // maybe switch in a beta later
-    };
-  });
+  // var allies = _.shuffle(names).slice(0, ctx.allies_per_scene).map(function(name) {
+  //   return {
+  //     title: 'Sgt.',
+  //     name: name,
+  //     reliability: random.range(0.0, 1.0) // maybe switch in a beta later
+  //   };
+  // });
 
-  models.User.findById(workerId, function(err, user) {
+  models.User.fromId(workerId, function(err, user) {
     logger.maybe(err);
-    if (!user) {
-      user = new User({_id: workerId});
-      user.save(logger.maybe);
-    }
-
-    ctx.batches = _.range(ctx.batches_per_HIT).map(function(batch_index) {
-      var batch = makeBatch(allies, ctx.scenes_per_batch);
-      batch.id = batch_index + 1;
-      return batch;
+    models.Stimlist.find({slug: slug}, function(err, stimlist) {
+      logger.maybe(err);
+      amulet.stream(['stimlists/one.mu'], {stimlist: stimlist}).pipe(res);
     });
   });
 });

@@ -7,15 +7,17 @@ p{margin:0.5em 0;}
 body{margin:0;font:13px "Lucida Grande",Arial,sans-serif;}
 fieldset{border:1px solid #CCC;}
 label{display:block;font-size:90%;margin:4px 0 2px;}label span{margin-right:4px;font-weight:bold;}
-label label[disabled]{color:#777;}
+label[disabled]{color:#777;}
 fieldset{margin:0 0 10px 0;}fieldset button{margin:10px 10px 0 0;}
 button{margin:5px 0;}
-table{border-collapse:collapse;}table th{text-align:left;white-space:nowrap;}
+table{border-collapse:collapse;}table th{white-space:nowrap;text-align:left;}
 table td{padding:1px 4px;vertical-align:top;}
+table tfoot td{border-bottom:0;}
 .panes>div{padding:10px;}
-.navbar{position:fixed;top:0;background:#FFF;width:100%;border-bottom:1px solid #CCC;}.navbar a{display:inline-block;border-radius:3px;border:1px solid #555;padding:2px 6px;margin:2px;}.navbar a:hover{background-color:#EEE;}
+.shortdate{width:50px;overflow:hidden;table-layout:fixed;}
 .hform label span{display:inline-block;width:75px;}
 .vform label span{display:block;}
+.navbar{position:fixed;top:0;background:#FFF;width:100%;border-bottom:1px solid #CCC;}.navbar a{display:inline-block;border-radius:3px;border:1px solid #555;padding:2px 6px;margin:2px;}.navbar a:hover{background-color:#EEE;}
 .assignment{margin-top:10px;padding-left:10px;border:1px dotted #ddd;}.assignment .controls{float:left;width:30%;}
 .assignment .keyval{float:left;width:64%;margin-left:10px;}.assignment .keyval td:first-child{width:120px;}
 .assignment input{width:200px;}

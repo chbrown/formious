@@ -1,6 +1,6 @@
 {{#account}}
 <table>
-  <tr class="left"><th>Account</th><th>{{_id}}</th></tr>
+  <tr><th>AWS Account</th><th>{{_id}}</th></tr>
   <tr><td>Access Key ID</td><td>{{accessKeyId}}</td></tr>
   <tr><td>Secret Access Key</td><td>{{secretAccessKey}}</td></tr>
   <tr><td>Created</td><td>{{created}}</td></tr>

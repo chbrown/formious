@@ -49,8 +49,8 @@ R.get(/^\/admin\/users\/(\w+)/, function(m, req, res) {
 
 R.post(/^\/admin\/users\/(\w+)\/claim/, function(m, req, res) {
   var workerId = m[1].replace(/\W+/g, '');
-  req.wait(function() {
-    var fields = querystring.parse(req.data);
+  req.readToEnd('utf8', function(err, data) {
+    var fields = querystring.parse(data);
     models.User.fromId(workerId, function(err, user) {
       logger.maybe(err);
       if (user.password) {
@@ -72,8 +72,9 @@ R.post(/^\/admin\/users\/(\w+)\/claim/, function(m, req, res) {
 
 R.post(/^\/admin\/users\/(\w+)\/become/, function(m, req, res) {
   var workerId = m[1].replace(/\W+/g, '');
-  req.wait(function() {
-    var fields = querystring.parse(req.data);
+  req.readToEnd('utf8', function(err, data) {
+    logger.maybe(err);
+    var fields = querystring.parse(data);
     models.User.withPassword(workerId, fields.password, function(err, user) {
       if (err || !user) {
         logger.error(err);
@@ -101,7 +102,8 @@ R.get(/^\/admin\/users/, function(m, req, res) {
 // authorized
 
 authR.default = function(m, req, res) {
-  res.die('No route at: ' + req.url); // m[1] == req.url here
+  res.redirect('/admin/mt');
+  // res.die('No route at: ' + req.url); // m[1] == req.url here
 };
 
 // ------------
@@ -127,7 +129,7 @@ authR.get(/^\/admin\/users\/(\w+)/, function(m, req, res) {
 // /admin/mt
 // GET /admin/mt -> List all AWS MTurk Accounts and show creation form
 authR.get(/^\/admin\/mt$/, function(m, req, res) {
-  models.Account.find({}).exec(function(err, accounts) {
+  models.AWSAccount.find({}, function(err, accounts) {
     logger.maybe(err);
     var ctx = {
       user: req.user,
@@ -136,9 +138,21 @@ authR.get(/^\/admin\/mt$/, function(m, req, res) {
     amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/mt/all.mu'], ctx).pipe(res);
   });
 });
-// GET /admin/mt/:account
+// POST /admin/mt/:account -> Create new AWS MTurk Account
+authR.post(/^\/admin\/mt$/, function(m, req, res) {
+  req.readToEnd('utf8', function(err, data) {
+    logger.maybe(err);
+    var fields = _.extend({_id: m[1]}, querystring.parse(data));
+    var account = new models.AWSAccount(fields);
+    account.save(function(err) {
+      logger.maybe(err);
+      res.redirect('/admin/mt');
+    });
+  });
+});
+// GET /admin/mt/:account -> Show single AWS Account
 authR.get(/^\/admin\/mt\/(\w*)$/, function(m, req, res) {
-  models.Account.findById(m[1], function(err, account) {
+  models.AWSAccount.findById(m[1], function(err, account) {
     logger.maybe(err);
     var ctx = {
       user: req.user,
@@ -150,21 +164,22 @@ authR.get(/^\/admin\/mt\/(\w*)$/, function(m, req, res) {
 });
 // DELETE /admin/mt/:account -> List all AWS MTurk Accounts and show creation form
 authR.delete(/^\/admin\/mt\/(\w*)$/, function(m, req, res) {
-  models.Account.findOne({_id: m[1]}).remove(function(err) {
+  models.AWSAccount.findById(m[1], function (err, account) {
     logger.maybe(err);
-    res.json({success: true, message: 'Deleted account, ' + m[1]});
-  });
-});
-// POST /admin/mt/:account -> Add AWS MTurk Account
-authR.post(/^\/admin\/mt\/(\w*)$/, function(m, req, res) {
-  req.wait(function() {
-    var fields = querystring.parse(req.data);
-    fields._id = fields._id || m[1];
-    var account = new models.Account(fields);
-    account.save(function(err) {
-      logger.maybe(err);
-      res.redirect('/admin/mt');
-    });
+    if (account) {
+      account.remove(function(err) {
+        if (err) {
+          logger.maybe(err);
+          res.json({success: false, message: err.toString()});
+        }
+        else {
+          res.json({success: true, message: 'Deleted account: ' + account._id});
+        }
+      });
+    }
+    else {
+      res.json({success: false, message: 'Could not find account: ' + m[1]});
+    }
   });
 });
 

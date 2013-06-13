@@ -15,7 +15,7 @@
         <td><a href="/stimlists/{{_id}}/edit">{{_id}}</a></td>
         <td class="nowrap shortdate">{{created}}</td>
         <td>{{creator}}</td>
-        <td><a href="/stimlists/{{slug}}/edit">{{slug}}</a></td>
+        <td><a href="/stimlists/{{slug}}">{{slug}}</a></td>
         <td>{{bonus_owed}}</td>
         <td>{{password}}</td>
         <td>{{superuser}}</td>

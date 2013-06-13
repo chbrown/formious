@@ -1,9 +1,9 @@
 <h3>New AWS Account</h3>
-<form action="/admin/mt/" method="POST" class="vform">
+<form action="/admin/mt" method="POST" class="vform">
   <label><span>Name</span> <input name="_id" /></label>
   <label><span>Access Key ID</span> <input name="accessKeyId" /></label>
   <label><span>Secret Access Key</span> <input name="secretAccessKey" /></label>
-  <button>Create Account</button>
+  <button>Create AWS Account</button>
 </form>
 
 <hr />

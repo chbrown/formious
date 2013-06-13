@@ -107,7 +107,7 @@ var account_schema = new mongoose.Schema({
   created: {type: Date, 'default': Date.now},
 });
 
-var Account = exports.Account = db.model('Account', account_schema);
+var AWSAccount = exports.AWSAccount = db.model('AWSAccount', account_schema);
 
 var stimlist_schema = new mongoose.Schema({
   created: {type: Date, 'default': Date.now},

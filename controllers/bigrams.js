@@ -103,12 +103,8 @@ module.exports = function(R) {
       };
     });
 
-    User.findById(workerId, function(err, user) {
+    User.fromId(workerId, function(err, user) {
       logger.maybe(err);
-      if (!user) {
-        user = new User({_id: workerId});
-        user.save(logger.maybe);
-      }
 
       ctx.batches = _.range(ctx.batches_per_HIT).map(function(batch_index) {
         var batch = makeBatch(allies, ctx.scenes_per_batch);

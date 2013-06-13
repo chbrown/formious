@@ -11,7 +11,7 @@
     "cookies": "git://github.com/chbrown/cookies.git",
     "csv": "*",
     "formidable": "*",
-    "http-enhanced": "*",
+    "http-enhanced": "~0.3",
     "js-yaml": "*",
     "mechturk": "*",
     "moment": "git://github.com/timrwood/moment.git#develop",
