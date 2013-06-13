@@ -14,7 +14,7 @@
   {{#users}}
     <tr>
       <td><a href="/admin/users/{{_id}}">{{_id}}</td>
-      <td class="nowrap" style="width: 50px; overflow: hidden; table-layout:fixed;">{{created}}</td>
+      <td class="nowrap shortdate">{{created}}</td>
       <td>{{responses.length}}</td>
       <td>{{bonus_paid}}</td>
       <td>{{bonus_owed}}</td>

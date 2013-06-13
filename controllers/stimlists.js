@@ -86,8 +86,20 @@ authR.get(/^\/stimlists\/(\w+)\/(\d+)/, function(m, req, res) {
   });
 });
 
+authR.get(/^\/stimlists\/?$/, function(m, req, res) {
+  models.Stimlist.find({}, function(err, stimlists) {
+    console.log(stimlists);
+    logger.maybe(err);
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'stimlists/all.mu'], {stimlists: stimlists}).pipe(res);
+  });
+});
+
 authR.default = function(m, req, res) {
   R.route(req, res);
+};
+
+R.default = function(m, req, res) {
+  res.die('No action there.');
 };
 
 R.get(/^\/stimlists\/(.+)/, function(m, req, res) {

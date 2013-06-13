@@ -20,7 +20,7 @@ label {
     margin-right: 4px;
     font-weight: bold;
   }
-  label[disabled] {
+  &[disabled] {
     color: #777;
   }
 }
@@ -36,20 +36,37 @@ button {
 table {
   border-collapse: collapse;
   th {
+    white-space: nowrap;
     text-align: left;
-    .nowrap;
   }
   td {
     padding: 1px 4px;
     vertical-align: top;
   }
+  tfoot {
+    td {
+      border-bottom: 0;
+    }
+  }
 }
+
 .panes {
   & > div {
     padding: 10px;
   }
 }
-
+.shortdate {
+  width: 50px;
+  overflow: hidden;
+  table-layout:fixed;
+}
+.hform label span {
+  display: inline-block;
+  width: 75px;
+}
+.vform label span {
+  display: block;
+}
 .navbar {
   position: fixed;
   top: 0;
@@ -66,13 +83,6 @@ table {
     padding: 2px 6px;
     margin: 2px;
   }
-}
-.hform label span {
-  display: inline-block;
-  width: 75px;
-}
-.vform label span {
-  display: block;
 }
 .assignment {
   margin-top: 10px;
