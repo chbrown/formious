@@ -1,0 +1,43 @@
+
+<div id="digitimage"></div>
+<script>
+var segments = [
+  {{DIGITLINE1}},
+  {{DIGITLINE2}},
+  {{DIGITLINE3}},
+  {{DIGITLINE4}},
+  {{DIGITLINE5}},
+  {{DIGITLINE6}},
+  {{DIGITLINE7}},
+];
+$('#digitimage').digit(segments, {
+  hmargin: 20,
+  width: 110,
+  height: 145,
+  background: 'brown',
+  foreground: 'orange',
+  noise: 32
+});
+</script>
+
+<h4>Allies</h4>
+<ol class="allies">
+  <li>{{INFORMANT1}}
+  <li>{{INFORMANT2}}
+  <li>{{INFORMANT3}}
+  <li>{{INFORMANT4}}
+  <li>{{INFORMANT5}}
+  <li>{{INFORMANT6}}
+  <li>{{INFORMANT7}}
+  <li>{{INFORMANT8}}
+  <li>{{INFORMANT9}}
+  <li>{{INFORMANT10}}
+</ol>
+
+<div class="user-judgment">
+  Is this a {{DIGITTOASKABOUT}}?
+  <!-- it was originally a {{STARTINGDIGIT}}, so answer should be {{CORRECTANSWERTOQUESTION}} -->
+  <!-- flipprob was {{FLIPPROB}}, and prior was {{PRIOR}} -->
+  <button class="submit" value="yes">Yes</button>
+  <button class="submit" value="no">No</button>
+</div>

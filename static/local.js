@@ -90,6 +90,24 @@ var TemplatedCollection = Backbone.Collection.extend({
   }
 });
 
+// a stim (aka., state, when in a list of stims) is the full
+var Stim = TemplateView.extend({
+  template: 'stims/default',
+  preRender: function(ctx) {
+    console.log('Stim.preRender', ctx);
+    if (ctx.stim) {
+      this.template = 'stims/' + ctx.stim;
+    }
+    // ctx.keyvals = _.map(ctx, function(val, key, list) { return {key: key, val: val}; });
+  },
+  events: {
+    'click button.submit': function(ev) {
+      console.log('need to go to next...');
+    }
+  }
+});
+
+
 var FormInput = TemplateView.extend({
   template: 'form-input',
   preRender: function(ctx) {

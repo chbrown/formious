@@ -29,11 +29,9 @@ module.exports = function(m, req, res) {
 
 // /stimlists/new -> create new Stimlist and redirect to edit it.
 authR.get(/^\/stimlists\/new/, function(m, req, res) {
-  // console.log(req.user, typeof(req.user._id));
   var stimlist = new models.Stimlist({creator: req.user._id});
   stimlist.save(function(err) {
     logger.maybe(err);
-    // console.log('-->' + '/stimlists/' + stimlist._id + '/edit');
     res.redirect('/stimlists/' + stimlist._id + '/edit');
   });
 });
@@ -50,7 +48,6 @@ authR.get(/^\/stimlists\/(\w+)\/edit/, function(m, req, res) {
 authR.get(/^\/stimlists\/(\w+)\/edit/, function(m, req, res) {
   models.Stimlist.findById(m[1], function(err, stimlist) {
     logger.maybe(err);
-    // console.log("Rendering");
     amulet.stream(['stimlists/edit.mu'], {stimlist: stimlist}).pipe(res);
   });
 });
@@ -58,9 +55,7 @@ authR.get(/^\/stimlists\/(\w+)\/edit/, function(m, req, res) {
 authR.patch(/^\/stimlists\/(\w+)/, function(m, req, res) {
   req.readToEnd('utf8', function(err, stimlist_json) {
     logger.maybe(err);
-    console.log('#stimlist_json', stimlist_json.length);
     var fields = misc.parseJSON(stimlist_json);
-    // console.log(data.length, m[1], data);
     if (fields instanceof Error) {
       var message = 'Could not parse stimlist. Error: ' + fields.toString();
       logger.error(message);
@@ -87,8 +82,7 @@ authR.get(/^\/stimlists\/(\w+)\/(\d+)/, function(m, req, res) {
 });
 
 authR.get(/^\/stimlists\/?$/, function(m, req, res) {
-  models.Stimlist.find({}, function(err, stimlists) {
-    console.log(stimlists);
+  models.Stimlist.find(function(err, stimlists) {
     logger.maybe(err);
     amulet.stream(['layout.mu', 'admin/layout.mu', 'stimlists/all.mu'], {stimlists: stimlists}).pipe(res);
   });

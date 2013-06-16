@@ -25,18 +25,6 @@ function tabulate(objects) {
   return makeTable(cols, rows);
 }
 
-// a stim (aka., state, when in a list of stims) is the full
-var Stim = TemplateView.extend({
-  template: 'stims/default',
-  preRender: function(ctx) {
-    console.log('preRender', ctx);
-    if (ctx.stim) {
-      this.template = 'stims/' + ctx.stim;
-    }
-    ctx.keyvals = _.map(ctx, function(val, key, list) { return {key: key, val: val}; });
-  }
-});
-
 var Stimlist = Backbone.Model.extend({
   urlRoot: '/stimlists',
   idAttribute: '_id'
@@ -85,8 +73,8 @@ var StimlistView = TemplateView.extend({
       };
       this.model.save(attrs, {
         patch: true,
-        success: function(model, xhr, options) {
-          console.log(model, options);
+        success: function(model, response, options) {
+          this.$('button').flag({text: 'Saved successfully', fade: 3000});
         }
       });
     },
