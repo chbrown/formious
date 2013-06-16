@@ -21,18 +21,50 @@ $('#digitimage').digit(segments, {
 </script>
 
 <h4>Allies</h4>
-<ol class="allies">
-  <li>{{INFORMANT1}}
-  <li>{{INFORMANT2}}
-  <li>{{INFORMANT3}}
-  <li>{{INFORMANT4}}
-  <li>{{INFORMANT5}}
-  <li>{{INFORMANT6}}
-  <li>{{INFORMANT7}}
-  <li>{{INFORMANT8}}
-  <li>{{INFORMANT9}}
-  <li>{{INFORMANT10}}
-</ol>
+<div class="allies">
+  <table>
+    <tr class="{{INFORMANT1}}">
+      <td></td>
+      <td><span>{{INFORMANT1}}</span></td>
+    </tr>
+    <tr class="{{INFORMANT2}}">
+      <td></td>
+      <td><span>{{INFORMANT2}}</span></td>
+    </tr>
+    <tr class="{{INFORMANT3}}">
+      <td></td>
+      <td><span>{{INFORMANT3}}</span></td>
+    </tr>
+    <tr class="{{INFORMANT4}}">
+      <td></td>
+      <td><span>{{INFORMANT4}}</span></td>
+    </tr>
+    <tr class="{{INFORMANT5}}">
+      <td></td>
+      <td><span>{{INFORMANT5}}</span></td>
+    </tr>
+    <tr class="{{INFORMANT6}}">
+      <td></td>
+      <td><span>{{INFORMANT6}}</span></td>
+    </tr>
+    <tr class="{{INFORMANT7}}">
+      <td></td>
+      <td><span>{{INFORMANT7}}</span></td>
+    </tr>
+    <tr class="{{INFORMANT8}}">
+      <td></td>
+      <td><span>{{INFORMANT8}}</span></td>
+    </tr>
+    <tr class="{{INFORMANT9}}">
+      <td></td>
+      <td><span>{{INFORMANT9}}</span></td>
+    </tr>
+    <tr class="{{INFORMANT10}}">
+      <td></td>
+      <td><span>{{INFORMANT10}}</span></td>
+    </tr>
+  </table>
+</div>
 
 <div class="user-judgment">
   Is this a {{DIGITTOASKABOUT}}?

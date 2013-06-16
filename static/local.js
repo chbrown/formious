@@ -148,7 +148,7 @@ PaneManager.prototype.set = function(index, $pane) {
   }
   else {
     // throw error or just don't do anything if $panes.length == 2 and we set(4, '<br/>'), e.g.
-    $panes.eq(index).replaceWith($pane);
+    $panes.eq(index).empty().append($pane);
     // don't layout
   }
 };

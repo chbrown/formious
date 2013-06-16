@@ -2,6 +2,9 @@
 tr:hover {
   background-color: #DDD;
 }
+tr.preview {
+  background-color: #CCC;
+}
 table td {
   font-size: 80%;
 }
@@ -48,7 +51,6 @@ var StimlistView = TemplateView.extend({
   },
   postRender: function(opts) {
     var data = this.model.get('states');
-    console.log(data, opts);
     if (data.length) {
       var html = tabulate(data);
       this.$('.states').html(html);
@@ -80,6 +82,8 @@ var StimlistView = TemplateView.extend({
     },
     'click tr': function(ev) {
       var $tr = $(ev.currentTarget);
+      $tr.siblings('.preview').removeClass('preview');
+      $tr.addClass('preview');
       // console.log('click tr', ev, $tr, $tr.index());
       this.preview($tr.index());
     },

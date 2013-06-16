@@ -1,8 +1,8 @@
 (function() {
   var template = Handlebars.template, templates = Handlebars.templates = Handlebars.templates || {};
 templates['admin/HITs/one'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, stack2, functionType="function", escapeExpression=this.escapeExpression;
 
 
@@ -76,8 +76,8 @@ helpers = helpers || Handlebars.helpers; data = data || {};
   return buffer;
   });
 templates['admin/assignments/one'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, options, functionType="function", escapeExpression=this.escapeExpression, self=this, blockHelperMissing=helpers.blockHelperMissing;
 
 function program1(depth0,data) {
@@ -224,8 +224,8 @@ function program11(depth0,data) {
   return buffer;
   });
 templates['form-input'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
@@ -244,9 +244,38 @@ helpers = helpers || Handlebars.helpers; data = data || {};
     + "\" />";
   return buffer;
   });
+templates['stimlists/edit'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+
+
+  buffer += "<h3>Stimlist: ";
+  if (stack1 = helpers._id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0._id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</h3>\n<div class=\"hform\" style=\"display: inline-block\">\n  <label><span>Slug</span>\n    <input name=\"slug\" type=\"text\" value=\"";
+  if (stack1 = helpers.slug) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.slug; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" />\n    <a href=\"/stimlists/";
+  if (stack1 = helpers.slug) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.slug; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\">";
+  if (stack1 = helpers.slug) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.slug; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</a>\n  </label>\n  <label><span>Creator</span>\n    <input name=\"creator\" type=\"text\" value=\"";
+  if (stack1 = helpers.creator) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.creator; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" />\n  </label>\n  <button>Save</button>\n</div>\n\n<br />\n\n<div class=\"states-form\" style=\"display: inline-block\">\n  <label><span>Paste states</span>\n    <textarea placeholder=\"Paste csv here\" name=\"paste\" rows=\"1\">\n    </textarea>\n  </label>\n  <label><span>Upload states</span>\n    <input type=\"file\" name=\"upload\">\n  </label>\n</div>\n\n<div class=\"states\"></div>\n";
+  return buffer;
+  });
 templates['stims/aircraft/batch-debriefing'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression, self=this;
 
 function program1(depth0,data) {
@@ -277,8 +306,8 @@ function program3(depth0,data) {
   return buffer;
   });
 templates['stims/aircraft/conclusion'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
@@ -306,8 +335,8 @@ helpers = helpers || Handlebars.helpers; data = data || {};
   return buffer;
   });
 templates['stims/aircraft/scene'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, options, functionType="function", escapeExpression=this.escapeExpression, self=this, blockHelperMissing=helpers.blockHelperMissing;
 
 function program1(depth0,data) {
@@ -379,17 +408,169 @@ function program3(depth0,data) {
   buffer += "\n</div>\n";
   return buffer;
   });
+templates['stims/clock2'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+
+
+  buffer += "\n<div id=\"digitimage\"></div>\n<script>\nvar segments = [\n  ";
+  if (stack1 = helpers.DIGITLINE1) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.DIGITLINE1; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + ",\n  ";
+  if (stack1 = helpers.DIGITLINE2) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.DIGITLINE2; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + ",\n  ";
+  if (stack1 = helpers.DIGITLINE3) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.DIGITLINE3; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + ",\n  ";
+  if (stack1 = helpers.DIGITLINE4) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.DIGITLINE4; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + ",\n  ";
+  if (stack1 = helpers.DIGITLINE5) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.DIGITLINE5; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + ",\n  ";
+  if (stack1 = helpers.DIGITLINE6) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.DIGITLINE6; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + ",\n  ";
+  if (stack1 = helpers.DIGITLINE7) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.DIGITLINE7; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + ",\n];\n$('#digitimage').digit(segments, {\n  hmargin: 20,\n  width: 110,\n  height: 145,\n  background: 'brown',\n  foreground: 'orange',\n  noise: 32\n});\n</script>\n\n<h4>Allies</h4>\n<ol class=\"allies\">\n  <li>";
+  if (stack1 = helpers.INFORMANT1) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.INFORMANT1; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\n  <li>";
+  if (stack1 = helpers.INFORMANT2) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.INFORMANT2; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\n  <li>";
+  if (stack1 = helpers.INFORMANT3) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.INFORMANT3; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\n  <li>";
+  if (stack1 = helpers.INFORMANT4) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.INFORMANT4; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\n  <li>";
+  if (stack1 = helpers.INFORMANT5) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.INFORMANT5; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\n  <li>";
+  if (stack1 = helpers.INFORMANT6) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.INFORMANT6; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\n  <li>";
+  if (stack1 = helpers.INFORMANT7) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.INFORMANT7; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\n  <li>";
+  if (stack1 = helpers.INFORMANT8) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.INFORMANT8; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\n  <li>";
+  if (stack1 = helpers.INFORMANT9) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.INFORMANT9; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\n  <li>";
+  if (stack1 = helpers.INFORMANT10) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.INFORMANT10; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\n</ol>\n\n<div class=\"user-judgment\">\n  Is this a ";
+  if (stack1 = helpers.DIGITTOASKABOUT) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.DIGITTOASKABOUT; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "?\n  <!-- it was originally a ";
+  if (stack1 = helpers.STARTINGDIGIT) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.STARTINGDIGIT; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + ", so answer should be ";
+  if (stack1 = helpers.CORRECTANSWERTOQUESTION) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.CORRECTANSWERTOQUESTION; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + " -->\n  <!-- flipprob was ";
+  if (stack1 = helpers.FLIPPROB) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.FLIPPROB; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + ", and prior was ";
+  if (stack1 = helpers.PRIOR) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.PRIOR; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + " -->\n  <button class=\"submit\" value=\"yes\">Yes</button>\n  <button class=\"submit\" value=\"no\">No</button>\n</div>\n";
+  return buffer;
+  });
+templates['stims/conclusion'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+
+
+  buffer += "<form method=\"POST\" action=\"";
+  if (stack1 = helpers.host) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.host; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "/mturk/externalSubmit\">\n  <input type=\"hidden\" name=\"assignmentId\" value=\"";
+  if (stack1 = helpers.assignmentId) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.assignmentId; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" />\n  <input type=\"hidden\" name=\"turkerId\" value=\"";
+  if (stack1 = helpers.workerId) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.workerId; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" />\n  <input type=\"hidden\" name=\"duration\" value=\"";
+  if (stack1 = helpers.duration) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.duration; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" />\n\n  <label>\n    <div>Was this task unclear, mispriced, or frustrating? If we could make it better, let us know! (optional)</div>\n    <textarea rows=\"4\" cols=\"80\" name=\"task_comments\"></textarea>\n  </label>\n\n  <p class=\"clear\">\n    <input type=\"submit\" value=\"Submit Responses and Finish Task\" />\n  </p>\n</form>\n";
+  return buffer;
+  });
 templates['stims/consent'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
   return "<h3>Consent form</h3>\n<p>\n  You are invited to participate in a study, entitled \"Learning in Social Networks\". The study is being conducted by Colin Bannard in the Linguistics department of The University of Texas at Austin.\n<p>\n  Department of Linguistics<br/>\n  University of Texas at Austin,<br/>\n  305 E. 23rd Street B5100,<br/>\n  Austin, TX 78712, USA<br/>\n  (512) 471-9022\n<p>The purpose of this study is to examine how people learn. We estimate that it will take about half a minute of your time to complete each question, and you will be paid 2 cents for each question you respond to. You are free to contact the investigator at the above address and phone number to discuss the survey.\n<p>Risks to participants are considered minimal. There will be no costs for participating. You will be paid for each HIT you complete, but will not otherwise benefit from participating. Your Amazon Mechanical Turk identification will be kept while we collect data for tracking purposes only. A limited number of research team members will have access to the data during data collection. This information will be stripped from the final dataset.\n<p>Your participation in this survey is voluntary. You may decline to answer any question and you have the right to withdraw from participation at any time without penalty. If you wish to withdraw from the study or have any questions, contact the investigator listed above.\n<p>If you have any questions, please email Colin Bannard at bannard@utexas.edu. You may also request a hard copy of the survey from the contact information above.\n<p>This study has been reviewed and approved by The University of Texas at Austin Institutional Review Board (IRB Study Number 2010-10-0051). If you have questions about your rights as a study participant, or are dissatisfied at any time with any aspect of this study, you may contact - anonymously, if you wish - the Institutional Review Board by phone at (512) 471-8871 or email at orsc@uts.cc.utexas.edu.\n<p>\n<button>I Consent</button>\n";
   });
+templates['stims/default'] = template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression, self=this;
+
+function program1(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n  <dt>";
+  if (stack1 = helpers.key) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.key; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</dt>\n  <dd>";
+  if (stack1 = helpers.val) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.val; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</dd>\n";
+  return buffer;
+  }
+
+  buffer += "<h5>";
+  if (stack1 = helpers._id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0._id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</h5>\n<dl>\n";
+  stack1 = helpers.each.call(depth0, depth0.keyvals, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n</dl>\n";
+  return buffer;
+  });
 templates['stims/digits/batch'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, stack2, functionType="function", escapeExpression=this.escapeExpression;
 
 
@@ -405,8 +586,8 @@ helpers = helpers || Handlebars.helpers; data = data || {};
   return buffer;
   });
 templates['stims/digits/conclusion'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
@@ -434,8 +615,8 @@ helpers = helpers || Handlebars.helpers; data = data || {};
   return buffer;
   });
 templates['stims/digits/scene'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, options, functionType="function", escapeExpression=this.escapeExpression, self=this, blockHelperMissing=helpers.blockHelperMissing;
 
 function program1(depth0,data) {
@@ -471,8 +652,8 @@ function program1(depth0,data) {
   return buffer;
   });
 templates['stims/feedback'] = template(function (Handlebars,depth0,helpers,partials,data) {
-  this.compilerInfo = [3,'>= 1.0.0-rc.4'];
-helpers = helpers || Handlebars.helpers; data = data || {};
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, self=this;
 
 function program1(depth0,data) {

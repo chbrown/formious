@@ -31,7 +31,6 @@
   "staticPattern": "static/lib/{file}",
   "staticDependencies": {
     "backbone": "*",
-    "clock-js": "git://chbrown.github.io/clock-js.git",
     "handlebars": "*",
     "jquery": "*",
     "jquery-noty": "*",

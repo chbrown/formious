@@ -28,6 +28,7 @@ module.exports = function(grunt) {
             'static/lib/layouts/bottomRight.js',
             'static/lib/backbone.js',
             'static/lib/handlebars.js',
+            'static/lib/clock.js',
             // 'static/templates.js',
             // 'static/local.js',
           ]
