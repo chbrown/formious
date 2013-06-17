@@ -3,7 +3,7 @@ tr:hover {
   background-color: #DDD;
 }
 tr.preview {
-  background-color: #CCC;
+  background-color: #BBB;
 }
 table td {
   font-size: 80%;
@@ -17,22 +17,8 @@ table td {
 <script src="/static/templates.js"></script>
 <script src="/static/local.js"></script>
 <script>
-function tabulate(objects) {
-  // use just the first object for the set of key/columns
-  var cols = _.keys(objects[0]);
-  var rows = objects.map(function(object) {
-    return cols.map(function(col) {
-      return object[col];
-    });
-  });
-  return makeTable(cols, rows);
-}
-
-var Stimlist = Backbone.Model.extend({
-  urlRoot: '/stimlists',
-  idAttribute: '_id'
-});
 var StimlistView = TemplateView.extend({
+  stim: null,
   template: 'stimlists/edit',
   loadText: function(raw) {
     // console.log('loadText', raw);
@@ -59,11 +45,23 @@ var StimlistView = TemplateView.extend({
     }
   },
   preview: function(index) {
-    var states = this.model.get('states');
-    var state = states[index];
+    // throw out the old stim
+    if (this.stim) {
+      this.stim.stopListening('finish');
+    }
 
-    var stim = new Stim(state);
+    // create the new one and show it in the right pane
+    var states = this.model.get('states');
+    var stim = new Stim(states[index]);
     pane_manager.set(1, stim.$el);
+
+    // listen for next
+    stim.on('finish', function() {
+      this.preview(index + 1);
+    }, this);
+
+    // highlight the new row
+    this.$('.states tbody tr').eq(index).addClass('preview').siblings().removeClass('preview');
   },
   events: {
     'click button': function(ev) {
@@ -71,7 +69,7 @@ var StimlistView = TemplateView.extend({
         slug: $('[name=slug]').val(),
         creator: $('[name=creator]').val(),
         csv: this.model.get('csv'),
-        states: this.model.get('states'),
+        states: this.model.get('states')
       };
       this.model.save(attrs, {
         patch: true,
@@ -81,11 +79,7 @@ var StimlistView = TemplateView.extend({
       });
     },
     'click tr': function(ev) {
-      var $tr = $(ev.currentTarget);
-      $tr.siblings('.preview').removeClass('preview');
-      $tr.addClass('preview');
-      // console.log('click tr', ev, $tr, $tr.index());
-      this.preview($tr.index());
+      this.preview($(ev.currentTarget).index());
     },
     'change [name=upload]': function(ev) {
       var self = this;

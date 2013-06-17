@@ -116,21 +116,13 @@ R.get(/^\/stimlists\/(.+)/, function(m, req, res) {
   };
   req.cookies.set('workerId', workerId);
 
-  // a preview request will be the same, minus workerId and turkSubmitTo,
-  // and assignmentId will always then be 'ASSIGNMENT_ID_NOT_AVAILABLE'
-  // var allies = _.shuffle(names).slice(0, ctx.allies_per_scene).map(function(name) {
-  //   return {
-  //     title: 'Sgt.',
-  //     name: name,
-  //     reliability: random.range(0.0, 1.0) // maybe switch in a beta later
-  //   };
-  // });
-
   models.User.fromId(workerId, function(err, user) {
     logger.maybe(err);
-    models.Stimlist.find({slug: slug}, function(err, stimlist) {
+    models.Stimlist.findOne({slug: slug}, function(err, stimlist) {
       logger.maybe(err);
-      amulet.stream(['stimlists/one.mu'], {stimlist: stimlist}).pipe(res);
+      ctx.stimlist = stimlist;
+      console.log(ctx);
+      amulet.stream(['layout.mu', 'stimlists/one.mu'], ctx).pipe(res);
     });
   });
 });

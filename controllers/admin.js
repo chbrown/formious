@@ -43,7 +43,7 @@ R.get(/^\/admin\/users\/(\w+)/, function(m, req, res) {
   models.User.fromId(workerId, function(err, user) {
     logger.maybe(err);
     var ctx = {user: user};
-    amulet.stream(['layout.mu', 'admin/users/login.mu'], ctx).pipe(res);
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/users/login.mu'], ctx).pipe(res);
   });
 });
 
@@ -63,7 +63,7 @@ R.post(/^\/admin\/users\/(\w+)\/claim/, function(m, req, res) {
           req.cookies.set('workerId', user._id);
           req.cookies.set('ticket', ticket);
           var ctx = {user: user, authorized: true};
-          amulet.stream(['layout.mu', 'admin/users/one.mu'], ctx).pipe(res);
+          amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/users/one.mu'], ctx).pipe(res);
         });
       }
     });
@@ -85,7 +85,7 @@ R.post(/^\/admin\/users\/(\w+)\/become/, function(m, req, res) {
         req.cookies.set('workerId', user._id);
         req.cookies.set('ticket', ticket);
         var ctx = {user: user, authorized: true};
-        amulet.stream(['layout.mu', 'admin/users/one.mu'], ctx).pipe(res);
+        amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/users/one.mu'], ctx).pipe(res);
       }
     });
   });
@@ -97,6 +97,14 @@ R.get(/^\/admin\/users/, function(m, req, res) {
     res.redirect('/admin/users/' + user._id);
   });
 });
+
+R.default = function(m, req, res) {
+  var workerId = req.cookies.get('workerId') || 'public';
+  models.User.fromId(workerId, function(err, user) {
+    res.redirect('/admin/users/' + user._id);
+  });
+};
+
 
 // ##########
 // authorized

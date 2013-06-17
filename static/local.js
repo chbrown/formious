@@ -26,7 +26,7 @@ function renderHandlebars(template_name, context, ajax) {
     template = _cache[template_name];
     if (template === undefined) {
       $.ajax({
-        url: '/templates/' + template_name + '.bars',
+        url: '/templates/' + template_name + '.bars' + '?t=' + now(),
         async: false,
         success: function(template_src) {
           template = _cache[template_name] = Handlebars.compile(template_src);
@@ -50,6 +50,18 @@ function makeTable(cols, rows) {
   var tbody = '<tbody><tr>' + trs.join('</tr><tr>') + '</tr></tbody>';
   return '<table>' + thead + tbody + '</table>';
 }
+function tabulate(objects) {
+  // convert a list of objects to columns and rows, then render them to a table.
+  // use just the first object for the set of key/columns
+  var cols = _.keys(objects[0]);
+  var rows = objects.map(function(object) {
+    return cols.map(function(col) {
+      return object[col];
+    });
+  });
+  return makeTable(cols, rows);
+}
+
 
 
 // requires Backbone and Handlebars to be loaded
@@ -94,7 +106,7 @@ var TemplatedCollection = Backbone.Collection.extend({
 var Stim = TemplateView.extend({
   template: 'stims/default',
   preRender: function(ctx) {
-    console.log('Stim.preRender', ctx);
+    // console.log('Stim.preRender', ctx);
     if (ctx.stim) {
       this.template = 'stims/' + ctx.stim;
     }
@@ -102,10 +114,16 @@ var Stim = TemplateView.extend({
   },
   events: {
     'click button.submit': function(ev) {
-      console.log('need to go to next...');
+      this.trigger('finish');
     }
   }
 });
+
+var Stimlist = Backbone.Model.extend({
+  urlRoot: '/stimlists',
+  idAttribute: '_id'
+});
+
 
 
 var FormInput = TemplateView.extend({

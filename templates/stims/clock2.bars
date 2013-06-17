@@ -67,9 +67,11 @@ $('#digitimage').digit(segments, {
 </div>
 
 <div class="user-judgment">
-  Is this a {{DIGITTOASKABOUT}}?
+  <p>Is this a {{DIGITTOASKABOUT}}?</p>
   <!-- it was originally a {{STARTINGDIGIT}}, so answer should be {{CORRECTANSWERTOQUESTION}} -->
   <!-- flipprob was {{FLIPPROB}}, and prior was {{PRIOR}} -->
-  <button class="submit" value="yes">Yes</button>
-  <button class="submit" value="no">No</button>
+  <div>
+    <button class="submit" value="yes">Yes</button>
+    <button class="submit" value="no">No</button>
+  </div>
 </div>
