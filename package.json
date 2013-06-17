@@ -6,14 +6,14 @@
   "repository": "git://github.com/chbrown/turkserv.git",
   "author": "Christopher Brown <io@henrian.com>",
   "dependencies": {
-    "amulet": "*",
+    "amulet": "~0.3",
     "async": "*",
     "cookies": "git://github.com/chbrown/cookies.git",
     "csv": "*",
     "formidable": "*",
     "http-enhanced": "~0.3",
     "js-yaml": "*",
-    "mechturk": "*",
+    "mechturk": "git://github.com/chbrown/mechturk.git",
     "moment": "git://github.com/timrwood/moment.git#develop",
     "mongoose": "*",
     "optimist": "*",
@@ -21,7 +21,7 @@
     "sprintf": "*",
     "sv": "*",
     "underscore": "*",
-    "winston": "0.6.x"
+    "winston": "~0.6"
   },
   "devDependencies": {
     "grunt": "*",
