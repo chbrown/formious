@@ -141,7 +141,7 @@ var Stim = TemplateView.extend({
           // else fill it out with useful metadata
           // `context` and `stimlist` are globals that a Stim view will always have access to
           response.hit_started = context.hit_started;
-          response.stimlist = stimlist.get('_id');
+          response.stimlist = stimlist.get('slug');
           response.submitted = now();
           new Response(response).save(null, {
             success: function(model, response, options) {
