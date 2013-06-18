@@ -1,36 +1,34 @@
-.left{text-align:left;}
-.center{text-align:center;}
-.right{text-align:right;}
-.nowrap{white-space:nowrap;}
-h1,h2,h3,h4,h5,h6{margin:0.75em 0 0.25em 0;}
-p{margin:0.5em 0;}
-body{margin:0;font:13px "Lucida Grande",Arial,sans-serif;}
-fieldset{border:1px solid #CCC;}
-label{display:block;font-size:90%;margin:4px 0 2px;}label span{margin-right:4px;font-weight:bold;}
-label[disabled]{color:#777;}
-fieldset{margin:0 0 10px 0;}fieldset button{margin:10px 10px 0 0;}
-button{margin:5px 0;}
-table{border-collapse:collapse;}table th{white-space:nowrap;text-align:left;}
-table td{padding:1px 4px;vertical-align:top;}
-table tfoot td{border-bottom:0;}
-.panes>div{padding:10px;}
-.shortdate{width:50px;overflow:hidden;table-layout:fixed;}
-.hform label span{display:inline-block;width:75px;}
-.vform label span{display:block;}
-.navbar{position:fixed;top:0;background:#FFF;width:100%;border-bottom:1px solid #CCC;}.navbar a{display:inline-block;border-radius:3px;border:1px solid #555;padding:2px 6px;margin:2px;}.navbar a:hover{background-color:#EEE;}
-.assignment{margin-top:10px;padding-left:10px;border:1px dotted #ddd;}.assignment .controls{float:left;width:30%;}
-.assignment .keyval{float:left;width:64%;margin-left:10px;}.assignment .keyval td:first-child{width:120px;}
-.assignment input{width:200px;}
-textarea{vertical-align:middle;overflow:hidden;}
-.admin{padding:30px 10px 10px;}.admin td{border-bottom:1px solid #DDD;font-size:90%;}
-.admin .keyval th{padding-top:4px;border-bottom:1px solid #777;}
-.admin .keyval td:first-child{font-weight:bold;}
-.admin .status span{font-size:110%;font-weight:bold;}.admin .status span.Submitted{color:#CCC;}
-.admin .status span.Approved{color:darkgreen;}
-.admin .status span.Rejected{color:darkred;}
-.vlabels,textarea{margin:5px 0 5px;}.vlabels label,textarea label{display:block;padding:2px 2px;}
-.spaced-buttons button{margin:5px;}
-.focus{box-shadow:0 0 6px #51cbee;}
-.flag{position:absolute;background-color:black;border-radius:4px;padding:2px;color:white;font-size:90%;}.flag .triangle{display:inline-block;position:absolute;border:6px solid transparent;width:0;height:0;}
-.flag .subflag{display:inline-block;}.flag .subflag span,.flag .subflag a{display:inline-block;padding:0 4px;}
-.flag .subflag a{background-color:white;border-radius:2px;}
+.left{text-align:left}
+.center{text-align:center}
+.right{text-align:right}
+.nowrap{white-space:nowrap}
+h1,h2,h3,h4,h5,h6{margin:.75em 0 .25em 0}
+p{margin:.5em 0}
+body{margin:0;font:13px "Lucida Grande",Arial,sans-serif}
+fieldset{border:1px solid #ccc}
+label{display:block;font-size:90%;margin:4px 0 2px}label span{margin-right:4px;font-weight:bold}
+label[disabled]{color:#777}
+fieldset{margin:0 0 10px 0}fieldset button{margin:10px 10px 0 0}
+table{border-collapse:collapse}table th{white-space:nowrap;text-align:left}
+table td{padding:1px 4px;vertical-align:top}
+textarea{vertical-align:middle;overflow:hidden}
+.stim{display:inline-block;margin:0 auto}
+.shortdate{width:50px;overflow:hidden;table-layout:fixed}
+.hform label span{display:inline-block;width:75px}
+.vform label span{display:block}
+.navbar{position:fixed;top:0;background:#fff;width:100%;border-bottom:1px solid #ccc}.navbar a{display:inline-block;border-radius:3px;border:1px solid #555;padding:2px 6px;margin:2px}.navbar a:hover{background-color:#eee}
+.assignment{margin-top:10px;padding-left:10px;border:1px dotted #ddd}.assignment .controls{float:left;width:30%}
+.assignment .keyval{float:left;width:64%;margin-left:10px}.assignment .keyval td:first-child{width:120px}
+.assignment input{width:200px}
+.admin{padding:30px 10px 10px}.admin td{border-bottom:1px solid #ddd;font-size:90%}
+.admin tfoot td{border-bottom:0}
+.admin .keyval th{padding-top:4px;border-bottom:1px solid #777}
+.admin .keyval td:first-child{font-weight:bold}
+.admin .status span{font-size:110%;font-weight:bold}.admin .status span.Submitted{color:#ccc}
+.admin .status span.Approved{color:#006400}
+.admin .status span.Rejected{color:#8b0000}
+.vlabels,textarea{margin:5px 0 5px}.vlabels label,textarea label{display:block;padding:2px 2px}
+.focus{box-shadow:0 0 6px #51cbee}
+.flag{position:absolute;background-color:#000;border-radius:4px;padding:2px;color:#fff;font-size:90%}.flag .triangle{display:inline-block;position:absolute;border:6px solid transparent;width:0;height:0}
+.flag .subflag{display:inline-block}.flag .subflag span,.flag .subflag a{display:inline-block;padding:0 4px}
+.flag .subflag a{background-color:#fff;border-radius:2px}

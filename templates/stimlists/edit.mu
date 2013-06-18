@@ -1,4 +1,5 @@
 <style>
+* { box-sizing: border-box; }
 tr:hover {
   background-color: #DDD;
 }
@@ -8,7 +9,18 @@ tr.preview {
 table td {
   font-size: 80%;
 }
-* { box-sizing: border-box; }
+.pane-padded {
+  padding: 10px 20px;
+}
+.pane-control.left {
+  display: block;
+  position: absolute;
+  height: 100%;
+  margin: 0;
+  top: 0;
+  left: 0;
+  padding: 1px;
+}
 </style>
 
 <div class="panes"></div>
@@ -17,12 +29,18 @@ table td {
 <script src="/static/templates.js"></script>
 <script src="/static/local.js"></script>
 <script>
+// have context to match the normal stimlist environment
+var context = {
+  hit_started: {{hit_started}},
+  workerId: '{{workerId}}'
+};
+
 var StimlistView = TemplateView.extend({
-  stim: null,
+  className: 'pane-padded',
   template: 'stimlists/edit',
   loadText: function(raw) {
-    // console.log('loadText', raw);
     var self = this;
+    self.model.set('csv', raw);
     // outsource the processing, for now.
     $.ajax({
       url: '/sv',
@@ -30,7 +48,6 @@ var StimlistView = TemplateView.extend({
       data: raw,
       dataType: 'json',
     }).done(function(data, type, jqXHR) {
-      console.log('done', data, type);
       self.model.set('states', data);
       self.postRender();
     });
@@ -52,8 +69,16 @@ var StimlistView = TemplateView.extend({
 
     // create the new one and show it in the right pane
     var states = this.model.get('states');
-    var stim = new Stim(states[index]);
+    var state = states[index];
+    _.extend(state, context);
+    var stim = new Stim(state);
+    stim.$el.addClass('pane-padded');
+
     pane_manager.set(1, stim.$el);
+    var $pane_hide = $('<button class="pane-control left">&raquo;</button>').appendTo(stim.$el);
+    $pane_hide.on('click', function(ev) {
+      pane_manager.limit(1);
+    });
 
     // listen for next
     stim.on('finish', function() {
@@ -74,7 +99,7 @@ var StimlistView = TemplateView.extend({
       this.model.save(attrs, {
         patch: true,
         success: function(model, response, options) {
-          this.$('button').flag({text: 'Saved successfully', fade: 3000});
+          $(ev.target).flag({text: 'Saved successfully', fade: 3000});
         }
       });
     },
@@ -87,14 +112,14 @@ var StimlistView = TemplateView.extend({
       var file = files[0];
       var reader = new FileReader();
       reader.onload = function(progress_event) {
-        self.loadText(progress_event.target.result, ev.target);
+        self.loadText(progress_event.target.result);
       };
       reader.readAsText(file); // , opt_encoding
       var message = 'Uploading ' + file.name + ' (' + file.size + ' bytes)';
-      this.$('.states-form').flag({html: message, fade: 3000});
+      $(ev.target).flag({html: message, fade: 3000});
     },
     'change [name=paste]': function(ev) {
-      this.loadText(ev.target.value, ev.target);
+      this.loadText(ev.target.value);
     }
   }
 });

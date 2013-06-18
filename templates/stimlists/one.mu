@@ -3,12 +3,7 @@
 <p>You will see judgements from others to help you in making your decision. The number of other people whose judgement you see will vary from phrase to phrase.
  -->
 <!-- <hr /> -->
-<style>
-.container {
-  padding: 10px;
-}
-</style>
-<div class="container">
+<div class="container" style="padding: 10px">
   <div id="root"></div>
 </div>
 
@@ -16,28 +11,29 @@
 <script src="/static/templates.js"></script>
 <script src="/static/local.js"></script>
 <script>
+// the context is given to all stims, in case they want the values
+var context = {
+  assignmentId: '{{assignmentId}}',
+  hit_started: {{hit_started}},
+  hitId: '{{hitId}}',
+  host: '{{host}}',
+  workerId: '{{workerId}}'
+};
+
 var stimlist = new Stimlist({{{JSON.stringify(stimlist)}}});
 
 function presentStim(index) {
   var states = stimlist.get('states');
-  var stim = new Stim(states[index]);
+  var state = states[index];
+  var stim = new Stim(_.extend({}, context, state));
   stim.on('finish', function() {
-    // stim.stopListening('finish');
+    // stim.stopListening('finish') ?
     presentStim(index + 1);
   });
   $('#root').empty().append(stim.$el);
 }
 
-var assignmentId = '{{assignmentId}}';
-var hitId = '{{hitId}}';
-var config = {
-  task_started: {{task_started}},
-  host: '{{host}}',
-  feedback_duration: 2000,
-  workerId: '{{workerId}}',
-};
-
 $(function() {
-  presentStim(0);
+  presentStim({{index}});
 });
 </script>

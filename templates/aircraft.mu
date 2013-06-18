@@ -59,10 +59,6 @@ var raw_batches = {{{JSON.stringify(batches)}}};
 
 var feedback_duration = 2000;
 
-var Response = Backbone.Model.extend({
-  url: '/responses'
-});
-
 var Scene = Backbone.Model.extend({
   // allies: Array[5], truth: "enemy", id: 1, image_id: 35, src: "enemy-35-050.jpg", width: 50
   saveResponse: function(choice, correct) {

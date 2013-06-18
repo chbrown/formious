@@ -106,15 +106,56 @@ var TemplatedCollection = Backbone.Collection.extend({
 var Stim = TemplateView.extend({
   template: 'stims/default',
   preRender: function(ctx) {
-    // console.log('Stim.preRender', ctx);
     if (ctx.stim) {
       this.template = 'stims/' + ctx.stim;
     }
-    // ctx.keyvals = _.map(ctx, function(val, key, list) { return {key: key, val: val}; });
+    else {
+      ctx.keyvals = _.map(ctx, function(val, key) {
+        return {key: key, val: val};
+      });
+    }
   },
   events: {
-    'click button.submit': function(ev) {
-      this.trigger('finish');
+    'click [type="submit"]': function(ev) {
+      var self = this;
+      var $submit = $(ev.target);
+      var $form = $submit.closest('form');
+      window.ev = ev;
+      // we only hijack the submit if the form does not have an action
+      // console.log('Submit', $form.serialize(), $form.serializeArray());
+      // return false;
+      if (!$form.attr('action')) {
+        ev.preventDefault();
+        // to catch the submit and serialize its values.
+        var response = _.object($form.serializeArray());
+        if ($submit.attr('name')) {
+          // the button
+          response[$submit.attr('name')] = $submit.val();
+        }
+
+        if (_.isEmpty(response)) {
+          // don't save empty responses
+          self.trigger('finish');
+        }
+        else {
+          // else fill it out with useful metadata
+          // `context` and `stimlist` are globals that a Stim view will always have access to
+          response.hit_started = context.hit_started;
+          response.stimlist = stimlist.get('_id');
+          response.submitted = now();
+          new Response(response).save(null, {
+            success: function(model, response, options) {
+              // console.log('response.save cb', arguments);
+              self.trigger('finish');
+            },
+            error: function(model, xhr, options) {
+              // console.log('response.error cb', arguments);
+              // alert('Failed');
+              self.trigger('finish');
+            }
+          });
+        }
+      }
     }
   }
 });
@@ -158,24 +199,26 @@ PaneManager.prototype.add = function($pane) {
   this.$el.append($pane);
   this.layout();
 };
+PaneManager.prototype.limit = function(count) {
+  this.$el.children().slice(count).remove();
+  this.layout();
+};
 PaneManager.prototype.set = function(index, $pane) {
   var $panes = this.$el.children();
-  // console.log(index, $pane, $panes.length);
-  if (index == $panes.length) {
-    this.add($pane);
+  if ($panes.length == index) {
+    // just like this.add()
+    this.$el.append($pane);
+    this.layout();
   }
   else {
     // throw error or just don't do anything if $panes.length == 2 and we set(4, '<br/>'), e.g.
-    $panes.eq(index).empty().append($pane);
-    // don't layout
+    $panes.eq(index).replaceWith($pane);
+    this.layout();
   }
 };
-// PaneManager.prototype.get = function(index) {
-//   // $pane could actually be html, just as well
-// };
 PaneManager.prototype.layout = function(orientation) {
   if (orientation === undefined) orientation = 'v';
-  var $panes = this.$el.children().attr('style', '').css({overflow: 'hidden'});
+  var $panes = this.$el.children().attr('style', '').css({overflow: 'auto'});
   // console.log('layout -> ', $panes.length);
   if ($panes.length == 1) {
     // $panes.css({width: '', height: ''});
@@ -187,11 +230,20 @@ PaneManager.prototype.layout = function(orientation) {
   else if ($panes.length == 2) {
     if (orientation == 'v') {
       $panes.eq(0).css({width: '50%'});
-      $panes.eq(1).css({position: 'absolute', left: '50%', top: 0});
+      $panes.eq(1).css({
+        'position': 'absolute',
+        'top': 0,
+        'left': '50%'
+        // 'min-height': '100%'
+      });
     }
     else {
       $panes.eq(0).css({height: '50%'});
-      $panes.eq(1).css({position: 'absolute', top: '50%'});
+      $panes.eq(1).css({
+        'position': 'absolute',
+        'top': '50%'
+        // 'min-height': '50%'
+      });
     }
   }
   else if ($panes.length == 3) {

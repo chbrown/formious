@@ -11,7 +11,7 @@ var Router = require('regex-router');
 var R = new Router();
 var authR = new Router();
 
-// /stimlists
+// GET /stimlists -> handle auth
 module.exports = function(m, req, res) {
   var workerId = req.cookies.get('workerId');
   var ticket = req.cookies.get('ticket');
@@ -27,7 +27,7 @@ module.exports = function(m, req, res) {
   });
 };
 
-// /stimlists/new -> create new Stimlist and redirect to edit it.
+// GET /stimlists/new -> create new Stimlist and redirect to edit it
 authR.get(/^\/stimlists\/new/, function(m, req, res) {
   var stimlist = new models.Stimlist({creator: req.user._id});
   stimlist.save(function(err) {
@@ -36,22 +36,22 @@ authR.get(/^\/stimlists\/new/, function(m, req, res) {
   });
 });
 
-// /stimlists/:stimlist_id/edit -> edit existing Stimlist
+// GET /stimlists/:stimlist_id/edit -> edit existing Stimlist
 authR.get(/^\/stimlists\/(\w+)\/edit/, function(m, req, res) {
   models.Stimlist.findById(m[1], function(err, stimlist) {
     logger.maybe(err);
-    amulet.stream(['layout.mu', 'stimlists/edit.mu'], {stimlist: stimlist}).pipe(res);
+    // set the context to match the normal GET /stimlists/:stimlist
+    var ctx = {
+      hit_started: Date.now(),
+      index: 0,
+      stimlist: stimlist,
+      workerId: req.user._id,
+    };
+    amulet.stream(['layout.mu', 'stimlists/edit.mu'], ctx).pipe(res);
   });
 });
 
-// /stimlists/:stimlist_id/:index -> show single existing Stimlist
-authR.get(/^\/stimlists\/(\w+)\/edit/, function(m, req, res) {
-  models.Stimlist.findById(m[1], function(err, stimlist) {
-    logger.maybe(err);
-    amulet.stream(['stimlists/edit.mu'], {stimlist: stimlist}).pipe(res);
-  });
-});
-
+// PATCH /stimlists/:stimlist_id
 authR.patch(/^\/stimlists\/(\w+)/, function(m, req, res) {
   req.readToEnd('utf8', function(err, stimlist_json) {
     logger.maybe(err);
@@ -72,15 +72,20 @@ authR.patch(/^\/stimlists\/(\w+)/, function(m, req, res) {
   });
 });
 
-authR.get(/^\/stimlists\/(\w+)\/(\d+)/, function(m, req, res) {
-  models.Stimlist.findById(m[1], function(err, stimlist) {
-    logger.maybe(err);
-    var index = parseInt(m[2], 10);
-    var state = stimlist.states[index];
-    amulet.stream(['stimlists/one.mu'], {state: state}).pipe(res);
+// DELETE /stimlists/:stimlist_id
+authR.delete(/^\/stimlists\/(\w+)/, function(m, req, res) {
+  models.Stimlist.findByIdAndRemove(m[1], function(err, stimlist) {
+    if (err) {
+      logger.maybe(err);
+      res.json({success: false, message: err.toString()});
+    }
+    else {
+      res.json({success: true, message: 'Deleted stimlist: ' + m[1]});
+    }
   });
 });
 
+// GET /stimlists -> index of all stimlists
 authR.get(/^\/stimlists\/?$/, function(m, req, res) {
   models.Stimlist.find(function(err, stimlists) {
     logger.maybe(err);
@@ -92,36 +97,35 @@ authR.default = function(m, req, res) {
   R.route(req, res);
 };
 
+// /stimlists index is forbidden unless you're logged in.
 R.default = function(m, req, res) {
   res.die('No action there.');
 };
 
-R.get(/^\/stimlists\/(.+)/, function(m, req, res) {
+
+
+// /stimlists/:slug -> present single stimlist to worker, starting at 0
+// /stimlists/:slug/:index -> present stimlist, starting at given index
+R.get(/^\/stimlists\/([^\/]+)(\/(\d+))?/, function(m, req, res) {
   var slug = m[1];
-  // logger.info('request', {url: urlObj, headers: req.headers});
-  // a normal turk request looks like: urlObj.query =
-  // { assignmentId: '2NXNWAB543Q0EQ3C16EV1YB46I8620K',
-  //   hitId: '2939RJ85OZIZ4RKABAS998123Q9M8NEW85',
-  //   workerId: 'A9T1WQR9AL982W',
-  //   turkSubmitTo: 'https://www.mturk.com' },
 
   var urlObj = url.parse(req.url, true);
   var workerId = (urlObj.query.workerId || req.cookies.get('workerId') || '').replace(/\W+/g, '');
-  var ctx = {
-    assignmentId: urlObj.query.assignmentId,
-    hitId: urlObj.query.hitId,
-    workerId: workerId,
-    host: urlObj.query.debug !== undefined ? '' : (urlObj.query.turkSubmitTo || 'https://www.mturk.com'),
-    task_started: Date.now(),
-  };
   req.cookies.set('workerId', workerId);
 
   models.User.fromId(workerId, function(err, user) {
     logger.maybe(err);
     models.Stimlist.findOne({slug: slug}, function(err, stimlist) {
       logger.maybe(err);
-      ctx.stimlist = stimlist;
-      console.log(ctx);
+      var ctx = {
+        assignmentId: urlObj.query.assignmentId,
+        hit_started: Date.now(),
+        hitId: urlObj.query.hitId,
+        host: urlObj.query.debug !== undefined ? '' : (urlObj.query.turkSubmitTo || 'https://www.mturk.com'),
+        index: m[3] || 0,
+        stimlist: stimlist,
+        workerId: workerId,
+      };
       amulet.stream(['layout.mu', 'stimlists/one.mu'], ctx).pipe(res);
     });
   });

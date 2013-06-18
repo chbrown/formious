@@ -5,7 +5,7 @@
       <th>Created</th>
       <th>Creator</th>
       <th>Slug</th>
-      <th>CSV.length</th>
+      <th>CSV chars</th>
       <th># States</th>
     </tr>
   </thead>
@@ -16,10 +16,9 @@
         <td class="nowrap shortdate">{{created}}</td>
         <td>{{creator}}</td>
         <td><a href="/stimlists/{{slug}}">{{slug}}</a></td>
-        <td>{{bonus_owed}}</td>
-        <td>{{password}}</td>
-        <td>{{superuser}}</td>
-        <td>{{tickets.length}}</td>
+        <td>{{csv.length}}</td>
+        <td>{{states.length}}</td>
+        <td><a href="/stimlists/{{_id}}" data-method="delete">delete</a></td>
       </tr>
     {{/stimlists}}
   </tbody>

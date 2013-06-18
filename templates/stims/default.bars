@@ -5,3 +5,4 @@
   <dd>{{val}}</dd>
 {{/each}}
 </dl>
+<p><em>This is the default stim display (you should customize it).</em></p>

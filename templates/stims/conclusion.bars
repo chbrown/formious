@@ -8,7 +8,5 @@
     <textarea rows="4" cols="80" name="task_comments"></textarea>
   </label>
 
-  <p class="clear">
-    <input type="submit" value="Submit Responses and Finish Task" />
-  </p>
+  <input type="submit" value="Submit responses and finish task" />
 </form>

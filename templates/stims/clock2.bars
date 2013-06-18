@@ -1,77 +1,81 @@
+<div style="width: 200px; margin: 0 auto">
 
-<div id="digitimage"></div>
-<script>
-var segments = [
-  {{DIGITLINE1}},
-  {{DIGITLINE2}},
-  {{DIGITLINE3}},
-  {{DIGITLINE4}},
-  {{DIGITLINE5}},
-  {{DIGITLINE6}},
-  {{DIGITLINE7}},
-];
-$('#digitimage').digit(segments, {
-  hmargin: 20,
-  width: 110,
-  height: 145,
-  background: 'brown',
-  foreground: 'orange',
-  noise: 32
-});
-</script>
+  <div id="digitimage"></div>
 
-<h4>Allies</h4>
-<div class="allies">
-  <table>
-    <tr class="{{INFORMANT1}}">
-      <td></td>
-      <td><span>{{INFORMANT1}}</span></td>
-    </tr>
-    <tr class="{{INFORMANT2}}">
-      <td></td>
-      <td><span>{{INFORMANT2}}</span></td>
-    </tr>
-    <tr class="{{INFORMANT3}}">
-      <td></td>
-      <td><span>{{INFORMANT3}}</span></td>
-    </tr>
-    <tr class="{{INFORMANT4}}">
-      <td></td>
-      <td><span>{{INFORMANT4}}</span></td>
-    </tr>
-    <tr class="{{INFORMANT5}}">
-      <td></td>
-      <td><span>{{INFORMANT5}}</span></td>
-    </tr>
-    <tr class="{{INFORMANT6}}">
-      <td></td>
-      <td><span>{{INFORMANT6}}</span></td>
-    </tr>
-    <tr class="{{INFORMANT7}}">
-      <td></td>
-      <td><span>{{INFORMANT7}}</span></td>
-    </tr>
-    <tr class="{{INFORMANT8}}">
-      <td></td>
-      <td><span>{{INFORMANT8}}</span></td>
-    </tr>
-    <tr class="{{INFORMANT9}}">
-      <td></td>
-      <td><span>{{INFORMANT9}}</span></td>
-    </tr>
-    <tr class="{{INFORMANT10}}">
-      <td></td>
-      <td><span>{{INFORMANT10}}</span></td>
-    </tr>
-  </table>
-</div>
+  <script>
+  var segments = [
+    {{DIGITLINE1}},
+    {{DIGITLINE2}},
+    {{DIGITLINE3}},
+    {{DIGITLINE4}},
+    {{DIGITLINE5}},
+    {{DIGITLINE6}},
+    {{DIGITLINE7}},
+  ];
+  $('#digitimage').digit(segments, {
+    hmargin: 20,
+    width: 110,
+    height: 145,
+    background: 'brown',
+    foreground: 'orange',
+    noise: 32
+  });
+  </script>
 
-<div class="user-judgment">
-  <p>Is this a {{DIGITTOASKABOUT}}?</p>
-  <!-- it was originally a {{STARTINGDIGIT}}, so answer should be {{CORRECTANSWERTOQUESTION}} -->
-  <!-- flipprob was {{FLIPPROB}}, and prior was {{PRIOR}} -->
-  <div>
-    <button class="submit" value="yes">Yes</button>
-    <button class="submit" value="no">No</button>
+  <h4>Allies</h4>
+  <div class="allies">
+    <table>
+      <tr class="{{INFORMANT1}}">
+        <td></td>
+        <td><span>{{INFORMANT1}}</span></td>
+      </tr>
+      <tr class="{{INFORMANT2}}">
+        <td></td>
+        <td><span>{{INFORMANT2}}</span></td>
+      </tr>
+      <tr class="{{INFORMANT3}}">
+        <td></td>
+        <td><span>{{INFORMANT3}}</span></td>
+      </tr>
+      <tr class="{{INFORMANT4}}">
+        <td></td>
+        <td><span>{{INFORMANT4}}</span></td>
+      </tr>
+      <tr class="{{INFORMANT5}}">
+        <td></td>
+        <td><span>{{INFORMANT5}}</span></td>
+      </tr>
+      <tr class="{{INFORMANT6}}">
+        <td></td>
+        <td><span>{{INFORMANT6}}</span></td>
+      </tr>
+      <tr class="{{INFORMANT7}}">
+        <td></td>
+        <td><span>{{INFORMANT7}}</span></td>
+      </tr>
+      <tr class="{{INFORMANT8}}">
+        <td></td>
+        <td><span>{{INFORMANT8}}</span></td>
+      </tr>
+      <tr class="{{INFORMANT9}}">
+        <td></td>
+        <td><span>{{INFORMANT9}}</span></td>
+      </tr>
+      <tr class="{{INFORMANT10}}">
+        <td></td>
+        <td><span>{{INFORMANT10}}</span></td>
+      </tr>
+    </table>
   </div>
+
+  <div>
+    <p>Is this a {{DIGITTOASKABOUT}}?</p>
+    <!-- it was originally a {{STARTINGDIGIT}}, so answer should be {{CORRECTANSWERTOQUESTION}} -->
+    <!-- flipprob was {{FLIPPROB}}, and prior was {{PRIOR}} -->
+    <form>
+      <button type="submit" name="choice" value="yes">Yes</button>
+      <button type="submit" name="choice" value="no">No</button>
+    </form>
+  </div>
+
 </div>

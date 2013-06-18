@@ -30,9 +30,6 @@ fieldset {
     margin: 10px 10px 0 0;
   }
 }
-button {
-  margin: 5px 0;
-}
 table {
   border-collapse: collapse;
   th {
@@ -43,20 +40,13 @@ table {
     padding: 1px 4px;
     vertical-align: top;
   }
-  tfoot td {
-    border-bottom: 0;
-  }
 }
 textarea {
   vertical-align: middle;
   overflow: hidden;
 }
 
-.panes {
-  & > div {
-    padding: 10px;
-  }
-}
+
 .shortdate {
   width: 50px;
   overflow: hidden;
@@ -69,6 +59,7 @@ textarea {
 .vform label span {
   display: block;
 }
+
 .navbar {
   position: fixed;
   top: 0;
@@ -124,6 +115,9 @@ textarea {
     border-bottom: 1px solid #DDD;
     font-size: 90%;
   }
+  tfoot td {
+    border-bottom: 0;
+  }
 
   .keyval {
     th {
@@ -148,11 +142,6 @@ textarea {
   label {
     display: block;
     padding: 2px 2px;
-  }
-}
-.spaced-buttons {
-  button {
-    margin: 5px;
   }
 }
 .focus {

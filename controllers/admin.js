@@ -38,6 +38,7 @@ module.exports = function(m, req, res) {
 //  1. claim your current workerId
 //  2. become a different user
 
+// GET /admin/users/:user
 R.get(/^\/admin\/users\/(\w+)/, function(m, req, res) {
   var workerId = m[1].replace(/\W+/g, '');
   models.User.fromId(workerId, function(err, user) {
@@ -47,6 +48,7 @@ R.get(/^\/admin\/users\/(\w+)/, function(m, req, res) {
   });
 });
 
+// GET /admin/users/:user/claim
 R.post(/^\/admin\/users\/(\w+)\/claim/, function(m, req, res) {
   var workerId = m[1].replace(/\W+/g, '');
   req.readToEnd('utf8', function(err, data) {
@@ -70,6 +72,7 @@ R.post(/^\/admin\/users\/(\w+)\/claim/, function(m, req, res) {
   });
 });
 
+// GET /admin/users/:user/become
 R.post(/^\/admin\/users\/(\w+)\/become/, function(m, req, res) {
   var workerId = m[1].replace(/\W+/g, '');
   req.readToEnd('utf8', function(err, data) {
@@ -91,6 +94,7 @@ R.post(/^\/admin\/users\/(\w+)\/become/, function(m, req, res) {
   });
 });
 
+// GET /admin/users
 R.get(/^\/admin\/users/, function(m, req, res) {
   var workerId = req.cookies.get('workerId') || 'public';
   models.User.fromId(workerId, function(err, user) {
@@ -98,6 +102,7 @@ R.get(/^\/admin\/users/, function(m, req, res) {
   });
 });
 
+// GET /admin -> redirect to /admin/users/:worker
 R.default = function(m, req, res) {
   var workerId = req.cookies.get('workerId') || 'public';
   models.User.fromId(workerId, function(err, user) {

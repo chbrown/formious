@@ -38,6 +38,7 @@ R.post(/^\/seen$/, function(m, req, res) {
   });
 });
 
+// /mturk/externalSubmit is a debug function
 R.post(/^\/mturk\/externalSubmit/, function(m, req, res) {
   new formidable.IncomingForm().parse(req, function(err, fields, files) {
     var workerId = (fields.workerId || req.cookies.get('workerId') || 'none').replace(/\W+/g, '');
@@ -50,13 +51,11 @@ R.post(/^\/mturk\/externalSubmit/, function(m, req, res) {
   });
 });
 
-R.any(/^\/responses/, function(m, req, res) {
+// /responses
+R.post(/^\/responses$/, function(m, req, res) {
   var workerId = (req.cookies.get('workerId') || 'none').replace(/\W+/g, '');
   logger.info('Saving response.', {workerId: workerId});
-  req.readBuffer(function(err, buffer) {
-  // req.on('end', function() {
-    // need to check this json parse
-    var string = buffer.toString();
+  req.readToEnd('utf8', function(err, string) {
     var response = misc.parseJSON(string);
     if (response instanceof Error) {
       var message = 'Could not parse response, "' + string + '". Error: ' + response.toString();
@@ -64,11 +63,9 @@ R.any(/^\/responses/, function(m, req, res) {
       res.json({success: false, message: message});
     }
     else {
-      response.submitted = new Date();
-      User.fromId(workerId, function(err, user) {
+      response.created = new Date();
+      User.update({_id: workerId}, {$push: {responses: response}}, function(err) {
         logger.maybe(err);
-        user.responses.push(response);
-        user.save(logger.maybe);
         res.json({success: true, message: 'Saved response for user: ' + workerId});
       });
     }
