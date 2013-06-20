@@ -10,7 +10,6 @@
     "amulet": "~0.3",
     "async": "*",
     "cookies": "git://github.com/chbrown/cookies.git",
-    "csv": "*",
     "formidable": "*",
     "http-enhanced": "~0.3",
     "js-yaml": "*",
@@ -35,7 +34,7 @@
     "handlebars": "*",
     "jquery": "*",
     "jquery-noty": "*",
-    "jquery-plugins": "git://github.com/chbrown/jquery-plugins.git",
+    "jquery-plugins": "git://github.com/chbrown/js-libs.git",
     "jquery-tablesorter": "*",
     "json2": "*",
     "underscore": "*"
