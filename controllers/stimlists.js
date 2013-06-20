@@ -103,10 +103,10 @@ R.default = function(m, req, res) {
 };
 
 
-
 // /stimlists/:slug -> present single stimlist to worker, starting at 0
 // /stimlists/:slug/:index -> present stimlist, starting at given index
-R.get(/^\/stimlists\/([^\/]+)(\/(\d+))?/, function(m, req, res) {
+//  slugs must be word characters
+R.get(/^\/stimlists\/(\w+)(\/(\d+))?/, function(m, req, res) {
   var slug = m[1];
 
   var urlObj = url.parse(req.url, true);
