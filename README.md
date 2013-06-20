@@ -143,3 +143,7 @@ The two planes are Messerschmitts and Spitfires, particularly, models taken from
       var message = 'Not yet eligible for bonus. Must answer at least ' + (unpaid_minimum - unpaid) + ' more hits.';
       res.json({success: false, message: message, unpaid: unpaid});
     }
+
+## License
+
+Copyright © 2011–2013 Christopher Brown. [MIT Licensed](LICENSE).

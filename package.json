@@ -4,7 +4,8 @@
   "version": "0.1.4",
   "homepage": "https://github.com/chbrown/turkserv",
   "repository": "git://github.com/chbrown/turkserv.git",
-  "author": "Christopher Brown <io@henrian.com>",
+  "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
+  "license": "MIT",
   "dependencies": {
     "amulet": "~0.3",
     "async": "*",
