@@ -31,7 +31,6 @@
   "staticPattern": "static/lib/{file}",
   "staticDependencies": {
     "backbone": "*",
-    "handlebars": "*",
     "jquery": "*",
     "jquery-noty": "*",
     "js-libs": "git://github.com/chbrown/js-libs.git",
