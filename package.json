@@ -34,7 +34,7 @@
     "handlebars": "*",
     "jquery": "*",
     "jquery-noty": "*",
-    "jquery-plugins": "git://github.com/chbrown/js-libs.git",
+    "js-libs": "git://github.com/chbrown/js-libs.git",
     "jquery-tablesorter": "*",
     "json2": "*",
     "underscore": "*"
