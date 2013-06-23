@@ -12,6 +12,13 @@
     <tr><td>Bonus owed</td><td>{{bonus_owed}}</td></tr>
     <tr><td>Password</td><td>{{password}}</td></tr>
     <tr><td>Superuser</td><td>{{superuser}}</td></tr>
-    <tr><td>Tickets</td><td>{{tickets}}</td></tr>
+    <tr>
+      <td>Tickets</td>
+      <td>
+        {{#tickets}}
+          <div>{{.}}</div>
+        {{/tickets}}
+      </td>
+    </tr>
   </table>
 {{/user}}
