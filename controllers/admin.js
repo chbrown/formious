@@ -122,7 +122,7 @@ authR.default = function(m, req, res) {
 // ------------
 // GET /admin/users -> list all users.
 authR.get(/^\/admin\/users$/, function(m, req, res) {
-  models.User.find({}).exec(function(err, users) {
+  models.User.find({}, '_id created responses.length bonus_paid bonus_owed password superuser tickets.length', function(err, users) {
     logger.maybe(err);
     amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/users/all.mu'], {users: users}).pipe(res);
   });

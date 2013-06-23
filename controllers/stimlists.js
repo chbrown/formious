@@ -87,7 +87,7 @@ authR.delete(/^\/stimlists\/(\w+)/, function(m, req, res) {
 
 // GET /stimlists -> index of all stimlists
 authR.get(/^\/stimlists\/?$/, function(m, req, res) {
-  models.Stimlist.find(function(err, stimlists) {
+  models.Stimlist.find({}, '_id created creator slug csv.length states.length', function(err, stimlists) {
     logger.maybe(err);
     amulet.stream(['layout.mu', 'admin/layout.mu', 'stimlists/all.mu'], {stimlists: stimlists}).pipe(res);
   });
