@@ -1,4 +1,4 @@
-"use strict"; /*jslint indent: 2 */ /*globals _, $, Backbone, Handlebars */
+"use strict"; /*jslint indent: 2 */ /*globals _, $, Backbone, Handlebars, TemplatedView, TemplatedCollection */
 function now() { return (new Date()).getTime(); }
 
 $(document).on('click', 'a[data-method]', function(ev) {
@@ -10,36 +10,6 @@ $(document).on('click', 'a[data-method]', function(ev) {
     $(ev.target).flag({anchor: 'r', align: 'm', text: data.message, fade: 3000});
   });
 });
-
-
-// handlebars debug / caching
-var _cache = {};
-function renderHandlebars(template_name, context, ajax) {
-  // returns html, sync
-  if (ajax === undefined) {
-    ajax = window.DEBUG; // DEBUG is a special global, which may be missing.
-  }
-
-  var template;
-  if (ajax) {
-    // only cache once per page load (this is debug, after all)
-    template = _cache[template_name];
-    if (template === undefined) {
-      $.ajax({
-        url: '/templates/' + template_name + '.bars' + '?t=' + now(),
-        async: false,
-        success: function(template_src) {
-          template = _cache[template_name] = Handlebars.compile(template_src);
-        }
-      });
-    }
-  }
-  else {
-    template = Handlebars.templates[template_name];
-  }
-  return template(context);
-}
-
 
 
 function makeTable(cols, rows) {
@@ -65,45 +35,9 @@ function tabulate(objects) {
 
 
 // requires Backbone and Handlebars to be loaded
-var TemplateView = Backbone.View.extend({
-  // TemplateView has hooks called (pre|post)(Initialize|Render), each of which take a context
-  //   that context is just the model and whatever options the view is initialized with.
-  // preInitialize, postInitialize, preRender, postRender
-  initialize: function(opts) {
-    // prePreRender
-    var ctx = _.extend(this.model ? this.model.toJSON() : {}, opts);
-    if (this.preInitialize) this.preInitialize(ctx);
-    this.render(ctx);
-    if (this.postInitialize) this.postInitialize(ctx);
-  },
-  render: function(ctx) {
-    if (this.preRender) this.preRender(ctx);
-    this.el.innerHTML = renderHandlebars(this.template, ctx);
-    if (this.postRender) this.postRender(ctx);
-    if (ctx.replace) {
-      // if .replace is given, it's the parent node that this new view should
-      // attach to, replacing the old contents.
-      ctx.replace.replaceWith(this.$el);
-    }
-    return this;
-  }
-});
-
-var TemplatedCollection = Backbone.Collection.extend({
-  renderTo: function($el, View) {
-    var fragment = document.createDocumentFragment();
-    this.each(function(model) {
-      var ctx = model.toJSON();
-      ctx.model = model;
-      var view = new View(ctx);
-      fragment.appendChild(view.el);
-    });
-    $el.append(fragment);
-  }
-});
 
 // a stim (aka., state, when in a list of stims) is the full
-var Stim = TemplateView.extend({
+var Stim = TemplatedView.extend({
   template: 'stims/default',
   preRender: function(ctx) {
     if (ctx.stim) {
@@ -167,7 +101,7 @@ var Stimlist = Backbone.Model.extend({
 
 
 
-var FormInput = TemplateView.extend({
+var FormInput = TemplatedView.extend({
   template: 'form-input',
   preRender: function(ctx) {
     this.id = ctx.id;
@@ -284,7 +218,7 @@ $.fn.panes = function(opts) {
 // ####### ADMIN #######
 var HIT = Backbone.Model.extend({});
 var HITCollection = TemplatedCollection.extend({url: 'hits'});
-var HITView = TemplateView.extend({
+var HITView = TemplatedView.extend({
   template: 'admin/HITs/one'
 });
 var MTWorker = Backbone.Model.extend({
@@ -301,7 +235,7 @@ var AssignmentCollection = TemplatedCollection.extend({
   model: Assignment,
   url: '../Assignments'
 });
-var AssignmentView = TemplateView.extend({
+var AssignmentView = TemplatedView.extend({
   className: 'assignment',
   template: 'admin/assignments/one',
   preRender: function(ctx) {

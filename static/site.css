@@ -12,7 +12,6 @@ fieldset{margin:0 0 10px 0}fieldset button{margin:10px 10px 0 0}
 table{border-collapse:collapse}table th{white-space:nowrap;text-align:left}
 table td{padding:1px 4px;vertical-align:top}
 textarea{vertical-align:middle;overflow:hidden}
-.stim{display:inline-block;margin:0 auto}
 .shortdate{width:50px;overflow:hidden;table-layout:fixed}
 .hform label span{display:inline-block;width:75px}
 .vform label span{display:block}

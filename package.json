@@ -33,9 +33,9 @@
     "backbone": "*",
     "jquery": "*",
     "jquery-noty": "*",
-    "js-libs": "git://github.com/chbrown/js-libs.git",
     "jquery-tablesorter": "*",
     "json2": "*",
+    "misc-js": "git://github.com/chbrown/misc-js.git",
     "underscore": "*"
   }
 }
