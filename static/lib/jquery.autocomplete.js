@@ -1,11 +1,11 @@
-// Copyright 2011-2012 Christopher Brown (henrian.com)
-// MIT Licensed - http://www.opensource.org/licenses/mit-license.php
+// Copyright 2011-2013, Christopher Brown <io@henrian.com>, MIT Licensed
+// https://github.com/chbrown/misc-js :: jquery.autocomplete.js
+"use strict"; /*jslint indent: 2 */ /*globals $ */
 // usage:
 //  in your html: <input type="text" data-autocomplete="/users.json" />
 //  where /users.json?q=jo will respond in json
 //  then call: $('input[data-autocomplete]').ac();
 //  the actual Autocomplete object will be available at each element's .data('autocomplete') key
-
 (function($) {
   function measureBox($target) {
     return {
@@ -142,4 +142,4 @@
       $this.data('autocomplete', autocomplete);
     });
   };
-})(jQuery);
+})($);

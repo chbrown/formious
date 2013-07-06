@@ -1,6 +1,6 @@
-// Copyright 2011-2012 Christopher Brown (henrian.com)
-//   https://github.com/chbrown/jquery-plugins
-// MIT Licensed - http://www.opensource.org/licenses/mit-license.php
+// Copyright 2011-2013, Christopher Brown <io@henrian.com>, MIT Licensed
+// https://github.com/chbrown/misc-js :: jquery.flags.js
+"use strict"; /*jslint indent: 2 */ /*globals $ */
 (function($) {
   $.fn.measureBox = function() {
     return {
@@ -66,11 +66,13 @@
       if (this.anchor === 'r') {
         this.$flag.css({
           left: target_offset.left + target_size.width,
-          'margin-left': this.triangle_radius});
+          'margin-left': this.triangle_radius
+        });
         this.$triangle.css({
           left: -this.triangle_radius,
           'border-left-width': 0,
-          'border-right-color': this.bg_color});
+          'border-right-color': this.bg_color
+        });
       }
       else {
         this.$flag.css({
@@ -81,7 +83,8 @@
           // left: "auto",
           right: -this.triangle_radius,
           'border-right-width': 0,
-          'border-left-color': this.bg_color});
+          'border-left-color': this.bg_color
+        });
       }
 
       // handle alignment (top/middle/bottom)
@@ -139,4 +142,4 @@
       $.flag(args);
     });
   };
-})(jQuery);
+})($);

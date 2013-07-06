@@ -1,21 +1,24 @@
+// Copyright 2012-2013, Christopher Brown <io@henrian.com>, MIT Licensed
+// https://github.com/chbrown/misc-js :: jquery.persistence.js
+"use strict"; /*jslint indent: 2 */ /*globals _, $, Backbone, Handlebars */
 var EventEmitter = {
   _JQInit: function() {
-    this._JQ = jQuery(this);
+    this._JQ = $(this);
   },
   emit: function(ev) {
-    !this._JQ && this._JQInit();
+    if (!this._JQ) this._JQInit();
     this._JQ.trigger.apply(this._JQ, [ev, Array.prototype.slice.call(arguments, 1)]);
   },
   once: function(evt, handler) {
-    !this._JQ && this._JQInit();
+    if (!this._JQ) this._JQInit();
     this._JQ.one(evt, handler);
   },
   on: function(evt, handler) {
-    !this._JQ && this._JQInit();
+    if (!this._JQ) this._JQInit();
     this._JQ.bind(evt, handler);
   },
   off: function(evt, handler) {
-    !this._JQ && this._JQInit();
+    if (!this._JQ) this._JQInit();
     this._JQ.unbind(evt, handler);
   }
 };

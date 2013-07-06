@@ -1,4 +1,4 @@
-/*! tableSorter 2.8+ widgets - updated 4/13/2013
+/*! tableSorter 2.8+ widgets - updated 6/4/2013
  *
  * Column Styles
  * Column Filters
@@ -6,7 +6,7 @@
  * Sticky Header
  * UI Theme (generalized)
  * Save Sort
- * ["zebra", "uitheme", "stickyHeaders", "filter", "columns"]
+ * [ "columns", "filter", "resizable", "stickyHeaders", "uitheme", "saveSort" ]
  */
 /*jshint browser:true, jquery:true, unused:false, loopfunc:true */
 /*global jQuery: false, localStorage: false, navigator: false */
@@ -70,7 +70,14 @@ ts.storage = function(table, key, val){
 	var d, k, ls = false, v = {},
 	id = table.id || $('.tablesorter').index( $(table) ),
 	url = window.location.pathname;
-	try { ls = !!(localStorage.getItem); } catch(e) {}
+	// https://gist.github.com/paulirish/5558557
+	if ("localStorage" in window) {
+		try {
+			window.localStorage.setItem('_tmptest', 'temp');
+			ls = true;
+			window.localStorage.removeItem('_tmptest');
+		} catch(e) {}
+	}
 	// *** get val ***
 	if ($.parseJSON){
 		if (ls){
@@ -99,6 +106,45 @@ ts.storage = function(table, key, val){
 	} else {
 		return v && v[url] ? v[url][id] : {};
 	}
+};
+
+// Add a resize event to table headers
+// **************************
+ts.addHeaderResizeEvent = function(table, disable, options){
+	var defaults = {
+		timer : 250
+	},
+	o = $.extend({}, defaults, options),
+	c = table.config,
+	wo = c.widgetOptions,
+	headers,
+	checkSizes = function(){
+		wo.resize_flag = true;
+		headers = [];
+		c.$headers.each(function(){
+			var d = $.data(this, 'savedSizes'),
+				w = this.offsetWidth,
+				h = this.offsetHeight;
+			if (w !== d[0] || h !== d[1]) {
+				$.data(this, 'savedSizes', [ w, h ]);
+				headers.push(this);
+			}
+		});
+		if (headers.length) { c.$table.trigger('resize', [ headers ]); }
+		wo.resize_flag = false;
+	};
+	clearInterval(wo.resize_timer);
+	if (disable) {
+		wo.resize_flag = false;
+		return false;
+	}
+	c.$headers.each(function(){
+		$.data(this, 'savedSizes', [ this.offsetWidth, this.offsetHeight ]);
+	});
+	wo.resize_timer = setInterval(function(){
+		if (wo.resize_flag) { return; }
+		checkSizes();
+	}, o.timer);
 };
 
 // Widget: General UI theme
@@ -287,21 +333,25 @@ ts.addWidget({
 		filter_childRows     : false, // if true, filter includes child row content in the search
 		filter_columnFilters : true,  // if true, a filter will be added to the top of each table column
 		filter_cssFilter     : 'tablesorter-filter', // css class name added to the filter row & each input in the row
+		filter_filteredRow   : 'filtered', // class added to filtered rows; needed by pager plugin
 		filter_formatter     : null,  // add custom filter elements to the filter row
 		filter_functions     : null,  // add custom filter functions using this option
 		filter_hideFilters   : false, // collapse filter row when mouse leaves the area
 		filter_ignoreCase    : true,  // if true, make all searches case-insensitive
 		filter_liveSearch    : true,  // if true, search column content while the user types (with a delay)
+		filter_onlyAvail     : 'filter-onlyAvail', // a header with a select dropdown & this class name will only show available (visible) options within the drop down
 		filter_reset         : null,  // jQuery selector string of an element used to reset the filters
 		filter_searchDelay   : 300,   // typing delay in milliseconds before starting a search
 		filter_startsWith    : false, // if true, filter start from the beginning of the cell contents
 		filter_useParsedData : false, // filter all data using parsed content
 		filter_serversideFiltering : false, // if true, server-side filtering should be performed because client-side filtering will be disabled, but the ui and events will still be used.
+		filter_defaultAttrib : 'data-value', // data attribute in the header cell that contains the default filter value
 
 		// regex used in filter "check" functions - not for general use and not documented
 		filter_regex : {
 			"regex" : /^\/((?:\\\/|[^\/])+)\/([mig]{0,3})?$/, // regex to test for regex
 			"child" : /tablesorter-childRow/, // child row class name; this gets updated in the script
+			"filtered" : /filtered/, // filtered (hidden) row class name; updated in the script
 			"type" : /undefined|number/, // check type
 			"exact" : /(^[\"|\'|=])|([\"|\'|=]$)/g, // exact match
 			"nondigit" : /[^\w,. \-()]/g, // replace non-digits (from digit & currency parser)
@@ -328,9 +378,7 @@ ts.addWidget({
 					cv = (v || []).join(''); // combined filter values
 				// add filter array back into inputs
 				if (arry) {
-					c.$filters.each(function(i,el){
-						$(el).val(filter[i] || '');
-					});
+					ts.setFilters( $t, v );
 				}
 				if (wo.filter_hideFilters){
 					// show/hide filter row as needed
@@ -352,21 +400,30 @@ ts.addWidget({
 				}
 			},
 			findRows = function(filter, v, cv){
-				var $tb, $tr, $td, cr, r, l, ff, time, r1, r2;
+				var $tb, $tr, $td, cr, r, l, ff, time, r1, r2, searchFiltered;
 				if (c.debug) { time = new Date(); }
-
 				for (k = 0; k < b.length; k++ ){
 					if (b.eq(k).hasClass(c.cssInfoBlock)) { continue; } // ignore info blocks, issue #264
 					$tb = ts.processTbody(table, b.eq(k), true);
-					$tr = $tb.children('tr');
+					$tr = $tb.children('tr:not(.' + c.cssChildRow + ')');
 					l = $tr.length;
 					if (cv === '' || wo.filter_serversideFiltering){
-						$tr.show().removeClass('filtered');
+						$tb.children().show().removeClass(wo.filter_filteredRow);
 					} else {
+						// optimize searching only through already filtered rows - see #313
+						searchFiltered = true;
+						r = $t.data('lastSearch') || [];
+						$.each(v, function(i,val){
+							// check for changes from beginning of filter; but ignore if there is a logical "or" in the string
+							searchFiltered = (val || '').indexOf(r[i] || '') === 0 && searchFiltered && !/(\s+or\s+|\|)/g.test(val || '');
+						});
+						// can't search when all rows are hidden - this happens when looking for exact matches
+						if (searchFiltered && $tr.filter(':visible').length === 0) { searchFiltered = false; }
 						// loop through the rows
 						for (j = 0; j < l; j++){
-							// skip child rows
-							if (wo.filter_regex.child.test($tr[j].className)) { continue; }
+							r = $tr[j].className;
+							// skip child rows & already filtered rows
+							if ( wo.filter_regex.child.test(r) || (searchFiltered && wo.filter_regex.filtered.test(r)) ) { continue; }
 							r = true;
 							cr = $tr.eq(j).nextUntil('tr:not(.' + c.cssChildRow + ')');
 							// so, if "table.config.widgetOptions.filter_childRows" is true and there is
@@ -419,9 +476,16 @@ ts.addWidget({
 										ff = val === '' ? true : !(wo.filter_startsWith ? s === 0 : s >= 0);
 									// Look for operators >, >=, < or <=
 									} else if (/^[<>]=?/.test(val)){
-										// xi may be numeric - see issue #149
-										rg = isNaN(xi) ? fmt(xi.replace(wo.filter_regex.nondigit, ''), table) : fmt(xi, table);
 										s = fmt(val.replace(wo.filter_regex.nondigit, '').replace(wo.filter_regex.operators,''), table);
+										// parse filter value in case we're comparing numbers (dates)
+										if (parsed[i] || c.parsers[i].type === 'numeric') {
+											rg = c.parsers[i].format('' + val.replace(wo.filter_regex.operators,''), table, $ths.eq(i), i);
+											s = (rg !== '' && !isNaN(rg)) ? rg : s;
+										}
+										// xi may be numeric - see issue #149;
+										// check if c.cache[k].normalized[j] is defined, because sometimes j goes out of range? (numeric columns)
+										rg = ( parsed[i] || c.parsers[i].type === 'numeric' ) && !isNaN(s) && c.cache[k].normalized[j] ? c.cache[k].normalized[j][i] :
+											isNaN(xi) ? fmt(xi.replace(wo.filter_regex.nondigit, ''), table) : fmt(xi, table);
 										if (/>/.test(val)) { ff = />=/.test(val) ? rg >= s : rg > s; }
 										if (/</.test(val)) { ff = /<=/.test(val) ? rg <= s : rg < s; }
 										if (s === '') { ff = true; } // keep showing all rows if nothing follows the operator
@@ -436,15 +500,28 @@ ts.addWidget({
 										}
 									// Look for a range (using " to " or " - ") - see issue #166; thanks matzhu!
 									} else if (/\s+(-|to)\s+/.test(val)){
-										rg = isNaN(xi) ? fmt(xi.replace(wo.filter_regex.nondigit, ''), table) : fmt(xi, table);
 										s = val.split(/(?: - | to )/); // make sure the dash is for a range and not indicating a negative number
 										r1 = fmt(s[0].replace(wo.filter_regex.nondigit, ''), table);
 										r2 = fmt(s[1].replace(wo.filter_regex.nondigit, ''), table);
+										// parse filter value in case we're comparing numbers (dates)
+										if (parsed[i] || c.parsers[i].type === 'numeric') {
+											rg = c.parsers[i].format('' + s[0], table, $ths.eq(i), i);
+											r1 = (rg !== '' && !isNaN(rg)) ? rg : r1;
+											rg = c.parsers[i].format('' + s[1], table, $ths.eq(i), i);
+											r2 = (rg !== '' && !isNaN(rg)) ? rg : r2;
+										}
+										rg = ( parsed[i] || c.parsers[i].type === 'numeric' ) && !isNaN(r1) && !isNaN(r2) ? c.cache[k].normalized[j][i] :
+											isNaN(xi) ? fmt(xi.replace(wo.filter_regex.nondigit, ''), table) : fmt(xi, table);
 										if (r1 > r2) { ff = r1; r1 = r2; r2 = ff; } // swap
 										ff = (rg >= r1 && rg <= r2) || (r1 === '' || r2 === '') ? true : false;
 									// Look for wild card: ? = single, * = multiple, or | = logical OR
 									} else if ( /[\?|\*]/.test(val) || /\s+OR\s+/.test(v[i]) ){
-										ff = new RegExp( val.replace(/\s+or\s+/gi,"|").replace(/\?/g, '\\S{1}').replace(/\*/g, '\\S*') ).test(xi);
+										s = val.replace(/\s+OR\s+/gi,"|");
+										// look for an exact match with the "or" unless the "filter-match" class is found
+										if (!$ths.filter('[data-column="' + i + '"]:last').hasClass('filter-match') && /\|/.test(s)) {
+											s = '^(' + s + ')$';
+										}
+										ff = new RegExp( s.replace(/\?/g, '\\S{1}').replace(/\*/g, '\\S*') ).test(xi);
 									// Look for match, and add child row data for matching
 									} else {
 										x = (xi + t).indexOf(val);
@@ -454,13 +531,12 @@ ts.addWidget({
 								}
 							}
 							$tr[j].style.display = (r ? '' : 'none');
-							$tr.eq(j)[r ? 'removeClass' : 'addClass']('filtered');
+							$tr.eq(j)[r ? 'removeClass' : 'addClass'](wo.filter_filteredRow);
 							if (cr.length) { cr[r ? 'show' : 'hide'](); }
 						}
 					}
 					ts.processTbody(table, $tb, false);
 				}
-
 				last = cv; // save last search
 				$t.data('lastSearch', v);
 				if (c.debug){
@@ -469,14 +545,18 @@ ts.addWidget({
 				$t.trigger('applyWidgets'); // make sure zebra widget is applied
 				$t.trigger('filterEnd');
 			},
-			buildSelect = function(i, updating){
-				var o, arry = [];
+			buildSelect = function(i, updating, onlyavail){
+				var o, t, arry = [], currentVal;
 				i = parseInt(i, 10);
-				o = '<option value="">' + ($ths.filter('[data-column="' + i + '"]:last').attr('data-placeholder') || '') + '</option>';
+				t = $ths.filter('[data-column="' + i + '"]:last');
+				// t.data('placeholder') won't work in jQuery older than 1.4.3
+				o = '<option value="">' + (t.data('placeholder') || t.attr('data-placeholder') || '') + '</option>';
 				for (k = 0; k < b.length; k++ ){
 					l = c.cache[k].row.length;
 					// loop through the rows
 					for (j = 0; j < l; j++){
+						// check if has class filtered
+						if (onlyavail && c.cache[k].row[j][0].className.match(wo.filter_filteredRow)) { continue; }
 						// get non-normalized cell content
 						if (wo.filter_useParsedData){
 							arry.push( '' + c.cache[k].normalized[j][i] );
@@ -497,10 +577,14 @@ ts.addWidget({
 				});
 				arry = (ts.sortText) ? arry.sort(function(a, b){ return ts.sortText(table, a, b, i); }) : arry.sort(true);
 
+				// Get curent filter value
+				currentVal = $t.find('thead').find('select.' + css + '[data-column="' + i + '"]').val();
+
 				// build option list
 				for (k = 0; k < arry.length; k++){
+					t = arry[k].replace(/\"/g, "&quot;");
 					// replace quotes - fixes #242 & ignore empty strings - see http://stackoverflow.com/q/14990971/145346
-					o += arry[k] !== '' ? '<option value="' + arry[k].replace(/\"/g, "&quot;") + '">' + arry[k] + '</option>' : '';
+					o += arry[k] !== '' ? '<option value="' + t + '"' + (currentVal === t ? ' selected="selected"' : '') +'>' + arry[k] + '</option>' : '';
 				}
 				$t.find('thead').find('select.' + css + '[data-column="' + i + '"]')[ updating ? 'html' : 'append' ](o);
 			},
@@ -512,14 +596,27 @@ ts.addWidget({
 					if ((t.hasClass('filter-select') || wo.filter_functions && wo.filter_functions[i] === true) && !t.hasClass('filter-false')){
 						if (!wo.filter_functions) { wo.filter_functions = {}; }
 						wo.filter_functions[i] = true; // make sure this select gets processed by filter_functions
-						buildSelect(i, updating);
+						buildSelect(i, updating, t.hasClass(wo.filter_onlyAvail));
 					}
+				}
+			},
+			searching = function(filter){
+				if (typeof filter === 'undefined' || filter === true){
+					// delay filtering
+					clearTimeout(timer);
+					timer = setTimeout(function(){
+						checkFilters(filter); 
+					}, wo.filter_liveSearch ? wo.filter_searchDelay : 10);
+				} else {
+					// skip delay
+					checkFilters(filter);
 				}
 			};
 			if (c.debug){
 				time = new Date();
 			}
 			wo.filter_regex.child = new RegExp(c.cssChildRow);
+			wo.filter_regex.filtered = new RegExp(wo.filter_filteredRow);
 			// don't build filter row if columnFilters is false or all columns are set to "filter-false" - issue #156
 			if (wo.filter_columnFilters !== false && $ths.filter('.filter-false').length !== $ths.length){
 				// build filter row
@@ -557,7 +654,7 @@ ts.addWidget({
 							t = $('<input type="search">').appendTo( c.$filters.eq(i) );
 						}
 						if (t) {
-							t.attr('placeholder', $th.attr('data-placeholder') || '');
+							t.attr('placeholder', $th.data('placeholder') || $th.attr('data-placeholder') || '');
 						}
 					}
 					if (t) {
@@ -569,33 +666,33 @@ ts.addWidget({
 				}
 			}
 			$t
-			.bind('addRows updateCell update updateRows updateComplete appendCache filterReset search '.split(' ').join('.tsfilter '), function(e, filter){
-				if (!/(search|filterReset)/.test(e.type)){
+			.bind('addRows updateCell update updateRows updateComplete appendCache filterReset filterEnd search '.split(' ').join('.tsfilter '), function(e, filter){
+				if (!/(search|filterReset|filterEnd)/.test(e.type)){
 					e.stopPropagation();
 					buildDefault(true);
 				}
 				if (e.type === 'filterReset') {
 					$t.find('.' + css).val('');
 				}
-				// send false argument to force a new search; otherwise if the filter hasn't changed, it will return
-				filter = e.type === 'search' ? filter : e.type === 'updateComplete' ? $t.data('lastSearch') : '';
-				checkFilters(filter);
+				if (e.type === 'filterEnd') {
+					buildDefault(true);
+				} else {
+					// send false argument to force a new search; otherwise if the filter hasn't changed, it will return
+					filter = e.type === 'search' ? filter : e.type === 'updateComplete' ? $t.data('lastSearch') : '';
+					searching(filter);
+				}
 				return false;
 			})
 			.find('input.' + css).bind('keyup search', function(e, filter){
-				// ignore arrow and meta keys; allow backspace
-				if (e.type === 'keyup' && ((e.which < 32 && e.which !== 8) || (e.which >= 37 && e.which <=40) || (e.which !== 13 && !wo.filter_liveSearch))) { return; }
-				// skip delay
-				if (typeof filter === 'undefined' || filter === false){
-					checkFilters();
-				} else {
-					// delay filtering
-					clearTimeout(timer);
-					timer = setTimeout(function(){
-						checkFilters(filter);
-					}, wo.filter_searchDelay);
-					return false;
+				// emulate what webkit does.... escape clears the filter
+				if (e.which === 27) {
+					this.value = '';
+				// liveSearch can contain a min value length; ignore arrow and meta keys, but allow backspace
+				} else if ( (typeof wo.filter_liveSearch === 'number' && this.value.length < wo.filter_liveSearch && this.value !== '') || ( e.type === 'keyup' &&
+					( (e.which < 32 && e.which !== 8 && wo.filter_liveSearch === true && e.which !== 13) || (e.which >= 37 && e.which <=40) || (e.which !== 13 && wo.filter_liveSearch === false) ) ) ) {
+					return;
 				}
+				searching(filter);
 			});
 
 			// parse columns after formatter, in case the class is added at that point
@@ -621,7 +718,7 @@ ts.addWidget({
 							// add custom drop down list
 							for (str in wo.filter_functions[col]){
 								if (typeof str === 'string'){
-									ff += ff === '' ? '<option value="">' + (t.attr('data-placeholder') || '') + '</option>' : '';
+									ff += ff === '' ? '<option value="">' + (t.data('placeholder') || t.attr('data-placeholder') ||  '') + '</option>' : '';
 									ff += '<option value="' + str + '">' + str + '</option>';
 								}
 							}
@@ -691,6 +788,14 @@ ts.addWidget({
 			if (c.debug){
 				ts.benchmark("Applying Filter widget", time);
 			}
+			// add default values
+			$t.bind('tablesorter-initialized', function(){
+				ff = ts.getFilters(table);
+				for (i = 0; i < ff.length; i++) {
+					ff[i] = $ths.filter('[data-column="' + i + '"]:last').attr(wo.filter_defaultAttrib) || ff[i];
+				}
+				ts.setFilters(table, ff, true);
+			});
 			// filter widget initialized
 			$t.trigger('filterInit');
 			checkFilters();
@@ -707,7 +812,7 @@ ts.addWidget({
 			.find('.tablesorter-filter-row').remove();
 		for (k = 0; k < b.length; k++ ){
 			$tb = ts.processTbody(table, b.eq(k), true); // remove tbody
-			$tb.children().removeClass('filtered').show();
+			$tb.children().removeClass(wo.filter_filteredRow).show();
 			ts.processTbody(table, $tb, false); // restore tbody
 		}
 		if (wo.filterreset) { $(wo.filter_reset).unbind('click.tsfilter'); }
@@ -715,6 +820,7 @@ ts.addWidget({
 });
 ts.getFilters = function(table) {
 	var c = table ? $(table)[0].config : {};
+	if (c && c.widgetOptions && !c.widgetOptions.filter_columnFilters) { return $(table).data('lastSearch'); }
 	return c && c.$filters ? c.$filters.find('.' + c.widgetOptions.filter_cssFilter).map(function(i, el) {
 		return $(el).val();
 	}).get() || [] : false;
@@ -724,8 +830,8 @@ ts.setFilters = function(table, filter, apply) {
 		c = $t.length ? $t[0].config : {},
 		valid = c && c.$filters ? c.$filters.find('.' + c.widgetOptions.filter_cssFilter).each(function(i, el) {
 			$(el).val(filter[i] || '');
-		}) || false : false;
-	if (valid && apply) { $t.trigger('search'); }
+		}).trigger('change.tsfilter') || false : false;
+	if (apply) { $t.trigger('search', [filter, false]); }
 	return !!valid;
 };
 
@@ -738,33 +844,39 @@ ts.addWidget({
 	id: "stickyHeaders",
 	priority: 60,
 	options: {
-		stickyHeaders: 'tablesorter-stickyHeader',
-		stickyHeaders_cloneId: '-sticky' // added to table ID, if it exists
+		stickyHeaders : 'tablesorter-stickyHeader',
+		stickyHeaders_offset : 0, // number or jquery selector targeting the position:fixed element
+		stickyHeaders_cloneId : '-sticky', // added to table ID, if it exists
+		stickyHeaders_addResizeEvent : true, // trigger "resize" event on headers
+		stickyHeaders_includeCaption : true // if false and a caption exist, it won't be included in the sticky header
 	},
 	format: function(table, c, wo){
 		if (c.$table.hasClass('hasStickyHeaders')) { return; }
 		var $t = c.$table,
-			win = $(window),
+			$win = $(window),
 			header = $t.children('thead:first'),
 			hdrCells = header.children('tr:not(.sticky-false)').children(),
 			innr = '.tablesorter-header-inner',
 			tfoot = $t.find('tfoot'),
-			filterInputs = 'input, select',
-			t2 = wo.$sticky = $t.clone()
+			filterInputs = '.' + (wo.filter_cssFilter || 'tablesorter-filter'),
+			$stickyOffset = isNaN(wo.stickyHeaders_offset) ? $(wo.stickyHeaders_offset) : '',
+			stickyOffset = $stickyOffset.length ? $stickyOffset.height() || 0 : parseInt(wo.stickyHeaders_offset, 10) || 0,
+			$stickyTable = wo.$sticky = $t.clone()
 				.addClass('containsStickyHeaders')
 				.css({
 					position   : 'fixed',
 					margin     : 0,
-					top        : 0,
+					top        : stickyOffset,
 					visibility : 'hidden',
-					zIndex     : 1
+					zIndex     : 2
 				}),
-			stkyHdr = t2.children('thead:first').addClass(wo.stickyHeaders),
+			stkyHdr = $stickyTable.children('thead:first').addClass(wo.stickyHeaders),
 			stkyCells,
 			laststate = '',
 			spacing = 0,
 			flag = false,
 			resizeHdr = function(){
+				stickyOffset = $stickyOffset.length ? $stickyOffset.height() || 0 : parseInt(wo.stickyHeaders_offset, 10) || 0;
 				var bwsr = navigator.userAgent;
 				spacing = 0;
 				// yes, I dislike browser sniffing, but it really is needed here :(
@@ -774,8 +886,8 @@ ts.addWidget({
 					// update border-spacing here because of demos that switch themes
 					spacing = parseInt(hdrCells.eq(0).css('border-left-width'), 10) * 2;
 				}
-				t2.css({
-					left : header.offset().left - win.scrollLeft() - spacing,
+				$stickyTable.css({
+					left : header.offset().left - $win.scrollLeft() - spacing,
 					width: $t.width()
 				});
 				stkyCells.filter(':visible').each(function(i){
@@ -789,13 +901,16 @@ ts.addWidget({
 				});
 			};
 		// fix clone ID, if it exists - fixes #271
-		if (t2.attr('id')) { t2[0].id += wo.stickyHeaders_cloneId; }
+		if ($stickyTable.attr('id')) { $stickyTable[0].id += wo.stickyHeaders_cloneId; }
 		// clear out cloned table, except for sticky header
 		// include caption & filter row (fixes #126 & #249)
-		t2.find('thead:gt(0), tr.sticky-false, tbody, tfoot').remove();
+		$stickyTable.find('thead:gt(0), tr.sticky-false, tbody, tfoot').remove();
+		if (!wo.stickyHeaders_includeCaption) {
+			$stickyTable.find('caption').remove();
+		}
 		// issue #172 - find td/th in sticky header
 		stkyCells = stkyHdr.children().children();
-		t2.css({ height:0, width:0, padding:0, margin:0, border:0 });
+		$stickyTable.css({ height:0, width:0, padding:0, margin:0, border:0 });
 		// remove resizable block
 		stkyCells.find('.tablesorter-resizer').remove();
 		// update sticky header class names to match real header after sorting
@@ -820,35 +935,39 @@ ts.addWidget({
 		});
 		// http://stackoverflow.com/questions/5312849/jquery-find-self;
 		hdrCells.find(c.selectorSort).add( c.$headers.filter(c.selectorSort) ).each(function(i){
-			var t = $(this);
-			stkyHdr.children('tr.tablesorter-headerRow').children().eq(i)
+			var t = $(this),
 			// clicking on sticky will trigger sort
-			.bind('mouseup', function(e){
+			$cell = stkyHdr.children('tr.tablesorter-headerRow').children().eq(i).bind('mouseup', function(e){
 				t.trigger(e, true); // external mouseup flag (click timer is ignored)
-			})
-			// prevent sticky header text selection
-			.bind('mousedown', function(){
-				this.onselectstart = function(){ return false; };
-				return false;
 			});
+			// prevent sticky header text selection
+			if (c.cancelSelection) {
+				$cell
+					.attr('unselectable', 'on')
+					.bind('selectstart', false)
+					.css({
+						'user-select': 'none',
+						'MozUserSelect': 'none'
+					});
+			}
 		});
 		// add stickyheaders AFTER the table. If the table is selected by ID, the original one (first) will be returned.
-		$t.after( t2 );
+		$t.after( $stickyTable );
 		// make it sticky!
-		win
-		.bind('scroll.tsSticky resize.tsSticky', function(e){
+		$win.bind('scroll.tsSticky resize.tsSticky', function(e){
 			if (!$t.is(':visible')) { return; } // fixes #278
 			var pre = 'tablesorter-sticky-',
 				offset = $t.offset(),
-				sTop = win.scrollTop(),
-				tableHt = $t.height() - (t2.height() + (tfoot.height() || 0)),
-				vis = (sTop > offset.top) && (sTop < offset.top + tableHt) ? 'visible' : 'hidden';
-			t2
+				cap = -(wo.stickyHeaders_includeCaption ? 0 : $t.find('caption').height()),
+				sTop = $win.scrollTop() + stickyOffset,
+				tableHt = $t.height() - ($stickyTable.height() + (tfoot.height() || 0)),
+				vis = (sTop > offset.top - cap) && (sTop < offset.top - cap + tableHt) ? 'visible' : 'hidden';
+			$stickyTable
 			.removeClass(pre + 'visible ' + pre + 'hidden')
 			.addClass(pre + vis)
 			.css({
 				// adjust when scrolling horizontally - fixes issue #143
-				left : header.offset().left - win.scrollLeft() - spacing,
+				left : header.offset().left - $win.scrollLeft() - spacing,
 				visibility : vis
 			});
 			if (vis !== laststate || e.type === 'resize'){
@@ -857,6 +976,9 @@ ts.addWidget({
 				laststate = vis;
 			}
 		});
+		if (wo.stickyHeaders_addResizeEvent) {
+			ts.addHeaderResizeEvent(table);
+		}
 
 		// look for filter widget
 		$t.bind('filterEnd', function(){
@@ -865,7 +987,7 @@ ts.addWidget({
 				$(this).find(filterInputs).val( c.$filters.find(filterInputs).eq(i).val() );
 			});
 		});
-		stkyCells.find(filterInputs).bind('keyup search', function(e){
+		stkyCells.find(filterInputs).bind('keyup search change', function(e){
 			// ignore arrow and meta keys; allow backspace
 			if ((e.which < 32 && e.which !== 8) || (e.which >= 37 && e.which <=40)) { return; }
 			flag = true;
@@ -877,6 +999,7 @@ ts.addWidget({
 				flag = false;
 			}, wo.filter_searchDelay);
 		});
+		$t.trigger('stickyHeadersInit');
 
 	},
 	remove: function(table, c, wo){
@@ -884,8 +1007,12 @@ ts.addWidget({
 			.removeClass('hasStickyHeaders')
 			.unbind('sortEnd.tsSticky pagerComplete.tsSticky')
 			.find('.' + wo.stickyHeaders).remove();
-		if (wo.$sticky) { wo.$sticky.remove(); } // remove cloned thead
-		$(window).unbind('scroll.tsSticky resize.tsSticky');
+		if (wo.$sticky && wo.$sticky.length) { wo.$sticky.remove(); } // remove cloned table
+		// don't unbind if any table on the page still has stickyheaders applied
+		if (!$('.hasStickyHeaders').length) {
+			$(window).unbind('scroll.tsSticky resize.tsSticky');
+		}
+		ts.addHeaderResizeEvent(table, false);
 	}
 });
 
