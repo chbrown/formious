@@ -14,12 +14,13 @@ module.exports = function(grunt) {
       all: {
         options: {
           // beautify: true,
-          mangle: false
+          mangle: false,
         },
         files: {
           'static/compiled.js': [
             'static/lib/json2.js',
             'static/lib/underscore.js',
+            'static/lib/cookies.js',
             'static/lib/jquery.js',
             'static/lib/jquery.flags.js',
             'static/lib/jquery-noty.js',
