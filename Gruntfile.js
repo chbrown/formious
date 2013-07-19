@@ -29,7 +29,7 @@ module.exports = function(grunt) {
             'static/lib/layouts/bottomRight.js',
             'static/lib/backbone.js',
             'static/lib/handlebars.js',
-            'static/lib/templating.js'
+            'static/lib/templating.js',
           ]
         }
       }

@@ -105,7 +105,7 @@ var Batch = Backbone.Model.extend({
 });
 var BatchCollection = Backbone.Collection.extend({model: Batch});
 
-var SceneView = TemplateView.extend({
+var SceneView = TemplatedView.extend({
   template: 'stims/aircraft/scene',
   // a scene is given exactly a model
   preRender: function(ctx) {
@@ -139,7 +139,7 @@ var SceneView = TemplateView.extend({
   },
 });
 
-var SceneFeedbackView = TemplateView.extend({
+var SceneFeedbackView = TemplatedView.extend({
   template: 'stims/feedback',
   postRender: function(ctx) {
     var self = this;
@@ -161,7 +161,7 @@ var SceneFeedbackView = TemplateView.extend({
   }
 });
 
-var BatchDebriefingView = TemplateView.extend({
+var BatchDebriefingView = TemplatedView.extend({
   template: 'stims/aircraft/batch-debriefing',
   preRender: function(ctx) {
     ctx.bonus_available = ctx.bonus > 0;
@@ -200,7 +200,7 @@ var BatchDebriefingView = TemplateView.extend({
   }
 });
 
-var ConclusionView = TemplateView.extend({
+var ConclusionView = TemplatedView.extend({
   template: 'stims/aircraft/conclusion',
   preRender: function(ctx) {
     var allies = this.model.scenes.first().get('allies');
@@ -215,7 +215,7 @@ var ConclusionView = TemplateView.extend({
   },
 });
 
-var ConsentView = TemplateView.extend({
+var ConsentView = TemplatedView.extend({
   template: 'stims/consent',
   events: {
     'click button': 'next'

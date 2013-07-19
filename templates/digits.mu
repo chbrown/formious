@@ -100,7 +100,7 @@ var Batch = Backbone.Model.extend({
 var BatchCollection = Backbone.Collection.extend({model: Batch});
 var batches = new BatchCollection({{{JSON.stringify(batches)}}});
 
-var BatchView = TemplateView.extend({
+var BatchView = TemplatedView.extend({
   template: 'stims/digits/batch',
   // className: 'auto-hmargin',
   postRender: function(ctx) {
@@ -153,7 +153,7 @@ var BatchView = TemplateView.extend({
   },
 });
 
-var SceneView = TemplateView.extend({
+var SceneView = TemplatedView.extend({
   tagName: 'td',
   template: 'stims/digits/scene',
   preRender: function(ctx) {
@@ -178,7 +178,7 @@ var SceneView = TemplateView.extend({
   }
 });
 
-var BatchFeedbackView = TemplateView.extend({
+var BatchFeedbackView = TemplatedView.extend({
   template: 'stims/feedback',
   postRender: function(ctx) {
     var self = this;
@@ -198,7 +198,7 @@ var BatchFeedbackView = TemplateView.extend({
   }
 });
 
-var ConclusionView = TemplateView.extend({
+var ConclusionView = TemplatedView.extend({
   template: 'stims/digits/conclusion',
   preRender: function(ctx) {
     var allies = this.model.get('scenes').first().get('allies');
@@ -213,7 +213,7 @@ var ConclusionView = TemplateView.extend({
   },
 });
 
-var ConsentView = TemplateView.extend({
+var ConsentView = TemplatedView.extend({
   template: 'stims/consent',
   events: {
     'click button': 'next'

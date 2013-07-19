@@ -28,9 +28,16 @@ var hosts = {
   local: '/',
 };
 
+/** Overall /admin/mt url stucture:
+
+  /admin/mt/(account_name)/(host_name)
+      `account_name` is provided by the user, and linked to an AWS Access Key and AWS Secret Key
+      `host_name` is either "deploy" or "sandbox".
+
+*/
+
 // /admin/mt
 module.exports = function(m, req, res) {
-  // /admin/mt/(account_name)/(host_name)
   var account_id = m[1];
   var host_id = m[2];
 

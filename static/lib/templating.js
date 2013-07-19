@@ -18,6 +18,7 @@ function TemplateManager(opts) {
 }
 TemplateManager.prototype.render = function(template_name, context) {
   // synchronous; returns html.
+  var self = this;
   var cached_template = this.cache[template_name];
   // only cache once per page load
   if (!cached_template) {
@@ -25,7 +26,7 @@ TemplateManager.prototype.render = function(template_name, context) {
       url: this.url + template_name + this.extension + this.querystring,
       async: false,
       success: function(template_src) {
-        cached_template = this.compile(template_src);
+        cached_template = self.compile(template_src);
       }
     });
     // yes, the above *will* execute synchronously!

@@ -35,7 +35,7 @@ var context = {
   workerId: '{{workerId}}'
 };
 
-var StimlistView = TemplateView.extend({
+var StimlistView = TemplatedView.extend({
   className: 'pane-padded',
   template: 'stimlists/edit',
   loadText: function(raw) {

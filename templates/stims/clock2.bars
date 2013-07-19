@@ -2,7 +2,9 @@
 
   <div id="digitimage"></div>
 
-
+  <!-- perhaps this is wasteful, to include this here, everytime we load this stim,
+    but it's more generic to load all resources required by the stim, in the stim,
+    rather than including them into the global compiled.js file. Maybe use head.js? -->
   <script src="/static/lib/clock.js"></script>
   <script>
   var segments = [
