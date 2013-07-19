@@ -2,6 +2,8 @@
 
   <div id="digitimage"></div>
 
+
+  <script src="/static/lib/clock.js"></script>
   <script>
   var segments = [
     {{DIGITLINE1}},
