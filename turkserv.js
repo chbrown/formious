@@ -12,8 +12,10 @@ var R = new Router();
 amulet.set({minify: true, root: path.join(__dirname, 'templates')});
 
 Cookies.prototype.defaults = function() {
-  var expires = new Date(Date.now() + 31*86400 *1000); // 1 month
-  return {expires: expires};
+  return {
+    path: '/',
+    expires: new Date(Date.now() + 31*86400*1000), // 1 month out
+  };
 };
 
 R.get(/^\/favicon.ico/, function(m, req, res) {
