@@ -1,5 +1,6 @@
 <div class="navbar">
   <a href="/admin/users">Users</a>
+  <a href="/stimlists">Stimlists</a>
   <a href="/admin/mt">AWS Accounts</a>
   <a href="/admin" style="float: right;">Logout</a>
 </div>

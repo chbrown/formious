@@ -6,7 +6,6 @@ var logger = require('../logger');
 var amulet = require('amulet');
 var async = require('async');
 var _ = require('underscore');
-var moment = require('moment');
 var Router = require('regex-router');
 
 var models = require('../models');

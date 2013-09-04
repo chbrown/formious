@@ -45,6 +45,7 @@ and you will receive feedback on whether your guess was correct.
 <script src="/static/compiled.js"></script>
 <script src="/static/templates.js"></script>
 <script src="/static/local.js"></script>
+<script src="/static/lib/clock.js"></script>
 <script>
 var assignmentId = "{{assignmentId}}";
 var config = {
