@@ -133,7 +133,7 @@ The two planes are Messerschmitts and Spitfires, particularly, models taken from
           var result_string = util.inspect(result, {showHidden: true, depth: 5});
           logger.info('Bonus of ' + amount + ' granted to worker: ' + workerId + '. ' + result_string);
           user.set('paid', user.responses.length);
-          user.save(logger.maybe);
+          user.save();
           res.json({success: true, message: 'Bonus awarded: $' + amount, amount: amount});
         }
       });

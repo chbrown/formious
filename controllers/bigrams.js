@@ -3,11 +3,10 @@ var url = require('url');
 var mechturk = require('mechturk');
 var _ = require('underscore');
 var amulet = require('amulet');
-var vsprintf = require('sprintf').vsprintf;
 
-var random = require('./random');
-var User = require('./models').User;
-var logger = require('./logger');
+var logger = require('../lib/logger');
+var misc = require('../lib/misc');
+var models = require('../lib/models');
 
 var names = ['Banks', 'Barkley', 'Bowers', 'Dean', 'Frederick', 'Henderson',
   'Jacob', 'Kimball', 'Malackany', 'Malcom', 'Marin', 'Parker', 'Riedel',
@@ -79,7 +78,7 @@ module.exports = function(R) {
     //   hitId: '2939RJ85OZIZ4RKABAS998123Q9M8NEW85',
     //   workerId: 'A9T1WQR9AL982W',
     //   turkSubmitTo: 'https://www.mturk.com' },
-    var workerId = (urlObj.query.workerId || req.cookies.get('workerId') || '').replace(/\W+/g, '');
+    var workerId = (urlObj.query.workerId || req.user_id).replace(/\W+/g, '');
     var ctx = {
       assignmentId: urlObj.query.assignmentId,
       hitId: urlObj.query.hitId,
@@ -99,20 +98,19 @@ module.exports = function(R) {
       return {
         title: 'Sgt.',
         name: name,
-        reliability: random.range(0.0, 1.0) // maybe switch in a beta later
+        reliability: misc.random(0.0, 1.0) // maybe switch in a beta later
       };
     });
 
-    User.fromId(workerId, function(err, user) {
-      logger.maybe(err);
+    models.User.fromId(workerId, function(err, user) {
+      if (err) return res.die('User query error: ' + err);
 
       ctx.batches = _.range(ctx.batches_per_HIT).map(function(batch_index) {
         var batch = makeBatch(allies, ctx.scenes_per_batch);
         batch.id = batch_index + 1;
         return batch;
       });
-      amulet.render(res, ['layout.mu', 'digits.mu'], ctx);
+      amulet.stream(['layout.mu', 'digits.mu'], ctx).pipe(res);
     });
   });
-
 };

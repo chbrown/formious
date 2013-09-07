@@ -2,6 +2,7 @@
   <thead>
     <tr>
       <th>ID</th>
+      <th></th>
       <th>Created</th>
       <th># Responses</th>
       <th>Bonus paid</th>
@@ -14,6 +15,7 @@
   {{#users}}
     <tr>
       <td><a href="/admin/users/{{_id}}">{{_id}}</td>
+      <td><a href="/admin/users/{{_id}}/edit">Edit</td>
       <td class="nowrap shortdate">{{created}}</td>
       <td>{{responses.length}}</td>
       <td>{{bonus_paid}}</td>

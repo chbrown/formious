@@ -11,17 +11,19 @@
     "async": "*",
     "cookies": "git://github.com/chbrown/cookies.git",
     "formidable": "*",
-    "http-enhanced": "~0.3",
+    "http-enhanced": "*",
     "js-yaml": "*",
     "mechturk": "git://github.com/chbrown/mechturk.git",
     "moment": "git://github.com/timrwood/moment.git#develop",
     "mongoose": "*",
     "optimist": "*",
     "regex-router": "*",
+    "send": "*",
     "sprintf": "*",
+    "streaming": "*",
     "sv": "*",
     "underscore": "*",
-    "winston": "~0.6"
+    "winston": "*"
   },
   "devDependencies": {
     "grunt": "*",

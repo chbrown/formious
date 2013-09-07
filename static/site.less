@@ -1,63 +1,77 @@
-.left { text-align: left; }
-.center { text-align: center; }
-.right { text-align: right; }
-.nowrap { white-space: nowrap; }
-h1, h2, h3, h4, h5, h6 { margin: 0.75em 0 0.25em 0; }
-p { margin: 0.5em 0; }
-
+* {
+  box-sizing: border-box;
+}
 body {
   margin: 0;
   font: 13px "Lucida Grande", Arial, sans-serif;
 }
-fieldset {
-  border: 1px solid #CCC;
+h1, h2, h3, h4, h5, h6 {
+  margin: 0.75em 0 0.25em 0;
 }
-label {
-  display: block;
-  font-size: 90%;
-  margin: 4px 0 2px;
-  span {
-    margin-right: 4px;
-    font-weight: bold;
-  }
-  &[disabled] {
-    color: #777;
-  }
+p {
+  margin: 0.5em 0;
 }
-fieldset {
-  margin: 0 0 10px 0;
-  button {
-    margin: 10px 10px 0 0;
-  }
-}
+
 table {
   border-collapse: collapse;
+  tr.preview {
+    background-color: #BBB;
+  }
   th {
     white-space: nowrap;
     text-align: left;
   }
   td {
+    font-size: 90%;
     padding: 1px 4px;
     vertical-align: top;
   }
+  &.hoverable {
+    tr:hover {
+      background-color: #DDD;
+    }
+  }
 }
+
+button {
+  margin: 10px 10px 0 0;
+}
+label {
+  display: block;
+  &[disabled] {
+    color: #777;
+  }
+  span {
+    margin: 2px 4px;
+  }
+}
+.hform label span:first-child {
+  display: inline-block;
+  width: 75px;
+}
+.vform label span:first-child {
+  // only match spans that come first in a label so that radio buttons with postfixed spans are not blocked and bolded
+  display: block;
+  font-weight: bold;
+  margin: 2px 0;
+}
+fieldset {
+  margin: 0 0 10px 0;
+  border: 1px solid #CCC;
+}
+
 textarea {
   vertical-align: middle;
   overflow: hidden;
 }
 
-
+.nowrap {
+  white-space: nowrap;
+}
 .shortdate {
   width: 50px;
   overflow: hidden;
-  table-layout:fixed;
-}
-.hform label span {
-  display: inline-block;
-  width: 75px;
-}
-.vform label span {
-  display: block;
+  table-layout: fixed;
 }
 
 .navbar {
@@ -77,18 +91,20 @@ textarea {
     margin: 2px;
   }
 }
-// .emoticon {
-//   text-align: center;
-//   font-size: 20em;
-// }
-// .allies {
-//   td {
-//     padding: 4px;
-//   }
-//   span {
-//     font-weight: bold;
-//   }
-// }
+
+.pane-padded {
+  padding: 10px 20px;
+}
+.pane-control.left {
+  display: block;
+  position: absolute;
+  height: 100%;
+  margin: 0;
+  top: 0;
+  left: 0;
+  padding: 1px;
+}
+
 .assignment {
   margin-top: 10px;
   padding-left: 10px;
@@ -165,7 +181,6 @@ textarea {
   padding: 2px;
   color: white;
   font-size: 90%;
-  // like a diaond -- half-diameter measure
   .triangle {
     display: inline-block;
     position: absolute;

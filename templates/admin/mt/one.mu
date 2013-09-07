@@ -10,7 +10,7 @@
 <table id="hosts">
   <thead>
     <tr>
-      <th class="left">Host</th>
+      <th>Host</th>
       <th>Available Balance</th>
       <th></th>
       <th></th>
@@ -20,7 +20,7 @@
     {{#hosts}}
       <tr>
         <td>{{.}}</td>
-        <td class="right"></td>
+        <td></td>
         <td><a href="/admin/mt/{{account._id}}/{{.}}/HITs">View HITs</a></td>
         <td><a href="/admin/mt/{{account._id}}/{{.}}/HITs/new">Create new HIT</a></td>
       </tr>

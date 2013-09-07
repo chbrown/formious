@@ -5,22 +5,9 @@ var _ = require('underscore');
 var amulet = require('amulet');
 var vsprintf = require('sprintf').vsprintf;
 
-var User = require('../models').User;
-var logger = require('../logger');
-
-function sample(list, num) {
-  // with replacement.
-  if (num === undefined) {
-    return list[(Math.random() * list.length) | 0];
-  }
-  else {
-    var samples = [];
-    for (var i = 0; i < num; i++) {
-      samples.push(list[(Math.random() * list.length) | 0]);
-    }
-    return samples;
-  }
-}
+var logger = require('../lib/logger');
+var misc = require('../lib/misc');
+var models = require('../lib/models');
 
 function allyJudgment(reliability, truth, prior_on_enemy) {
   // var prior_on_enemy = 1 - prior_on_friend;
@@ -42,7 +29,7 @@ function makeBatch(prior_on_enemy, number_of_scenes, allies, widths) {
   var total_friendly = number_of_scenes - total_enemy;
 
   var scenes = _.range(number_of_scenes).map(function(scene_index) {
-    var width = sample(widths);
+    var width = misc.sample(widths);
     var image_id = (Math.random() * 100) | 0;
     var truth = scene_index < total_enemy ? 'enemy' : 'friend';
     return {
@@ -86,14 +73,14 @@ module.exports = function(m, req, res) {
   //   hitId: '2939RJ85OZIZ4RKABAS998123Q9M8NEW85',
   //   workerId: 'A9T1WQR9AL982W',
   //   turkSubmitTo: 'https://www.mturk.com' },
-  var context = {
+  var ctx = {
     assignmentId: urlObj.query.assignmentId,
     hitId: urlObj.query.hitId,
-    workerId: (urlObj.query.workerId || req.cookies.get('workerId') || '').replace(/\W+/g, ''),
+    workerId: (urlObj.query.workerId || req.user_id).replace(/\W+/g, ''),
     host: urlObj.query.debug !== undefined ? '' : (urlObj.query.turkSubmitTo || 'https://www.mturk.com'),
     task_started: Date.now()
   };
-  req.cookies.set('workerId', context.workerId);
+  req.cookies.set('workerId', ctx.workerId);
 
   // a preview request will be the same, minus workerId and turkSubmitTo,
   // and assignmentId will always then be 'ASSIGNMENT_ID_NOT_AVAILABLE'
@@ -105,17 +92,18 @@ module.exports = function(m, req, res) {
     };
   });
 
-  User.fromId(context.workerId, function(err, user) {
-    logger.maybe(err);
+  models.User.fromId(ctx.workerId, function(err, user) {
+    if (err) return res.die('User query error: ' + err);
+
     var batch_priors = _.shuffle(priors);
     // first is the training batch
     batch_priors.unshift(0.5);
-    context.batches = batch_priors.map(function(prior, i) {
+    ctx.batches = batch_priors.map(function(prior, i) {
       var batch = makeBatch(prior, scenes_per_batch, allies, widths);
       batch.bonus = i > 1 ? 0.25 : 0.00;
       batch.id = i + 1;
       return batch;
     });
-    amulet.stream(['layout.mu', 'aircraft.mu'], context).pipe(res);
+    amulet.stream(['layout.mu', 'aircraft.mu'], ctx).pipe(res);
   });
 };

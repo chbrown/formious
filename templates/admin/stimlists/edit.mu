@@ -1,28 +1,3 @@
-<style>
-* { box-sizing: border-box; }
-tr:hover {
-  background-color: #DDD;
-}
-tr.preview {
-  background-color: #BBB;
-}
-table td {
-  font-size: 80%;
-}
-.pane-padded {
-  padding: 10px 20px;
-}
-.pane-control.left {
-  display: block;
-  position: absolute;
-  height: 100%;
-  margin: 0;
-  top: 0;
-  left: 0;
-  padding: 1px;
-}
-</style>
-
 <div class="panes"></div>
 
 <script src="/static/compiled.js"></script>
@@ -37,7 +12,7 @@ var context = {
 
 var StimlistView = TemplatedView.extend({
   className: 'pane-padded',
-  template: 'stimlists/edit',
+  template: 'admin/stimlists/edit',
   loadText: function(raw) {
     var self = this;
     self.model.set('csv', raw);
@@ -75,7 +50,7 @@ var StimlistView = TemplatedView.extend({
     stim.$el.addClass('pane-padded');
 
     pane_manager.set(1, stim.$el);
-    var $pane_hide = $('<button class="pane-control left">&raquo;</button>').appendTo(stim.$el);
+    var $pane_hide = $('<button class="pane-control">&raquo;</button>').appendTo(stim.$el);
     $pane_hide.on('click', function(ev) {
       pane_manager.limit(1);
     });

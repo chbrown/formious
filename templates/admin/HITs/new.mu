@@ -1,12 +1,11 @@
-<form method="POST" action="CreateHIT" id="create">
-  <fieldset><legend>Create HIT</legend>
-    <div class="inputs"></div>
-    <button>Create HIT</button>
-  </fieldset>
-</form>
+<fieldset><legend>Create HIT</legend>
+  <form method="POST" action="CreateHIT">
+    <button type="submit">Create HIT</button>
+  </form>
+</fieldset>
 
 <script>
-[
+var fields = [
   {
     id: 'MaxAssignments',
   },
@@ -47,8 +46,10 @@
     id: 'AutoApprovalDelay',
     label: 'Auto-approval Delay (e.g., 60m)',
   },
-].forEach(function(field) {
-  var form_input = new FormInput(field)
-  $('#create .inputs').append(form_input.$el);
+];
+
+fields.reverse().forEach(function(field) {
+  var form_input = new FormInput(field);
+  $('form').prepend(form_input.$el);
 });
 </script>
