@@ -57,7 +57,7 @@ function makeBatch(prior_on_enemy, number_of_scenes, allies, widths) {
   };
 }
 
-module.exports = function(m, req, res) {
+module.exports = function(req, res, m) {
   // A batch shows scenes, so we start with the batch.
   // When a batch starts, it's given a batchmodel, which contains a collection of scenes
   // A scene must attach inside a batch

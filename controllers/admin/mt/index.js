@@ -6,17 +6,20 @@ var amulet = require('amulet');
 var async = require('async');
 var Router = require('regex-router');
 
-// var logger = require('../../../lib/logger');
+var logger = require('../../../lib/logger');
+// var misc = require('../../../lib/misc');
 var models = require('../../../lib/models');
 
-var R = new Router();
+var R = new Router(function(req, res) {
+  res.die(404, 'No resource at: ' + req.url);
+});
 
 // set up single sub-controller (which handles per-account API calls, as opposed to the CRUD-type things below)
-R.any(/^\/admin\/mt\/(\w+)\/(\w+)/, require('./api'));
+R.any(/^\/admin\/aws\/(\w+)\/(\w+)/, require('./api'));
 
-/** GET /admin/mt
-List all AWS MTurk accounts and show creation form */
-R.get(/^\/admin\/mt$/, function(m, req, res) {
+/** GET /admin/aws
+Index - list all AWS accounts and show creation link */
+R.get('/admin/aws', function(req, res) {
   models.AWSAccount.find({}, function(err, accounts) {
     if (err) return res.die(err);
 
@@ -24,26 +27,26 @@ R.get(/^\/admin\/mt$/, function(m, req, res) {
       user: req.user,
       accounts: accounts,
     };
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/mt/all.mu'], ctx).pipe(res);
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/aws/all.mu'], ctx).pipe(res);
   });
 });
-/** POST /admin/mt
-Create new AWS MTurk account */
-R.post(/^\/admin\/mt$/, function(m, req, res) {
-  req.readToEnd('utf8', function(err, data) {
-    if (err) return res.die(err);
 
-    var account = _.extend({_id: m[1]}, querystring.parse(data));
-    new models.AWSAccount(account).save(function(err, account) {
-      if (err) return res.die(err);
+/** GET /admin/aws/new
+Create new AWS account and redirect to edit it */
+R.get('/admin/aws/new', function(req, res) {
+  new models.AWSAccount().save(function(err, account) {
+    if (err) {
+      logger.error('new AWSAccount().save() error', err);
+      return res.die(err);
+    }
 
-      res.redirect('/admin/mt/' + account._id);
-    });
+    res.redirect('/admin/aws/' + account._id + '/edit');
   });
 });
-/** GET /admin/mt/:account
-Show single AWS MTurk account */
-R.get(/^\/admin\/mt\/(\w*)$/, function(m, req, res) {
+
+/** GET /admin/aws/:account_id
+Show single AWS account */
+R.get(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
   models.AWSAccount.findById(m[1], function(err, account) {
     if (err) return res.die(err);
 
@@ -52,12 +55,47 @@ R.get(/^\/admin\/mt\/(\w*)$/, function(m, req, res) {
       account: account,
       hosts: ['deploy', 'sandbox'],
     };
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/mt/one.mu'], ctx).pipe(res);
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/aws/one.mu'], ctx).pipe(res);
   });
 });
-/** DELETE /admin/mt/:account
-Delete single AWS MTurk account */
-R.delete(/^\/admin\/mt\/(\w*)$/, function(m, req, res) {
+
+/** GET /admin/aws/:account_id/edit
+Edit single user */
+R.get(/^\/admin\/aws\/(\w+)\/edit$/, function(req, res, m) {
+  models.AWSAccount.findById(m[1], function(err, account) {
+    if (err) return res.die('AWSAccount query error: ' + err);
+
+    var ctx = {
+      user: req.user,
+      account: account,
+      hosts: ['deploy', 'sandbox'],
+    };
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/aws/edit.mu'], ctx).pipe(res);
+  });
+});
+
+/** POST /admin/aws/:account_id
+Update new AWS account */
+R.post(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
+  models.AWSAccount.findById(m[1], function(err, account) {
+    if (err) return res.die(err);
+
+    req.readToEnd('utf8', function(err, data) {
+      if (err) return res.die(err);
+
+      _.extend(account, querystring.parse(data));
+      account.save(function(err, account) {
+        if (err) return res.die(err);
+
+        res.redirect('/admin/aws/' + account._id);
+      });
+    });
+  });
+});
+
+/** DELETE /admin/aws/:account_id
+Delete single AWS account */
+R.delete(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
   models.AWSAccount.findById(m[1], function (err, account) {
     if (err) return res.json({success: false, message: err});
 
@@ -71,8 +109,4 @@ R.delete(/^\/admin\/mt\/(\w*)$/, function(m, req, res) {
   });
 });
 
-R.default = function(m, req, res) {
-  res.die(404, 'No resource at: ' + req.url);
-};
-
-module.exports = function(m, req, res) { R.route(req, res); };
+module.exports = R.route.bind(R);

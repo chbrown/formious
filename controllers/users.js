@@ -8,11 +8,13 @@ var logger = require('../lib/logger');
 var misc = require('../lib/misc');
 var models = require('../lib/models');
 
-var R = new Router();
+var R = new Router(function(req, res) {
+  res.die(404, 'No resource at: ' + req.url);
+});
 
 /** GET /users/:user
 show login page for this user */
-R.get(/^\/users\/(\w+)/, function(m, req, res) {
+R.get(/^\/users\/(\w+)/, function(req, res, m) {
   var workerId = m[1].replace(/\W+/g, '');
   models.User.fromId(workerId, function(err, user) {
     if (err) {
@@ -27,7 +29,7 @@ R.get(/^\/users\/(\w+)/, function(m, req, res) {
 
 /** GET /users/:user/claim
 register unclaimed (no set password) user by adding password */
-R.post(/^\/users\/(\w+)\/claim/, function(m, req, res) {
+R.post(/^\/users\/(\w+)\/claim/, function(req, res, m) {
   var workerId = m[1].replace(/\W+/g, '');
   req.readToEnd('utf8', function(err, data) {
     var fields = querystring.parse(data);
@@ -49,7 +51,7 @@ R.post(/^\/users\/(\w+)\/claim/, function(m, req, res) {
 
 /** GET /users/:user/become
 login as claimed user by providing password */
-R.post(/^\/users\/(\w+)\/become/, function(m, req, res) {
+R.post(/^\/users\/(\w+)\/become/, function(req, res, m) {
   var workerId = m[1].replace(/\W+/g, '');
   req.readToEnd('utf8', function(err, data) {
     if (err) {
@@ -72,7 +74,7 @@ R.post(/^\/users\/(\w+)\/become/, function(m, req, res) {
 });
 
 // GET /users -> redirect to /users/:current_user_id
-R.get(/^\/users\/?$/, function(m, req, res) {
+R.get(/^\/users\/?$/, function(req, res, m) {
   models.User.fromId(req.user_id, function(err, user) {
     if (err) return res.die('User.fromId error ' + err);
     if (!user) return res.die('User not found: ' + req.user_id);
@@ -81,8 +83,4 @@ R.get(/^\/users\/?$/, function(m, req, res) {
   });
 });
 
-R.default = function(m, req, res) {
-  res.die(404, 'No resource at: ' + req.url);
-};
-
-module.exports = function(m, req, res) { R.route(req, res); };
+module.exports = R.route.bind(R);

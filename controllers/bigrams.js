@@ -70,9 +70,11 @@ function makeBatch(allies, scenes_per_batch) {
   return {scenes: scenes};
 }
 
-var R = new Router();
+var R = new Router(function(req, res) {
+  res.die(404, 'No resource at: ' + req.url);
+});
 
-R.any(/digits/, function(m, req, res) {
+R.any(/digits/, function(req, res, m) {
   var urlObj = url.parse(req.url, true);
   // logger.info('request', {url: urlObj, headers: req.headers});
   // a normal turk request looks like: urlObj.query =

@@ -68,7 +68,7 @@ function makeBatch(allies, scenes_per_batch) {
   return {scenes: scenes};
 }
 
-module.exports = function(m, req, res) {
+module.exports = function(req, res, m) {
   var urlObj = url.parse(req.url, true);
   // logger.info('request', {url: urlObj, headers: req.headers});
   // a normal turk request looks like: urlObj.query =

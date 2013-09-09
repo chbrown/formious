@@ -8,12 +8,14 @@ var logger = require('../lib/logger');
 var misc = require('../lib/misc');
 var models = require('../lib/models');
 
-var R = new Router();
+var R = new Router(function(req, res) {
+  res.die(404, 'No resource at: ' + req.url);
+});
 
 // /stimlists/:slug -> present single stimlist to worker, starting at 0
 // /stimlists/:slug/:index -> present stimlist, starting at given index
 //   slugs must be word characters
-R.get(/^\/stimlists\/(\w+)(\/(\d+))?/, function(m, req, res) {
+R.get(/^\/stimlists\/(\w+)(\/(\d+))?/, function(req, res, m) {
   var stimlist_slug = m[1];
 
   var urlObj = url.parse(req.url, true);
@@ -44,8 +46,4 @@ R.get(/^\/stimlists\/(\w+)(\/(\d+))?/, function(m, req, res) {
   });
 });
 
-R.default = function(m, req, res) {
-  res.die(404, 'No resource at: ' + req.url);
-};
-
-module.exports = function(m, req, res) { R.route(req, res); };
+module.exports = R.route.bind(R);

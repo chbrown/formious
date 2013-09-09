@@ -30,9 +30,11 @@ Compared to mt/index.js, all actions under these routes are assured the existenc
 `req.turk`, which is an instance of mechturk({...}).
 */
 
-var R = new Router();
+var R = new Router(function(req, res) {
+  res.die(404, 'No resource at: ' + req.url);
+});
 
-R.post(/GetAccountBalance/, function(m, req, res) {
+R.post(/GetAccountBalance/, function(req, res, m) {
   req.turk.GetAccountBalance({}, function(err, result) {
     if (err) return res.json({success: false, message: err});
     // {"GetAccountBalanceResponse":{"OperationRequest":{"RequestId":"9ef506b"},
@@ -43,7 +45,7 @@ R.post(/GetAccountBalance/, function(m, req, res) {
   });
 });
 
-R.post(/CreateHIT/, function(m, req, res) {
+R.post(/CreateHIT/, function(req, res, m) {
   req.readToEnd('utf8', function(err, data) {
     if (err) return res.json({success: false, message: err});
 
@@ -67,7 +69,7 @@ R.post(/CreateHIT/, function(m, req, res) {
   });
 });
 
-R.get(/Workers\/(\w+)/, function(m, req, res) {
+R.get(/Workers\/(\w+)/, function(req, res, m) {
   models.User.findById(m[1], function(err, user) {
     if (err) return res.json({success: false, message: err});
 
@@ -75,7 +77,7 @@ R.get(/Workers\/(\w+)/, function(m, req, res) {
   });
 });
 
-R.post(/Assignments\/(\w+)\/Approve/, function(m, req, res) {
+R.post(/Assignments\/(\w+)\/Approve/, function(req, res, m) {
   var AssignmentId = m[1];
   req.readToEnd('utf8', function(err, data) {
     if (err) return res.json({success: false, message: err});
@@ -91,7 +93,7 @@ R.post(/Assignments\/(\w+)\/Approve/, function(m, req, res) {
   });
 });
 
-R.post(/Assignments\/(\w+)\/GrantBonus/, function(m, req, res) {
+R.post(/Assignments\/(\w+)\/GrantBonus/, function(req, res, m) {
   var AssignmentId = m[1];
   req.readToEnd('utf8', function(err, data) {
     if (err) return res.json({success: false, message: err});
@@ -129,7 +131,7 @@ R.post(/Assignments\/(\w+)\/GrantBonus/, function(m, req, res) {
 });
 
 // HIT/show tsv
-R.get(/HITs\/(\w+)\.(csv|tsv)/, function(m, req, res) {
+R.get(/HITs\/(\w+)\.(csv|tsv)/, function(req, res, m) {
   var HITId = m[1];
   // var columns = ['workerId', 'duration'].concat(['choice', 'correct', 'truth',
   //   'image_id', 'prior', 'judgments', 'reliabilities', 'batch_index', 'scene_index',
@@ -168,12 +170,12 @@ R.get(/HITs\/(\w+)\.(csv|tsv)/, function(m, req, res) {
 });
 
 // GET /admin/mt/:account/:host/HITs/new -> form to create new HIT
-R.get(/HITs\/new/, function(m, req, res) {
+R.get(/HITs\/new/, function(req, res, m) {
   amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/HITs/new.mu']).pipe(res);
 });
 
 // HITs/show
-R.get(/HITs\/(\w+)/, function(m, req, res) {
+R.get(/HITs\/(\w+)/, function(req, res, m) {
   var HITId = m[1];
   var params = {HITId: HITId, PageSize: 100};
   var sort_params = {SortProperty: 'SubmitTime', SortDirection: 'Ascending'};
@@ -226,7 +228,7 @@ R.get(/HITs\/(\w+)/, function(m, req, res) {
 });
 
 // HITs/index
-R.get(/HITs/, function(m, req, res) {
+R.get(/HITs/, function(req, res, m) {
   req.turk.SearchHITs({SortDirection: 'Descending', PageSize: 100}, function(err, result) {
     if (err) return res.die('SearchHITs error: ' + err);
 
@@ -234,10 +236,6 @@ R.get(/HITs/, function(m, req, res) {
     amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/HITs/all.mu'], {hits: hits}).pipe(res);
   });
 });
-
-R.default = function(m, req, res) {
-  res.die(404, 'No resource at: ' + req.url);
-};
 
 // /admin/mt/:account/:host
 module.exports = function(req, res, m) {

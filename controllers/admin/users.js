@@ -10,11 +10,13 @@ var misc = require('../../lib/misc');
 var models = require('../../lib/models');
 
 // /admin/users/*
-var R = new Router();
+var R = new Router(function(req, res) {
+  res.die(404, 'No resource at: ' + req.url);
+});
 
 /** GET /admin/users
 list all users */
-R.get(/^\/admin\/users\/?$/, function(m, req, res) {
+R.get(/^\/admin\/users\/?$/, function(req, res, m) {
   models.User.find({}, '_id created responses.length bonus_paid bonus_owed password superuser tickets.length', function(err, users) {
     if (err) return res.die('User query error: ' + err);
 
@@ -24,7 +26,7 @@ R.get(/^\/admin\/users\/?$/, function(m, req, res) {
 
 /** GET /admin/users/:user
 show single user */
-R.get(/^\/admin\/users\/(\w+)$/, function(m, req, res) {
+R.get(/^\/admin\/users\/(\w+)$/, function(req, res, m) {
   models.User.fromId(m[1], function(err, user) {
     if (err) return res.die('User query error: ' + err);
 
@@ -34,7 +36,7 @@ R.get(/^\/admin\/users\/(\w+)$/, function(m, req, res) {
 
 /** GET /admin/users/:user/edit
 edit single user */
-R.get(/^\/admin\/users\/(\w+)\/edit$/, function(m, req, res) {
+R.get(/^\/admin\/users\/(\w+)\/edit$/, function(req, res, m) {
   models.User.fromId(m[1], function(err, user) {
     if (err) return res.die('User query error: ' + err);
 
@@ -44,7 +46,7 @@ R.get(/^\/admin\/users\/(\w+)\/edit$/, function(m, req, res) {
 
 /** POST /admin/users/:user
 update existing User. Should be PATCH, but <form>s only do POST. */
-R.post(/^\/admin\/users\/(\w+)$/, function(m, req, res) {
+R.post(/^\/admin\/users\/(\w+)$/, function(req, res, m) {
   models.User.fromId(m[1], function(err, user) {
     if (err) return res.die('User query error: ' + err);
 
@@ -61,9 +63,4 @@ R.post(/^\/admin\/users\/(\w+)$/, function(m, req, res) {
   });
 });
 
-
-R.default = function(m, req, res) {
-  res.die(404, 'No resource at: ' + req.url);
-};
-
-module.exports = function(m, req, res) { R.route(req, res); };
+module.exports = R.route.bind(R);

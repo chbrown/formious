@@ -19,7 +19,7 @@ fs.readFile(path.join(__dirname, 'mbti.yaml'), 'utf8', function (err, mbti_yaml)
   });
 });
 
-module.exports = function(m, req, res) {
+module.exports = function(req, res, m) {
   var ctx = {
     questions: mbti.map(function(question, i) {
       var cloned_question = _.clone(question);

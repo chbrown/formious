@@ -6,7 +6,7 @@ var logger = require('../lib/logger');
 
 var static_root = path.join(__dirname, '..', 'static');
 
-module.exports = function(m, req, res) {
+module.exports = function(req, res, m) {
   var path = req.url.slice(8); // since '/static/'.length == 8
   if (req.url == '/favicon.ico') {
     path = 'favicon.ico';

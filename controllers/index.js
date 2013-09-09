@@ -9,7 +9,9 @@ var logger = require('../lib/logger');
 var misc = require('../lib/misc');
 var models = require('../lib/models');
 
-var R = new Router();
+var R = new Router(function(req, res) {
+  res.die(404, 'No resource at: ' + req.url);
+});
 
 // attach controllers
 R.any(/^\/(static|favicon\.ico)/, require('./static'));
@@ -19,7 +21,7 @@ R.any(/^\/digits/, require('./digits'));
 R.any(/^\/admin/, require('./admin')); // == ./admin/index
 
 // POST /seen
-R.post(/^\/seen$/, function(m, req, res) {
+R.post(/^\/seen$/, function(req, res, m) {
   new formidable.IncomingForm().parse(req, function(err, fields, files) {
     // and the fields: workerId, and "questionIds[]" that equates to a list of strings
     // which is just multiple 'questionIds[] = string1' fields (I think).
@@ -45,7 +47,7 @@ R.post(/^\/seen$/, function(m, req, res) {
 });
 
 // POST /mturk/externalSubmit
-R.post(/^\/mturk\/externalSubmit/, function(m, req, res) {
+R.post(/^\/mturk\/externalSubmit/, function(req, res, m) {
   new formidable.IncomingForm().parse(req, function(err, fields, files) {
     var workerId = fields.workerId || req.user_id;
     models.User.fromId(workerId, function(err, user) {
@@ -63,7 +65,7 @@ R.post(/^\/mturk\/externalSubmit/, function(m, req, res) {
 });
 
 // POST /responses
-R.post(/^\/responses$/, function(m, req, res) {
+R.post(/^\/responses$/, function(req, res, m) {
   var workerId = req.user_id;
   req.readToEnd('utf8', function(err, data) {
     logger.debug('Saving response.', {workerId: workerId, data: data});
@@ -84,7 +86,7 @@ R.post(/^\/responses$/, function(m, req, res) {
 });
 
 // POST /addbonus
-R.post(/^\/addbonus$/, function(m, req, res) {
+R.post(/^\/addbonus$/, function(req, res, m) {
   var default_bonus = 0.25;
   var max_bonus = 0.25;
   // var unpaid_minimum = 49;
@@ -115,7 +117,7 @@ R.post(/^\/addbonus$/, function(m, req, res) {
 
 /** POST /sv
 parse csv-like input flexibly and write out json to response */
-R.post(/^\/sv$/, function(m, req, res) {
+R.post(/^\/sv$/, function(req, res, m) {
   // res.writeHead(200, {'Content-Type': 'text/csv'});
   //   .pipe(new sv.Stringifier({delimiter: ','}))
   var parsed_stream = req.pipe(new sv.Parser());
@@ -128,12 +130,8 @@ R.post(/^\/sv$/, function(m, req, res) {
 
 /** GET /
 root currently redirects to: /aircraft */
-R.get(/^\/$/, function(m, req, res) {
+R.get(/^\/$/, function(req, res, m) {
   res.redirect('/aircraft');
 });
 
-R.default = function(m, req, res) {
-  res.die(404, 'No resource at: ' + req.url);
-};
-
-module.exports = function(m, req, res) { R.route(req, res); };
+module.exports = R.route.bind(R);

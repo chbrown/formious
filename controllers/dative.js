@@ -50,8 +50,8 @@ setInterval(function() {
   misc.shuffle(questions);
 }, 1*60*1000);
 
-// module.exports = function(m, req, res) { R.route(req, res); };
-module.exports = function(m, req, res) {
+// module.exports = R.route.bind(R);
+module.exports = function(req, res, m) {
   // don't show them anything they've already seen.
   var ctx = {
     questions: []

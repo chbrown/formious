@@ -7,11 +7,13 @@ var logger = require('../../lib/logger');
 var misc = require('../../lib/misc');
 var models = require('../../lib/models');
 
-var R = new Router();
+var R = new Router(function(req, res) {
+  res.die(404, 'No resource at: ' + req.url);
+});
 
 /** GET /admin/stimlists/new
 create new Stimlist and redirect to edit it */
-R.get(/^\/admin\/stimlists\/new/, function(m, req, res) {
+R.get(/^\/admin\/stimlists\/new/, function(req, res, m) {
   new models.Stimlist({creator: req.user._id}).save(function(err, stimlist) {
     if (err) {
       logger.error('new Stimlist().save() error', err);
@@ -24,7 +26,7 @@ R.get(/^\/admin\/stimlists\/new/, function(m, req, res) {
 
 /** GET /admin/stimlists/:stimlist_id/edit
 edit existing Stimlist */
-R.get(/^\/admin\/stimlists\/(\w+)\/edit$/, function(m, req, res) {
+R.get(/^\/admin\/stimlists\/(\w+)\/edit$/, function(req, res, m) {
   var stimlist_id = m[1];
   models.Stimlist.findById(stimlist_id, function(err, stimlist) {
     if (err) {
@@ -49,7 +51,7 @@ R.get(/^\/admin\/stimlists\/(\w+)\/edit$/, function(m, req, res) {
 
 /** PATCH /admin/stimlists/:stimlist_id
 update existing Stimlist */
-R.patch(/^\/admin\/stimlists\/(\w+)/, function(m, req, res) {
+R.patch(/^\/admin\/stimlists\/(\w+)/, function(req, res, m) {
   var stimlist_id = m[1];
   req.readToEnd('utf8', function(err, stimlist_json) {
     if (err) {
@@ -80,7 +82,7 @@ R.patch(/^\/admin\/stimlists\/(\w+)/, function(m, req, res) {
 
 /** DELETE /admin/stimlists/:stimlist_id
 delete Stimlist */
-R.delete(/^\/admin\/stimlists\/(\w+)$/, function(m, req, res) {
+R.delete(/^\/admin\/stimlists\/(\w+)$/, function(req, res, m) {
   var stimlist_id = m[1];
   models.Stimlist.findByIdAndRemove(stimlist_id, function(err, stimlist) {
     if (err) {
@@ -94,7 +96,7 @@ R.delete(/^\/admin\/stimlists\/(\w+)$/, function(m, req, res) {
 
 /** GET /admin/stimlists
 list all Stimlists */
-R.get(/^\/admin\/stimlists\/?$/, function(m, req, res) {
+R.get(/^\/admin\/stimlists\/?$/, function(req, res, m) {
   models.Stimlist.find({}, '_id created creator slug csv.length states.length', function(err, stimlists) {
     if (err) {
       logger.error('Stimlist.find({}, ...) error', err);
@@ -105,8 +107,4 @@ R.get(/^\/admin\/stimlists\/?$/, function(m, req, res) {
   });
 });
 
-R.default = function(m, req, res) {
-  res.die(404, 'No resource at: ' + req.url);
-};
-
-module.exports = function(m, req, res) { R.route(req, res); };
+module.exports = R.route.bind(R);

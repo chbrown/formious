@@ -33,8 +33,8 @@ http.createServer(function(req, res) {
     logger.info('duration', {url: req.url, method: req.method, ms: Date.now() - started});
   });
 
-  // root_controller has signature of (m, req, res), just like any other controller module
-  root_controller(null, req, res);
+  // root_controller has signature of (req, res), just like any other controller module
+  root_controller(req, res);
 }).listen(argv.port, argv.hostname, function() {
   logger.info('listening on %s:%d', argv.hostname, argv.port);
 });

@@ -12,7 +12,9 @@ var misc = require('../../lib/misc');
 var models = require('../../lib/models');
 
 // /admin/*
-var R = new Router();
+var R = new Router(function(req, res) {
+  res.die(404, 'No resource at: ' + req.url);
+});
 
 // attach controllers requiring authentication
 R.any(/^\/admin\/mt/, require('./mt'));
@@ -20,7 +22,7 @@ R.any(/^\/admin\/stimlists/, require('./stimlists'));
 R.any(/^\/admin\/users/, require('./users'));
 
 // GET /admin/responses.tsv (obsolete)
-R.get(/\/admin\/responses.tsv/, function(m, req, res) {
+R.get(/\/admin\/responses.tsv/, function(req, res, m) {
   var stringifier = new sv.Stringifier({delimiter: '\t'});
   res.writeHead(200, {'Content-Type': 'text/plain'});
   stringifier.pipe(res);
@@ -51,7 +53,7 @@ R.get(/\/admin\/responses.tsv/, function(m, req, res) {
   });
 });
 // GET /admin/responses/:page.json (obsolete)
-R.get(/\/admin\/responses\/(\d+)\.json/, function(m, req, res) {
+R.get(/\/admin\/responses\/(\d+)\.json/, function(req, res, m) {
   var page = parseInt(m[1], 10);
   var per_page = 10;
   var query = models.User
@@ -66,16 +68,12 @@ R.get(/\/admin\/responses\/(\d+)\.json/, function(m, req, res) {
 });
 
 // GET /admin -> redirect to /admin/users
-R.get(/\/admin\/?$/, function(m, req, res) {
+R.get(/\/admin\/?$/, function(req, res, m) {
   res.redirect('/admin/users');
 });
 
-R.default = function(m, req, res) {
-  res.die(404, 'No resource at: ' + req.url);
-};
-
 // /admin/* -> handle auth and forward
-module.exports = function(m, req, res) {
+module.exports = function(req, res) {
   // this is the checkpoint for all admin-level requests, and should drop all non-superusers
   var workerId = req.cookies.get('workerId');
   var ticket = req.cookies.get('ticket');
