@@ -17,7 +17,7 @@
     "moment": "git://github.com/timrwood/moment.git#develop",
     "mongoose": "*",
     "optimist": "*",
-    "regex-router": "*",
+    "regex-router": "~0.2",
     "send": "*",
     "sprintf": "*",
     "streaming": "*",

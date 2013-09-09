@@ -3,7 +3,7 @@
 All modules in `/controllers/**/*.js` should, for the most part, define only a single export:
 
 ```javascript
-module.exports = function(m, req, res) {
+module.exports = function(req, res) {
   ...
 }
 ```
@@ -11,7 +11,7 @@ module.exports = function(m, req, res) {
 E.g., `controllers/fancy.js` might look like this
 
 ```javascript
-module.exports = function(m, req, res) {
+module.exports = function(req, res) {
   /** handle any requests for /fancy/*
 
   req is an http-enhanced version of the http.IncomingMessage object

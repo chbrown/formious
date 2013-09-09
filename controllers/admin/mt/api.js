@@ -240,7 +240,7 @@ R.default = function(m, req, res) {
 };
 
 // /admin/mt/:account/:host
-module.exports = function(m, req, res) {
+module.exports = function(req, res, m) {
   // m is actually already set correctly; we just want to make sure
   m = req.url.match(/^\/admin\/mt\/(\w+)\/(\w+)/);
   var account_id = m[1];
