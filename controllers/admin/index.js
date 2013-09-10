@@ -2,7 +2,6 @@
 var _ = require('underscore');
 var sv = require('sv');
 var querystring = require('querystring');
-var mechturk = require('mechturk');
 var amulet = require('amulet');
 var async = require('async');
 var Router = require('regex-router');

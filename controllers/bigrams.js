@@ -1,7 +1,6 @@
 'use strict'; /*jslint node: true, es5: true, indent: 2 */
 var _ = require('underscore');
 var url = require('url');
-var mechturk = require('mechturk');
 var amulet = require('amulet');
 var Router = require('regex-router');
 

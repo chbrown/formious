@@ -1,11 +1,10 @@
 'use strict'; /*jslint node: true, indent: 2, vars: true, es5: true */
 var url = require('url');
-var mechturk = require('mechturk');
 var _ = require('underscore');
 var amulet = require('amulet');
 var vsprintf = require('sprintf').vsprintf;
 
-var logger = require('../lib/logger');
+// var logger = require('../lib/logger');
 var misc = require('../lib/misc');
 var models = require('../lib/models');
 

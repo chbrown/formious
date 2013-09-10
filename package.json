@@ -13,7 +13,7 @@
     "formidable": "*",
     "http-enhanced": "*",
     "js-yaml": "*",
-    "mechturk": "git://github.com/chbrown/mechturk.git",
+    "turk": "*",
     "moment": "git://github.com/timrwood/moment.git#develop",
     "mongoose": "*",
     "optimist": "*",
@@ -23,7 +23,8 @@
     "streaming": "*",
     "sv": "*",
     "underscore": "*",
-    "winston": "*"
+    "winston": "*",
+    "xmlconv": "*"
   },
   "devDependencies": {
     "grunt": "*",

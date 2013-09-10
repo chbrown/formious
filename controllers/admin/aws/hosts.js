@@ -4,8 +4,9 @@ var _ = require('underscore');
 var sv = require('sv');
 var amulet = require('amulet');
 var async = require('async');
-var mechturk = require('mechturk');
+var turk = require('turk');
 var Router = require('regex-router');
+var xmlconv = require('xmlconv');
 
 var logger = require('../../../lib/logger');
 var misc = require('../../../lib/misc');
@@ -27,7 +28,7 @@ Overall /admin/aws/ API access url structure:
     `*` is the actual route (optional)
 
 Compared to aws/index.js, all actions under these routes are assured the existence of
-`req.turk`, which is an instance of mechturk({...}).
+`req.turk`, which is an instance of turk.Connection.
 */
 
 var R = new Router(function(req, res) {
@@ -54,9 +55,9 @@ R.post(/CreateHIT/, function(req, res) {
       MaxAssignments: parseInt(fields.MaxAssignments, 10),
       Title: fields.Title,
       Description: fields.Description,
-      Reward: new mechturk.models.Price(parseFloat(fields.Reward)),
+      Reward: new turk.models.Price(parseFloat(fields.Reward)),
       Keywords: fields.Keywords,
-      Question: new mechturk.models.ExternalQuestion(fields.ExternalURL, parseInt(fields.FrameHeight, 10)),
+      Question: new turk.models.ExternalQuestion(fields.ExternalURL, parseInt(fields.FrameHeight, 10)),
       AssignmentDurationInSeconds: misc.durationStringToSeconds(fields.AssignmentDuration || 0),
       LifetimeInSeconds: misc.durationStringToSeconds(fields.Lifetime || 0),
       AutoApprovalDelayInSeconds: misc.durationStringToSeconds(fields.AutoApprovalDelay || 0),
@@ -106,7 +107,7 @@ R.post(/Assignments\/(\w+)\/GrantBonus/, function(req, res, m) {
     var params = {
       WorkerId: WorkerId,
       AssignmentId: AssignmentId,
-      BonusAmount: new mechturk.models.Price(amount),
+      BonusAmount: new turk.models.Price(amount),
       UniqueRequestToken: AssignmentId + ':' + WorkerId + ':bonus',
     };
 
@@ -147,7 +148,8 @@ R.get(/HITs\/(\w+)\.(csv|tsv)/, function(req, res, m) {
     async.eachSeries(raw_assigments, function(assignment, callback) {
       var assignment_answers = {};
       // pull in the Assignment level POST that AMT stores:
-      mechturk.xml2json(assignment.Answer).QuestionFormAnswers.Answer.forEach(function(question_answer) {
+      var answer = xmlconv(assignment.Answer, {convention: 'castle'});
+      answer.QuestionFormAnswers.Answer.forEach(function(question_answer) {
         assignment_answers[question_answer.QuestionIdentifier] = question_answer.FreeText;
       });
       // For each response recorded for this user, merge in those assignment details and write to csv
@@ -196,9 +198,7 @@ R.get(/HITs\/(\w+)/, function(req, res, m) {
 
     var raw_assigments = results.GetAssignmentsForHITResult.Assignment || [];
     async.map(raw_assigments, function(assignment, callback) {
-      console.log('>> async.map assignment', assignment);
-
-      assignment.Answer = mechturk.xml2json(assignment.Answer).QuestionFormAnswers.Answer;
+      assignment.Answer = xmlconv(assignment.Answer, {convention: 'castle'}).QuestionFormAnswers.Answer;
 
       models.User.findById(assignment.WorkerId, function(err, user) {
         if (err) return callback(err);
@@ -248,12 +248,11 @@ module.exports = function(req, res, m) {
     if (err) return res.die('AWSAccount.find error: ' + err);
     if (!account) return res.die('No AWSAccount found with that name: ' + account_name);
 
-    req.turk = mechturk({
+    req.turk = new turk.Connection(account.accessKeyId, account.secretAccessKey, {
       url: hosts[host_id],
-      accessKeyId: account.accessKeyId,
-      secretAccessKey: account.secretAccessKey,
-      logger: logger
+      logger: logger,
     });
+
     R.route(req, res);
   });
 };
