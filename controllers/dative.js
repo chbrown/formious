@@ -58,21 +58,21 @@ module.exports = function(req, res, m) {
   };
 
   var urlObj = url.parse(req.url, true);
-  var workerId = (urlObj.query.workerId || req.user_id).replace(/\W+/g, '');
-  req.cookies.set('workerId', workerId);
-
+  var workerId = urlObj.query.workerId || req.user_id;
   models.User.fromId(workerId, function(err, user) {
     for (var question, q = 0, i = 0; (question = questions[q]) && (i < per_page); q++) {
       if (!user || user.seen.indexOf(question.id) === -1) {
         var new_question = _.clone(question, {index: ++i});
-        context.questions.push(new_question);
+        ctx.questions.push(new_question);
       }
     }
 
+    req.cookies.set('workerId', user._id);
+
     // 20 hits per page
-    context.remaining_hits = (context.remaining / per_page) | 0;
-    if (context.assignmentId !== 'ASSIGNMENT_ID_NOT_AVAILABLE')
-      context.remaining_hits--;
-    amulet.stream(['layout.mu', 'verb-continuation.mu'], context).pipe(res);
+    ctx.remaining_hits = (ctx.remaining / per_page) | 0;
+    if (ctx.assignmentId !== 'ASSIGNMENT_ID_NOT_AVAILABLE')
+      ctx.remaining_hits--;
+    amulet.stream(['layout.mu', 'verb-continuation.mu'], ctx).pipe(res);
   });
 };

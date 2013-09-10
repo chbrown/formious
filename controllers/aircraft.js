@@ -67,19 +67,12 @@ module.exports = function(req, res, m) {
   var scenes_per_batch = 50;
 
   var urlObj = url.parse(req.url, true);
+  var workerId = urlObj.query.workerId || req.user_id;
   // a normal turk request looks like: urlObj.query =
   // { assignmentId: '2NXNWAB543Q0EQ3C16EV1YB46I8620K',
   //   hitId: '2939RJ85OZIZ4RKABAS998123Q9M8NEW85',
   //   workerId: 'A9T1WQR9AL982W',
   //   turkSubmitTo: 'https://www.mturk.com' },
-  var ctx = {
-    assignmentId: urlObj.query.assignmentId,
-    hitId: urlObj.query.hitId,
-    workerId: (urlObj.query.workerId || req.user_id).replace(/\W+/g, ''),
-    host: urlObj.query.debug !== undefined ? '' : (urlObj.query.turkSubmitTo || 'https://www.mturk.com'),
-    task_started: Date.now()
-  };
-  req.cookies.set('workerId', ctx.workerId);
 
   // a preview request will be the same, minus workerId and turkSubmitTo,
   // and assignmentId will always then be 'ASSIGNMENT_ID_NOT_AVAILABLE'
@@ -91,8 +84,19 @@ module.exports = function(req, res, m) {
     };
   });
 
-  models.User.fromId(ctx.workerId, function(err, user) {
+  models.User.fromId(workerId, function(err, user) {
     if (err) return res.die('User query error: ' + err);
+    if (!user) return res.die('Could not find user: ' + workerId);
+
+    var ctx = {
+      assignmentId: urlObj.query.assignmentId,
+      hitId: urlObj.query.hitId,
+      workerId: user._id,
+      host: urlObj.query.debug !== undefined ? '' : (urlObj.query.turkSubmitTo || 'https://www.mturk.com'),
+      task_started: Date.now()
+    };
+
+    req.cookies.set('workerId', user._id);
 
     var batch_priors = _.shuffle(priors);
     // first is the training batch

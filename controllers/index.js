@@ -26,7 +26,7 @@ R.post(/^\/seen$/, function(req, res, m) {
   new formidable.IncomingForm().parse(req, function(err, fields, files) {
     // and the fields: workerId, and "questionIds[]" that equates to a list of strings
     // which is just multiple 'questionIds[] = string1' fields (I think).
-    var workerId = (fields.workerId || req.user_id).replace(/\W+/g, '');
+    var workerId = fields.workerId || req.user_id;
     models.User.fromId(workerId, function(err, user) {
       if (err) return res.die('User query error: ' + err);
       if (!user) return res.die('No user "' + workerId + '" found.');
@@ -39,10 +39,9 @@ R.post(/^\/seen$/, function(req, res, m) {
 
       user.save(function(err) {
         if (err) logger.error('User.save error: ' + err);
-      });
 
-      // res.json({success: false, message: 'Could not find worker with ID: "' + workerId + '"'});
-      res.json({success: true, message: 'Added ' + questionIds.length + ' to seen.'});
+        res.json({success: true, message: 'Added ' + questionIds.length + ' to seen.'});
+      });
     });
   });
 });
@@ -92,7 +91,7 @@ R.post(/^\/addbonus$/, function(req, res, m) {
   var max_bonus = 0.25;
   // var unpaid_minimum = 49;
   new formidable.IncomingForm().parse(req, function(err, fields, files) {
-    var workerId = (fields.workerId || req.cookies.get('workerId') || 'none').replace(/\W+/g, '');
+    var workerId = fields.workerId || req.user_id;
     models.User.fromId(workerId, function(err, user) {
       if (err) return res.die('User query error: ' + err);
       if (!user) return res.die('No user "' + workerId + '" found.');

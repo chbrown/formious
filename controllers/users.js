@@ -15,10 +15,9 @@ var R = new Router(function(req, res) {
 /** GET /users/:user
 show login page for this user */
 R.get(/^\/users\/(\w+)/, function(req, res, m) {
-  var workerId = m[1].replace(/\W+/g, '');
-  models.User.fromId(workerId, function(err, user) {
+  models.User.fromId(m[1], function(err, user) {
     if (err) {
-      logger.error('User.fromId(%s) error', workerId, err);
+      logger.error('User.fromId(%s) error', m[1], err);
       return res.die(err);
     }
 
@@ -30,12 +29,11 @@ R.get(/^\/users\/(\w+)/, function(req, res, m) {
 /** GET /users/:user/claim
 register unclaimed (no set password) user by adding password */
 R.post(/^\/users\/(\w+)\/claim/, function(req, res, m) {
-  var workerId = m[1].replace(/\W+/g, '');
   req.readToEnd('utf8', function(err, data) {
     var fields = querystring.parse(data);
-    models.User.fromId(workerId, function(err, user) {
+    models.User.fromId(m[1], function(err, user) {
       if (err) return res.die('User query error: ' + err);
-      if (!user) return res.die('User not found: ' + workerId);
+      if (!user) return res.die('User not found: ' + m[1]);
       if (user.password) return res.die("User cannot be claimed; the user's password is already set.");
       if (!fields.password.trim()) return res.die('Password cannot be empty');
 
@@ -57,7 +55,6 @@ R.post(/^\/users\/(\w+)\/claim/, function(req, res, m) {
 /** GET /users/:user/become
 login as claimed user by providing password */
 R.post(/^\/users\/(\w+)\/become/, function(req, res, m) {
-  var workerId = m[1].replace(/\W+/g, '');
   req.readToEnd('utf8', function(err, data) {
     if (err) {
       logger.error('GET /users/:user/become: req.readToEnd error', err);
@@ -65,7 +62,7 @@ R.post(/^\/users\/(\w+)\/become/, function(req, res, m) {
     }
 
     var fields = querystring.parse(data);
-    models.User.withPassword(workerId, fields.password, function(err, user) {
+    models.User.withPassword(m[1], fields.password, function(err, user) {
       if (err) return res.die('User.withPassword error ' + err);
       if (!user) return res.die('Cannot become user; that user does not exist or the password you entered is incorrect.');
 
