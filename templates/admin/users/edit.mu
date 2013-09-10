@@ -9,6 +9,10 @@
       <input name="bonus_owed" type="text" value="{{bonus_owed}}" />
     </label>
 
+    <label><span>Set password (leave blank to leave unchanged)</span>
+      <input name="password" type="text" />
+    </label>
+
     <label><span>Superuser</span></label>
     <label>
       <input name="superuser" type="radio" value="true" {{#superuser}}checked{{/}} />

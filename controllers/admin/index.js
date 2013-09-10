@@ -17,12 +17,12 @@ var R = new Router(function(req, res) {
 });
 
 // attach controllers requiring authentication
-R.any(/^\/admin\/mt/, require('./mt'));
+R.any(/^\/admin\/aws/, require('./aws'));
 R.any(/^\/admin\/stimlists/, require('./stimlists'));
 R.any(/^\/admin\/users/, require('./users'));
 
 // GET /admin/responses.tsv (obsolete)
-R.get(/\/admin\/responses.tsv/, function(req, res, m) {
+R.get('/admin/responses.tsv', function(req, res) {
   var stringifier = new sv.Stringifier({delimiter: '\t'});
   res.writeHead(200, {'Content-Type': 'text/plain'});
   stringifier.pipe(res);
@@ -86,8 +86,7 @@ module.exports = function(req, res) {
     if (!user) {
       // this return is CRUCIAL!
       logger.info('User.withTicket(%s, %s) returned no user.', workerId, ticket);
-      return res.die(err);
-      // res.redirect('/users');
+      return res.redirect('/users');
     }
 
     if (!user.superuser) {

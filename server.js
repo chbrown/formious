@@ -22,7 +22,7 @@ var argv = optimist.default({
 
 logger.level = argv.loglevel;
 
-var root_controller = require('./controllers/index');
+var root_controller = require('./controllers');
 
 http.createServer(function(req, res) {
   req.cookies = new Cookies(req, res);

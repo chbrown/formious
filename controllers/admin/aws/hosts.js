@@ -17,16 +17,16 @@ var hosts = {
   local: '/',
 };
 
-/** MT account API-type actions only (mt/index.js handles account linking)
+/** MT account API-type actions only (aws/index.js handles account credentials)
 
-Overall /admin/mt API access url structure:
+Overall /admin/aws/ API access url structure:
 
-/admin/mt/(account_name)/(host_name)/*
+/admin/aws/(account_name)/hosts/(host_name)/*
     `account_name` is provided by the user, and linked to an AWS Access Key and AWS Secret Key
     `host_name` is either "deploy" or "sandbox".
     `*` is the actual route (optional)
 
-Compared to mt/index.js, all actions under these routes are assured the existence of
+Compared to aws/index.js, all actions under these routes are assured the existence of
 `req.turk`, which is an instance of mechturk({...}).
 */
 
@@ -34,7 +34,7 @@ var R = new Router(function(req, res) {
   res.die(404, 'No resource at: ' + req.url);
 });
 
-R.post(/GetAccountBalance/, function(req, res, m) {
+R.post(/GetAccountBalance/, function(req, res) {
   req.turk.GetAccountBalance({}, function(err, result) {
     if (err) return res.json({success: false, message: err});
     // {"GetAccountBalanceResponse":{"OperationRequest":{"RequestId":"9ef506b"},
@@ -45,7 +45,7 @@ R.post(/GetAccountBalance/, function(req, res, m) {
   });
 });
 
-R.post(/CreateHIT/, function(req, res, m) {
+R.post(/CreateHIT/, function(req, res) {
   req.readToEnd('utf8', function(err, data) {
     if (err) return res.json({success: false, message: err});
 
@@ -169,7 +169,7 @@ R.get(/HITs\/(\w+)\.(csv|tsv)/, function(req, res, m) {
   });
 });
 
-// GET /admin/mt/:account/:host/HITs/new -> form to create new HIT
+// GET /admin/aws/:account/:hosts/HITs/new -> form to create new HIT
 R.get(/HITs\/new/, function(req, res, m) {
   amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/HITs/new.mu']).pipe(res);
 });
@@ -227,8 +227,8 @@ R.get(/HITs\/(\w+)/, function(req, res, m) {
   });
 });
 
-// HITs/index
-R.get(/HITs/, function(req, res, m) {
+// index: list all HITs
+R.get(/HITs$/, function(req, res) {
   req.turk.SearchHITs({SortDirection: 'Descending', PageSize: 100}, function(err, result) {
     if (err) return res.die('SearchHITs error: ' + err);
 
@@ -237,18 +237,16 @@ R.get(/HITs/, function(req, res, m) {
   });
 });
 
-// /admin/mt/:account/:host
+// /admin/aws/:account/hosts/:host
 module.exports = function(req, res, m) {
   // m is actually already set correctly; we just want to make sure
-  m = req.url.match(/^\/admin\/mt\/(\w+)\/(\w+)/);
-  var account_id = m[1];
+  m = req.url.match(/^\/admin\/aws\/([^\/]+)\/hosts\/([^\/]+)/);
+  var account_name = m[1];
   var host_id = m[2];
 
-  models.AWSAccount.findById(account_id, function(err, account) {
-    if (err) {
-      logger.error('AWSAccount.findById error', err);
-      return res.die(err);
-    }
+  models.AWSAccount.findOne({name: account_name}, function(err, account) {
+    if (err) return res.die('AWSAccount.find error: ' + err);
+    if (!account) return res.die('No AWSAccount found with that name: ' + account_name);
 
     req.turk = mechturk({
       url: hosts[host_id],

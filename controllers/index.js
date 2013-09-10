@@ -18,7 +18,8 @@ R.any(/^\/(static|favicon\.ico)/, require('./static'));
 R.any(/^\/stimlists/, require('./stimlists'));
 R.any(/^\/aircraft/, require('./aircraft'));
 R.any(/^\/digits/, require('./digits'));
-R.any(/^\/admin/, require('./admin')); // == ./admin/index
+R.any(/^\/admin/, require('./admin'));
+R.any(/^\/users/, require('./users'));
 
 // POST /seen
 R.post(/^\/seen$/, function(req, res, m) {

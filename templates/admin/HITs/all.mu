@@ -1,3 +1,4 @@
+<h3>HITs</h3>
 <div id="hits"></div>
 
 <script>

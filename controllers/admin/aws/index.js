@@ -15,7 +15,7 @@ var R = new Router(function(req, res) {
 });
 
 // set up single sub-controller (which handles per-account API calls, as opposed to the CRUD-type things below)
-R.any(/^\/admin\/aws\/(\w+)\/(\w+)/, require('./api'));
+R.any(/^\/admin\/aws\/([^\/]+)\/hosts\/([^\/]+)/, require('./hosts'));
 
 /** GET /admin/aws
 Index - list all AWS accounts and show creation link */
@@ -35,10 +35,7 @@ R.get('/admin/aws', function(req, res) {
 Create new AWS account and redirect to edit it */
 R.get('/admin/aws/new', function(req, res) {
   new models.AWSAccount().save(function(err, account) {
-    if (err) {
-      logger.error('new AWSAccount().save() error', err);
-      return res.die(err);
-    }
+    if (err) return res.die('new AWSAccount error: ' + err);
 
     res.redirect('/admin/aws/' + account._id + '/edit');
   });
@@ -85,7 +82,7 @@ R.post(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
 
       _.extend(account, querystring.parse(data));
       account.save(function(err, account) {
-        if (err) return res.die(err);
+        if (err) return res.die('account.save error: ' +err);
 
         res.redirect('/admin/aws/' + account._id);
       });

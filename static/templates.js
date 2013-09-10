@@ -616,13 +616,13 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 
   buffer += "<table cellpadding=\"0\" cellspacing=\"0\" style=\"margin: 0 auto\">\n  <tr>\n    <th colspan=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.scenes),stack1 == null || stack1 === false ? stack1 : stack1.length)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" class=\"left\">\n      <h3>Bomb ";
+    + "\" style=\"text-align: left;\">\n      <h3>Bomb ";
   if (stack2 = helpers.id) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
   else { stack2 = depth0.id; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
   buffer += escapeExpression(stack2)
     + "</h3>\n    </th>\n  </tr>\n  <tr id=\"digits\"></tr>\n  <tr>\n    <td colspan=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.scenes),stack1 == null || stack1 === false ? stack1 : stack1.length)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" class=\"right\" style=\"padding: 20px 0\">\n      <button disabled=\"true\">Submit</button>\n    </td>\n  </tr>\n</table>\n";
+    + "\" style=\"padding: 20px 0; text-align: right;\">\n      <button disabled=\"true\">Submit</button>\n    </td>\n  </tr>\n</table>\n";
   return buffer;
   });
 templates['stims/digits/conclusion'] = template(function (Handlebars,depth0,helpers,partials,data) {

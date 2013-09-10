@@ -1,12 +1,15 @@
 {{#account}}
+<h3>AWS Account: {{name}}</h3>
 <table>
-  <tr><th>AWS Account</th><th>{{_id}}</th></tr>
+  <tr><td>ID</td><td>{{_id}}</td></tr>
+  <tr><td>Name</td><td>{{name}}</td></tr>
   <tr><td>Access Key ID</td><td>{{accessKeyId}}</td></tr>
   <tr><td>Secret Access Key</td><td>{{secretAccessKey}}</td></tr>
   <tr><td>Created</td><td>{{created}}</td></tr>
 </table>
 {{/account}}
 
+<h3>Mechanical Turk Hosts</h3>
 <table id="hosts">
   <thead>
     <tr>
@@ -21,8 +24,8 @@
       <tr>
         <td>{{.}}</td>
         <td></td>
-        <td><a href="/admin/mt/{{account._id}}/{{.}}/HITs">View HITs</a></td>
-        <td><a href="/admin/mt/{{account._id}}/{{.}}/HITs/new">Create new HIT</a></td>
+        <td><a href="/admin/aws/{{account.name}}/hosts/{{.}}/HITs">View HITs</a></td>
+        <td><a href="/admin/aws/{{account.name}}/hosts/{{.}}/HITs/new">Create new HIT</a></td>
       </tr>
     {{/hosts}}
   </tbody>
@@ -32,7 +35,7 @@
 $('#hosts tbody tr').each(function(i, el) {
   var $tr = $(el);
   var host = $tr.children('td:nth-child(1)').text();
-  $.post('/admin/mt/{{account._id}}/' + host + '/GetAccountBalance', function(data, textStatus, jqXHR) {
+  $.post('/admin/aws/{{account.name}}/hosts/' + host + '/GetAccountBalance', function(data, textStatus, jqXHR) {
     var price = data.GetAccountBalanceResult.AvailableBalance.FormattedPrice;
     $tr.children('td:nth-child(2)').text(price);
   });

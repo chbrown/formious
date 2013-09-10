@@ -1,8 +1,18 @@
-<div class="panes"></div>
+<div id="preview" style="display: none;">
+  <div class="controls">
+    <button>Hide preview</button>
+  </div>
+  <div class="content"></div>
+</div>
+<script>
+// move #preview outside the default .admin div
+$('body').append($('#preview'));
+$('#preview > .controls button').on('click', function(ev) {
+  $('#preview').hide();
+});
+</script>
 
-<script src="/static/compiled.js"></script>
-<script src="/static/templates.js"></script>
-<script src="/static/local.js"></script>
+<div id="stimlist"></div>
 <script>
 // have context to match the normal stimlist environment
 var context = {
@@ -11,7 +21,6 @@ var context = {
 };
 
 var StimlistView = TemplatedView.extend({
-  className: 'pane-padded',
   template: 'admin/stimlists/edit',
   loadText: function(raw) {
     var self = this;
@@ -32,6 +41,7 @@ var StimlistView = TemplatedView.extend({
     if (data.length) {
       var html = tabulate(data);
       this.$('.states').html(html);
+      this.$('.states table').addClass('hoverable');
       var message = 'Processed csv into ' + data.length + ' rows.';
       this.$('.states-form').flag({html: message, fade: 3000});
     }
@@ -42,18 +52,13 @@ var StimlistView = TemplatedView.extend({
       this.stim.stopListening('finish');
     }
 
-    // create the new one and show it in the right pane
+    // create the new one and show it in the overlay
     var states = this.model.get('states');
     var state = states[index];
     _.extend(state, context);
     var stim = new Stim(state);
-    stim.$el.addClass('pane-padded');
 
-    pane_manager.set(1, stim.$el);
-    var $pane_hide = $('<button class="pane-control">&raquo;</button>').appendTo(stim.$el);
-    $pane_hide.on('click', function(ev) {
-      pane_manager.limit(1);
-    });
+    $('#preview').show().children('.content').html(stim.$el);
 
     // listen for next
     stim.on('finish', function() {
@@ -101,5 +106,5 @@ var StimlistView = TemplatedView.extend({
 
 var stimlist = new Stimlist({{{JSON.stringify(stimlist)}}});
 var stimlist_view = new StimlistView({model: stimlist});
-var pane_manager = $('.panes').append(stimlist_view.el).panes();
+$('#stimlist').append(stimlist_view.el);
 </script>

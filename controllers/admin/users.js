@@ -54,9 +54,16 @@ R.post(/^\/admin\/users\/(\w+)$/, function(req, res, m) {
       if (err) return res.die('IO read error: ' + err);
 
       var fields = querystring.parse(data);
+      var overwriting_fields = _.pick(fields, 'bonus_paid', 'bonus_owed', 'superuser');
+      _.extend(user, overwriting_fields);
 
-      _.extend(user, fields);
+      if (fields.password && fields.password.trim()) {
+        user.password = fields.password;
+      }
+
       user.save(function(err) {
+        if (err) return res.die('User save error: ' + err);
+
         res.redirect('/admin/users/' + user._id);
       });
     });

@@ -95,7 +95,7 @@ var Stim = TemplatedView.extend({
 });
 
 var Stimlist = Backbone.Model.extend({
-  urlRoot: '/stimlists',
+  urlRoot: '/admin/stimlists',
   idAttribute: '_id'
 });
 
