@@ -17,7 +17,7 @@ var R = new Router(function(req, res) {
 /** GET /admin/users
 list all users */
 R.get(/^\/admin\/users\/?$/, function(req, res, m) {
-  models.User.find({}, '_id created responses.length bonus_paid bonus_owed password superuser tickets.length', function(err, users) {
+  models.User.find({}, '_id created responses.length bonus_paid bonus_owed password superuser tickets', function(err, users) {
     if (err) return res.die('User query error: ' + err);
 
     amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/users/all.mu'], {users: users}).pipe(res);
