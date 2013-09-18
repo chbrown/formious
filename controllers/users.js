@@ -26,10 +26,12 @@ R.get(/^\/users\/(\w+)/, function(req, res, m) {
   });
 });
 
-/** GET /users/:user/claim
+/** POST /users/:user/claim
 register unclaimed (no set password) user by adding password */
 R.post(/^\/users\/(\w+)\/claim/, function(req, res, m) {
   req.readToEnd('utf8', function(err, data) {
+    if (err) return res.die('POST /users/:user/claim: req.readToEnd error', err);
+
     var fields = querystring.parse(data);
     models.User.fromId(m[1], function(err, user) {
       if (err) return res.die('User query error: ' + err);
@@ -52,14 +54,11 @@ R.post(/^\/users\/(\w+)\/claim/, function(req, res, m) {
   });
 });
 
-/** GET /users/:user/become
+/** POST /users/:user/become
 login as claimed user by providing password */
 R.post(/^\/users\/(\w+)\/become/, function(req, res, m) {
   req.readToEnd('utf8', function(err, data) {
-    if (err) {
-      logger.error('GET /users/:user/become: req.readToEnd error', err);
-      return res.die(err);
-    }
+    if (err) return res.die('POST /users/:user/become: req.readToEnd error', err);
 
     var fields = querystring.parse(data);
     models.User.withPassword(m[1], fields.password, function(err, user) {
