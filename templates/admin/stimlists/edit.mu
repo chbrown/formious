@@ -4,8 +4,9 @@
   </div>
   <div class="content"></div>
 </div>
+
 <script>
-// move #preview outside the default .admin div
+// move #preview outside the default .admin div, so that .admin ... { /* etc. */ } css doesn't apply to it
 $('body').append($('#preview'));
 $('#preview > .controls button').on('click', function(ev) {
   $('#preview').hide();
@@ -13,37 +14,59 @@ $('#preview > .controls button').on('click', function(ev) {
 </script>
 
 <div id="stimlist"></div>
+
+<!-- <script src="/static/lib/jquery-contextMenu.js"></script> -->
+<!-- <script src="/static/lib/jquery-handsontable.min.js"></script> -->
 <script>
 // have context to match the normal stimlist environment
+// and might as well be connected to the current user
 var context = {
   hit_started: {{hit_started}},
-  workerId: '{{workerId}}'
+  workerId: '{{ticket_user._id}}'
 };
 
 var StimlistView = TemplatedView.extend({
   template: 'admin/stimlists/edit',
   loadText: function(raw) {
     var self = this;
-    self.model.set('csv', raw);
-    // outsource the processing, for now.
+    this.model.set('raw', raw);
+
+    // outsource the csv processing, for now.
     $.ajax({
       url: '/sv',
       method: 'POST',
       data: raw,
       dataType: 'json',
     }).done(function(data, type, jqXHR) {
-      self.model.set('states', data);
+      self.model.set('columns', data.columns);
+      self.model.set('states', data.rows);
       self.postRender();
     });
   },
   postRender: function(opts) {
-    var data = this.model.get('states');
-    if (data.length) {
-      var html = tabulate(data);
+    var states = this.model.get('states');
+    var columns = this.model.get('columns');
+    // states is a list of objects
+    if (states.length) {
+      // var handson_columns = columns.map(function(column) { return {data: column}; })
+      // this.$('.states').handsontable({
+      //   colHeaders: columns,
+      //   columns: handson_columns,
+      //   minSpareRows: 1,
+      //   data: states,
+      //   // contextMenu: false,
+      // });
+      if (columns === undefined || columns.length == 0) {
+        columns = _.keys(states[0]);
+      }
+      var html = tabulate(states, columns);
       this.$('.states').html(html);
-      this.$('.states table').addClass('hoverable');
-      var message = 'Processed csv into ' + data.length + ' rows.';
-      this.$('.states-form').flag({html: message, fade: 3000});
+      this.$('.states table').addClass('hoverable box');
+      var message = 'Processed upload into ' + states.length + ' rows.';
+      this.$('.states-form').flag({anchor: 't', align: 'c', html: message, fade: 3000});
+    }
+    else {
+      this.$('.states').html('No states');
     }
   },
   preview: function(index) {
@@ -73,7 +96,8 @@ var StimlistView = TemplatedView.extend({
       var attrs = {
         slug: $('[name=slug]').val(),
         creator: $('[name=creator]').val(),
-        csv: this.model.get('csv'),
+        raw: this.model.get('raw'),
+        columns: this.model.get('columns'),
         states: this.model.get('states')
       };
       this.model.save(attrs, {

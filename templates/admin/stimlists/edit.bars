@@ -1,25 +1,24 @@
-<h3>Stimlist: {{_id}}</h3>
-<div class="hform" style="display: inline-block">
+<section class="hform">
+  <h3>Stimlist: {{_id}}</h3>
   <label><span>Slug</span>
     <input name="slug" type="text" value="{{slug}}" />
     <a href="/stimlists/{{slug}}">{{slug}}</a>
   </label>
+
   <label><span>Creator</span>
     <input name="creator" type="text" value="{{creator}}" />
   </label>
-  <button>Save</button>
-</div>
 
-<br />
-
-<div class="states-form" style="display: inline-block">
-  <label><span>Paste states</span>
+  <label><span>Paste</span>
     <textarea placeholder="Paste csv here" name="paste" rows="1">
     </textarea>
   </label>
-  <label><span>Upload states</span>
+
+  <label><span>Upload</span>
     <input type="file" name="upload">
   </label>
-</div>
+
+  <button>Save</button>
+</section>
 
 <div class="states"></div>

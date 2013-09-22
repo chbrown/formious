@@ -13,25 +13,22 @@ $(document).on('click', 'a[data-method]', function(ev) {
 
 
 function makeTable(cols, rows) {
+  var thead = '<thead><tr><th>' + cols.join('</th><th>') + '</th></tr></thead>';
   var trs = rows.map(function(cells) {
     return '<td>' + cells.join('</td><td>') + '</td>';
   });
-  var thead = '<thead><tr><th>' + cols.join('</th><th>') + '</th></tr></thead>';
   var tbody = '<tbody><tr>' + trs.join('</tr><tr>') + '</tr></tbody>';
   return '<table>' + thead + tbody + '</table>';
 }
-function tabulate(objects) {
-  // convert a list of objects to columns and rows, then render them to a table.
-  // use just the first object for the set of key/columns
-  var cols = _.keys(objects[0]);
+function tabulate(objects, keys) {
+  // convert a list of objects to flat rows, using the given list of keys, then render them to a table.
   var rows = objects.map(function(object) {
-    return cols.map(function(col) {
-      return object[col];
+    return keys.map(function(key) {
+      return object[key];
     });
   });
-  return makeTable(cols, rows);
+  return makeTable(keys, rows);
 }
-
 
 
 // requires Backbone and Handlebars to be loaded
