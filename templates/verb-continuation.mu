@@ -4,7 +4,7 @@
 
 <p>There are {{questions.length}} sentences below.</p>
 
-<fieldset class="demo">
+<fieldset>
   <legend><b>Instructions</b></legend>
   <p>Please read each sentence, and then choose <b>how natural</b> the sentence sounds, from these options:</p>
   <table>
