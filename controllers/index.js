@@ -123,6 +123,8 @@ R.post('/sv', function(req, res, m) {
   streaming.readToEnd(parser, function(err, rows) {
     if (err) return res.die('sv read error: ' + err);
 
+    logger.debug('/sv read %d rows of %d columns', rows.length, parser.columns.length);
+
     // columns is a list of strings, rows is a list of objects
     res.json({columns: parser.columns, rows: rows});
   });
