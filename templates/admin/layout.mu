@@ -2,7 +2,7 @@
   <a href="/admin/aws">AWS Accounts</a>
   <a href="/admin/users">Users</a>
   <a href="/admin/stimlists">Stimlists</a>
-  <!-- <a href="/admin" style="float: right;">Logout</a> -->
+  <a href="/users/{{ticket_user._id}}/logout" style="float: right">Logout</a>
 </div>
 <script src="/static/compiled.js"></script>
 <script src="/static/templates.js"></script>
