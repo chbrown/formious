@@ -1,6 +1,42 @@
-// Copyright 2011-2013, Christopher Brown <io@henrian.com>, MIT Licensed
-// https://github.com/chbrown/misc-js :: jquery.flags.js
-"use strict"; /*jslint indent: 2 */ /*globals $ */
+// "use strict"; /*jslint indent: 2 */ /*globals $ */
+/** Copyright 2011-2013, Christopher Brown <io@henrian.com>, MIT Licensed
+
+https://raw.github.com/chbrown/misc-js/master/jquery.flags.js
+
+Usage:
+
+    $(ev.target).flag({text: 'Success', fade: 3000});
+
+Suggested CSS:
+
+.flag {
+  position: absolute;
+  background-color: black;
+  border-radius: 4px;
+  padding: 2px;
+  color: white;
+  font-size: 90%;
+  .triangle {
+    display: inline-block;
+    position: absolute;
+    border: 6px solid transparent;
+    width: 0;
+    height: 0;
+  }
+  .subflag {
+    display: inline-block;
+    span, a {
+      display: inline-block;
+      padding: 0 4px;
+    }
+    a {
+      background-color: white;
+      border-radius: 2px;
+    }
+  }
+}
+
+*/
 (function($) {
   $.fn.measureBox = function() {
     return {
@@ -35,10 +71,10 @@
     this.triangle_radius = parseInt(this.$triangle.css('border-top-width'), 10);
   }
   Flag.prototype.redraw = function() {
-    var self = this,
-      target_offset = this.$target.offset(), // { left: 999, top: 999 }
-      target_size = this.$target.measureBox(), // { width: 999, height: 999 }
-      $content;
+    var self = this;
+    var target_offset = this.$target.offset(); // { left: 999, top: 999 }
+    var target_size = this.$target.measureBox(); // { width: 999, height: 999 }
+    var $content;
     this.$flag.fadeIn(80);
     if (this.onclick) {
       $content = $('<a href="#"></a>').click(function(ev) {
@@ -106,8 +142,8 @@
 
   $.flag = function(args) {
     if (args === undefined) args = {};
-    var $target = args.element || $(args.selector),
-        update = args.update === undefined ? true : args.update;
+    var $target = args.element || $(args.selector);
+    var update = args.update === undefined ? true : args.update;
 
     var flag = $target.data('flag');
     if (!update || !flag) {
@@ -118,8 +154,9 @@
     flag.onclick = args.onclick;
     flag.html = args.html;
     flag.text = args.text;
-    if (!flag.html && !flag.text)
+    if (!flag.html && !flag.text) {
       flag.text = '!!!';
+    }
     flag.redraw();
 
     if (args.fade !== undefined) {

@@ -1,11 +1,15 @@
-// Copyright 2011-2013, Christopher Brown <io@henrian.com>, MIT Licensed
-// https://github.com/chbrown/misc-js :: jquery.autocomplete.js
-"use strict"; /*jslint indent: 2 */ /*globals $ */
-// usage:
-//  in your html: <input type="text" data-autocomplete="/users.json" />
-//  where /users.json?q=jo will respond in json
-//  then call: $('input[data-autocomplete]').ac();
-//  the actual Autocomplete object will be available at each element's .data('autocomplete') key
+// "use strict"; /*jslint indent: 2 */ /*globals $ */
+/** Copyright 2011-2013, Christopher Brown <io@henrian.com>, MIT Licensed
+
+https://raw.github.com/chbrown/misc-js/master/jquery.autocomplete.js
+
+Usage:
+  in your html: <input type="text" data-autocomplete="/users.json" />
+  where /users.json?q=jo will respond in json
+  then call: $('input[data-autocomplete]').ac();
+  the actual Autocomplete object will be available at each element's .data('autocomplete') key
+
+*/
 (function($) {
   function measureBox($target) {
     return {
@@ -93,11 +97,11 @@
     if (this.options.length > 0) {
       this.$ul.show(); // only need to show it in case we didn't just create it
 
-      var input_size = measureBox(this.$input),
-          input_offset = this.$input.offset(),
-          position = {left: input_offset.left, top: input_offset.top + input_size.height},
-          limit = ($(window).height() - position.top) / 19 | 0,
-          lis = this.options.map(function(item) { return item.label || item.value; });
+      var input_size = measureBox(this.$input);
+      var input_offset = this.$input.offset();
+      var position = {left: input_offset.left, top: input_offset.top + input_size.height};
+      var limit = ($(window).height() - position.top) / 19 | 0;
+      var lis = this.options.map(function(item) { return item.label || item.value; });
       this.$ul.css(position).html("<li>" + lis.slice(0, limit).join("</li><li>") + "</li>");
 
       var self = this;
@@ -117,8 +121,9 @@
     this.highlightedIndex = -1;
   };
   Autocomplete.prototype.highlight = function(index) {
-    if (this.highlightedIndex !== -1)
+    if (this.highlightedIndex !== -1) {
       this.$ul.children('li:eq(' + this.highlightedIndex + ')').removeClass('highlighted');
+    }
     this.$ul.children('li:eq(' + index + ')').addClass('highlighted');
     this.highlightedIndex = index;
   };
@@ -136,9 +141,9 @@
 
   $.fn.ac = function() {
     return this.each(function() {
-      var $this = $(this),
-          url = $this.attr('data-autocomplete'),
-          autocomplete = new Autocomplete($this, url);
+      var $this = $(this);
+      var url = $this.attr('data-autocomplete');
+      var autocomplete = new Autocomplete($this, url);
       $this.data('autocomplete', autocomplete);
     });
   };

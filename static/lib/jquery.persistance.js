@@ -1,6 +1,9 @@
-// Copyright 2012-2013, Christopher Brown <io@henrian.com>, MIT Licensed
-// https://github.com/chbrown/misc-js :: jquery.persistence.js
-"use strict"; /*jslint indent: 2 */ /*globals _, $, Backbone, Handlebars */
+// "use strict"; /*jslint indent: 2 */ /*globals $ */
+/** Copyright 2012-2013, Christopher Brown <io@henrian.com>, MIT Licensed
+
+https://raw.github.com/chbrown/misc-js/master/jquery.persistence.js
+
+*/
 var EventEmitter = {
   _JQInit: function() {
     this._JQ = $(this);

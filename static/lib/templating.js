@@ -1,14 +1,18 @@
-// Copyright 2013, Christopher Brown <io@henrian.com>, MIT Licensed
-// https://github.com/chbrown/misc-js :: templating.js
-"use strict"; /*jslint indent: 2 */ /*globals _, $, Backbone, Handlebars */
+// "use strict"; /*jslint indent: 2 */ /*globals _, $, Backbone, Handlebars */
+/** Copyright 2013, Christopher Brown <io@henrian.com>, MIT Licensed
 
-// Templates debug / caching. E.g.:
-// new TemplateManager({
-//   cache: window.DEBUG ? Handlebars.templates : {},
-//   url: '/templates/',
-//   extension: '.bars',
-//   compile: Handlebars.compile
-// });
+https://raw.github.com/chbrown/misc-js/master/templating.js
+
+Templates debug / caching. E.g.:
+
+    new TemplateManager({
+      cache: window.DEBUG ? Handlebars.templates : {},
+      url: '/templates/',
+      extension: '.bars',
+      compile: Handlebars.compile
+    });
+
+*/
 function TemplateManager(opts) {
   this.cache = opts.cache || {}; // optional, defaults to {}
   this.url = opts.url || '/'; // where to look for templates

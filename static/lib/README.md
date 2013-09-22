@@ -1,6 +1,19 @@
-# jquery-plugins
+# misc-js
 
-Here are some jQuery plugins that I like, some of which I've created, and use often.
+Custom client-side javascript libraries for use with jQuery, Backbone, and Handlebars.
+
+* Too small to make into their own repositories.
+* Too big to keep copy and pasting.
+
+## Standards
+
+JSLint:
+
+    "use strict"; /*jslint indent: 2 */
+
+E.g., with jQuery, underscore.js:
+
+    "use strict"; /*jslint indent: 2 */ /*globals $, _ */
 
 ## jquery.autocomplete.js
 
@@ -89,29 +102,81 @@ Here's the basic LESS css required for this plugin (recent update removes stylin
       }
     }
 
-## jquery.cookie.js
 
-https://github.com/carhartl/jquery-cookie
+## cookies.js
 
-Copyright 2011, Klaus Hartl, Dual licensed under the MIT or GPL Version 2 licenses.
+Adds a `cookies` variable to your global scope.
 
-    // add cookie
-    $.cookie('user_id', 'wXzGVpNvBkoK');
+### get cookie
 
-    // add cookie with options. "expires" is in days. ("path" is optional.)
-    $.cookie('user_id', 'wXzGVpNvBkoK', {expires: 31, path: '/'});
-    // other options: domain, secure, raw
+```javascript
+var user_id = cookies.get('user_id');
+// user_id will be undefined or a string
+```
 
-    // get cookie
-    var user_id = $.cookie('user_id');
+### add or set cookie (with options)
 
-    // delete cookie
-    $.cookie('user_id', null);
+```javascript
+var now = new Date().getTime();
+var one_month = new Date(now + 31*86400000);
+cookies.set('user_id', '10089', {expires: one_month, path: '/'});
+```
 
-## jquery.tablesorter.js
+Options when setting:
 
-http://tablesorter.com/
+* Date expires
+* String path
+* String domain
+* Boolean secure
+* Boolean raw
+    - Not part of the cookie data, but controls how the cookie is stringified.
+    - Prevents `encodeURIComponent` being called on the given name and value.
 
-Copyright 2007 Christian Bach, Dual licensed under MIT or GPL licenses.
+### delete cookie
 
-    $('.tablesorter').tablesorter();
+```javascript
+cookie.del('user_id');
+```
+
+### set defaults
+
+Merge any `cookies.set` command with some default set of options.
+Can be either a static object or a function that returns an object.
+
+```javascript
+cookies.setDefault(function() {
+  var now = new Date().getTime();
+  var thirty_seconds = new Date(now + 30000);
+  return {expires: thirty_seconds};
+});
+```
+
+Or, more sanely and simply:
+
+```javascript
+cookies.setDefault({path: '/'});
+```
+
+
+## templating.js
+
+Templating helper for Backbone joined with Handlebars.
+
+### Creates a class, `TemplateManager`.
+
+* TemplateManager.cache = the dictionary to look up and store templates by name
+* TemplateManager.url = where to request templates if they're not in the cache
+* TemplateManager.extension = the dictionary to look up and store templates by name.
+* TemplateManager.querystring = set to '?t=123' to keep from pulling static templates from cache.
+* TemplateManager.compile = function (template_string) -> function (context) -> html
+
+### Creates a global variable, `HandlebarsTemplates`:
+
+For convenience, `Templates` is set to the same reference.
+
+Unless you have set `window.DEBUG = true` somewhere, `HandlebarsTemplates` will load `Handlebars.templates` as its cache.
+
+### Creates helper classes for Backbone:
+
+* TemplatedView (extends Backbone.View)
+* TemplatedCollection (extends Backbone.Collection)
