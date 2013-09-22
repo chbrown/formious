@@ -69,7 +69,7 @@ var Scene = Backbone.Model.extend({
       choice: choice,
       reliabilities: _.map(allies, function(ally) { return ally.reliability.toFixed(4); }),
       judgments: _.pluck(allies, 'judgment'),
-      time: now() - this.get('shown'),
+      time: time() - this.get('shown'),
     });
     var response = new Response(attrs);
     response.save();
@@ -158,7 +158,7 @@ var SceneView = TemplatedView.extend({
   tagName: 'td',
   template: 'stims/digits/scene',
   preRender: function(ctx) {
-    this.model.set('shown', now());
+    this.model.set('shown', time());
   },
   postRender: function(ctx) {
     var scene = this.model;
@@ -208,7 +208,7 @@ var ConclusionView = TemplatedView.extend({
       return connector + ally.title + ' ' + ally.name;
     });
     _.extend(ctx, config, {
-      duration: now() - config.task_started,
+      duration: time() - config.task_started,
       all_allies_string: ally_names.join(', ')
     });
   },

@@ -1,5 +1,5 @@
 "use strict"; /*jslint indent: 2 */ /*globals _, $, Backbone, Handlebars, TemplatedView, TemplatedCollection */
-function now() { return (new Date()).getTime(); }
+function time() { return (new Date()).getTime(); }
 
 $(document).on('click', 'a[data-method]', function(ev) {
   ev.preventDefault();
@@ -76,7 +76,7 @@ var Stim = TemplatedView.extend({
           // `context` and `stimlist` are globals that a Stim view will always have access to
           response.hit_started = context.hit_started;
           response.stimlist = stimlist.get('slug');
-          response.submitted = now();
+          response.submitted = time();
           new Response(response).save(null, {
             success: function(model, response, options) {
               // console.log('response.save cb', arguments);

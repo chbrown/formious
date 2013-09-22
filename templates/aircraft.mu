@@ -75,7 +75,7 @@ var Scene = Backbone.Model.extend({
       correct: correct,
       image_id: this.get('image_id'),
       width: this.get('width'),
-      time: now() - this.get('shown'),
+      time: time() - this.get('shown'),
       version: config.version
     });
     response.save();
@@ -109,7 +109,7 @@ var SceneView = TemplatedView.extend({
   template: 'stims/aircraft/scene',
   // a scene is given exactly a model
   preRender: function(ctx) {
-    this.model.set('shown', now());
+    this.model.set('shown', time());
 
     // prep the next image for instant loading
     var next = this.model.next();
@@ -209,7 +209,7 @@ var ConclusionView = TemplatedView.extend({
       return connector + ally.title + ' ' + ally.name;
     });
     _.extend(ctx, config, {
-      duration: now() - config.task_started,
+      duration: time() - config.task_started,
       all_allies_string: ally_names.join(', ')
     });
   },
