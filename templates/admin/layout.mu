@@ -7,10 +7,7 @@
   <script src="/static/compiled.js"></script>
   <script src="/static/templates.js"></script>
   <script src="/static/local.js"></script>
-  <script>
-  var started = new Date();
-  //DEBUG=true;
-  </script>
+  <script>/*DEBUG=true;*/</script>
 </head>
 <body class="admin">
   <nav>
@@ -22,4 +19,8 @@
   <div class="content">
     {{<}}
   </div>
+  <script>
+  var started = new Date();
+  $('nav a[href="' + location.pathname + '"]').addClass('active');
+  </script>
 </body>

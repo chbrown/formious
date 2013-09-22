@@ -6,33 +6,11 @@ body {
   font: 13px "Lucida Grande", Arial, sans-serif;
 }
 h1, h2, h3, h4, h5, h6 {
-  margin: 0.75em 0 0.25em 0;
+  margin: 0.5ex 0;
 }
 p {
   margin: 0.5em 0;
 }
-
-table {
-  border-collapse: collapse;
-  tr.preview {
-    background-color: #BBB;
-  }
-  th {
-    white-space: nowrap;
-    text-align: left;
-  }
-  td {
-    font-size: 90%;
-    padding: 1px 4px;
-    vertical-align: top;
-  }
-  &.hoverable {
-    tr:hover {
-      background-color: #DDD;
-    }
-  }
-}
-
 button {
   margin: 10px 10px 0 0;
 }
@@ -45,6 +23,97 @@ label {
     margin: 2px 4px;
   }
 }
+fieldset {
+  margin: 0 0 10px 0;
+  border: 1px solid #CCC;
+}
+textarea {
+  vertical-align: middle;
+  overflow: hidden;
+}
+.box {
+  background-color: white;
+  border: 1px solid #EEE;
+}
+section {
+  .box;
+  margin: 1ex 0;
+  padding: 10px;
+  // display: inline-block;
+}
+nav {
+  position: fixed;
+  top: 0;
+  padding: 0 4px;
+  background-color: #FDFDFD;
+  width: 100%;
+  border-bottom: 1px solid #CCC;
+  a {
+    display: inline-block;
+    border-radius: 3px;
+    border: 1px solid #BBB;
+    padding: 2px 6px;
+    margin: 2px;
+    &.active {
+      border: 1px solid #AAA;
+      background-color: #DDD;
+    }
+    &:hover {
+      border: 1px solid #AAA;
+      background-color: #EEE;
+    }
+  }
+}
+table {
+  border-collapse: collapse;
+  tr.preview {
+    background-color: #BBB;
+  }
+  th {
+    // white-space: nowrap;
+    text-align: left;
+  }
+  td {
+    font-size: 90%;
+  }
+  td, th {
+    vertical-align: top;
+    padding: 1px 5px 1px 2px;
+  }
+  &.hoverable tbody tr:hover {
+    background-color: #DDD;
+  }
+}
+
+.admin {
+  background-color: #FCFCFC;
+
+  .content {
+    padding: 30px 10px 10px;
+  }
+
+  table {
+    thead td, tbody td {
+      border-bottom: 1px solid #DDD;
+    }
+  }
+  .keyval {
+    th {
+      padding-top: 4px;
+      border-bottom: 1px solid #777;
+    }
+    td:first-child {
+      font-weight: bold;
+    }
+  }
+  .status span {
+    font-size: 110%;
+    font-weight: bold;
+    &.Submitted { color: #CCC; }
+    &.Approved { color: darkgreen; }
+    &.Rejected { color: darkred; }
+  }
+}
 .hform label span:first-child {
   display: inline-block;
   width: 75px;
@@ -55,15 +124,6 @@ label {
   font-weight: bold;
   margin: 2px 0;
 }
-fieldset {
-  margin: 0 0 10px 0;
-  border: 1px solid #CCC;
-}
-
-textarea {
-  vertical-align: middle;
-  overflow: hidden;
-}
 
 .nowrap {
   white-space: nowrap;
@@ -72,24 +132,6 @@ textarea {
   width: 50px;
   overflow: hidden;
   table-layout: fixed;
-}
-
-.navbar {
-  position: fixed;
-  top: 0;
-  background: #FFF;
-  width: 100%;
-  border-bottom: 1px solid #CCC;
-  a {
-    display: inline-block;
-    border-radius: 3px;
-    border: 1px solid #555;
-    &:hover {
-      background-color: #EEE;
-    }
-    padding: 2px 6px;
-    margin: 2px;
-  }
 }
 
 #preview {
@@ -110,19 +152,6 @@ textarea {
   }
 }
 
-.pane-padded {
-  padding: 10px 20px;
-}
-.pane-control.left {
-  display: block;
-  position: absolute;
-  height: 100%;
-  margin: 0;
-  top: 0;
-  left: 0;
-  padding: 1px;
-}
-
 .assignment {
   margin-top: 10px;
   padding-left: 10px;
@@ -141,33 +170,6 @@ textarea {
   }
   input {
     width: 200px;
-  }
-}
-.admin {
-  padding: 30px 10px 10px;
-  td {
-    border-bottom: 1px solid #DDD;
-    font-size: 90%;
-  }
-  tfoot td {
-    border-bottom: 0;
-  }
-
-  .keyval {
-    th {
-      padding-top: 4px;
-      border-bottom: 1px solid #777;
-    }
-    td:first-child {
-      font-weight: bold;
-    }
-  }
-  .status span {
-    font-size: 110%;
-    font-weight: bold;
-    &.Submitted { color: #CCC; }
-    &.Approved { color: darkgreen; }
-    &.Rejected { color: darkred; }
   }
 }
 
