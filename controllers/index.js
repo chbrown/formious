@@ -117,14 +117,14 @@ R.post(/^\/addbonus$/, function(req, res, m) {
 
 /** POST /sv
 parse csv-like input flexibly and write out json to response */
-R.post(/^\/sv$/, function(req, res, m) {
-  // res.writeHead(200, {'Content-Type': 'text/csv'});
-  //   .pipe(new sv.Stringifier({delimiter: ','}))
-  var parsed_stream = req.pipe(new sv.Parser());
-  streaming.readToEnd(parsed_stream, function(err, rows) {
-    if (err) return res.die('IO read error: ' + err);
+R.post('/sv', function(req, res, m) {
+  // /^\/sv(.json)?$/
+  var parser = req.pipe(new sv.Parser());
+  streaming.readToEnd(parser, function(err, rows) {
+    if (err) return res.die('sv read error: ' + err);
 
-    res.json(rows);
+    // columns is a list of strings, rows is a list of objects
+    res.json({columns: parser.columns, rows: rows});
   });
 });
 
