@@ -20,7 +20,8 @@ R.get(/^\/admin\/users\/?$/, function(req, res, m) {
   models.User.find({}, '_id created responses.length bonus_paid bonus_owed password superuser tickets', function(err, users) {
     if (err) return res.die('User query error: ' + err);
 
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/users/all.mu'], {users: users}).pipe(res);
+    req.ctx.users = users;
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/users/all.mu'], req.ctx).pipe(res);
   });
 });
 
@@ -30,7 +31,8 @@ R.get(/^\/admin\/users\/(\w+)$/, function(req, res, m) {
   models.User.fromId(m[1], function(err, user) {
     if (err) return res.die('User query error: ' + err);
 
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/users/one.mu'], {user: user}).pipe(res);
+    req.ctx.user = user;
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/users/one.mu'], req.ctx).pipe(res);
   });
 });
 
@@ -40,7 +42,8 @@ R.get(/^\/admin\/users\/(\w+)\/edit$/, function(req, res, m) {
   models.User.fromId(m[1], function(err, user) {
     if (err) return res.die('User query error: ' + err);
 
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/users/edit.mu'], {user: user}).pipe(res);
+    req.ctx.user = user;
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/users/edit.mu'], req.ctx).pipe(res);
   });
 });
 

@@ -23,11 +23,10 @@ R.get('/admin/aws', function(req, res) {
   models.AWSAccount.find({}, function(err, accounts) {
     if (err) return res.die(err);
 
-    var ctx = {
-      user: req.user,
+    _.extend(req.ctx, {
       accounts: accounts,
-    };
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/aws/all.mu'], ctx).pipe(res);
+    });
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/aws/all.mu'], req.ctx).pipe(res);
   });
 });
 
@@ -47,12 +46,11 @@ R.get(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
   models.AWSAccount.findById(m[1], function(err, account) {
     if (err) return res.die(err);
 
-    var ctx = {
-      user: req.user,
+    _.extend(req.ctx, {
       account: account,
       hosts: ['deploy', 'sandbox'],
-    };
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/aws/one.mu'], ctx).pipe(res);
+    });
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/aws/one.mu'], req.ctx).pipe(res);
   });
 });
 
@@ -62,12 +60,11 @@ R.get(/^\/admin\/aws\/(\w+)\/edit$/, function(req, res, m) {
   models.AWSAccount.findById(m[1], function(err, account) {
     if (err) return res.die('AWSAccount query error: ' + err);
 
-    var ctx = {
-      user: req.user,
+    _.extend(req.ctx, {
       account: account,
       hosts: ['deploy', 'sandbox'],
-    };
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/aws/edit.mu'], ctx).pipe(res);
+    });
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/aws/edit.mu'], req.ctx).pipe(res);
   });
 });
 

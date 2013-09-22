@@ -29,23 +29,16 @@ edit existing Stimlist */
 R.get(/^\/admin\/stimlists\/(\w+)\/edit$/, function(req, res, m) {
   var stimlist_id = m[1];
   models.Stimlist.findById(stimlist_id, function(err, stimlist) {
-    if (err) {
-      logger.error('Stimlist.findById() error', err);
-      return res.die(err);
-    }
-
-    if (!stimlist) {
-      return res.die('No stimlist "' + stimlist_id + '" could be found');
-    }
+    if (err) return res.die('Stimlist.findById() error', err);
+    if (!stimlist) return res.die('No stimlist "' + stimlist_id + '" could be found');
 
     // set the context to match the normal GET /admin/stimlists/:stimlist
-    var ctx = {
+    _.extend(req.ctx, {
       hit_started: Date.now(),
       index: 0,
       stimlist: stimlist,
-      workerId: req.user._id,
-    };
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/stimlists/edit.mu'], ctx).pipe(res);
+    });
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/stimlists/edit.mu'], req.ctx).pipe(res);
   });
 });
 
@@ -103,7 +96,10 @@ R.get(/^\/admin\/stimlists\/?$/, function(req, res, m) {
       return res.die(err);
     }
 
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/stimlists/all.mu'], {stimlists: stimlists}).pipe(res);
+    _.extend(req.ctx, {
+      stimlists: stimlists
+    });
+    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/stimlists/all.mu'], req.ctx).pipe(res);
   });
 });
 

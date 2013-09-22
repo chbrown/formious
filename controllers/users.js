@@ -26,6 +26,15 @@ R.get(/^\/users\/(\w+)/, function(req, res, m) {
   });
 });
 
+/** GET /users/:user/logout
+helper page to purge ticket */
+R.get(/^\/users\/(\w+)\/logout/, function(req, res, m) {
+  logger.debug('Deleting ticket cookie "%s" (for user: "%s")', req.cookies.get('ticket'), m[1]);
+
+  req.cookies.del('ticket');
+  res.redirect('/users');
+});
+
 /** POST /users/:user/claim
 register unclaimed (no set password) user by adding password */
 R.post(/^\/users\/(\w+)\/claim/, function(req, res, m) {
@@ -79,7 +88,8 @@ R.post(/^\/users\/(\w+)\/become/, function(req, res, m) {
   });
 });
 
-// GET /users -> redirect to /users/:current_user_id
+/** GET /users
+redirect to /users/:current_user */
 R.get(/^\/users\/?$/, function(req, res, m) {
   models.User.fromId(req.user_id, function(err, user) {
     if (err) return res.die('User.fromId error ' + err);

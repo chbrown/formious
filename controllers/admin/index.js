@@ -96,6 +96,8 @@ module.exports = function(req, res) {
 
     // alright, they're in. go wild.
     req.user = user;
+    // and starting building the context
+    req.ctx = {ticket_user: user};
     logger.debug('Authenticated with user: %s', user._id);
     R.route(req, res);
   });
