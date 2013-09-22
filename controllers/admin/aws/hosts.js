@@ -173,7 +173,7 @@ R.get(/HITs\/(\w+)\.(csv|tsv)/, function(req, res, m) {
 
 // GET /admin/aws/:account/:hosts/HITs/new -> form to create new HIT
 R.get(/HITs\/new/, function(req, res, m) {
-  amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/HITs/new.mu'], req.ctx).pipe(res);
+  amulet.stream(['admin/layout.mu', 'admin/HITs/new.mu'], req.ctx).pipe(res);
 });
 
 // HITs/show
@@ -222,7 +222,7 @@ R.get(/HITs\/(\w+)/, function(req, res, m) {
         BonusPayments: results.GetBonusPaymentsResult.BonusPayment,
         assignments: assignments,
       });
-      amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/HITs/one.mu'], req.ctx).pipe(res);
+      amulet.stream(['admin/layout.mu', 'admin/HITs/one.mu'], req.ctx).pipe(res);
     });
   });
 });
@@ -233,7 +233,7 @@ R.get(/HITs$/, function(req, res) {
     if (err) return res.die('SearchHITs error: ' + err);
 
     req.ctx.hits = result.SearchHITsResult.HIT || [];
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/HITs/all.mu'], req.ctx).pipe(res);
+    amulet.stream(['admin/layout.mu', 'admin/HITs/all.mu'], req.ctx).pipe(res);
   });
 });
 

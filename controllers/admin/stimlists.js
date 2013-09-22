@@ -38,7 +38,7 @@ R.get(/^\/admin\/stimlists\/(\w+)\/edit$/, function(req, res, m) {
       index: 0,
       stimlist: stimlist,
     });
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/stimlists/edit.mu'], req.ctx).pipe(res);
+    amulet.stream(['admin/layout.mu', 'admin/stimlists/edit.mu'], req.ctx).pipe(res);
   });
 });
 
@@ -99,7 +99,7 @@ R.get(/^\/admin\/stimlists\/?$/, function(req, res, m) {
     _.extend(req.ctx, {
       stimlists: stimlists
     });
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/stimlists/all.mu'], req.ctx).pipe(res);
+    amulet.stream(['admin/layout.mu', 'admin/stimlists/all.mu'], req.ctx).pipe(res);
   });
 });
 

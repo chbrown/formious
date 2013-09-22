@@ -21,7 +21,7 @@ R.get(/^\/admin\/users\/?$/, function(req, res, m) {
     if (err) return res.die('User query error: ' + err);
 
     req.ctx.users = users;
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/users/all.mu'], req.ctx).pipe(res);
+    amulet.stream(['admin/layout.mu', 'admin/users/all.mu'], req.ctx).pipe(res);
   });
 });
 
@@ -32,7 +32,7 @@ R.get(/^\/admin\/users\/(\w+)$/, function(req, res, m) {
     if (err) return res.die('User query error: ' + err);
 
     req.ctx.user = user;
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/users/one.mu'], req.ctx).pipe(res);
+    amulet.stream(['admin/layout.mu', 'admin/users/one.mu'], req.ctx).pipe(res);
   });
 });
 
@@ -43,7 +43,7 @@ R.get(/^\/admin\/users\/(\w+)\/edit$/, function(req, res, m) {
     if (err) return res.die('User query error: ' + err);
 
     req.ctx.user = user;
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/users/edit.mu'], req.ctx).pipe(res);
+    amulet.stream(['admin/layout.mu', 'admin/users/edit.mu'], req.ctx).pipe(res);
   });
 });
 

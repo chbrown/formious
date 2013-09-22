@@ -26,7 +26,7 @@ R.get('/admin/aws', function(req, res) {
     _.extend(req.ctx, {
       accounts: accounts,
     });
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/aws/all.mu'], req.ctx).pipe(res);
+    amulet.stream(['admin/layout.mu', 'admin/aws/all.mu'], req.ctx).pipe(res);
   });
 });
 
@@ -50,7 +50,7 @@ R.get(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
       account: account,
       hosts: ['deploy', 'sandbox'],
     });
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/aws/one.mu'], req.ctx).pipe(res);
+    amulet.stream(['admin/layout.mu', 'admin/aws/one.mu'], req.ctx).pipe(res);
   });
 });
 
@@ -64,7 +64,7 @@ R.get(/^\/admin\/aws\/(\w+)\/edit$/, function(req, res, m) {
       account: account,
       hosts: ['deploy', 'sandbox'],
     });
-    amulet.stream(['layout.mu', 'admin/layout.mu', 'admin/aws/edit.mu'], req.ctx).pipe(res);
+    amulet.stream(['admin/layout.mu', 'admin/aws/edit.mu'], req.ctx).pipe(res);
   });
 });
 

@@ -7,4 +7,4 @@ var started = new Date();
 //DEBUG=true;
 </script>
 <link href="/static/site.css" rel="stylesheet" type="text/css" />
-{{<yield}}
+{{<}}
