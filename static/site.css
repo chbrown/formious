@@ -13,17 +13,16 @@ section.fill,.section.fill{border-width:1px 0;overflow:auto}
 section.box,.section.box{display:inline-block;margin:0 10px}
 nav{position:fixed;top:0;padding:0 4px;background-color:#fdfdfd;width:100%;border-bottom:1px solid #ccc}nav a{display:inline-block;border-radius:3px;border:1px solid #bbb;padding:2px 6px;margin:2px}nav a.active{border:1px solid #aaa;background-color:#ddd}
 nav a:hover{border:1px solid #aaa;background-color:#eee}
-nav+div{padding-top:30px}
+.hasnav{padding-top:30px}
 table{border-collapse:collapse}table tr.preview{background-color:#bbb}
 table th{text-align:left}
 table td{font-size:90%}
 table td,table th{vertical-align:top;padding:1px 8px 2px 1px}
 table.hoverable tbody tr:hover{background-color:#ddd}
-.admin{background-color:#fcfcfc}.admin table thead td,.admin table tbody td{border-bottom:1px solid #ddd}
-.admin a.new{display:block;margin:10px 0 5px;padding:1px}
-.admin .keyval th{padding-top:4px;border-bottom:1px solid #777}
-.admin .keyval td:first-child{font-weight:bold}
-.admin .status span{font-size:110%;font-weight:bold}.admin .status span.Submitted{color:#ccc}
+table.keyval th{padding-top:4px;border-bottom:1px solid #777}
+table.keyval td:first-child{font-weight:bold}
+.fill table thead td,.fill table tbody td{border-bottom:1px solid #ddd}
+.admin{background-color:#fcfcfc}.admin .status span{font-size:110%;font-weight:bold}.admin .status span.Submitted{color:#ccc}
 .admin .status span.Approved{color:#006400}
 .admin .status span.Rejected{color:#8b0000}
 .vform>label>span:first-child,.hform>label>span:first-child{margin:6px 0 2px}

@@ -45,7 +45,6 @@ section, .section {
     border: 1px solid #EEE;
   }
   &.fill {
-    // margin: 10px 0;
     border-width: 1px 0;
     overflow: auto;
   }
@@ -78,11 +77,11 @@ nav {
       background-color: #EEE;
     }
   }
-  & + div {
-    // accounting for the fixed header
-    padding-top: 30px;
-  }
 }
+.hasnav {
+  padding-top: 30px;
+}
+
 table {
   border-collapse: collapse;
   tr.preview {
@@ -101,24 +100,7 @@ table {
   &.hoverable tbody tr:hover {
     background-color: #DDD;
   }
-}
-
-
-.admin {
-  background-color: #FCFCFC;
-
-  table {
-    thead td, tbody td {
-      border-bottom: 1px solid #DDD;
-    }
-  }
-  a.new {
-    display: block;
-    margin: 10px 0 5px;
-    padding: 1px;
-  }
-
-  .keyval {
+  &.keyval {
     th {
       padding-top: 4px;
       border-bottom: 1px solid #777;
@@ -127,6 +109,16 @@ table {
       font-weight: bold;
     }
   }
+}
+.fill table {
+  thead td, tbody td {
+    border-bottom: 1px solid #DDD;
+  }
+}
+
+.admin {
+  background-color: #FCFCFC;
+
   .status span {
     font-size: 110%;
     font-weight: bold;

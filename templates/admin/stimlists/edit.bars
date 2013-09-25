@@ -1,8 +1,9 @@
-<section class="hform">
-  <h3>Stimlist: {{_id}}</h3>
+<h3 class="section">Stimlist: {{_id}}</h3>
+
+<section class="box hform">
   <label><span>Slug</span>
     <input name="slug" type="text" value="{{slug}}" />
-    <a href="/stimlists/{{slug}}">{{slug}}</a>
+    URL: <a href="/stimlists/{{slug}}">{{slug}}</a>
   </label>
 
   <label><span>Creator</span>
@@ -21,4 +22,4 @@
   <button>Save</button>
 </section>
 
-<div class="states"></div>
+<section class="fill states"></section>

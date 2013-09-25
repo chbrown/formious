@@ -229,15 +229,15 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  buffer += "<h3>Stimlist: ";
+  buffer += "<h3 class=\"section\">Stimlist: ";
   if (stack1 = helpers._id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0._id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</h3>\n<div class=\"hform\" style=\"display: inline-block\">\n  <label><span>Slug</span>\n    <input name=\"slug\" type=\"text\" value=\"";
+    + "</h3>\n\n<section class=\"box hform\">\n  <label><span>Slug</span>\n    <input name=\"slug\" type=\"text\" value=\"";
   if (stack1 = helpers.slug) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.slug; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\" />\n    <a href=\"/stimlists/";
+    + "\" />\n    URL: <a href=\"/stimlists/";
   if (stack1 = helpers.slug) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.slug; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
@@ -245,11 +245,11 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   if (stack1 = helpers.slug) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.slug; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</a>\n  </label>\n  <label><span>Creator</span>\n    <input name=\"creator\" type=\"text\" value=\"";
+    + "</a>\n  </label>\n\n  <label><span>Creator</span>\n    <input name=\"creator\" type=\"text\" value=\"";
   if (stack1 = helpers.creator) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.creator; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\" />\n  </label>\n  <button>Save</button>\n</div>\n\n<br />\n\n<div class=\"states-form\" style=\"display: inline-block\">\n  <label><span>Paste states</span>\n    <textarea placeholder=\"Paste csv here\" name=\"paste\" rows=\"1\">\n    </textarea>\n  </label>\n  <label><span>Upload states</span>\n    <input type=\"file\" name=\"upload\">\n  </label>\n</div>\n\n<div class=\"states\"></div>\n";
+    + "\" />\n  </label>\n\n  <label><span>Paste</span>\n    <textarea placeholder=\"Paste csv here\" name=\"paste\" rows=\"1\">\n    </textarea>\n  </label>\n\n  <label><span>Upload</span>\n    <input type=\"file\" name=\"upload\">\n  </label>\n\n  <button>Save</button>\n</section>\n\n<section class=\"fill states\"></section>\n";
   return buffer;
   });
 templates['form-input'] = template(function (Handlebars,depth0,helpers,partials,data) {
@@ -567,7 +567,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   if (stack1 = helpers.duration) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.duration; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\" />\n\n  <label>\n    <div>Was this task unclear, mispriced, or frustrating? If we could make it better, let us know! (optional)</div>\n    <textarea rows=\"4\" cols=\"80\" name=\"task_comments\"></textarea>\n  </label>\n\n  <input type=\"submit\" value=\"Submit responses and finish task\" />\n</form>\n";
+    + "\" />\n\n  <label>\n    <div>Was this task unclear, mispriced, or frustrating? If we could make it better, let us know! (optional)</div>\n    <textarea rows=\"4\" cols=\"80\" name=\"task_comments\"></textarea>\n  </label>\n\n  <button>Submit responses and finish task</button>\n</form>\n";
   return buffer;
   });
 templates['stims/consent'] = template(function (Handlebars,depth0,helpers,partials,data) {
@@ -576,7 +576,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<h3>Consent form</h3>\n<p>\n  You are invited to participate in a study, entitled \"Learning in Social Networks\". The study is being conducted by Colin Bannard in the Linguistics department of The University of Texas at Austin.\n<p>\n  Department of Linguistics<br/>\n  University of Texas at Austin,<br/>\n  305 E. 23rd Street B5100,<br/>\n  Austin, TX 78712, USA<br/>\n  (512) 471-9022\n<p>The purpose of this study is to examine how people learn. We estimate that it will take about half a minute of your time to complete each question, and you will be paid 2 cents for each question you respond to. You are free to contact the investigator at the above address and phone number to discuss the survey.\n<p>Risks to participants are considered minimal. There will be no costs for participating. You will be paid for each HIT you complete, but will not otherwise benefit from participating. Your Amazon Mechanical Turk identification will be kept while we collect data for tracking purposes only. A limited number of research team members will have access to the data during data collection. This information will be stripped from the final dataset.\n<p>Your participation in this survey is voluntary. You may decline to answer any question and you have the right to withdraw from participation at any time without penalty. If you wish to withdraw from the study or have any questions, contact the investigator listed above.\n<p>If you have any questions, please email Colin Bannard at bannard@utexas.edu. You may also request a hard copy of the survey from the contact information above.\n<p>This study has been reviewed and approved by The University of Texas at Austin Institutional Review Board (IRB Study Number 2010-10-0051). If you have questions about your rights as a study participant, or are dissatisfied at any time with any aspect of this study, you may contact - anonymously, if you wish - the Institutional Review Board by phone at (512) 471-8871 or email at orsc@uts.cc.utexas.edu.\n<p>\n\n<form>\n  <input type=\"submit\" value=\"I Consent\" />\n</form>\n";
+  return "<h3>Consent form</h3>\n<p>\n  You are invited to participate in a study, entitled \"Learning in Social Networks\". The study is being conducted by Colin Bannard in the Linguistics department of The University of Texas at Austin.\n<p>\n  Department of Linguistics<br/>\n  University of Texas at Austin,<br/>\n  305 E. 23rd Street B5100,<br/>\n  Austin, TX 78712, USA<br/>\n  (512) 471-9022\n<p>The purpose of this study is to examine how people learn. We estimate that it will take about half a minute of your time to complete each question, and you will be paid 2 cents for each question you respond to. You are free to contact the investigator at the above address and phone number to discuss the survey.\n<p>Risks to participants are considered minimal. There will be no costs for participating. You will be paid for each HIT you complete, but will not otherwise benefit from participating. Your Amazon Mechanical Turk identification will be kept while we collect data for tracking purposes only. A limited number of research team members will have access to the data during data collection. This information will be stripped from the final dataset.\n<p>Your participation in this survey is voluntary. You may decline to answer any question and you have the right to withdraw from participation at any time without penalty. If you wish to withdraw from the study or have any questions, contact the investigator listed above.\n<p>If you have any questions, please email Colin Bannard at bannard@utexas.edu. You may also request a hard copy of the survey from the contact information above.\n<p>This study has been reviewed and approved by The University of Texas at Austin Institutional Review Board (IRB Study Number 2010-10-0051). If you have questions about your rights as a study participant, or are dissatisfied at any time with any aspect of this study, you may contact - anonymously, if you wish - the Institutional Review Board by phone at (512) 471-8871 or email at orsc@uts.cc.utexas.edu.\n<p>\n\n<form>\n  <button>I Consent</button>\n</form>\n";
   });
 templates['stims/default'] = template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
@@ -651,7 +651,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   if (stack1 = helpers.all_allies_string) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.all_allies_string; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + ") were helpful or not.</div>\n    <textarea rows=\"4\" cols=\"80\" name=\"allies_comments\"></textarea>\n  </label>\n\n  <label>\n    <div>What strategy worked the best?</div>\n    <textarea rows=\"2\" cols=\"80\" name=\"strategy_comments\"></textarea>\n  </label>\n\n  <label>\n    <div>Was this task unclear, mispriced, or frustrating? If we could make it better, let us know!</div>\n    <textarea rows=\"4\" cols=\"80\" name=\"task_comments\"></textarea>\n  </label>\n\n  <p class=\"clear\">\n    <input type=\"submit\" value=\"Submit Responses and Finish Task\" />\n  </p>\n</form>\n";
+    + ") were helpful or not.</div>\n    <textarea rows=\"4\" cols=\"80\" name=\"allies_comments\"></textarea>\n  </label>\n\n  <label>\n    <div>What strategy worked the best?</div>\n    <textarea rows=\"2\" cols=\"80\" name=\"strategy_comments\"></textarea>\n  </label>\n\n  <label>\n    <div>Was this task unclear, mispriced, or frustrating? If we could make it better, let us know!</div>\n    <textarea rows=\"4\" cols=\"80\" name=\"task_comments\"></textarea>\n  </label>\n\n  <p class=\"clear\">\n    <button>Submit Responses and Finish Task</button>\n  </p>\n</form>\n";
   return buffer;
   });
 templates['stims/digits/scene'] = template(function (Handlebars,depth0,helpers,partials,data) {

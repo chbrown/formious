@@ -36,5 +36,5 @@
 </section>
 
 <section>
-  <a href="/admin/users/new" class="new">Create new...</a>
+  <a href="/admin/users/new">Create new...</a>
 </section>

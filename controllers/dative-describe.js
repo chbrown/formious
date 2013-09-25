@@ -45,8 +45,7 @@ Table.prototype.toString = function(field_separator, record_separator, escape) {
 
 
 function getStimuli(callback) {
-  // mostly a copy&paste from turkserv.js:71-97
-  fs.readFile('/Users/chbrown/github/turkserv/stimuli.yaml', 'utf8', function (err, stimuli_yaml) {
+  fs.readFile('dative-stimuli.yaml', 'utf8', function (err, stimuli_yaml) {
     yaml.loadAll(stimuli_yaml, function(stimuli) {
       var data = [];
       stimuli.sort(function(a, b) { return a.id > b.id; });

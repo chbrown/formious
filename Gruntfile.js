@@ -22,7 +22,7 @@ module.exports = function(grunt) {
             'static/lib/underscore.js',
             'static/lib/cookies.js',
             'static/lib/jquery.js',
-            'static/lib/jquery.flags.js',
+            'static/lib/jquery-flags.js',
             'static/lib/jquery-noty.js',
             'static/lib/jquery-noty.theme.js',
             'static/lib/layouts/top.js', // the required one

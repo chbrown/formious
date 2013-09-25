@@ -8,29 +8,11 @@ The main purpose is to provide a framework for External Questions, but there are
     git clone https://github.com/chbrown/turkserv.git
     cd turkserv
     npm install
-    birdie
     grunt
 
 ## Suggested Configuration
 
-* Use [nginx](http://nginx.org/) as a reverse-proxy and static file handler.
 * Use [supervisord](http://supervisord.org/) to monitor and restart the process if it dies.
-
-### nginx
-
-`/etc/nginx/sites/turkserv` (e.g.):
-
-    server {
-      listen 80;
-      server_name localhost;
-      proxy_set_header X-Real-IP $remote_addr;
-      gzip on;
-
-      set $root /var/www/turkserv;
-      location /static    { root $root; }
-      location /templates { root $root; }
-      location / { proxy_pass http://127.0.0.1:1451; }
-    }
 
 ### supervisord
 
@@ -38,8 +20,28 @@ The main purpose is to provide a framework for External Questions, but there are
 
     [program:turkserv]
     directory=/var/www/turkserv
-    command=/usr/local/bin/node turkserv.js
+    command=/usr/local/bin/node server.js
     user=chbrown
+
+### nginx
+
+* If you want to serve the static files with [nginx](http://nginx.org/), you can reverse-proxy all non-static requests to node and serve static directories like so:
+
+**/etc/nginx/sites/turkserv**:
+
+    server {
+        listen 80;
+        server_name _;
+        proxy_set_header X-Real-IP $remote_addr;
+        gzip on;
+
+        set $root /Users/chbrown/github/turkserv;
+
+        location /favicon.ico { root $root/static; }
+        location /static { root $root; }
+        location /templates { root $root; }
+        location / { proxy_pass http://127.0.0.1:1451; }
+    }
 
 ## post-receive hook for quick development
 
