@@ -14,7 +14,7 @@ var R = new Router(function(req, res) {
 });
 
 // attach controllers
-R.any(/^\/(static|favicon\.ico)/, require('./static'));
+R.any(/^\/(templates|static|favicon\.ico)/, require('./static'));
 R.any(/^\/stimlists/, require('./stimlists'));
 R.any(/^\/aircraft/, require('./aircraft'));
 R.any(/^\/digits/, require('./digits'));
