@@ -15,6 +15,7 @@ var R = new Router(function(req, res) {
 /** GET /users/:user
 show login page for this user */
 R.get(/^\/users\/(\w+)/, function(req, res, m) {
+  // console.log('serving get', m);
   models.User.fromId(m[1], function(err, user) {
     if (err) {
       logger.error('User.fromId(%s) error', m[1], err);
@@ -35,55 +36,50 @@ R.get(/^\/users\/(\w+)\/logout/, function(req, res, m) {
   res.redirect('/users');
 });
 
-/** POST /users/:user/claim
-register unclaimed (no set password) user by adding password */
-R.post(/^\/users\/(\w+)\/claim/, function(req, res, m) {
-  req.readToEnd('utf8', function(err, data) {
-    if (err) return res.die('POST /users/:user/claim: req.readToEnd error', err);
+/** POST /users/login
+register unclaimed (no set password) user by adding password,
+or login as claimed user by providing password */
+R.post('/users/login', function(req, res) {
+  var become = function(user) {
+    var ticket = user.newTicket();
+    // user now has dirty fields: .password and .tickets
+    user.save(function(err) {
+      if (err) return res.die('User save error: ' + err);
 
-    var fields = querystring.parse(data);
-    models.User.fromId(m[1], function(err, user) {
-      if (err) return res.die('User query error: ' + err);
-      if (!user) return res.die('User not found: ' + m[1]);
-      if (user.password) return res.die("User cannot be claimed; the user's password is already set.");
-      if (!fields.password.trim()) return res.die('Password cannot be empty');
-
-      user.password = fields.password;
-      var ticket = user.newTicket();
-      // user now has dirty fields: .password and .tickets
-      user.save(function(err) {
-        if (err) return res.die('User save error: ' + err);
-
-        req.cookies.set('workerId', user._id);
-        req.cookies.set('ticket', ticket);
-        // this will just die if the user is not a superuser
-        res.redirect('/admin/users/' + user._id);
-      });
+      req.cookies.set('workerId', user._id);
+      req.cookies.set('ticket', ticket);
+      // this will just die if the user is not a superuser
+      res.redirect('/admin/users/' + user._id);
     });
-  });
-});
+  };
 
-/** POST /users/:user/become
-login as claimed user by providing password */
-R.post(/^\/users\/(\w+)\/become/, function(req, res, m) {
   req.readToEnd('utf8', function(err, data) {
-    if (err) return res.die('POST /users/:user/become: req.readToEnd error', err);
+    if (err) return res.die('POST /users/login: req.readToEnd error', err);
 
     var fields = querystring.parse(data);
-    models.User.withPassword(m[1], fields.password, function(err, user) {
-      if (err) return res.die('User.withPassword error ' + err);
-      if (!user) return res.die('Cannot become user; that user does not exist or the password you entered is incorrect.');
+    _.defaults(fields, {user_id: '', password: ''});
+    if (!fields.user_id.trim()) return res.die('User cannot be empty');
+    if (!fields.password.trim()) return res.die('Password cannot be empty');
 
-      var ticket = user.newTicket();
-      // user now has dirty field: .tickets
-      user.save(function(err) {
-        if (err) return res.die('User save error: ' + err);
+    models.User.fromId(fields.user_id, function(err, user) {
+      if (err) return res.die('User query error: ' + err);
+      if (!user) return res.die('User not found: ' + fields.user_id);
 
-        req.cookies.set('workerId', user._id);
-        req.cookies.set('ticket', ticket);
-        // this will just die if the user is not a superuser
-        res.redirect('/admin/users/' + user._id);
-      });
+      if (user.password) {
+        // become
+        console.log('authenticating with:', fields.user_id, fields.password);
+        models.User.withPassword(fields.user_id, fields.password, function(err, user) {
+          if (err) return res.die('User.withPassword error ' + err);
+          if (!user) return res.die('Cannot become user; the password you entered is incorrect.');
+
+          become(user);
+        });
+      }
+      else {
+        // claim (and then become)
+        user.password = fields.password;
+        become(user);
+      }
     });
   });
 });
