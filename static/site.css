@@ -7,7 +7,7 @@ label{margin:2px 0;display:block}label[disabled]{color:#777}
 textarea,input{margin:0}
 input[type="radio"],input[type="checkbox"]{margin:1px .25ex}
 fieldset{margin:0 0 10px 0;border:1px solid #ccc}
-textarea{vertical-align:middle}
+textarea{vertical-align:middle}textarea.code{font:9pt "Courier New",Courier,monospace}
 section,.section{margin:10px 0;padding:0 10px}section.fill,.section.fill,section.box,.section.box{padding:10px;background-color:#fff;border:1px solid #eee}
 section.fill,.section.fill{border-width:1px 0;overflow:auto}
 section.box,.section.box{display:inline-block;margin:0 10px}

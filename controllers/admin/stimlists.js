@@ -15,10 +15,7 @@ var R = new Router(function(req, res) {
 create new Stimlist and redirect to edit it */
 R.get(/^\/admin\/stimlists\/new/, function(req, res, m) {
   new models.Stimlist({creator: req.user._id}).save(function(err, stimlist) {
-    if (err) {
-      logger.error('new Stimlist().save() error', err);
-      return res.die(err);
-    }
+    if (err) return res.die('New Stimlist save error:' + err);
 
     res.redirect('/admin/stimlists/' + stimlist._id + '/edit');
   });

@@ -12,11 +12,13 @@ var R = new Router(function(req, res) {
   res.die(404, 'No resource at: ' + req.url);
 });
 
-// /stimlists/:slug -> present single stimlist to worker, starting at 0
-// /stimlists/:slug/:index -> present stimlist, starting at given index
-//   slugs must be word characters
+/** GET /stimlists/:slug
+or  GET /stimlists/:slug/:index
+Present single stimlist (given by name, not id) to worker, starting at given index or 0
+*/
 R.get(/^\/stimlists\/(\w+)(\/(\d+))?/, function(req, res, m) {
-  var stimlist_slug = m[1];
+  var slug = m[1];
+  var index = m[3] || 0;
 
   var urlObj = url.parse(req.url, true);
   var workerId = urlObj.query.workerId || req.user_id;
@@ -26,18 +28,15 @@ R.get(/^\/stimlists\/(\w+)(\/(\d+))?/, function(req, res, m) {
 
     req.cookies.set('workerId', user._id);
 
-    models.Stimlist.findOne({slug: stimlist_slug}, function(err, stimlist) {
-      if (err) {
-        logger.error('Stimlist.findOne(slug=%s) error', stimlist_slug, err);
-        return res.die(err);
-      }
+    models.Stimlist.findOne({slug: slug}, function(err, stimlist) {
+      if (err) return res.die('Could not find stimlist "' + slug + '": ' + err);
 
       var ctx = {
         assignmentId: urlObj.query.assignmentId,
         hit_started: Date.now(),
         hitId: urlObj.query.hitId,
         host: urlObj.query.debug !== undefined ? '' : (urlObj.query.turkSubmitTo || 'https://www.mturk.com'),
-        index: m[3] || 0,
+        index: index,
         stimlist: stimlist,
         workerId: user._id,
       };

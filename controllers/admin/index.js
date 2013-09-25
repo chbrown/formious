@@ -18,6 +18,7 @@ var R = new Router(function(req, res) {
 // attach controllers requiring authentication
 R.any(/^\/admin\/aws/, require('./aws'));
 R.any(/^\/admin\/stimlists/, require('./stimlists'));
+R.any(/^\/admin\/stims/, require('./stims'));
 R.any(/^\/admin\/users/, require('./users'));
 
 // GET /admin/responses.tsv (obsolete)

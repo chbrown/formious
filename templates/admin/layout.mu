@@ -14,7 +14,7 @@
     <a href="/admin/aws">AWS Accounts</a>
     <a href="/admin/users">Users</a>
     <a href="/admin/stimlists">Stimlists</a>
-    <a href="/admin/stims">Stims</a>
+    <a href="/admin/stims">Stim Templates</a>
     <a href="/users/{{ticket_user._id}}/logout" style="float: right">Logout</a>
   </nav>
   {{<}}
