@@ -21,7 +21,7 @@
           <td><a href="/admin/aws/{{_id}}/edit">Edit</a></td>
           <td>{{accessKeyId}}</td>
           <td><div class="truncate">{{secretAccessKey}}</div></td>
-          <td>{{created}}</td>
+          <td>{{datefmt(created)}}</td>
           <td><a href="/admin/aws/{{_id}}" data-method="delete">delete</a></td>
         </tr>
       {{/accounts}}

@@ -3,9 +3,22 @@
 var path = require('path');
 var http = require('http-enhanced');
 var logger = require('./lib/logger');
+var models = require('./lib/models');
 
-var amulet = require('amulet').set({minify: true, root: path.join(__dirname, 'templates')});
 // amulet.set(), as opposed amulet.create(), will set the defaults on the module singleton
+var amulet = require('amulet').set({
+  minify: true,
+  root: path.join(__dirname, 'templates'),
+  globals: {
+    'JSON': JSON,
+    'datefmt': function(date) {
+      return (date && date.toISOString) ? date.toISOString().split('T')[0] : date;
+    },
+    'truncate': function(string, max) {
+      return (string && string.length > max) ? (string.slice(0, max - 3) + '...') : string;
+    },
+  }
+});
 
 var Cookies = require('cookies');
 Cookies.prototype.defaults = function() {
@@ -17,6 +30,7 @@ var optimist = require('optimist')
   .describe({
     hostname: 'hostname to listen on',
     port: 'port to listen on',
+    database: 'name of the mongodb database',
 
     help: 'print this help message',
     verbose: 'print extra output',
@@ -27,6 +41,7 @@ var optimist = require('optimist')
   .default({
     hostname: '127.0.0.1',
     port: 1451,
+    database: 'turkserv',
   });
 
 var argv = optimist.argv;
@@ -41,6 +56,8 @@ else if (argv.version) {
 else {
   var root_controller = require('./controllers');
 
+  models.mongoose.connect('localhost', argv.database);
+
   http.createServer(function(req, res) {
     req.cookies = new Cookies(req, res);
     req.user_id = req.cookies.get('workerId');
@@ -53,6 +70,6 @@ else {
     // root_controller has signature of (req, res), just like any other controller module
     root_controller(req, res);
   }).listen(argv.port, argv.hostname, function() {
-    logger.info('listening on %s:%d', argv.hostname, argv.port);
+    logger.info('listening on http://%s:%d', argv.hostname, argv.port);
   });
 }
