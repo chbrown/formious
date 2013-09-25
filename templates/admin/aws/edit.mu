@@ -1,5 +1,7 @@
 {{#account}}
-  <h3>AWS Account: {{_id}}</h3>
+<h3 class="section">AWS Account: {{_id}}</h3>
+
+<section class="box">
   <form method="POST" action="/admin/aws/{{_id}}" class="vform">
     <label><span>Name</span>
       <input name="name" type="text" value="{{name}}" />
@@ -15,4 +17,5 @@
 
     <button>Save</button>
   </form>
+</section>
 {{/account}}

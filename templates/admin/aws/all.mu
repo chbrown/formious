@@ -1,4 +1,6 @@
-<section>
+<h3 class="section">AWS Accounts</h3>
+
+<section class="fill">
   <table>
     <thead>
       <tr>
@@ -18,7 +20,7 @@
           <td><a href="/admin/aws/{{_id}}">View</a></td>
           <td><a href="/admin/aws/{{_id}}/edit">Edit</a></td>
           <td>{{accessKeyId}}</td>
-          <td>{{secretAccessKey}}</td>
+          <td><div class="truncate">{{secretAccessKey}}</div></td>
           <td>{{created}}</td>
           <td><a href="/admin/aws/{{_id}}" data-method="delete">delete</a></td>
         </tr>
@@ -27,4 +29,4 @@
   </table>
 </section>
 
-<a href="/admin/aws/new">Create new...</a>
+<a href="/admin/aws/new" class="section">Create new...</a>

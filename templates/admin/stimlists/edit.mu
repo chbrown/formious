@@ -1,14 +1,12 @@
 <div id="preview" style="display: none;">
-  <div class="controls">
-    <button>Hide preview</button>
-  </div>
+  <div class="controls"><span>&times;</span>Hide preview</div>
   <div class="content"></div>
 </div>
 
 <script>
 // move #preview outside the default .admin div, so that .admin ... { /* etc. */ } css doesn't apply to it
 $('body').append($('#preview'));
-$('#preview > .controls button').on('click', function(ev) {
+$('#preview > .controls').on('click', function(ev) {
   $('#preview').hide();
 });
 </script>

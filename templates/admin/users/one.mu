@@ -1,5 +1,7 @@
 {{#user}}
-  <h3>User: {{_id}}</h3>
+<h3 class="section">User: {{_id}}</h3>
+
+<section class="fill">
   <table>
     <tr>
       <td style="width: 100px">Worker ID</td>
@@ -21,4 +23,5 @@
       </td>
     </tr>
   </table>
+</section>
 {{/user}}

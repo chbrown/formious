@@ -1,5 +1,7 @@
 {{#user}}
-  <h3>User: {{_id}}</h3>
+<h3 class="section">User: {{_id}}</h3>
+
+<section class="box">
   <form method="POST" action="/admin/users/{{_id}}" class="vform">
     <label><span>Bonus paid</span>
       <input name="bonus_paid" type="text" value="{{bonus_paid}}" />
@@ -23,6 +25,7 @@
       <span>False</span>
     </label>
 
-    <button type="submit">Save</button>
+    <button>Save</button>
   </form>
+</section>
 {{/user}}

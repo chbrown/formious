@@ -22,6 +22,6 @@
   </label>
 
   <p class="clear">
-    <input type="submit" value="Submit Responses and Finish Task" />
+    <button>Submit Responses and Finish Task</button>
   </p>
 </form>

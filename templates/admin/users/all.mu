@@ -1,4 +1,8 @@
 <section>
+  <h3>Users</h3>
+</section>
+
+<section class="fill">
   <table>
     <thead>
       <tr>
@@ -18,11 +22,11 @@
         <tr>
           <td><a href="/admin/users/{{_id}}">{{_id}}</td>
           <td><a href="/admin/users/{{_id}}/edit">Edit</td>
-          <td class="nowrap shortdate">{{created}}</td>
+          <td>{{datefmt(created)}}</td>
           <td>{{responses.length}}</td>
           <td>{{bonus_paid}}</td>
           <td>{{bonus_owed}}</td>
-          <td>{{password}}</td>
+          <td><span class="truncate">{{password}}</span></td>
           <td>{{superuser}}</td>
           <td>{{tickets.length}}</td>
         </tr>
@@ -31,4 +35,6 @@
   </table>
 </section>
 
-<a href="/admin/users/new">Create new...</a>
+<section>
+  <a href="/admin/users/new" class="new">Create new...</a>
+</section>

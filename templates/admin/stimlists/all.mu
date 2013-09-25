@@ -1,4 +1,6 @@
-<section>
+<h3 class="section">Stimlists</h3>
+
+<section class="fill">
   <table>
     <thead>
       <tr>
@@ -17,7 +19,7 @@
           <td title="{{_id}}">{{slug}}</td>
           <td><a href="/stimlists/{{slug}}">Play</a></td>
           <td><a href="/admin/stimlists/{{_id}}/edit">Edit</a></td>
-          <td class="nowrap shortdate">{{created}}</td>
+          <td>{{datefmt(created)}}</td>
           <td>{{creator}}</td>
           <td>{{states.length}}</td>
           <td><a href="/admin/stimlists/{{_id}}" data-method="delete">delete</a></td>
@@ -27,4 +29,4 @@
   </table>
 </section>
 
-<a href="/admin/stimlists/new">Create new...</a>
+<a href="/admin/stimlists/new" class="section">Create new...</a>

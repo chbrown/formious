@@ -2,6 +2,7 @@
   box-sizing: border-box;
 }
 body {
+  background-color: white;
   margin: 0;
   font: 13px "Lucida Grande", Arial, sans-serif;
 }
@@ -9,19 +10,23 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0.5ex 0;
 }
 p {
-  margin: 0.5em 0;
+  margin: 1ex 0;
 }
 button {
   margin: 10px 10px 0 0;
 }
 label {
+  margin: 2px 0;
   display: block;
   &[disabled] {
     color: #777;
   }
-  span {
-    margin: 2px 4px;
-  }
+}
+textarea, input {
+  margin: 0;
+}
+input[type="radio"], input[type="checkbox"] {
+  margin: 1px .25ex;
 }
 fieldset {
   margin: 0 0 10px 0;
@@ -29,17 +34,27 @@ fieldset {
 }
 textarea {
   vertical-align: middle;
-  overflow: hidden;
+  // margin: 5px 0 5px;
 }
-.box {
-  background-color: white;
-  border: 1px solid #EEE;
-}
-section {
-  .box;
-  margin: 1ex 0;
-  padding: 10px;
-  // display: inline-block;
+section, .section {
+  margin: 10px 0;
+  padding: 0 10px;
+  &.fill, &.box {
+    padding: 10px;
+    background-color: white;
+    border: 1px solid #EEE;
+  }
+  &.fill {
+    // margin: 10px 0;
+    border-width: 1px 0;
+    overflow: auto;
+  }
+  &.box {
+    display: inline-block;
+    // inline-block doesn't allow margin overlapping, so remove the top-bottom margins
+    // but also add left-right margins
+    margin: 0 10px;
+  }
 }
 nav {
   position: fixed;
@@ -63,6 +78,10 @@ nav {
       background-color: #EEE;
     }
   }
+  & + div {
+    // accounting for the fixed header
+    padding-top: 30px;
+  }
 }
 table {
   border-collapse: collapse;
@@ -70,7 +89,6 @@ table {
     background-color: #BBB;
   }
   th {
-    // white-space: nowrap;
     text-align: left;
   }
   td {
@@ -78,25 +96,28 @@ table {
   }
   td, th {
     vertical-align: top;
-    padding: 1px 5px 1px 2px;
+    padding: 1px 8px 2px 1px;
   }
   &.hoverable tbody tr:hover {
     background-color: #DDD;
   }
 }
 
+
 .admin {
   background-color: #FCFCFC;
-
-  .content {
-    padding: 30px 10px 10px;
-  }
 
   table {
     thead td, tbody td {
       border-bottom: 1px solid #DDD;
     }
   }
+  a.new {
+    display: block;
+    margin: 10px 0 5px;
+    padding: 1px;
+  }
+
   .keyval {
     th {
       padding-top: 4px;
@@ -114,24 +135,42 @@ table {
     &.Rejected { color: darkred; }
   }
 }
-.hform label span:first-child {
-  display: inline-block;
-  width: 75px;
+.vform, .hform {
+  & > label > span:first-child {
+    margin: 6px 0 2px;
+  }
 }
-.vform label span:first-child {
-  // only match spans that come first in a label so that radio buttons with postfixed spans are not blocked and bolded
-  display: block;
-  font-weight: bold;
-  margin: 2px 0;
+.hform {
+  label {
+    span {
+      &:first-child {
+        display: inline-block;
+        font-weight: bold;
+        width: 75px;
+      }
+    }
+  }
+
+}
+.vform {
+  label {
+    span {
+      margin: 2px 4px;
+      &:first-child {
+        // only match spans that come first in a label so that radio btns with postfixed spans are not blocked and bolded
+        display: block;
+        font-weight: bold;
+        margin: 2px 0;
+      }
+    }
+  }
 }
 
-.nowrap {
-  white-space: nowrap;
-}
-.shortdate {
-  width: 50px;
+.truncate {
+  display: block;
+  max-width: 10em;
   overflow: hidden;
-  table-layout: fixed;
+  text-overflow: ellipsis;
 }
 
 #preview {
@@ -142,12 +181,17 @@ table {
   border: 1px solid #DDD;
   .content {
     padding: 10px;
-    background-color: #FDFDFD;
+    background-color: white;
   }
   .controls {
+    padding: 10px;
     background-color: #EEE;
-    button {
-      margin: 10px;
+    cursor: pointer;
+    span {
+      float: right;
+    }
+    &:hover {
+      background-color: #DDD;
     }
   }
 }
@@ -173,13 +217,6 @@ table {
   }
 }
 
-.vlabels, textarea {
-  margin: 5px 0 5px;
-  label {
-    display: block;
-    padding: 2px 2px;
-  }
-}
 .focus {
   box-shadow: 0 0 6px rgba(81, 203, 238, 1);
   // border: 1px solid rgba(81, 203, 238, 1);

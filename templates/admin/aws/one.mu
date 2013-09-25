@@ -1,35 +1,39 @@
 {{#account}}
-<h3>AWS Account: {{name}}</h3>
-<table>
-  <tr><td>ID</td><td>{{_id}}</td></tr>
-  <tr><td>Name</td><td>{{name}}</td></tr>
-  <tr><td>Access Key ID</td><td>{{accessKeyId}}</td></tr>
-  <tr><td>Secret Access Key</td><td>{{secretAccessKey}}</td></tr>
-  <tr><td>Created</td><td>{{created}}</td></tr>
-</table>
+<h3 class="section">AWS Account: {{name}}</h3>
+<section class="box">
+  <table>
+    <tr><td>ID</td><td>{{_id}}</td></tr>
+    <tr><td>Name</td><td>{{name}}</td></tr>
+    <tr><td>Access Key ID</td><td>{{accessKeyId}}</td></tr>
+    <tr><td>Secret Access Key</td><td>{{secretAccessKey}}</td></tr>
+    <tr><td>Created</td><td>{{created}}</td></tr>
+  </table>
+</section>
 {{/account}}
 
-<h3>Mechanical Turk Hosts</h3>
-<table id="hosts">
-  <thead>
-    <tr>
-      <th>Host</th>
-      <th>Available Balance</th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    {{#hosts}}
+<h3 class="section">Mechanical Turk Hosts</h3>
+<section class="box">
+  <table id="hosts">
+    <thead>
       <tr>
-        <td>{{.}}</td>
-        <td></td>
-        <td><a href="/admin/aws/{{account.name}}/hosts/{{.}}/HITs">View HITs</a></td>
-        <td><a href="/admin/aws/{{account.name}}/hosts/{{.}}/HITs/new">Create new HIT</a></td>
+        <th>Host</th>
+        <th>Available Balance</th>
+        <th></th>
+        <th></th>
       </tr>
-    {{/hosts}}
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      {{#hosts}}
+        <tr>
+          <td>{{.}}</td>
+          <td></td>
+          <td><a href="/admin/aws/{{account.name}}/hosts/{{.}}/HITs">View HITs</a></td>
+          <td><a href="/admin/aws/{{account.name}}/hosts/{{.}}/HITs/new">Create new HIT</a></td>
+        </tr>
+      {{/hosts}}
+    </tbody>
+  </table>
+</section>
 
 <script>
 $('#hosts tbody tr').each(function(i, el) {

@@ -50,7 +50,7 @@
   <fieldset><legend>English familiarity (recommended)</legend>
     <p>We accept and encourage participation from every level of English familiarity, but we would like to record your background.</p>
     <p><b>Please select the first option that applies to you:</b></p>
-    <div class="vlabels">
+    <div class="vform">
       <label><input type="radio" name="english_familiarity" value="1"> English was the first language I learned.</label>
       <label><input type="radio" name="english_familiarity" value="2"> I am fluent in English.</label>
       <label><input type="radio" name="english_familiarity" value="3"> I know English fairly well.</label>

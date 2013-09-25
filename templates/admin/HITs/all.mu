@@ -1,5 +1,7 @@
-<h3>HITs</h3>
-<div id="hits"></div>
+<section>
+  <h3>HITs</h3>
+  <div id="hits"></div>
+</section>
 
 <script>
 var hits = new HITCollection({{{JSON.stringify(hits)}}});

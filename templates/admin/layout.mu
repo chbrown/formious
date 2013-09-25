@@ -9,14 +9,14 @@
   <script src="/static/local.js"></script>
   <script>/*DEBUG=true;*/</script>
 </head>
-<body class="admin">
+<body>
   <nav>
     <a href="/admin/aws">AWS Accounts</a>
     <a href="/admin/users">Users</a>
     <a href="/admin/stimlists">Stimlists</a>
     <a href="/users/{{ticket_user._id}}/logout" style="float: right">Logout</a>
   </nav>
-  <div class="content">
+  <div class="admin">
     {{<}}
   </div>
   <script>
