@@ -42,28 +42,20 @@ R.get(/^\/admin\/stimlists\/(\w+)\/edit$/, function(req, res, m) {
 /** PATCH /admin/stimlists/:stimlist_id
 update existing Stimlist */
 R.patch(/^\/admin\/stimlists\/(\w+)/, function(req, res, m) {
-  var stimlist_id = m[1];
+  var _id = m[1];
   req.readToEnd('utf8', function(err, stimlist_json) {
-    if (err) {
-      logger.error('req.readToEnd error', err);
-      return res.json({success: false, message: err.toString()});
-    }
+    if (err) return res.die('req.readToEnd error: ' + err);
 
     var fields = misc.parseJSON(stimlist_json);
-    if (fields instanceof Error) {
-      var fields_err = new Error('Could not parse stimlist. Error: ' + fields.toString());
-      logger.error('parseJSON error', fields_err);
-      res.json({success: false, message: fields_err.toString()});
-    }
+    if (fields instanceof Error) return res.die('Could not parse JSON. Error: ' + fields);
 
-    models.Stimlist.findById(stimlist_id, function(err, stimlist) {
-      if (err) {
-        logger.error('Stimlist.findById(%s) error', stimlist_id, err);
-        return res.json({success: false, message: err});
-      }
+    models.Stimlist.findById(_id, function(err, stimlist) {
+      if (err) return res.die('Stimlist.findById error: ' + err);
 
       _.extend(stimlist, fields);
       stimlist.save(function() {
+        // not sure how I feel about this special header business
+        res.setHeader('x-message', 'Stimlist saved');
         res.json(stimlist);
       });
     });
@@ -73,14 +65,11 @@ R.patch(/^\/admin\/stimlists\/(\w+)/, function(req, res, m) {
 /** DELETE /admin/stimlists/:stimlist_id
 delete Stimlist */
 R.delete(/^\/admin\/stimlists\/(\w+)$/, function(req, res, m) {
-  var stimlist_id = m[1];
-  models.Stimlist.findByIdAndRemove(stimlist_id, function(err, stimlist) {
-    if (err) {
-      logger.error('Stimlist.findByIdAndRemove(%s) error', stimlist_id, err);
-      return res.json({success: false, message: err});
-    }
+  var _id = m[1];
+  models.Stimlist.findByIdAndRemove(_id, function(err, stimlist) {
+    if (err) return res.die('Stimlist.findByIdAndRemove error: ' + err);
 
-    res.json({success: true, message: 'Deleted stimlist: ' + m[1]});
+    res.json({success: true, message: 'Deleted stimlist: ' + _id});
   });
 });
 
@@ -88,14 +77,9 @@ R.delete(/^\/admin\/stimlists\/(\w+)$/, function(req, res, m) {
 list all Stimlists */
 R.get(/^\/admin\/stimlists\/?$/, function(req, res, m) {
   models.Stimlist.find({}, '_id created creator slug csv.length states.length', function(err, stimlists) {
-    if (err) {
-      logger.error('Stimlist.find({}, ...) error', err);
-      return res.die(err);
-    }
+    if (err) return res.die('Stimlist.find() error', err);
 
-    _.extend(req.ctx, {
-      stimlists: stimlists
-    });
+    req.ctx.stimlists = stimlists;
     amulet.stream(['admin/layout.mu', 'admin/stimlists/all.mu'], req.ctx).pipe(res);
   });
 });

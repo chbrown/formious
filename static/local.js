@@ -34,7 +34,8 @@ function tabulate(objects, keys) {
 // requires Backbone and Handlebars to be loaded
 
 // a stim (aka., state, when in a list of stims) is the full
-var Stim = TemplatedView.extend({
+var StimView = TemplatedView.extend({
+  // usage new StimView({hit_started: Number, stimlist_slug: String, ...})
   template: 'stims/default',
   preRender: function(ctx) {
     if (ctx.stim) {
@@ -46,59 +47,47 @@ var Stim = TemplatedView.extend({
       });
     }
   },
-  events: {
-    'click [type="submit"]': function(ev) {
-      var self = this;
-      var $submit = $(ev.target);
-      var $form = $submit.closest('form');
-      window.ev = ev;
-      // we only hijack the submit if the form does not have an action
-      // console.log('Submit', $form.serialize(), $form.serializeArray());
-      // return false;
-      if (!$form.attr('action')) {
-        ev.preventDefault();
-        // to catch the submit and serialize its values.
-        var response = _.object($form.serializeArray());
-        if ($submit.attr('name')) {
-          // the button
-          response[$submit.attr('name')] = $submit.val();
-        }
+  submit: function(ev) {
+    var self = this;
+    var $submit = $(ev.target);
+    var $form = $submit.closest('form');
+    window.ev = ev;
+    // we only hijack the submit if the form does not have an action
+    // console.log('Submit', $form.serialize(), $form.serializeArray());
+    // return false;
+    if (!$form.attr('action')) {
+      ev.preventDefault();
+      // to catch the submit and serialize its values.
+      var response = _.object($form.serializeArray());
+      if ($submit.attr('name')) {
+        // get the button's value, because otherwise it's not serialized
+        response[$submit.attr('name')] = $submit.val();
+      }
 
-        if (_.isEmpty(response)) {
-          // don't save empty responses
-          self.trigger('finish');
-        }
-        else {
-          // else fill it out with useful metadata
-          // `context` and `stimlist` are globals that a Stim view will always have access to
-          response.hit_started = context.hit_started;
-          response.stimlist = stimlist.get('slug');
-          response.submitted = time();
-          new Response(response).save(null, {
-            success: function(model, response, options) {
-              // console.log('response.save cb', arguments);
-              self.trigger('finish');
-            },
-            error: function(model, xhr, options) {
-              // console.log('response.error cb', arguments);
-              // alert('Failed');
-              self.trigger('finish');
-            }
-          });
-        }
+      if (_.isEmpty(response)) {
+        // don't save empty responses
+        self.trigger('finish');
+      }
+      else {
+        // fill it out with useful metadata (which is stored in this.model)
+        _.defaults(response, this.model.toJSON());
+        response.submitted = time();
+        new Response(response).save(null, {
+          success: function(model, response, options) {
+            self.trigger('finish');
+          },
+          error: function(model, xhr, options) {
+            // alert('Failed');
+            self.trigger('finish');
+          }
+        });
       }
     }
+  },
+  events: {
+    'click form button': 'submit'
+    // 'click [type="submit"]': 'submit'
   }
-});
-
-var Stimlist = Backbone.Model.extend({
-  urlRoot: '/admin/stimlists',
-  idAttribute: '_id'
-});
-
-var StimTemplate = Backbone.Model.extend({
-  urlRoot: '/admin/stims',
-  idAttribute: '_id'
 });
 
 
@@ -111,7 +100,6 @@ var FormInput = TemplatedView.extend({
   },
   postRender: function(ctx) {
     // window.form = this;
-    // console.log(this.$('input'),
     this.$('input').css({width: ctx.width});
   },
   events: {

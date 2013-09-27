@@ -20,8 +20,8 @@
     <tbody>
       {{#users}}
         <tr>
-          <td><a href="/admin/users/{{_id}}">{{_id}}</td>
-          <td><a href="/admin/users/{{_id}}/edit">Edit</td>
+          <td><a href="/admin/users/{{_id}}">{{_id}}</a></td>
+          <td><a href="/admin/users/{{_id}}/edit">Edit</a></td>
           <td>{{datefmt(created)}}</td>
           <td>{{responses.length}}</td>
           <td>{{bonus_paid}}</td>

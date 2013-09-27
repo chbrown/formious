@@ -1,8 +1,3 @@
-<!-- <h4>Instructions</h4>
-<p>You will see a series of phrases. Some of these phrases have been taken from real English texts. Others were produced by randomly combining English words. Your task is to identify the real phrases.
-<p>You will see judgements from others to help you in making your decision. The number of other people whose judgement you see will vary from phrase to phrase.
- -->
-<!-- <hr /> -->
 <div class="container" style="padding: 10px">
   <div id="root"></div>
 </div>
@@ -20,12 +15,17 @@ var context = {
   workerId: '{{workerId}}'
 };
 
-var stimlist = new Stimlist({{{JSON.stringify(stimlist)}}});
+// stim_globals will be merged onto each response payload
+var stim_globals = new Backbone.Model({
+  hit_started: context.hit_started,
+  stimlist: '{{slug}}'
+});
+
+var states = {{{JSON.stringify(states)}}};
 
 function presentStim(index) {
-  var states = stimlist.get('states');
   var state = states[index];
-  var stim = new Stim(_.extend({}, context, state));
+  var stim = new StimView(_.extend({model: stim_globals}, context, state));
   stim.on('finish', function() {
     // stim.stopListening('finish') ?
     presentStim(index + 1);

@@ -14,6 +14,9 @@ var amulet = require('amulet').set({
     'datefmt': function(date) {
       return (date && date.toISOString) ? date.toISOString().split('T')[0] : date;
     },
+    'datetimefmt': function(date) {
+      return (date && date.toISOString) ? date.toISOString().split('.')[0].replace(/T/, ' ') : date;
+    },
     'truncate': function(string, max) {
       return (string && string.length > max) ? (string.slice(0, max - 3) + '...') : string;
     },
@@ -55,6 +58,7 @@ else if (argv.version) {
 }
 else {
   var root_controller = require('./controllers');
+  // require('long-stack-traces');
 
   models.mongoose.connect('localhost', argv.database);
 

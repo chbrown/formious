@@ -24,4 +24,35 @@
     </tr>
   </table>
 </section>
+
+<section>
+  <a href="/admin/users/{{_id}}/edit">Edit user</a>
+</section>
 {{/user}}
+
+<section class="fill">
+  <h3>Responses</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Created</th>
+        <th>HIT Started</th>
+        <th>Submitted</th>
+        <th>Stimlist</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    <tbody>
+      {{#user.responses}}
+        <tr>
+          <td>{{datetimefmt(created)}}</td>
+          <td>{{datetimefmt(hit_started)}}</td>
+          <td>{{datetimefmt(submitted)}}</td>
+          <td>{{stimlist}}</td>
+          <td style="max-width: 400px; overflow: hidden;">{{{JSON.stringify(extra)}}}</td>
+        </tr>
+      {{/}}
+    </tbody>
+  </table>
+</section>

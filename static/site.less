@@ -18,11 +18,13 @@ button {
 label {
   margin: 2px 0;
   display: block;
+  vertical-align: middle;
   &[disabled] {
     color: #777;
   }
 }
 textarea, input {
+  vertical-align: middle;
   margin: 0;
 }
 input[type="radio"], input[type="checkbox"] {
@@ -33,8 +35,6 @@ fieldset {
   border: 1px solid #CCC;
 }
 textarea {
-  vertical-align: middle;
-  // margin: 5px 0 5px;
   &.code {
     font: 9pt "Courier New", Courier, monospace;
   }
@@ -131,8 +131,16 @@ table {
   }
 }
 .vform, .hform {
-  & > label > span:first-child {
-    margin: 6px 0 2px;
+  span {
+    vertical-align: middle;
+  }
+  & > label {
+    margin: 4px 0;
+  }
+  input[type="checkbox"] + span {
+    // bold spans coming after checkboxes
+    display: inline-block;
+    font-weight: bold;
   }
 }
 .hform {
@@ -217,31 +225,15 @@ table {
   // border: 1px solid rgba(81, 203, 238, 1);
 }
 
+
 .flag {
   position: absolute;
   background-color: black;
-  border-radius: 4px;
-  padding: 2px;
+  border-radius: 3px;
+  padding: 2px 6px;
   color: white;
-  font-size: 90%;
   .triangle {
-    display: inline-block;
     position: absolute;
     border: 6px solid transparent;
-    width: 0;
-    height: 0;
-  }
-  .subflag {
-    display: inline-block;
-    span, a {
-      display: inline-block;
-      padding: 0 4px;
-    }
-    a {
-      background-color: white;
-      border-radius: 2px;
-    }
   }
 }
-
-@import 'lib/jquery-handsontable';

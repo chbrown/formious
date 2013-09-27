@@ -16,24 +16,24 @@ var R = new Router(function(req, res) {
 /** GET /admin/stims/new
 create new Stim and redirect to edit it */
 R.get(/^\/admin\/stims\/new/, function(req, res, m) {
-  new models.StimTemplate().save(function(err, stim) {
-    if (err) return res.die('New Stim save error: ' + err);
+  new models.StimTemplate().save(function(err, stim_template) {
+    if (err) return res.die('New StimTemplate save error: ' + err);
 
-    res.redirect('/admin/stims/' + stim._id + '/edit');
+    res.redirect('/admin/stims/' + stim_template._id + '/edit');
   });
 });
 
 /** GET /admin/stims/:stim_id/edit
 edit existing Stim */
 R.get(/^\/admin\/stims\/(\w+)\/edit$/, function(req, res, m) {
-  var stim_id = m[1];
-  models.StimTemplate.findById(stim_id, function(err, stim) {
-    if (err) return res.die('Stim.findById() error', err);
-    if (!stim) return res.die('No stim "' + stim_id + '" could be found');
+  var _id = m[1];
+  models.StimTemplate.findById(_id, function(err, stim_template) {
+    if (err) return res.die('StimTemplate.findById() error', err);
+    if (!stim_template) return res.die('No StimTemplate "' + _id + '" could be found');
 
-    var stim_json = stim.toJSON();
-    stim_json.html = misc.escapeHTML(stim_json.html);
-    req.ctx.stim = stim_json;
+    var stim_template_json = stim_template.toJSON();
+    stim_template_json.html = misc.escapeHTML(stim_template_json.html);
+    req.ctx.stim = stim_template_json;
 
     amulet.stream(['admin/layout.mu', 'admin/stims/edit.mu'], req.ctx).pipe(res);
   });
@@ -42,15 +42,15 @@ R.get(/^\/admin\/stims\/(\w+)\/edit$/, function(req, res, m) {
 /** PATCH /admin/stims/:stim_id
 update existing Stim */
 R.patch(/^\/admin\/stims\/(\w+)/, function(req, res, m) {
-  var stim_id = m[1];
-  req.readToEnd('utf8', function(err, stim_json) {
+  var _id = m[1];
+  req.readToEnd('utf8', function(err, stim_template_json) {
     if (err) return res.die('req.readToEnd error: ' + err);
 
-    var fields = misc.parseJSON(stim_json);
+    var fields = misc.parseJSON(stim_template_json);
     if (fields instanceof Error) return res.die('Could not parse JSON. Error: ' + fields);
 
-    models.StimTemplate.findById(stim_id, function(err, stim) {
-      if (err) return res.die('Stim.findById error: ' + err);
+    models.StimTemplate.findById(_id, function(err, stim) {
+      if (err) return res.die('StimTemplate.findById error: ' + err);
 
       _.extend(stim, fields);
       stim.save(function() {
@@ -63,11 +63,11 @@ R.patch(/^\/admin\/stims\/(\w+)/, function(req, res, m) {
 /** DELETE /admin/stims/:stim_id
 delete Stim */
 R.delete(/^\/admin\/stims\/(\w+)$/, function(req, res, m) {
-  var stim_id = m[1];
-  models.StimTemplate.findByIdAndRemove(stim_id, function(err, stim) {
-    if (err) return res.die('Stim.findByIdAndRemove error: ' + err);
+  var _id = m[1];
+  models.StimTemplate.findByIdAndRemove(_id, function(err, stim) {
+    if (err) return res.die('StimTemplate.findByIdAndRemove error: ' + err);
 
-    res.json({success: true, message: 'Deleted stim: ' + m[1]});
+    res.json({success: true, message: 'Deleted stim: ' + _id});
   });
 });
 
@@ -75,7 +75,7 @@ R.delete(/^\/admin\/stims\/(\w+)$/, function(req, res, m) {
 list all Stims */
 R.get(/^\/admin\/stims\/?$/, function(req, res, m) {
   models.StimTemplate.find({}, function(err, stims) {
-    if (err) return res.die('Stim.find() error', err);
+    if (err) return res.die('StimTemplate.find() error', err);
 
     req.ctx.stims = stims;
     amulet.stream(['admin/layout.mu', 'admin/stims/all.mu'], req.ctx).pipe(res);

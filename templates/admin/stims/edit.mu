@@ -1,4 +1,4 @@
-<h3 class="section">Stim Template: {{_id}}</h3>
+<h3 class="section">Stim Template: {{stim._id}}</h3>
 
 <section class="fill vform" id="stim">
   <label><span>Name</span>
@@ -33,6 +33,11 @@ var StimTemplateView = Backbone.View.extend({
 });
 
 $('textarea').flexible();
+
+var StimTemplate = Backbone.Model.extend({
+  urlRoot: '/admin/stims',
+  idAttribute: '_id'
+});
 
 var stim_template = new StimTemplate({{{JSON.stringify(stim)}}});
 var stim_template_view = new StimTemplateView({model: stim_template, el: $('#stim')});

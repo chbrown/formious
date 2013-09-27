@@ -31,6 +31,18 @@ R.get(/^\/admin\/users\/(\w+)$/, function(req, res, m) {
   models.User.fromId(m[1], function(err, user) {
     if (err) return res.die('User query error: ' + err);
 
+    user.responses.sort(function(l, r) {
+      return (r.created || 0) - (l.created || 0);
+    });
+
+    user.responses.forEach(function(response) {
+      ['created', 'hit_started', 'submitted'].forEach(function(datetime_prop) {
+        if (response[datetime_prop]) response[datetime_prop] = new Date(response[datetime_prop]);
+      });
+      response.hit_started = response.hit_started ? new Date(response.hit_started) : response.hit_started;
+      response.extra = _.omit(response, 'created', 'hit_started', 'submitted', 'stimlist');
+    });
+
     req.ctx.user = user;
     amulet.stream(['admin/layout.mu', 'admin/users/one.mu'], req.ctx).pipe(res);
   });

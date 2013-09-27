@@ -13,20 +13,22 @@ var R = new Router(function(req, res) {
 });
 
 /** GET /stimlists/:slug
-or  GET /stimlists/:slug/:index
-Present single stimlist (given by name, not id) to worker, starting at given index or 0
+    GET /stimlists/:slug?segment=:segment&index=:index
+Present single stimlist (given by name, not id) to worker,
+starting at given index or 0, of the next available segment.
 */
-R.get(/^\/stimlists\/(\w+)(\/(\d+))?/, function(req, res, m) {
+R.get(/^\/stimlists\/(\w+)(\?|$)/, function(req, res, m) {
   var slug = m[1];
-  var index = m[3] || 0;
-
   var urlObj = url.parse(req.url, true);
+  // logger.debug('stimlist: slug=%s, segment=%s, index=%s', slug, segment, index)
   var workerId = urlObj.query.workerId || req.user_id;
+
   models.User.fromId(workerId, function(err, user) {
     if (err) return res.die('User query error: ' + err);
     if (!user) return res.die('Could not find user: ' + workerId);
 
-    req.cookies.set('workerId', user._id);
+    // update cookie if needed
+    if (req.cookies.get('workerId') != user._id) req.cookies.set('workerId', user._id);
 
     models.Stimlist.findOne({slug: slug}, function(err, stimlist) {
       if (err) return res.die('Could not find stimlist "' + slug + '": ' + err);
@@ -36,10 +38,29 @@ R.get(/^\/stimlists\/(\w+)(\/(\d+))?/, function(req, res, m) {
         hit_started: Date.now(),
         hitId: urlObj.query.hitId,
         host: urlObj.query.debug !== undefined ? '' : (urlObj.query.turkSubmitTo || 'https://www.mturk.com'),
-        index: index,
-        stimlist: stimlist,
         workerId: user._id,
+        slug: stimlist.slug,
+        index: urlObj.query.index || 0,
       };
+
+      if (stimlist.segmented) {
+        if (urlObj.query.segment === undefined) {
+          // find next available segment
+          var segments_available = _.difference(stimlist.segments, stimlist.segments_claimed);
+          if (segments_available.length === 0) res.die('No more available segments for stimlist: ' + slug);
+
+          res.redirect('/stimlists/' + slug + '?segment=' + segments_available[0]);
+        }
+        else {
+          ctx.states = stimlist.states.filter(function(state) {
+            return state.segment == urlObj.query.segment;
+          });
+        }
+      }
+      else {
+        ctx.states = stimlist.states;
+      }
+
       amulet.stream(['layout.mu', 'stimlists/one.mu'], ctx).pipe(res);
     });
   });

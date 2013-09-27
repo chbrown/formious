@@ -226,8 +226,13 @@ function program11(depth0,data) {
 templates['admin/stimlists/edit'] = template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
-  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
+  var buffer = "", stack1, options, functionType="function", escapeExpression=this.escapeExpression, self=this, blockHelperMissing=helpers.blockHelperMissing;
 
+function program1(depth0,data) {
+  
+  
+  return "checked";
+  }
 
   buffer += "<h3 class=\"section\">Stimlist: ";
   if (stack1 = helpers._id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
@@ -249,7 +254,13 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   if (stack1 = helpers.creator) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.creator; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\" />\n  </label>\n\n  <label><span>Paste</span>\n    <textarea placeholder=\"Paste csv here\" name=\"paste\" rows=\"1\">\n    </textarea>\n  </label>\n\n  <label><span>Upload</span>\n    <input type=\"file\" name=\"upload\">\n  </label>\n\n  <button>Save</button>\n</section>\n\n<section class=\"fill states\"></section>\n";
+    + "\" />\n  </label>\n\n  <label>\n    <input name=\"segmented\" type=\"checkbox\" ";
+  options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data};
+  if (stack1 = helpers.segmented) { stack1 = stack1.call(depth0, options); }
+  else { stack1 = depth0.segmented; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  if (!helpers.segmented) { stack1 = blockHelperMissing.call(depth0, stack1, options); }
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += " />\n    <span>Segmented (by Participant)</span>\n  </label>\n\n  <label><span>Paste</span>\n    <textarea placeholder=\"Paste csv here\" name=\"paste\" rows=\"1\">\n    </textarea>\n  </label>\n\n  <label><span>Upload</span>\n    <input type=\"file\" name=\"upload\">\n  </label>\n\n  <button>Save</button>\n</section>\n\n<section class=\"fill states\"></section>\n";
   return buffer;
   });
 templates['form-input'] = template(function (Handlebars,depth0,helpers,partials,data) {

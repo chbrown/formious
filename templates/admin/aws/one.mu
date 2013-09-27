@@ -1,5 +1,6 @@
 {{#account}}
 <h3 class="section">AWS Account: {{name}}</h3>
+
 <section class="box">
   <table>
     <tr><td>ID</td><td>{{_id}}</td></tr>
@@ -8,6 +9,10 @@
     <tr><td>Secret Access Key</td><td>{{secretAccessKey}}</td></tr>
     <tr><td>Created</td><td>{{created}}</td></tr>
   </table>
+</section>
+
+<section>
+  <a href="/admin/aws/{{_id}}/edit">Edit account</a>
 </section>
 {{/account}}
 

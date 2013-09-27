@@ -10,6 +10,11 @@
     <input name="creator" type="text" value="{{creator}}" />
   </label>
 
+  <label>
+    <input name="segmented" type="checkbox" {{#segmented}}checked{{/segmented}} />
+    <span>Segmented (by Participant)</span>
+  </label>
+
   <label><span>Paste</span>
     <textarea placeholder="Paste csv here" name="paste" rows="1">
     </textarea>
