@@ -103,8 +103,9 @@ var StimlistView = Backbone.View.extend({
     this.render();
   },
   render: function() {
-    console.log("Rendering", this.model.toJSON());
-    this.form.set(this.model.toJSON());
+    var stimlist_values = $.extend(true, {}, this.model.toJSON());
+
+    this.form.set(stimlist_values);
     // set arrays (to be merged into form.set?)
     this.segments.set(this.model.get('segments'));
     this.segments_claimed.set(this.model.get('segments_claimed'));
@@ -134,9 +135,8 @@ var StimlistView = Backbone.View.extend({
 
     // create the new one and show it in the overlay
     var states = this.model.get('states');
-    var state = states[index];
-    _.extend(state, context);
-    var stim = new StimView(state);
+    var stim_ctx = _.extend({}, {stim: this.model.get('default_stim')}, states[index], context);
+    var stim = new StimView(stim_ctx);
 
     $('#preview').show().children('.content').html(stim.$el);
 
@@ -214,10 +214,10 @@ var Stimlist = Backbone.Model.extend({
       self.set('columns', data.columns);
       self.set('states', data.rows);
 
-      var segmented = _.contains(data.columns, 'participant');
+      var segmented = _.contains(data.columns, 'segment');
       self.set('segmented', segmented);
       if (segmented) {
-        var segments = _.pluck(data.rows, 'participant');
+        var segments = _.pluck(data.rows, 'segment');
         self.set('segments', _.uniq(segments));
       }
 

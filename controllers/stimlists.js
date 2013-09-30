@@ -43,25 +43,45 @@ R.get(/^\/stimlists\/(\w+)(\?|$)/, function(req, res, m) {
         index: urlObj.query.index || 0,
       };
 
-      if (stimlist.segmented) {
-        if (urlObj.query.segment === undefined) {
-          // find next available segment
-          var segments_available = _.difference(stimlist.segments, stimlist.segments_claimed);
-          if (segments_available.length === 0) res.die('No more available segments for stimlist: ' + slug);
+      if (stimlist.segmented && urlObj.query.segment === undefined) {
+        // find next available segment
+        var segments_available = _.difference(stimlist.segments, stimlist.segments_claimed);
+        if (segments_available.length === 0) res.die('No more available segments for stimlist: ' + slug);
 
-          res.redirect('/stimlists/' + slug + '?segment=' + segments_available[0]);
-        }
-        else {
-          ctx.states = stimlist.states.filter(function(state) {
+        var next_segment = segments_available[0];
+        stimlist.update({$push: {segments_claimed: next_segment}}, function(err) {
+          if (err) return res.die('Could not claim segment:' + err);
+
+          res.redirect('/stimlists/' + slug + '?segment=' + next_segment);
+        });
+      }
+      else {
+        var states = stimlist.states;
+
+        if (stimlist.segmented) {
+          states = states.filter(function(state) {
             return state.segment == urlObj.query.segment;
           });
         }
-      }
-      else {
-        ctx.states = stimlist.states;
-      }
 
-      amulet.stream(['layout.mu', 'stimlists/one.mu'], ctx).pipe(res);
+        if (stimlist.default_stim) {
+          logger.debug('Setting default stim to %s', stimlist.default_stim);
+          states.forEach(function(state) {
+            if (!state.stim) state.stim = stimlist.default_stim;
+          });
+        }
+
+        if (stimlist.pre_stim) {
+          states.unshift({stim: stimlist.pre_stim});
+        }
+        if (stimlist.post_stim) {
+          states.push({stim: stimlist.post_stim});
+        }
+
+        ctx.states = states;
+
+        amulet.stream(['layout.mu', 'stimlists/one.mu'], ctx).pipe(res);
+      }
     });
   });
 });
