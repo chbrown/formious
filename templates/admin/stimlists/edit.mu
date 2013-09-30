@@ -5,15 +5,82 @@
 
 <script>
 // move #preview outside the default .admin div, so that .admin ... { /* etc. */ } css doesn't apply to it
-$('body').append($('#preview'));
+// $('body').append($('#preview'));
 $('#preview > .controls').on('click', function(ev) {
   $('#preview').hide();
 });
 </script>
 
-<div id="stimlist"></div>
 
-<script src="/static/lib/jquery-flags.js"></script>
+<section>
+  <h3>Stimlist: {{stimlist._id}}</h3>
+  URL: <a href="/stimlists/{{stimlist.slug}}">{{stimlist.slug}}</a>
+</section>
+
+<div id="stimlist">
+  <form>
+    <section class="box hform">
+      <label><span>Slug</span>
+        <input name="slug" type="text" />
+      </label>
+
+      <label><span>Creator</span>
+        <input name="creator" type="text" />
+      </label>
+
+      <label>
+        <input name="segmented" type="checkbox" />
+        <span>Segmented (by participant)</span>
+      </label>
+
+      <button type="submit">Save</button>
+    </section>
+
+    <section class="box vform">
+      <label><span>Prepend stim (show before each experiment)</span>
+        <input name="pre_stim" type="text" />
+      </label>
+
+      <label><span>Default stim (if no <code>stim</code> column is specified)</span>
+        <input name="default_stim" type="text" />
+      </label>
+
+      <label><span>Append stim (show after each experiment)</span>
+        <input name="post_stim" type="text" />
+      </label>
+    </section>
+
+    <section class="box vform">
+      <label>
+        <span>Segments</span>
+      </label>
+      <input name="segments" type="array" class="array" />
+    </section>
+
+    <section class="box vform">
+      <label>
+        <span>Claimed segments</span>
+      </label>
+      <input name="segments_claimed" type="array" class="array" />
+    </section>
+  </form>
+
+  <section class="fill vform">
+    <label><span>Paste</span>
+      <textarea placeholder="Paste csv here" id="paste" rows="1">
+      </textarea>
+    </label>
+
+    <label><span>Upload</span>
+      <input type="file" id="upload">
+    </label>
+  </section>
+
+  <section class="states fill"></section>
+</div>
+
+
+<script src="/static/forms.symlink.js"></script>
 <script>
 // have context to match the normal stimlist environment
 // and might as well be connected to the current user
@@ -22,46 +89,38 @@ var context = {
   workerId: '{{ticket_user._id}}'
 };
 
-function fileinputText(input, callback) {
-  // callback: function(Error | null, file_contents, file_name, file_size)
-  var files = input.files;
-  var file = files[0];
-  var reader = new FileReader();
-  reader.onerror = function(err) {
-    callback(err, null, file ? file.name : undefined, file ? file.size : undefined);
-  };
-  reader.onload = function(progress_event) {
-    callback(null, progress_event.target.result, file.name, file.size);
-  };
-  reader.readAsText(file); //, opt_encoding
-}
+var StimlistView = Backbone.View.extend({
+  // template: 'admin/stimlists/edit',
+  initialize: function() {
+    // this.model.on('change', this.render, this);
+    this.form = new Form(this.el);
 
-var StimlistView = TemplatedView.extend({
-  template: 'admin/stimlists/edit',
-  postInitialize: function() {
-    this.model.on('change', this.postRender, this);
+    // initialize arrays (to be merged into form.set?)
+    this.segments = $.listinput($('[name="segments"]'));
+    this.segments_claimed = $.listinput($('[name="segments_claimed"]'));
+
+    // final display step
+    this.render();
   },
-  postRender: function() {
+  render: function() {
+    console.log("Rendering", this.model.toJSON());
+    this.form.set(this.model.toJSON());
+    // set arrays (to be merged into form.set?)
+    this.segments.set(this.model.get('segments'));
+    this.segments_claimed.set(this.model.get('segments_claimed'));
+
+    // render states:
     var states = this.model.get('states');
     var columns = this.model.get('columns');
     // states is a list of objects
     if (states.length) {
-      // var handson_columns = columns.map(function(column) { return {data: column}; })
-      // this.$('.states').handsontable({
-      //   colHeaders: columns,
-      //   columns: handson_columns,
-      //   minSpareRows: 1,
-      //   data: states,
-      //   // contextMenu: false,
-      // });
       if (columns === undefined || columns.length == 0) {
         columns = _.keys(states[0]);
       }
+
       var html = tabulate(states, columns);
       this.$('.states').html(html);
-      this.$('.states table').addClass('hoverable box');
-      var message = 'Processed upload into ' + states.length + ' rows.';
-      this.$('.states-form').flag({anchor: 't', html: message, fade: 3000});
+      this.$('.states table').addClass('hoverable');
     }
     else {
       this.$('.states').html('No states');
@@ -90,43 +149,47 @@ var StimlistView = TemplatedView.extend({
     this.$('.states tbody tr').eq(index).addClass('preview').siblings().removeClass('preview');
   },
   events: {
-    'click button': function(ev) {
-      var attrs = {
-        creator: $('[name=creator]').val(),
-        slug: $('[name=slug]').val(),
-        raw: this.model.get('raw'),
-        columns: this.model.get('columns'),
-        states: this.model.get('states'),
-        segmented: $('[name=segmented]').prop('checked'),
-        segments: this.model.get('segments')
-      };
+    'submit form': function(ev) {
+      ev.preventDefault();
+
+      var form_obj = this.form.get();
+      var attrs = _.extend(this.model.toJSON(), form_obj);
       this.model.save(attrs, {
         patch: true,
         success: function(model, response, options) {
           var message = options.xhr.getResponseHeader('x-message') || 'Success!';
-          $(ev.target).flag({text: message, fade: 3000});
+          $(ev.target).find('button[type="submit"]').flag({text: message, fade: 3000});
         }
       });
     },
     'click tr': function(ev) {
       this.preview($(ev.currentTarget).index());
     },
-    'change [name=upload]': function(ev) {
+    'change #upload': function(ev) {
       var self = this;
 
       fileinputText(ev.target, function(err, file_contents, file_name, file_size) {
         if (err) return $(ev.target).flag({text: err});
 
         var message = 'Uploading ' + file_name + ' (' + file_size + ' bytes)';
-        $(ev.target).flag({html: message, fade: 3000});
+        $(ev.target).flag({html: message, fade: 1000});
         self.model.loadRaw(file_contents, function(err) {
           if (err) return $(ev.target).flag({text: err});
+
+          var message = 'Processed upload into ' + self.model.get('states').length + ' rows.';
+          $(ev.target).flag({html: message, fade: 3000});
+
+          // has made change, so render.
+          self.render();
         });
       });
     },
-    'change [name=paste]': function(ev) {
+    'change #paste': function(ev) {
+      var self = this;
       this.model.loadRaw(ev.target.value, function(err) {
         if (err) return $(ev.target).flag({text: err});
+
+        self.render();
       });
     }
   }
@@ -135,18 +198,19 @@ var StimlistView = TemplatedView.extend({
 var Stimlist = Backbone.Model.extend({
   urlRoot: '/admin/stimlists',
   idAttribute: '_id',
-  loadRaw: function(csv_string, callback) {
+  loadRaw: function(raw_string, callback) {
     // callback: function(Error | null, Stimlist | null)
     var self = this;
-    this.set('raw', csv_string);
+    this.set('raw', raw_string);
 
     // outsource the csv processing, for now.
     $.ajax({
       url: '/sv',
       method: 'POST',
-      data: csv_string,
+      data: raw_string,
       dataType: 'json'
     }).done(function(data, type, jqXHR) {
+      // infer things about the stimlist from what they just uploaded
       self.set('columns', data.columns);
       self.set('states', data.rows);
 
@@ -165,6 +229,6 @@ var Stimlist = Backbone.Model.extend({
 });
 
 var stimlist = new Stimlist({{{JSON.stringify(stimlist)}}});
-var stimlist_view = new StimlistView({model: stimlist});
+var stimlist_view = new StimlistView({model: stimlist, el: $('#stimlist')});
 $('#stimlist').append(stimlist_view.el);
 </script>
