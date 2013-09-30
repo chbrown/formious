@@ -1,0 +1,8 @@
+{
+  "staticIgnore": [
+    "doc/*",
+    "static/*",
+    "README.md",
+    "LICENSE"
+  ]
+}
