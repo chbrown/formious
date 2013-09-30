@@ -40,6 +40,7 @@ textarea {
   }
 }
 section, .section {
+  vertical-align: top;
   margin: 10px 0;
   padding: 0 10px;
   &.fill, &.box {
@@ -130,17 +131,18 @@ table {
     &.Rejected { color: darkred; }
   }
 }
+input[type="checkbox"] + span {
+  // bold spans coming after checkboxes
+  display: inline-block;
+  font-weight: bold;
+  margin-left: .25em;
+}
 .vform, .hform {
   span {
     vertical-align: middle;
   }
   & > label {
     margin: 4px 0;
-  }
-  input[type="checkbox"] + span {
-    // bold spans coming after checkboxes
-    display: inline-block;
-    font-weight: bold;
   }
 }
 .hform {
@@ -174,6 +176,28 @@ table {
   max-width: 10em;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.array {
+  .controls {
+    text-align: right;
+  }
+  .add {
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    font-size: 105%;
+    cursor: pointer;
+  }
+  .add::before {
+    font-size: 90%;
+    content: "add ";
+  }
+  .remove {
+    color: darkred;
+    cursor: pointer;
+  }
 }
 
 #preview {

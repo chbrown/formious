@@ -8,7 +8,7 @@ textarea,input{vertical-align:middle;margin:0}
 input[type="radio"],input[type="checkbox"]{margin:1px .25ex}
 fieldset{margin:0 0 10px 0;border:1px solid #ccc}
 textarea.code{font:9pt "Courier New",Courier,monospace}
-section,.section{margin:10px 0;padding:0 10px}section.fill,.section.fill,section.box,.section.box{padding:10px;background-color:#fff;border:1px solid #eee}
+section,.section{vertical-align:top;margin:10px 0;padding:0 10px}section.fill,.section.fill,section.box,.section.box{padding:10px;background-color:#fff;border:1px solid #eee}
 section.fill,.section.fill{border-width:1px 0;overflow:auto}
 section.box,.section.box{display:inline-block;margin:0 10px}
 nav{position:fixed;top:0;padding:0 4px;background-color:#fdfdfd;width:100%;border-bottom:1px solid #ccc}nav a{display:inline-block;border-radius:3px;border:1px solid #bbb;padding:2px 6px;margin:2px}nav a.active{border:1px solid #aaa;background-color:#ddd}
@@ -25,12 +25,16 @@ table.keyval td:first-child{font-weight:bold}
 .admin{background-color:#fcfcfc}.admin .status span{font-size:110%;font-weight:bold}.admin .status span.Submitted{color:#ccc}
 .admin .status span.Approved{color:#006400}
 .admin .status span.Rejected{color:#8b0000}
+input[type="checkbox"]+span{display:inline-block;font-weight:bold;margin-left:.25em}
 .vform span,.hform span{vertical-align:middle}
 .vform>label,.hform>label{margin:4px 0}
-.vform input[type="checkbox"]+span,.hform input[type="checkbox"]+span{display:inline-block;font-weight:bold}
 .hform label span:first-child{display:inline-block;font-weight:bold;width:75px}
 .vform label span{margin:2px 4px}.vform label span:first-child{display:block;font-weight:bold;margin:2px 0}
 .truncate{display:block;max-width:10em;overflow:hidden;text-overflow:ellipsis}
+.array .controls{text-align:right}
+.array .add{margin:0;padding:0;background:none;border:none;font-size:105%;cursor:pointer}
+.array .add::before{font-size:90%;content:"add "}
+.array .remove{color:#8b0000;cursor:pointer}
 #preview{position:fixed;max-width:50%;top:10px;right:10px;border:1px solid #ddd}#preview .content{padding:10px;background-color:#fff}
 #preview .controls{padding:10px;background-color:#eee;cursor:pointer}#preview .controls span{float:right}
 #preview .controls:hover{background-color:#ddd}
