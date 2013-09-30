@@ -1,4 +1,7 @@
-<h3 class="section">Stim Template: {{stim._id}}</h3>
+<section>
+  <h3>Stim Template: {{stim._id}}</h3>
+  <a href="/templates/stims/{{stim.name}}.bars">{{stim.name}}</a>
+</section>
 
 <section class="fill vform" id="stim">
   <label><span>Name</span>

@@ -13,7 +13,7 @@
     <tbody>
       {{#stims}}
         <tr>
-          <td title="{{_id}}">{{name}}</td>
+          <td title="{{_id}}"><a href="/templates/stims/{{name}}.bars">{{name}}</a></td>
           <td><a href="/admin/stims/{{_id}}/edit">Edit</a></td>
           <td>{{datefmt(created)}}</td>
           <td><a href="/admin/stims/{{_id}}" data-method="delete">delete</a></td>
