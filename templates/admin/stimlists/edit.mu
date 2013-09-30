@@ -80,7 +80,7 @@ $('#preview > .controls').on('click', function(ev) {
 </div>
 
 
-<script src="/static/forms.symlink.js"></script>
+<script src="/static/lib/forms.js"></script>
 <script>
 // have context to match the normal stimlist environment
 // and might as well be connected to the current user
