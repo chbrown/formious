@@ -58,7 +58,6 @@ else if (argv.version) {
 }
 else {
   var root_controller = require('./controllers');
-  // require('long-stack-traces');
 
   models.mongoose.connect('localhost', argv.database);
 

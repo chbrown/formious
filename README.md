@@ -146,6 +146,18 @@ The two planes are Messerschmitts and Spitfires, particularly, models taken from
       res.json({success: false, message: message, unpaid: unpaid});
     }
 
+
+## Handsontable example (was way too slow)
+
+    var handson_columns = columns.map(function(column) { return {data: column}; })
+    this.$('.states').handsontable({
+      colHeaders: columns,
+      columns: handson_columns,
+      minSpareRows: 1,
+      data: states,
+      // contextMenu: false,
+    });
+
 ## License
 
 Copyright © 2011–2013 Christopher Brown. [MIT Licensed](LICENSE).
