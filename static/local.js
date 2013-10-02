@@ -3,11 +3,16 @@ function time() { return (new Date()).getTime(); }
 
 $(document).on('click', 'a[data-method]', function(ev) {
   ev.preventDefault();
+  var method = this.getAttribute('data-method');
   $.ajax({
     url: this.href,
-    method: this.getAttribute('data-method')
+    method: method
   }).done(function(data, textStatus, jqXHR) {
-    $(ev.target).flag({anchor: 'r', align: 'm', text: data.message, fade: 3000});
+    $(ev.target).flag({
+      anchor: 'r',
+      text: data.message,
+      fade: 3000
+    }).closest('.record').addClass(method);
   });
 });
 

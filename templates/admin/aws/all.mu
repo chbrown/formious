@@ -15,14 +15,14 @@
     </thead>
     <tbody>
       {{#accounts}}
-        <tr>
+        <tr class="record">
           <td title="{{_id}}">{{name}}</td>
           <td><a href="/admin/aws/{{_id}}">View</a></td>
           <td><a href="/admin/aws/{{_id}}/edit">Edit</a></td>
           <td>{{accessKeyId}}</td>
           <td><div class="truncate">{{secretAccessKey}}</div></td>
           <td>{{datefmt(created)}}</td>
-          <td><a href="/admin/aws/{{_id}}" data-method="delete">delete</a></td>
+          <td><a href="/admin/aws/{{_id}}" data-method="delete">Delete</a></td>
         </tr>
       {{/accounts}}
     </tbody>
