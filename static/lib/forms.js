@@ -43,6 +43,7 @@ var Form = (function() {
   }
 
   function group(node, filterBy, groupBy) {
+    // I actually don't currently use this generic function
     // walk -> filter(filterBy) -> group(groupBy)
     var groups = {};
     walk(node, function(element) {
@@ -54,11 +55,6 @@ var Form = (function() {
     });
     return groups;
   }
-
-  var hasNameAttribute = function(element) { return element.getAttribute('name') !== undefined; };
-  var nameAttribute = function(element) { return element.getAttribute('name') !== undefined; };
-  var trueArrayProperty = function(obj) { return obj.array === true; };
-  var valueProperty = function(obj) { return obj.value; };
 
   var Input = {};
   Input.get = function(element) {
@@ -184,7 +180,7 @@ var Form = (function() {
       // determine whether we should coerce to array, if:
       //   a) any input has input.array == true, OR
       //   b) there is more than one element in the group
-      var array = fields.some(trueArrayProperty) || fields.length > 1;
+      var array = fields.some(function(obj) { return obj.array === true; }) || fields.length > 1;
       if (array) {
         return fields.map(fieldValue);
       }

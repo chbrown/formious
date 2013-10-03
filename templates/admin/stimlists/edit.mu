@@ -79,8 +79,8 @@ $('#preview > .controls').on('click', function(ev) {
   <section class="states fill"></section>
 </div>
 
-
-<script src="/static/lib/forms.js"></script>
+<script src="/static/inputs.js"></script> <!-- For ListInput() and $.listinput -->
+<script src="/static/lib/forms.js"></script> <!-- For new Form(...) -->
 <script>
 // have context to match the normal stimlist environment
 // and might as well be connected to the current user

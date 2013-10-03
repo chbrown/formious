@@ -48,6 +48,26 @@ var fields = [
   },
 ];
 
+var FormInput = TemplatedView.extend({
+  template: 'form-input',
+  preRender: function(ctx) {
+    this.id = ctx.id;
+    ctx.label = ctx.label || this.id;
+    ctx.value = localStorage[this.id];
+  },
+  postRender: function(ctx) {
+    // window.form = this;
+    this.$('input').css({width: ctx.width});
+  },
+  events: {
+    'change input': function(ev) {
+      // this.$('input')
+      var value = ev.target.value;
+      localStorage[this.id] = value;
+    }
+  }
+});
+
 fields.reverse().forEach(function(field) {
   var form_input = new FormInput(field);
   $('form').prepend(form_input.$el);

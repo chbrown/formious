@@ -16,6 +16,7 @@
     <a href="/admin/stimlists">Stimlists</a>
     <a href="/admin/stims">Stim Templates</a>
     <a href="/users/{{ticket_user._id}}/logout" style="float: right">Logout</a>
+    <a href="/admin/users/{{ticket_user._id}}" style="float: right">me</a>
   </nav>
   {{<}}
   <script>

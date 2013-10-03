@@ -1,4 +1,4 @@
-"use strict"; /*jslint indent: 2 */ /*globals _, $, Backbone, Handlebars, TemplatedView, TemplatedCollection */
+// "use strict"; /*jslint indent: 2 */ /*globals _, $, Backbone, Handlebars, TemplatedView, TemplatedCollection */
 function time() { return (new Date()).getTime(); }
 
 $(document).on('click', 'a[data-method]', function(ev) {
@@ -55,21 +55,20 @@ function fileinputText(input, callback) {
 var StimView = TemplatedView.extend({
   // usage new StimView({hit_started: Number, stimlist_slug: String, ...})
   template: 'stims/default',
-  preRender: function(ctx) {
-    if (ctx.stim) {
-      this.template = 'stims/' + ctx.stim;
-    }
-    else {
-      ctx.keyvals = _.map(ctx, function(val, key) {
-        return {key: key, val: val};
-      });
-    }
+  preInitialize: function(ctx) {
+    this.ctx = ctx;
+    this.template = 'stims/' + (ctx.stim || 'default');
   },
+  // preRender: function(ctx) {
+    // ctx.keyvals = _.map(ctx, function(val, key) {
+    //   return {key: key, val: val};
+    // });
+  // },
   submit: function(ev) {
     var self = this;
     var $submit = $(ev.target);
     var $form = $submit.closest('form');
-    window.ev = ev;
+    // window.ev = ev;
     // we only hijack the submit if the form does not have an action
     // console.log('Submit', $form.serialize(), $form.serializeArray());
     // return false;
@@ -88,7 +87,8 @@ var StimView = TemplatedView.extend({
       }
       else {
         // fill it out with useful metadata (which is stored in this.model)
-        _.defaults(response, this.model.toJSON());
+        console.log("Submitting with values from model:", self.ctx);
+        _.defaults(response, self.ctx);
         response.submitted = time();
         new Response(response).save(null, {
           success: function(model, response, options) {
@@ -105,27 +105,6 @@ var StimView = TemplatedView.extend({
   events: {
     'click form button': 'submit'
     // 'click [type="submit"]': 'submit'
-  }
-});
-
-
-var FormInput = TemplatedView.extend({
-  template: 'form-input',
-  preRender: function(ctx) {
-    this.id = ctx.id;
-    ctx.label = ctx.label || this.id;
-    ctx.value = localStorage[this.id];
-  },
-  postRender: function(ctx) {
-    // window.form = this;
-    this.$('input').css({width: ctx.width});
-  },
-  events: {
-    'change input': function(ev) {
-      // this.$('input')
-      var value = ev.target.value;
-      localStorage[this.id] = value;
-    }
   }
 });
 
@@ -203,74 +182,3 @@ var AssignmentView = TemplatedView.extend({
 var Response = Backbone.Model.extend({
   url: '/responses'
 });
-
-(function($) {
-  // requires $ and $.fn.flag
-  var ListInput = function(element, opts) {
-    var $element = $(element);
-    this.name = $element.attr('name');
-    var css_classes = $element.attr('class');
-    this.$container = $('<div />').replaceAll(element).attr('class', css_classes);
-
-    this.value = [];
-
-    // set up events
-    var self = this;
-    this.$container.on('click', '.add', function(ev) {
-      ev.preventDefault();
-
-      self.value.push('');
-      self.render();
-      // render first, then feedback
-      self.$container.find('input:last').flag({text: 'Added empty item', fade: 2000, anchor: 'l'});
-    });
-    this.$container.on('click', '.remove', function(ev) {
-      ev.preventDefault();
-
-      var index = $(ev.target).closest('div').index();
-      var removed = self.value.splice(index, 1);
-
-      // feedback first, then render
-      $(ev.target).flag({text: 'Removed "' + removed + '"', fade: 3000, anchor: 'r'});
-      self.render();
-    });
-    this.$container.on('change input', function(ev) {
-      var index = $(ev.target).closest('div').index();
-      self.value[index] = $(ev.target).val();
-    });
-
-    this.render();
-  };
-  ListInput.prototype.get = function() {
-    return this.value;
-  };
-  ListInput.prototype.set = function(value) {
-    this.value = value;
-    this.render();
-  };
-  ListInput.prototype.render = function() {
-    var $container = this.$container.empty();
-    var name = this.name;
-    this.value.forEach(function(value) {
-      var context = {name: name, value: value};
-      var item_html = ListInput.item_template.replace(/\{\{(\w+)\}\}/g, function(match, group) {
-        return context[group];
-      });
-      $container.append(item_html);
-    });
-    $container.append('<div class="controls"><button class="add">+</button></div>');
-  };
-
-  ListInput.item_template = '<div><input type="text" value="{{value}}" name="{{name}}" /> <a class="remove">&times;</a></div>';
-
-  $.listinput = function(element, opts) {
-    return new ListInput(element, opts);
-  };
-
-  $.fn.listinput = function(opts) {
-    return this.each(function(i, element) {
-      // element === this
-      $.listinput(this, opts);
-    });
-  };
-})($);
