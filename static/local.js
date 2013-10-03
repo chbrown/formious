@@ -70,7 +70,6 @@ var StimView = TemplatedView.extend({
     var $form = $submit.closest('form');
     // window.ev = ev;
     // we only hijack the submit if the form does not have an action
-    // console.log('Submit', $form.serialize(), $form.serializeArray());
     // return false;
     if (!$form.attr('action')) {
       ev.preventDefault();
@@ -87,7 +86,6 @@ var StimView = TemplatedView.extend({
       }
       else {
         // fill it out with useful metadata (which is stored in this.model)
-        console.log("Submitting with values from model:", self.ctx);
         _.defaults(response, self.ctx);
         response.submitted = time();
         new Response(response).save(null, {

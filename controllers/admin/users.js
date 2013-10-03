@@ -36,11 +36,11 @@ R.get(/^\/admin\/users\/(\w+)$/, function(req, res, m) {
     });
 
     user.responses.forEach(function(response) {
-      ['created', 'hit_started', 'submitted'].forEach(function(datetime_prop) {
+      ['created', 'submitted'].forEach(function(datetime_prop) {
         if (response[datetime_prop]) response[datetime_prop] = new Date(response[datetime_prop]);
       });
-      response.hit_started = response.hit_started ? new Date(response.hit_started) : response.hit_started;
-      response.extra = _.omit(response, 'created', 'hit_started', 'submitted', 'stimlist');
+      // response.hit_started = response.hit_started ? new Date(response.hit_started) : response.hit_started;
+      response.others = _.omit(response, 'created', 'submitted');
     });
 
     req.ctx.user = user;

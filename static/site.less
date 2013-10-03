@@ -123,6 +123,18 @@ table {
   text-decoration: line-through;
 }
 
+.hover-flow {
+  word-wrap: break-word; // normal | break-word | inherit
+  text-overflow: ellipsis;
+
+  white-space: nowrap; // normal | pre |  | pre-wrap | pre-line | inherit
+  overflow: hidden;
+  &:hover {
+    white-space: normal;
+    overflow: visible;
+  }
+}
+
 .admin {
   background-color: #FCFCFC;
 

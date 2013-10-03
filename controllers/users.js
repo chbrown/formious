@@ -17,10 +17,7 @@ show login page for this user */
 R.get(/^\/users\/(\w+)/, function(req, res, m) {
   // console.log('serving get', m);
   models.User.fromId(m[1], function(err, user) {
-    if (err) {
-      logger.error('User.fromId(%s) error', m[1], err);
-      return res.die(err);
-    }
+    if (err) return res.die('User.fromId error: ' + err);
 
     // login.mu presents a form that submits to /claim or /become depending on the current password status of the user
     amulet.stream(['layout.mu', 'users/login.mu'], {user: user}).pipe(res);

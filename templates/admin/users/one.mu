@@ -35,8 +35,6 @@
   <table>
     <thead>
       <tr>
-        <th>Created</th>
-        <th>HIT Started</th>
         <th>Submitted</th>
         <th>Stimlist</th>
         <th></th>
@@ -46,11 +44,9 @@
     <tbody>
       {{#user.responses}}
         <tr>
-          <td>{{datetimefmt(created)}}</td>
-          <td>{{datetimefmt(hit_started)}}</td>
           <td>{{datetimefmt(submitted)}}</td>
           <td>{{stimlist}}</td>
-          <td style="max-width: 400px; overflow: hidden;">{{{JSON.stringify(extra)}}}</td>
+          <td style="max-width: 600px"><div class="hover-flow">{{{JSON.stringify(others)}}}</div></td>
         </tr>
       {{/}}
     </tbody>
