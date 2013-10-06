@@ -557,26 +557,22 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 function program1(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += "\n  <dt>";
-  if (stack1 = helpers.key) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.key; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
-    + "</dt>\n  <dd>";
-  if (stack1 = helpers.val) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.val; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
-  buffer += escapeExpression(stack1)
+  buffer += "\n  <dt>"
+    + escapeExpression(((stack1 = ((stack1 = data),stack1 == null || stack1 === false ? stack1 : stack1.key)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "</dt>\n  <dd>"
+    + escapeExpression((typeof depth0 === functionType ? depth0.apply(depth0) : depth0))
     + "</dd>\n";
   return buffer;
   }
 
-  buffer += "<h5>";
+  buffer += "<h3>";
   if (stack1 = helpers._id) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0._id; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</h5>\n<dl>\n";
-  stack1 = helpers.each.call(depth0, depth0.keyvals, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+    + "</h3>\n<dl>\n";
+  stack1 = helpers.each.call(depth0, depth0, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n</dl>\n<p><em>This is the default stim display (you should customize it).</em></p>";
+  buffer += "\n</dl>\n<p>This is the default stim display. <b>You should customize it.</b></p>\n";
   return buffer;
   });
 templates['stims/digits/batch'] = template(function (Handlebars,depth0,helpers,partials,data) {
