@@ -7,7 +7,6 @@
   <script src="/static/compiled.js"></script>
   <script src="/static/templates.js"></script>
   <script src="/static/local.js"></script>
-  <script>/*DEBUG=true;*/</script>
 </head>
 <body class="admin hasnav">
   <nav>

@@ -158,6 +158,10 @@ The two planes are Messerschmitts and Spitfires, particularly, models taken from
       // contextMenu: false,
     });
 
+## Development
+
+Setting `window.DEBUG = true;` on any page will put client-side templating into synchronous mode, so that caching won't be problematic, and may also be useful in helping to diagnose other issues.
+
 ## License
 
 Copyright © 2011–2013 Christopher Brown. [MIT Licensed](LICENSE).
