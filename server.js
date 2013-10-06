@@ -67,7 +67,7 @@ else {
 
     var started = Date.now();
     res.on('finish', function() {
-      logger.info('duration', {url: req.url, method: req.method, ms: Date.now() - started});
+      logger.debug('duration', {url: req.url, method: req.method, ms: Date.now() - started});
     });
 
     // root_controller has signature of (req, res), just like any other controller module
