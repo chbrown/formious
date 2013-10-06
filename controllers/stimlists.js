@@ -46,14 +46,23 @@ R.get(/^\/stimlists\/(\w+)(\?|$)/, function(req, res, m) {
       if (stimlist.segmented && urlObj.query.segment === undefined) {
         // find next available segment
         var segments_available = _.difference(stimlist.segments, stimlist.segments_claimed);
-        if (segments_available.length === 0) res.die('No more available segments for stimlist: ' + slug);
+        if (segments_available.length === 0) {
+          // previous harsh behavior:
+          // res.die('No more available segments for stimlist: ' + slug);
 
-        var next_segment = segments_available[0];
-        stimlist.update({$push: {segments_claimed: next_segment}}, function(err) {
-          if (err) return res.die('Could not claim segment:' + err);
+          var random_index = Math.random()*stimlist.segments.length | 0;
+          var random_segment = stimlist.segments[random_index];
+          logger.warn('No more unclaimed segments for stimlist, "%s", assigning randomly and not claiming: "%s"', slug, random_segment);
+          res.redirect('/stimlists/' + slug + '?segment=' + random_segment);
+        }
+        else {
+          var next_segment = segments_available[0];
+          stimlist.update({$push: {segments_claimed: next_segment}}, function(err) {
+            if (err) return res.die('Could not claim segment:' + err);
 
-          res.redirect('/stimlists/' + slug + '?segment=' + next_segment);
-        });
+            res.redirect('/stimlists/' + slug + '?segment=' + next_segment);
+          });
+        }
       }
       else {
         var states = stimlist.states;
