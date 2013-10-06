@@ -1,8 +1,8 @@
-<h5>{{_id}}</h5>
+<h3>{{_id}}</h3>
 <dl>
-{{#each keyvals}}
-  <dt>{{key}}</dt>
-  <dd>{{val}}</dd>
+{{#each .}}
+  <dt>{{@key}}</dt>
+  <dd>{{this}}</dd>
 {{/each}}
 </dl>
-<p><em>This is the default stim display (you should customize it).</em></p>
+<p>This is the default stim display. <b>You should customize it.</b></p>
