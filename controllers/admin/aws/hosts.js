@@ -204,6 +204,7 @@ R.get(/HITs\/(\w+)/, function(req, res, m) {
   var params = {HITId: HITId, PageSize: 100};
   var sort_params = {SortProperty: 'SubmitTime', SortDirection: 'Ascending'};
 
+  // async.auto runs each task as quickly as possible but stops the whole thing if any callback with an error
   async.auto({
     GetHIT: function(callback) {
       req.turk.GetHIT({HITId:  HITId}, callback);
@@ -227,14 +228,13 @@ R.get(/HITs\/(\w+)/, function(req, res, m) {
         if (err) return callback(err);
         if (!user) return callback(new Error('Could not find user: ' + assignment.WorkerId));
 
-        var user_json = _.chain(user.toJSON()).omit('response', '__v').map(function(value, key) {
+        var user_json = _.omit(user.toJSON(), 'response', '__v');
+        // reduce to key-value pairs so that we can show in both Mu/Handlebars easily
+        assignment.user = _.map(user_json, function(value, key) {
           return {key: key, value: value};
-        }).value();
-
-        _.extend(assignment, {
-          // bonus_owed: user.get('bonus_owed'),
-          user: user_json,
         });
+
+        // assignment.bonus_owed = user.get('bonus_owed');
         callback(null, assignment);
       });
     }, function(err, assignments) {
