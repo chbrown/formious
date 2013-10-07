@@ -34,7 +34,7 @@ R.get('/admin/responses.tsv', function(req, res) {
 
   // flattenArrayProperty(r, 'reliabilities', 'reliability');
   // flattenArrayProperty(r, 'judgments', 'judgment');
-  user_stream.on('data', function (user) {
+  user_stream.on('data', function(user) {
     user.responses.forEach(function(response) {
       // ISO8601-ify dates
       for (var key in response) {
@@ -48,7 +48,7 @@ R.get('/admin/responses.tsv', function(req, res) {
   user_stream.on('error', function(err) {
     logger.error('User stream error', err);
   });
-  user_stream.on('close', function () {
+  user_stream.on('close', function() {
     stringifier.end();
   });
 });

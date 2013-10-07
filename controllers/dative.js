@@ -14,7 +14,7 @@ var models = require('../lib/models');
 
 var per_page = 10;
 var questions = [];
-fs.readFile(path.join(__dirname, 'stimuli.yaml'), 'utf8', function (err, stimuli_yaml) {
+fs.readFile(path.join(__dirname, 'stimuli.yaml'), 'utf8', function(err, stimuli_yaml) {
   yaml.loadAll(stimuli_yaml, function(stimuli) {
     // generate all sentences
     var loaded_ids = [];

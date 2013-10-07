@@ -10,7 +10,7 @@ var misc = require('../lib/misc');
 var models = require('../lib/models');
 
 var mbti = [];
-fs.readFile(path.join(__dirname, 'mbti.yaml'), 'utf8', function (err, mbti_yaml) {
+fs.readFile(path.join(__dirname, 'mbti.yaml'), 'utf8', function(err, mbti_yaml) {
   yaml.loadAll(mbti_yaml, function(stimuli) {
     stimuli.forEach(function(stimulus, index) {
       mbti.push({text: stimulus, id: index});

@@ -45,7 +45,7 @@ Table.prototype.toString = function(field_separator, record_separator, escape) {
 
 
 function getStimuli(callback) {
-  fs.readFile('dative-stimuli.yaml', 'utf8', function (err, stimuli_yaml) {
+  fs.readFile('dative-stimuli.yaml', 'utf8', function(err, stimuli_yaml) {
     yaml.loadAll(stimuli_yaml, function(stimuli) {
       var data = [];
       stimuli.sort(function(a, b) { return a.id > b.id; });

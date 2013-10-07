@@ -96,7 +96,7 @@ R.post(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
 Delete single AWS account */
 R.delete(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
   var _id = m[1];
-  models.AWSAccount.findById(_id, function (err, account) {
+  models.AWSAccount.findById(_id, function(err, account) {
     if (err) return res.die('AWS Account query error: ' + err);
     if (!account) return res.die(404, 'Could not find AWS Account: ' + _id);
 

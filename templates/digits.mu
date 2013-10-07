@@ -136,7 +136,7 @@ var BatchView = TemplatedView.extend({
       new BatchFeedbackView({correct: correct, model: this.model, replace: this.$el});
     },
     'keyup input': function(ev) {
-      var missing = this.$('input').filter(function (){return this.value == ''}).length;
+      var missing = this.$('input').filter(function() { return this.value == ''; }).length;
       if (missing == 0) {
         this.$('button').text('Submit').prop('disabled', false);
         // catch enter
