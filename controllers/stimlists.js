@@ -47,11 +47,13 @@ R.get(/^\/stimlists\/(\w+)(\?|$)/, function(req, res, m) {
         stimlist_id: stimlist._id,
       };
 
+      var preview_mode = ctx.assignmentId === 'ASSIGNMENT_ID_NOT_AVAILABLE';
+
       if (stimlist.segmented && ctx.segment === undefined) {
         // find next available segment
         var segments_available = _.difference(stimlist.segments, stimlist.segments_claimed);
         // if there are any unclaimed segments, or if this is a MT preview:
-        if (segments_available.length === 0 || ctx.assignmentId === 'ASSIGNMENT_ID_NOT_AVAILABLE') {
+        if (segments_available.length === 0 || preview_mode) {
           if (segments_available.length === 0) {
             logger.warn('No more unclaimed segments for stimlist, "%s"', stimlist._id);
           }
@@ -59,14 +61,17 @@ R.get(/^\/stimlists\/(\w+)(\?|$)/, function(req, res, m) {
           var random_index = Math.random()*stimlist.segments.length | 0;
           var random_segment = stimlist.segments[random_index];
           logger.info('Assigning stimlist randomly and not claiming: "%s"', random_segment);
-          res.redirect('/stimlists/' + stimlist._id + '?segment=' + random_segment);
+
+          urlObj.query.segment = random_segment;
+          res.redirect(url.format(urlObj));
         }
         else {
           var next_segment = segments_available[0];
           stimlist.update({$push: {segments_claimed: next_segment}}, function(err) {
             if (err) return res.die('Could not claim segment: ' + err);
 
-            res.redirect('/stimlists/' + stimlist._id + '?segment=' + next_segment);
+            urlObj.query.segment = next_segment;
+            res.redirect(url.format(urlObj));
           });
         }
       }
@@ -86,7 +91,7 @@ R.get(/^\/stimlists\/(\w+)(\?|$)/, function(req, res, m) {
           });
         }
 
-        if (stimlist.pre_stim) {
+        if (stimlist.pre_stim && !preview_mode) {
           states.unshift({stim: stimlist.pre_stim});
         }
         if (stimlist.post_stim) {
