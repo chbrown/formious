@@ -1,7 +1,6 @@
 <form method="POST" action="{{host}}/mturk/externalSubmit">
   <input type="hidden" name="assignmentId" value="{{assignmentId}}" />
   <input type="hidden" name="turkerId" value="{{workerId}}" />
-  <input type="hidden" name="duration" value="{{duration}}" />
 
   <h3>Comments</h3>
   <label>
