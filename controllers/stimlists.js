@@ -50,6 +50,9 @@ R.get(/^\/stimlists\/(\w+)(\?|$)/, function(req, res, m) {
       var preview_mode = ctx.assignmentId === 'ASSIGNMENT_ID_NOT_AVAILABLE';
 
       if (stimlist.segmented && ctx.segment === undefined) {
+        // url.format ignores .query if there is also .search, and url.parse gives us both (unfortunately)
+        var new_urlObj = {pathname: urlObj.pathname, query: urlObj.query};
+
         // find next available segment
         var segments_available = _.difference(stimlist.segments, stimlist.segments_claimed);
         // if there are any unclaimed segments, or if this is a MT preview:
@@ -60,18 +63,18 @@ R.get(/^\/stimlists\/(\w+)(\?|$)/, function(req, res, m) {
 
           var random_index = Math.random()*stimlist.segments.length | 0;
           var random_segment = stimlist.segments[random_index];
-          logger.info('Assigning stimlist randomly and not claiming: "%s"', random_segment);
+          logger.info('Assigning stimlist randomly: "%s"', random_segment);
 
-          urlObj.query.segment = random_segment;
-          res.redirect(url.format(urlObj));
+          new_urlObj.query.segment = random_segment;
+          res.redirect(url.format(new_urlObj));
         }
         else {
           var next_segment = segments_available[0];
           stimlist.update({$push: {segments_claimed: next_segment}}, function(err) {
             if (err) return res.die('Could not claim segment: ' + err);
 
-            urlObj.query.segment = next_segment;
-            res.redirect(url.format(urlObj));
+            new_urlObj.query.segment = next_segment;
+            res.redirect(url.format(new_urlObj));
           });
         }
       }
