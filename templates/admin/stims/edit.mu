@@ -4,9 +4,9 @@
   <a href="clone">Clone</a>
 </section>
 
-<section class="fill vform" id="stim">
-  <label><span>Name</span>
-    <input name="name" type="text" value="{{stim.name}}" style="width: 30em" />
+<form class="section fill vform" action="/admin/stims/{{stim._id}}" method="POST">
+  <label><span>ID</span>
+    <input name="_id" type="text" value="{{stim._id}}" style="width: 250px" />
   </label>
 
   <label><span>HTML</span>
@@ -14,34 +14,7 @@
   </label>
 
   <button>Save</button>
-</section>
-
-<script>
-var StimTemplateView = Backbone.View.extend({
-  events: {
-    'click button': function(ev) {
-      var attrs = {
-        name: $('[name="name"]').val(),
-        html: $('[name="html"]').val(),
-      };
-      this.model.save(attrs, {
-        patch: true,
-        success: function(model, response, options) {
-          $(ev.target).flag({text: 'Saved successfully', fade: 3000});
-        }
-      });
-    },
-  }
-});
-
-var StimTemplate = Backbone.Model.extend({
-  urlRoot: '/admin/stims',
-  idAttribute: '_id'
-});
-
-var stim_template = new StimTemplate({{{JSON.stringify(stim)}}});
-var stim_template_view = new StimTemplateView({model: stim_template, el: $('#stim')});
-</script>
+</form>
 
 <script src="/static/lib/textarea.js"></script>
 <script>

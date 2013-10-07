@@ -12,15 +12,14 @@ var R = new Router(function(req, res) {
   res.die(404, 'No resource at: ' + req.url);
 });
 
-/** GET /stimlists/:slug
-    GET /stimlists/:slug?segment=:segment&index=:index
+/** GET /stimlists/:stimlist_id
+    GET /stimlists/:stimlist_id?segment=:segment&index=:index
 Present single stimlist (given by name, not id) to worker,
 starting at given index or 0, of the next available segment.
 */
 R.get(/^\/stimlists\/(\w+)(\?|$)/, function(req, res, m) {
-  var slug = m[1];
+  var _id = m[1];
   var urlObj = url.parse(req.url, true);
-  // logger.debug('stimlist: slug=%s, segment=%s, index=%s', slug, segment, index)
   var workerId = urlObj.query.workerId || req.user_id;
 
   models.User.fromId(workerId, function(err, user) {
@@ -30,37 +29,44 @@ R.get(/^\/stimlists\/(\w+)(\?|$)/, function(req, res, m) {
     // update cookie if needed
     if (req.cookies.get('workerId') != user._id) req.cookies.set('workerId', user._id);
 
-    models.Stimlist.findOne({slug: slug}, function(err, stimlist) {
-      if (err) return res.die('Could not find stimlist "' + slug + '": ' + err);
+    models.Stimlist.findById(_id, function(err, stimlist) {
+      if (err) return res.die('Stimlist.findById error: ' + err);
+      if (!stimlist) return res.die('Could not find Stimlist: ' + _id);
 
+      // ctx: the current state to render the template with
       var ctx = {
-        assignmentId: urlObj.query.assignmentId,
-        hit_started: Date.now(),
-        hitId: urlObj.query.hitId,
+        // straight from the url
         host: urlObj.query.debug !== undefined ? '' : (urlObj.query.turkSubmitTo || 'https://www.mturk.com'),
         workerId: user._id,
-        slug: stimlist.slug,
+        assignmentId: urlObj.query.assignmentId,
+        hitId: urlObj.query.hitId,
+        segment: urlObj.query.segment,
         index: urlObj.query.index || 0,
+        // specific to this type of responses (stimlists)
+        hit_started: Date.now(),
+        stimlist_id: stimlist._id,
       };
 
-      if (stimlist.segmented && urlObj.query.segment === undefined) {
+      if (stimlist.segmented && ctx.segment === undefined) {
         // find next available segment
         var segments_available = _.difference(stimlist.segments, stimlist.segments_claimed);
-        if (segments_available.length === 0) {
-          // previous harsh behavior:
-          // res.die('No more available segments for stimlist: ' + slug);
+        // if there are any unclaimed segments, or if this is a MT preview:
+        if (segments_available.length === 0 || ctx.assignmentId === 'ASSIGNMENT_ID_NOT_AVAILABLE') {
+          if (segments_available.length === 0) {
+            logger.warn('No more unclaimed segments for stimlist, "%s"', stimlist._id);
+          }
 
           var random_index = Math.random()*stimlist.segments.length | 0;
           var random_segment = stimlist.segments[random_index];
-          logger.warn('No more unclaimed segments for stimlist, "%s", assigning randomly and not claiming: "%s"', slug, random_segment);
-          res.redirect('/stimlists/' + slug + '?segment=' + random_segment);
+          logger.info('Assigning stimlist randomly and not claiming: "%s"', random_segment);
+          res.redirect('/stimlists/' + stimlist._id + '?segment=' + random_segment);
         }
         else {
           var next_segment = segments_available[0];
           stimlist.update({$push: {segments_claimed: next_segment}}, function(err) {
-            if (err) return res.die('Could not claim segment:' + err);
+            if (err) return res.die('Could not claim segment: ' + err);
 
-            res.redirect('/stimlists/' + slug + '?segment=' + next_segment);
+            res.redirect('/stimlists/' + stimlist._id + '?segment=' + next_segment);
           });
         }
       }
@@ -69,7 +75,7 @@ R.get(/^\/stimlists\/(\w+)(\?|$)/, function(req, res, m) {
 
         if (stimlist.segmented) {
           states = states.filter(function(state) {
-            return state.segment == urlObj.query.segment;
+            return state.segment == ctx.segment;
           });
         }
 

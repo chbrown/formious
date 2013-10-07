@@ -2,7 +2,7 @@
 <table>
   <tr>
     <td><img src="/static/aircraft/pixelated/{{src}}" /></td>
-    <td style="padding-left: 20px; vertical-align: top;">
+    <td style="padding-left: 20px; vertical-align: top">
       <table class="stats">
         <tr><td>Estimated number of friendly aircraft in the sky:</td><td>{{total_friendly}}</td></tr>
         <tr><td>Estimated number of enemy aircraft in the sky:</td><td>{{total_enemy}}</td></tr>

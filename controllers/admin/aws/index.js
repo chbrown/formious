@@ -14,7 +14,7 @@ var R = new Router(function(req, res) {
   res.die(404, 'No resource at: ' + req.url);
 });
 
-// set up single sub-controller (which handles per-account API calls, as opposed to the CRUD-type things below)
+// add single sub-controller (which handles per-account API calls, as opposed to the CRUD-type things below)
 R.any(/^\/admin\/aws\/([^\/]+)\/hosts\/([^\/]+)/, require('./hosts'));
 
 /** GET /admin/aws
@@ -23,9 +23,7 @@ R.get('/admin/aws', function(req, res) {
   models.AWSAccount.find({}, function(err, accounts) {
     if (err) return res.die(err);
 
-    _.extend(req.ctx, {
-      accounts: accounts,
-    });
+    req.ctx.accounts = accounts;
     amulet.stream(['admin/layout.mu', 'admin/aws/all.mu'], req.ctx).pipe(res);
   });
 });
@@ -33,7 +31,7 @@ R.get('/admin/aws', function(req, res) {
 /** GET /admin/aws/new
 Create new AWS account and redirect to edit it */
 R.get('/admin/aws/new', function(req, res) {
-  new models.AWSAccount().save(function(err, account) {
+  models.AWSAccount.create({}, function(err, account) {
     if (err) return res.die('new AWSAccount error: ' + err);
 
     res.redirect('/admin/aws/' + account._id + '/edit');
@@ -43,8 +41,10 @@ R.get('/admin/aws/new', function(req, res) {
 /** GET /admin/aws/:account_id
 Show single AWS account */
 R.get(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
-  models.AWSAccount.findById(m[1], function(err, account) {
+  var _id = m[1];
+  models.AWSAccount.findById(_id, function(err, account) {
     if (err) return res.die(err);
+    if (!account) return res.die(404, 'Could not find AWS Account: ' + _id);
 
     _.extend(req.ctx, {
       account: account,
@@ -57,8 +57,10 @@ R.get(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
 /** GET /admin/aws/:account_id/edit
 Edit single user */
 R.get(/^\/admin\/aws\/(\w+)\/edit$/, function(req, res, m) {
-  models.AWSAccount.findById(m[1], function(err, account) {
-    if (err) return res.die('AWSAccount query error: ' + err);
+  var _id = m[1];
+  models.AWSAccount.findById(_id, function(err, account) {
+    if (err) return res.die('AWS Account query error: ' + err);
+    if (!account) return res.die(404, 'Could not find AWS Account: ' + _id);
 
     _.extend(req.ctx, {
       account: account,
@@ -71,15 +73,18 @@ R.get(/^\/admin\/aws\/(\w+)\/edit$/, function(req, res, m) {
 /** POST /admin/aws/:account_id
 Update new AWS account */
 R.post(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
-  models.AWSAccount.findById(m[1], function(err, account) {
-    if (err) return res.die(err);
+  var _id = m[1];
+  models.AWSAccount.findById(_id, function(err, account) {
+    if (err) return res.die('AWS Account query error: ' + err);
+    if (!account) return res.die(404, 'Could not find AWS Account: ' + _id);
 
     req.readToEnd('utf8', function(err, data) {
       if (err) return res.die(err);
 
-      _.extend(account, querystring.parse(data));
-      account.save(function(err, account) {
-        if (err) return res.die('account.save error: ' +err);
+      var values = querystring.parse(data);
+      // account.extendSave lets you change the account's _id, transparently
+      account.extendSave(values, function(err, account) {
+        if (err) return res.die('account.save error: ' + err);
 
         res.redirect('/admin/aws/' + account._id);
       });
@@ -90,13 +95,13 @@ R.post(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
 /** DELETE /admin/aws/:account_id
 Delete single AWS account */
 R.delete(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
-  models.AWSAccount.findById(m[1], function (err, account) {
-    if (err) return res.json({success: false, message: err});
-
-    if (!account) return res.json({success: false, message: 'Could not find account: ' + m[1]});
+  var _id = m[1];
+  models.AWSAccount.findById(_id, function (err, account) {
+    if (err) return res.die('AWS Account query error: ' + err);
+    if (!account) return res.die(404, 'Could not find AWS Account: ' + _id);
 
     account.remove(function(err) {
-      if (err) return res.json({success: false, message: err});
+      if (err) return res.die('AWS Account remove error: ' + err);
 
       res.json({success: true, message: 'Deleted account: ' + account._id});
     });

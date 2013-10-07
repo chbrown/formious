@@ -3,6 +3,10 @@
 
 <section class="box">
   <form method="POST" action="/admin/users/{{_id}}" class="vform">
+    <label><span>ID</span>
+      <input name="_id" type="text" value="{{_id}}" style="width: 250px" />
+    </label>
+
     <label><span>Bonus paid</span>
       <input name="bonus_paid" type="text" value="{{bonus_paid}}" />
     </label>

@@ -14,8 +14,10 @@
     <a href="/admin/users">Users</a>
     <a href="/admin/stimlists">Stimlists</a>
     <a href="/admin/stims">Stim Templates</a>
-    <a href="/users/{{ticket_user._id}}/logout" style="float: right">Logout</a>
-    <a href="/admin/users/{{ticket_user._id}}" style="float: right">me</a>
+    <div style="float: right">
+      <a href="/admin/users/{{ticket_user._id}}">me</a>
+      <a href="/users/{{ticket_user._id}}/logout">Logout</a>
+    </div>
   </nav>
   {{<}}
   <script>

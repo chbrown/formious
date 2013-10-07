@@ -1,5 +1,6 @@
 'use strict'; /*jslint node: true, es5: true, indent: 2 */
 var _ = require('underscore');
+var querystring = require('querystring');
 var amulet = require('amulet');
 var Router = require('regex-router');
 
@@ -22,6 +23,20 @@ R.get(/^\/admin\/stims\/new/, function(req, res, m) {
     res.redirect('/admin/stims/' + stim_template._id + '/edit');
   });
 });
+
+/** GET /admin/stims/:stim_id
+show existing StimTemplate */
+R.get(/^\/admin\/stims\/(\w+)$/, function(req, res, m) {
+  var _id = m[1];
+  models.StimTemplate.findById(_id, function(err, stim_template) {
+    if (err) return res.die('StimTemplate.findById() error: ' + err);
+    if (!stim_template) return res.die('No StimTemplate could be found: ' + _id);
+
+    req.ctx.stim = stim_template.toJSON();
+    amulet.stream(['admin/layout.mu', 'admin/stims/one.mu'], req.ctx).pipe(res);
+  });
+});
+
 
 /** GET /admin/stims/:stim_id/clone
 create new StimTemplate as clone of other */
@@ -52,30 +67,27 @@ R.get(/^\/admin\/stims\/(\w+)\/edit$/, function(req, res, m) {
     if (err) return res.die('StimTemplate.findById() error', err);
     if (!stim_template) return res.die('No StimTemplate "' + _id + '" could be found');
 
-    var stim_template_json = stim_template.toJSON();
-    // stim_template_json.html = misc.escapeHTML(stim_template_json.html);
-    req.ctx.stim = stim_template_json;
-
+    req.ctx.stim = stim_template.toJSON();
     amulet.stream(['admin/layout.mu', 'admin/stims/edit.mu'], req.ctx).pipe(res);
   });
 });
 
-/** PATCH /admin/stims/:stim_id
+/** POST /admin/stims/:stim_id
 update existing StimTemplate */
-R.patch(/^\/admin\/stims\/(\w+)/, function(req, res, m) {
+R.post(/^\/admin\/stims\/(\w+)/, function(req, res, m) {
   var _id = m[1];
-  req.readToEnd('utf8', function(err, stim_template_json) {
-    if (err) return res.die('req.readToEnd error: ' + err);
+  models.StimTemplate.findById(_id, function(err, stim_template) {
+    if (err) return res.die('StimTemplate query error: ' + err);
+    if (!stim_template) return res.die(404, 'Could not find StimTemplate: ' + _id);
 
-    var fields = misc.parseJSON(stim_template_json);
-    if (fields instanceof Error) return res.die('Could not parse JSON. Error: ' + fields);
+    req.readToEnd('utf8', function(err, data) {
+      if (err) return res.die('req.readToEnd error: ' + err);
 
-    models.StimTemplate.findById(_id, function(err, stim) {
-      if (err) return res.die('StimTemplate.findById error: ' + err);
+      var fields = querystring.parse(data);
+      stim_template.extendSave(fields, function(err, stim_template) {
+        if (err) return res.die('StimTemplate save error: ' + err);
 
-      _.extend(stim, fields);
-      stim.save(function() {
-        res.json(stim);
+        res.redirect('/admin/stims/' + stim_template._id);
       });
     });
   });

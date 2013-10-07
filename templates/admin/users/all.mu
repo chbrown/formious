@@ -6,7 +6,7 @@
   <table>
     <thead>
       <tr>
-        <th>ID</th>
+        <th>User</th>
         <th></th>
         <th>Created</th>
         <th># Responses</th>
@@ -15,11 +15,12 @@
         <th>Password</th>
         <th>Superuser</th>
         <th># Tickets</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
       {{#users}}
-        <tr>
+        <tr class="record">
           <td><a href="/admin/users/{{_id}}">{{_id}}</a></td>
           <td><a href="/admin/users/{{_id}}/edit">Edit</a></td>
           <td>{{datefmt(created)}}</td>
@@ -29,6 +30,7 @@
           <td><span class="truncate">{{password}}</span></td>
           <td>{{superuser}}</td>
           <td>{{tickets.length}}</td>
+          <td><a href="/admin/users/{{_id}}" data-method="delete">Delete</a></td>
         </tr>
       {{/}}
     </tbody>

@@ -3,8 +3,8 @@
 
 <section class="box">
   <form method="POST" action="/admin/aws/{{_id}}" class="vform">
-    <label><span>Name</span>
-      <input name="name" type="text" value="{{name}}" />
+    <label><span>ID</span>
+      <input name="_id" type="text" value="{{_id}}" />
     </label>
 
     <label><span>Access Key ID</span>
@@ -12,7 +12,7 @@
     </label>
 
     <label><span>Secret Access Key</span>
-      <input name="secretAccessKey" type="text" value="{{secretAccessKey}}" />
+      <input name="secretAccessKey" type="text" value="{{secretAccessKey}}" style="width: 500px" />
     </label>
 
     <button>Save</button>

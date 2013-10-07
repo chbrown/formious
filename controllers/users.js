@@ -58,8 +58,8 @@ R.post('/users/login', function(req, res) {
     if (!fields.user_id.trim()) return res.die('User cannot be empty');
     if (!fields.password.trim()) return res.die('Password cannot be empty');
 
-    models.User.fromId(fields.user_id, function(err, user) {
-      if (err) return res.die('User query error: ' + err);
+    models.User.findById(fields.user_id, function(err, user) {
+      if (err) return res.die('User.findById error: ' + err);
       if (!user) return res.die('User not found: ' + fields.user_id);
 
       if (user.password) {
@@ -84,8 +84,8 @@ R.post('/users/login', function(req, res) {
 /** GET /users
 redirect to /users/:current_user */
 R.get(/^\/users\/?$/, function(req, res, m) {
-  models.User.fromId(req.user_id, function(err, user) {
-    if (err) return res.die('User.fromId error ' + err);
+  models.User.findById(req.user_id, function(err, user) {
+    if (err) return res.die('User.findById error ' + err);
     if (!user) return res.die('User not found: ' + req.user_id);
 
     res.redirect('/users/' + user._id);

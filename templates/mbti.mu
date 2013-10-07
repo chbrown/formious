@@ -31,8 +31,5 @@
     <p><input type="input" name="mbti-score" /></p>
   </fieldset>
 
-  <div class="clear" style="padding: 10px">
-    <input type="submit" />
-  </div>
-
+  <button>Submit</button>
 </form>

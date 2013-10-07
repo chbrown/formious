@@ -1,4 +1,4 @@
-<div id="preview" style="display: none;">
+<div id="preview" style="display: none">
   <div class="controls"><span>&times;</span>Hide preview</div>
   <div class="content"></div>
 </div>
@@ -14,22 +14,22 @@ $('#preview > .controls').on('click', function(ev) {
 
 <section>
   <h3>Stimlist: {{stimlist._id}}</h3>
-  URL: <a href="/stimlists/{{stimlist.slug}}">{{stimlist.slug}}</a>
+  URL: <a href="/stimlists/{{stimlist._id}}">{{stimlist._id}}</a>
 </section>
 
 <div id="stimlist">
-  <form>
+  <form action="/admin/stimlists/{{stimlist._id}}">
     <section class="box hform">
-      <label><span>Slug</span>
-        <input name="slug" type="text" />
+      <label><span>ID</span>
+        <input name="_id" type="text" value="{{stimlist._id}}" />
       </label>
 
       <label><span>Creator</span>
-        <input name="creator" type="text" />
+        <input name="creator" type="text" value="{{stimlist.creator}}" />
       </label>
 
       <label>
-        <input name="segmented" type="checkbox" />
+        <input name="segmented" type="checkbox" {{#stimlist.segmented}}checked{{/}} />
         <span>Segmented (by participant)</span>
       </label>
 
@@ -38,15 +38,15 @@ $('#preview > .controls').on('click', function(ev) {
 
     <section class="box vform">
       <label><span>Prepend stim (show before each experiment)</span>
-        <input name="pre_stim" type="text" />
+        <input name="pre_stim" type="text" value="{{stimlist.pre_stim}}" style="width: 250px" />
       </label>
 
       <label><span>Default stim (if no <code>stim</code> column is specified)</span>
-        <input name="default_stim" type="text" />
+        <input name="default_stim" type="text" value="{{stimlist.default_stim}}" style="width: 250px" />
       </label>
 
       <label><span>Append stim (show after each experiment)</span>
-        <input name="post_stim" type="text" />
+        <input name="post_stim" type="text" value="{{stimlist.post_stim}}" style="width: 250px" />
       </label>
     </section>
 
@@ -80,7 +80,6 @@ $('#preview > .controls').on('click', function(ev) {
 </div>
 
 <script src="/static/inputs.js"></script> <!-- For ListInput() and $.listinput -->
-<script src="/static/lib/forms.js"></script> <!-- For new Form(...) -->
 <script>
 // have context to match the normal stimlist environment
 // and might as well be connected to the current user
@@ -151,16 +150,36 @@ var StimlistView = Backbone.View.extend({
   events: {
     'submit form': function(ev) {
       ev.preventDefault();
+      var $button = $(ev.target).find('button[type="submit"]');
+      var url = $(ev.target).attr('action');
 
       var form_obj = this.form.get();
       var attrs = _.extend(this.model.toJSON(), form_obj);
-      this.model.save(attrs, {
-        patch: true,
-        success: function(model, response, options) {
-          var message = options.xhr.getResponseHeader('x-message') || 'Success!';
-          $(ev.target).find('button[type="submit"]').flag({text: message, fade: 3000});
+
+      // Backbone doesn't let us set the URL in the request. So, that's dumb.
+      // var save_xhr = this.model.save(attrs, {patch: true});
+      var patch_xhr = $.ajax({
+        url: url,
+        method: 'PATCH',
+        data: JSON.stringify(attrs),
+        dataType: 'json',
+      });
+      patch_xhr.error(function(jqXHR, textStatus, errorThrown) {
+        $button.flag({text: jqXHR.responseText, fade: 3000});
+      });
+      patch_xhr.success(function(data, textStatus, jqXHR) {
+        var message = jqXHR.getResponseHeader('x-message') || 'Success!';
+        $button.flag({text: message, fade: 3000});
+
+        var redirect = jqXHR.getResponseHeader('location');
+        if (redirect) {
+          // pushState/replaceState arguments: (state_object, dummy, url)
+          // history.pushState(form_obj, '', redirect);
+          window.location = redirect;
         }
       });
+
+      $button.flag({html: '<img src="/static/lib/img/throbber-16-black.gif" />', fade: 5000});
     },
     'click tr': function(ev) {
       this.preview($(ev.currentTarget).index());

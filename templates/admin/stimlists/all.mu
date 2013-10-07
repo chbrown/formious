@@ -4,7 +4,7 @@
   <table>
     <thead>
       <tr>
-        <th>Slug</th>
+        <th>ID</th>
         <th></th>
         <th></th>
         <th>Created</th>
@@ -16,8 +16,8 @@
     <tbody>
       {{#stimlists}}
         <tr class="record">
-          <td title="{{_id}}">{{slug}}</td>
-          <td><a href="/stimlists/{{slug}}">Play</a></td>
+          <td title="{{_id}}">{{_id}}</td>
+          <td><a href="/stimlists/{{_id}}">View</a></td>
           <td><a href="/admin/stimlists/{{_id}}/edit">Edit</a></td>
           <td>{{datefmt(created)}}</td>
           <td>{{creator}}</td>
@@ -29,4 +29,6 @@
   </table>
 </section>
 
-<a href="/admin/stimlists/new" class="section">Create new...</a>
+<section>
+  <a href="/admin/stimlists/new">Create new...</a>
+</section>

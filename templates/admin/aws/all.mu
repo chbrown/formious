@@ -4,8 +4,7 @@
   <table>
     <thead>
       <tr>
-        <th>Name</th>
-        <th></th>
+        <th>Account</th>
         <th></th>
         <th>Access Key ID</th>
         <th>Secret Access Key</th>
@@ -16,8 +15,7 @@
     <tbody>
       {{#accounts}}
         <tr class="record">
-          <td title="{{_id}}">{{name}}</td>
-          <td><a href="/admin/aws/{{_id}}">View</a></td>
+          <td><a href="/admin/aws/{{_id}}">{{_id}}</a></td>
           <td><a href="/admin/aws/{{_id}}/edit">Edit</a></td>
           <td>{{accessKeyId}}</td>
           <td><div class="truncate">{{secretAccessKey}}</div></td>
@@ -29,4 +27,6 @@
   </table>
 </section>
 
-<a href="/admin/aws/new" class="section">Create new...</a>
+<section>
+  <a href="/admin/aws/new">Create new...</a>
+</section>

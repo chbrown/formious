@@ -356,7 +356,7 @@ function program3(depth0,data) {
   if (stack1 = helpers.src) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.src; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\" /></td>\n    <td style=\"padding-left: 20px; vertical-align: top;\">\n      <table class=\"stats\">\n        <tr><td>Estimated number of friendly aircraft in the sky:</td><td>";
+    + "\" /></td>\n    <td style=\"padding-left: 20px; vertical-align: top\">\n      <table class=\"stats\">\n        <tr><td>Estimated number of friendly aircraft in the sky:</td><td>";
   if (stack1 = helpers.total_friendly) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.total_friendly; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
@@ -385,7 +385,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression;
 
 
-  buffer += "<div style=\"width: 200px; margin: 0 auto\">\n\n  <div id=\"digitimage\"></div>\n\n  <!-- perhaps this is wasteful, to include this here, everytime we load this stim,\n    but it's more generic to load all resources required by the stim, in the stim,\n    rather than including them into the global compiled.js file. Maybe use head.js? -->\n  <script src=\"/static/lib/clock.js\"></script>\n  <script>\n  var segments = [\n    ";
+  buffer += "<div style=\"width: 250px; margin: 0 auto\">\n\n  <div id=\"digitimage\"></div>\n\n  <!-- perhaps this is wasteful, to include this here, everytime we load this stim,\n    but it's more generic to load all resources required by the stim, in the stim,\n    rather than including them into the global compiled.js file. Maybe use head.js? -->\n  <script src=\"/static/lib/clock.js\"></script>\n  <script>\n  var segments = [\n    ";
   if (stack1 = helpers.DIGITLINE1) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.DIGITLINE1; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
@@ -583,13 +583,13 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 
   buffer += "<table cellpadding=\"0\" cellspacing=\"0\" style=\"margin: 0 auto\">\n  <tr>\n    <th colspan=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.scenes),stack1 == null || stack1 === false ? stack1 : stack1.length)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" style=\"text-align: left;\">\n      <h3>Bomb ";
+    + "\" style=\"text-align: left\">\n      <h3>Bomb ";
   if (stack2 = helpers.id) { stack2 = stack2.call(depth0, {hash:{},data:data}); }
   else { stack2 = depth0.id; stack2 = typeof stack2 === functionType ? stack2.apply(depth0) : stack2; }
   buffer += escapeExpression(stack2)
     + "</h3>\n    </th>\n  </tr>\n  <tr id=\"digits\"></tr>\n  <tr>\n    <td colspan=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.scenes),stack1 == null || stack1 === false ? stack1 : stack1.length)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" style=\"padding: 20px 0; text-align: right;\">\n      <button disabled=\"true\">Submit</button>\n    </td>\n  </tr>\n</table>\n";
+    + "\" style=\"padding: 20px 0; text-align: right\">\n      <button disabled=\"true\">Submit</button>\n    </td>\n  </tr>\n</table>\n";
   return buffer;
   });
 templates['stims/digits/conclusion'] = template(function (Handlebars,depth0,helpers,partials,data) {

@@ -10,6 +10,7 @@
     "amulet": ">=1.0.4",
     "async": "*",
     "cookies": "git://github.com/chbrown/cookies.git",
+    "eyes": "*",
     "formidable": "*",
     "http-enhanced": "*",
     "js-yaml": "*",

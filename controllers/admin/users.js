@@ -17,7 +17,8 @@ var R = new Router(function(req, res) {
 /** GET /admin/users
 list all users */
 R.get(/^\/admin\/users\/?$/, function(req, res, m) {
-  models.User.find({}, '_id created responses.length bonus_paid bonus_owed password superuser tickets', function(err, users) {
+  var projection = '_id created responses.length bonus_paid bonus_owed password superuser tickets';
+  models.User.find().select(projection).sort('-created').exec(function(err, users) {
     if (err) return res.die('User query error: ' + err);
 
     req.ctx.users = users;
@@ -25,11 +26,23 @@ R.get(/^\/admin\/users\/?$/, function(req, res, m) {
   });
 });
 
-/** GET /admin/users/:user
+/** GET /admin/users/new
+create new User and redirect to edit it */
+R.get(/^\/admin\/users\/new/, function(req, res, m) {
+  models.User.create({}, function(err, user) {
+    if (err) return res.die('User.create error: ' + err);
+
+    res.redirect('/admin/users/' + user._id + '/edit');
+  });
+});
+
+/** GET /admin/users/:user_id
 show single user */
 R.get(/^\/admin\/users\/(\w+)$/, function(req, res, m) {
-  models.User.fromId(m[1], function(err, user) {
+  var _id = m[1];
+  models.User.findById(_id, function(err, user) {
     if (err) return res.die('User query error: ' + err);
+    if (!user) return res.die(404, 'Could not find User: ' + _id);
 
     user.responses.sort(function(l, r) {
       return (r.created || 0) - (l.created || 0);
@@ -48,39 +61,55 @@ R.get(/^\/admin\/users\/(\w+)$/, function(req, res, m) {
   });
 });
 
-/** GET /admin/users/:user/edit
+/** GET /admin/users/:user_id/edit
 edit single user */
 R.get(/^\/admin\/users\/(\w+)\/edit$/, function(req, res, m) {
-  models.User.fromId(m[1], function(err, user) {
+  var _id = m[1];
+  models.User.findById(_id, function(err, user) {
     if (err) return res.die('User query error: ' + err);
+    if (!user) return res.die(404, 'Could not find User: ' + _id);
 
     req.ctx.user = user;
     amulet.stream(['admin/layout.mu', 'admin/users/edit.mu'], req.ctx).pipe(res);
   });
 });
 
-/** POST /admin/users/:user
+/** POST /admin/users/:user_id
 update existing User. Should be PATCH, but <form>s only do POST. */
 R.post(/^\/admin\/users\/(\w+)$/, function(req, res, m) {
-  models.User.fromId(m[1], function(err, user) {
+  var _id = m[1];
+  models.User.findById(_id, function(err, user) {
     if (err) return res.die('User query error: ' + err);
+    if (!user) return res.die(404, 'Could not find User: ' + _id);
 
     req.readToEnd('utf8', function(err, data) {
       if (err) return res.die('IO read error: ' + err);
 
       var fields = querystring.parse(data);
-      var overwriting_fields = _.pick(fields, 'bonus_paid', 'bonus_owed', 'superuser');
-      _.extend(user, overwriting_fields);
+      // empty-string password means: don't change the password
+      if (fields.password === '') delete fields.password;
 
-      if (fields.password && fields.password.trim()) {
-        user.password = fields.password;
-      }
-
-      user.save(function(err) {
+      user.extendSave(fields, function(err, user) {
         if (err) return res.die('User save error: ' + err);
 
         res.redirect('/admin/users/' + user._id);
       });
+    });
+  });
+});
+
+/** DELETE /admin/users/:user_id
+Delete single User */
+R.delete(/^\/admin\/users\/(\w*)$/, function(req, res, m) {
+  var _id = m[1];
+  models.User.findById(_id, function(err, user) {
+    if (err) return res.die('User query error: ' + err);
+    if (!user) return res.die(404, 'Could not find User: ' + _id);
+
+    user.remove(function(err) {
+      if (err) return res.die('User remove error: ' + err);
+
+      res.json({success: true, message: 'Deleted user: ' + user._id});
     });
   });
 });

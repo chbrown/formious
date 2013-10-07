@@ -1,75 +1,72 @@
-<fieldset><legend>Create HIT</legend>
-  <form method="POST" action="CreateHIT">
-    <button type="submit">Create HIT</button>
+<h3 class="section">Create HIT</h3>
+
+<section class="box">
+  <form method="POST" action="CreateHIT" class="vform">
+
+    <label><span>Max Assignments</span>
+      <input type="text" name="MaxAssignments" />
+    </label>
+
+    <label><span>Title</span>
+      <input type="text" name="Title" style="width: 500px" />
+    </label>
+
+    <label><span>Description (2000 character max)</span>
+      <input type="text" name="Description" style="width: 600px" />
+    </label>
+
+    <label><span>Reward, in USD</span>
+      <input type="text" name="Reward" />
+    </label>
+
+    <label><span>Comma-separated keywords</span>
+      <input type="text" name="Keywords" style="width: 600px" />
+    </label>
+
+    <label><span>External URL</span>
+      <input type="text" name="ExternalURL" style="width: 600px" />
+    </label>
+
+    <label><span>Frame Height</span>
+      <input type="text" name="FrameHeight" />
+    </label>
+
+    <label><span>Assignment Duration (e.g., 3h)</span>
+      <input type="text" name="AssignmentDuration" />
+    </label>
+
+    <label><span>Lifetime (e.g., 3d)</span>
+      <input type="text" name="Lifetime" />
+    </label>
+
+    <label><span>Auto-approval Delay (e.g., 60m)</span>
+      <input type="text" name="AutoApprovalDelay" />
+    </label>
+
+    <button>Create HIT</button>
   </form>
-</fieldset>
+</section>
 
 <script>
-var fields = [
-  {
-    id: 'MaxAssignments',
-  },
-  {
-    id: 'Title',
-    width: '600',
-  },
-  {
-    id: 'Description',
-    label: 'Description (2000 character max)',
-    width: '600',
-  },
-  {
-    id: 'Reward',
-    label: 'Reward, in USD',
-  },
-  {
-    id: 'Keywords',
-    label: 'Comma-separated keywords',
-    width: '600',
-  },
-  {
-    id: 'ExternalURL',
-    width: '600',
-  },
-  {
-    id: 'FrameHeight',
-  },
-  {
-    id: 'AssignmentDuration',
-    label: 'Assignment Duration (e.g., 3h)',
-  },
-  {
-    id: 'Lifetime',
-    label: 'Lifetime (e.g., 3d)',
-  },
-  {
-    id: 'AutoApprovalDelay',
-    label: 'Auto-approval Delay (e.g., 60m)',
-  },
-];
+// .on('submit', function(ev) {
+//   ev.preventDefault();
+//   var form_obj = form.get();
+// });
 
-var FormInput = TemplatedView.extend({
-  template: 'form-input',
-  preRender: function(ctx) {
-    this.id = ctx.id;
-    ctx.label = ctx.label || this.id;
-    ctx.value = localStorage[this.id];
-  },
-  postRender: function(ctx) {
-    // window.form = this;
-    this.$('input').css({width: ctx.width});
-  },
-  events: {
-    'change input': function(ev) {
-      // this.$('input')
-      var value = ev.target.value;
-      localStorage[this.id] = value;
-    }
-  }
-});
+var form_defaults = {};
+try {
+  form_defaults = JSON.parse(localStorage.new_hit_defaults);
+}
+catch (exc) {
+  console.error(exc);
+}
 
-fields.reverse().forEach(function(field) {
-  var form_input = new FormInput(field);
-  $('form').prepend(form_input.$el);
+var $form = $('form');
+var form = new Form($form[0]);
+form.set(form_defaults);
+
+$form.on('change', 'input', function(ev) {
+  console.log('change', ev);
+  localStorage.new_hit_defaults = JSON.stringify(form.get());
 });
 </script>

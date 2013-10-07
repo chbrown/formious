@@ -13,7 +13,7 @@ var stim_globals = {
   hitId: '{{hitId}}',
   host: '{{host}}',
   workerId: '{{workerId}}',
-  stimlist: '{{slug}}'
+  stimlist: '{{stimlist_id}}'
 };
 
 var states = {{{JSON.stringify(states)}}};

@@ -4,7 +4,7 @@
   <table>
     <thead>
       <tr>
-        <th>Name</th>
+        <th>Stim Template</th>
         <th></th>
         <th></th>
         <th>Created</th>
@@ -14,7 +14,7 @@
     <tbody>
       {{#stims}}
         <tr class="record">
-          <td title="{{_id}}"><a href="/templates/stims/{{name}}.bars">{{name}}</a></td>
+          <td><a href="/admin/stims/{{_id}}">{{_id}}</a></td>
           <td><a href="/admin/stims/{{_id}}/edit">Edit</a></td>
           <td><a href="/admin/stims/{{_id}}/clone">Clone</a></td>
           <td>{{datefmt(created)}}</td>
@@ -25,4 +25,6 @@
   </table>
 </section>
 
-<a href="/admin/stims/new" class="section">Create new...</a>
+<section>
+  <a href="/admin/stims/new">Create new...</a>
+</section>

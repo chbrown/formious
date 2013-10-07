@@ -42,6 +42,5 @@ input[type="checkbox"]+span{display:inline-block;font-weight:bold;margin-left:.2
 #preview .controls:hover{background-color:#ddd}
 .assignment{margin-top:10px;padding-left:10px;border:1px dotted #ddd}.assignment .controls{float:left;width:30%}
 .assignment .keyval{float:left;width:64%;margin-left:10px}.assignment .keyval td:first-child{width:120px}
-.assignment input{width:200px}
 .focus{box-shadow:0 0 6px #51cbee}
 .flag{position:absolute;background-color:#000;border-radius:3px;padding:2px 6px;color:#fff}.flag .triangle{position:absolute;border:6px solid transparent}

@@ -53,7 +53,7 @@ function fileinputText(input, callback) {
 
 // a stim (aka., state, when in a list of stims) is the full
 var StimView = TemplatedView.extend({
-  // usage new StimView({hit_started: Number, stimlist_slug: String, ...})
+  // usage new StimView({hit_started: Number, stimlist_id: String, ...})
   template: 'stims/default',
   preInitialize: function(ctx) {
     this.ctx = ctx;
