@@ -14,7 +14,8 @@ var R = new Router(function(req, res) {
 /** GET /admin/stimlists
 list all Stimlists */
 R.get(/^\/admin\/stimlists\/?$/, function(req, res, m) {
-  models.Stimlist.find({}, '_id created creator csv.length states.length', function(err, stimlists) {
+  var projection = '_id created creator csv.length states.length';
+  models.Stimlist.find().select(projection).sort('-created').exec(function(err, stimlists) {
     if (err) return res.die('Stimlist.find() error', err);
 
     req.ctx.stimlists = stimlists;
