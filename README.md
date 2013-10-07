@@ -146,44 +146,22 @@ The two planes are Messerschmitts and Spitfires, particularly, models taken from
       res.json({success: false, message: message, unpaid: unpaid});
     }
 
-
-## Handsontable example (was way too slow)
-
-    var handson_columns = columns.map(function(column) { return {data: column}; })
-    this.$('.states').handsontable({
-      colHeaders: columns,
-      columns: handson_columns,
-      minSpareRows: 1,
-      data: states,
-      // contextMenu: false,
-    });
-
 ## Development
 
 Setting `window.DEBUG = true;` on any page will put client-side templating into synchronous mode, so that caching won't be problematic, and may also be useful in helping to diagnose other issues.
 
+**Developing locally using remote database**:
 
-## Converting to String _id's
+    # create ssh-powered tcp tunnel,
+    #  from localhost:27018 to localhost:27017 on remote host "vera"
+    ssh vera -L 27018:localhost:27017 -N
 
-    var coll = db.stimtemplates;
+    # Use -f to fork the ssh tunnel, otherwise, in another terminal:
 
-    // BSON type#7 is ObjectId, type#2 is String
-    //   http://docs.mongodb.org/manual/reference/bson-types/
-    coll.find({_id: {$type : 7}}).forEach(function(doc) {
-      doc._id = doc._id.str;
-      coll.save(doc);
-    });
-
-    var withObjectId_ids = coll.count({_id: {$type : 7}});
-    var withString_ids = coll.count({_id: {$type : 2}});
-    printjson({withObjectId_ids: withObjectId_ids, withString_ids: withString_ids});
-    assert(withObjectId_ids == withString_ids, 'Not as many objects with ObjectId _ids as String _ids');
-
-    // showing old ones:
-    coll.find({_id: {$type : 7}})
-
-    // deleting them:
-    coll.remove({_id: {$type : 7}})
+    # test connection with mongo CLI
+    mongo localhost:27018
+    # start node
+    node server.js --database_port 27018
 
 
 ## License

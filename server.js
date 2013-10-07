@@ -33,7 +33,10 @@ var optimist = require('optimist')
   .describe({
     hostname: 'hostname to listen on',
     port: 'port to listen on',
+
     database: 'name of the mongodb database',
+    database_host: 'hostname serving mongo',
+    database_port: 'port serving mongo',
 
     help: 'print this help message',
     verbose: 'print extra output',
@@ -44,7 +47,10 @@ var optimist = require('optimist')
   .default({
     hostname: '127.0.0.1',
     port: 1451,
+
     database: 'turkserv',
+    database_host: 'localhost',
+    database_port: 27017,
   });
 
 var argv = optimist.argv;
@@ -59,7 +65,8 @@ else if (argv.version) {
 else {
   var root_controller = require('./controllers');
 
-  models.mongoose.connect('localhost', argv.database);
+  logger.debug('connecting to mongodb://%s:%d/%s', argv.database_host, argv.database_port, argv.database);
+  models.mongoose.connect(argv.database_host, argv.database, argv.database_port);
 
   http.createServer(function(req, res) {
     req.cookies = new Cookies(req, res);
