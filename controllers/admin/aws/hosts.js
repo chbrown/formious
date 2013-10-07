@@ -62,6 +62,8 @@ R.post(/CreateHIT/, function(req, res) {
       LifetimeInSeconds: misc.durationStringToSeconds(fields.Lifetime || 0),
       AutoApprovalDelayInSeconds: misc.durationStringToSeconds(fields.AutoApprovalDelay || 0),
     };
+
+    logger.debug('CreateHIT params:', params);
     req.turk.CreateHIT(params, function(err, result) {
       if (err) return res.json({success: false, message: err});
 
@@ -183,20 +185,21 @@ R.get(/HITs\/(\w+)/, function(req, res, m) {
   var sort_params = {SortProperty: 'SubmitTime', SortDirection: 'Ascending'};
 
   async.auto({
-    GetHIT: function(callback, results) {
+    GetHIT: function(callback) {
       req.turk.GetHIT({HITId:  HITId}, callback);
     },
-    GetAssignmentsForHIT: function(callback, results) {
+    GetAssignmentsForHIT: function(callback) {
       var payload = _.extend({}, params, sort_params);
       req.turk.GetAssignmentsForHIT(payload, callback);
     },
-    GetBonusPayments: function(callback, results) {
+    GetBonusPayments: function(callback) {
       req.turk.GetBonusPayments(params, callback);
     },
   }, function(err, results) {
-    if (err) return res.die('GetHIT|GetAssignmentsForHIT|GetBonusPayments error: ' + err);
+    if (err) return res.die('GetHIT / GetAssignmentsForHIT / GetBonusPayments error: ' + err);
 
-    var raw_assigments = results.GetAssignmentsForHITResult.Assignment || [];
+    var hit_assignments_result = results.GetAssignmentsForHIT.GetAssignmentsForHITResult;
+    var raw_assigments = hit_assignments_result.Assignment || [];
     async.map(raw_assigments, function(assignment, callback) {
       assignment.Answer = xmlconv(assignment.Answer, {convention: 'castle'}).QuestionFormAnswers.Answer;
 
@@ -217,9 +220,11 @@ R.get(/HITs\/(\w+)/, function(req, res, m) {
     }, function(err, assignments) {
       if (err) return res.die('Assignment mapping error: ' + err);
 
+      var bonus_payments = results.GetBonusPayments;
+
       _.extend(req.ctx, {
         hit: results.GetHIT.HIT,
-        BonusPayments: results.GetBonusPaymentsResult.BonusPayment,
+        BonusPayments: bonus_payments.GetBonusPaymentsResult.BonusPayment,
         assignments: assignments,
       });
       amulet.stream(['admin/layout.mu', 'admin/HITs/one.mu'], req.ctx).pipe(res);

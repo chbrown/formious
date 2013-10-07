@@ -14,7 +14,6 @@
     "formidable": "*",
     "http-enhanced": "*",
     "js-yaml": "*",
-    "turk": "*",
     "moment": "git://github.com/timrwood/moment.git#develop",
     "mongoose": "*",
     "optimist": "*",
@@ -23,6 +22,7 @@
     "sprintf": "*",
     "streaming": "*",
     "sv": "*",
+    "turk": "0.5.2",
     "underscore": "*",
     "winston": "*",
     "xmlconv": "*"
