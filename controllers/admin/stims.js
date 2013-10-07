@@ -17,8 +17,8 @@ var R = new Router(function(req, res) {
 /** GET /admin/stims/new
 create new StimTemplate and redirect to edit it */
 R.get(/^\/admin\/stims\/new/, function(req, res, m) {
-  new models.StimTemplate().save(function(err, stim_template) {
-    if (err) return res.die('New StimTemplate save error: ' + err);
+  models.StimTemplate.create({}, function(err, stim_template) {
+    if (err) return res.die('StimTemplate.create error: ' + err);
 
     res.redirect('/admin/stims/' + stim_template._id + '/edit');
   });
@@ -47,12 +47,11 @@ R.get(/^\/admin\/stims\/(\w+)\/clone$/, function(req, res, m) {
     if (!stim_template) return res.die('No StimTemplate "' + _id + '" could be found');
 
     // copy properties, drop _id so new one will get inserted, and change name
-    var properties = stim_template.toObject();
-    delete properties._id;
-    properties.name += ' (copy)';
+    var clone_properties = stim_template.toObject();
+    clone_properties._id += '_copy';
 
-    new models.StimTemplate(properties).save(function(err, stim_template) {
-      if (err) return res.die('New StimTemplate save error: ' + err);
+    models.StimTemplate.create(clone_properties, function(err, stim_template) {
+      if (err) return res.die('StimTemplate.create error: ' + err);
 
       res.redirect('/admin/stims/' + stim_template._id + '/edit');
     });

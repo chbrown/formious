@@ -30,12 +30,12 @@ R.get(/^\/templates\/stims\/([^?]+\.bars)(\?|$)/, function(req, res, m) {
   // only handles .bars, at the moment
   logger.debug('/templates/stims: %s', m[1]);
   // check if there is a StimTemplate, first
-  var name = m[1].replace(/\.bars$/, '');
-  models.StimTemplate.findOne({name: name}, function(err, stim_template) {
-    if (err) return res.die('StimTemplate.findOne error' + err);
+  var _id = m[1].replace(/\.bars$/, '');
+  models.StimTemplate.findById(_id, function(err, stim_template) {
+    if (err) return res.die('StimTemplate.findById error: ' + err);
 
     if (stim_template) {
-      logger.debug('found StimTemplate:', stim_template.name);
+      logger.debug('found StimTemplate:', stim_template._id);
 
       res.writeAll(200, 'text/x-handlebars-template', stim_template.html);
     }
