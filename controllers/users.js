@@ -12,7 +12,16 @@ var R = new Router(function(req, res) {
   res.die(404, 'No resource at: ' + req.url);
 });
 
-/** GET /users/:user
+/** GET /users/:user_id/logout
+helper page to purge ticket (must come before login action below) */
+R.get(/^\/users\/(\w+)\/logout/, function(req, res, m) {
+  logger.debug('Deleting ticket cookie "%s" (for user: "%s")', req.cookies.get('ticket'), m[1]);
+
+  req.cookies.del('ticket');
+  res.redirect('/users');
+});
+
+/** GET /users/:user_id
 show login page for this user */
 R.get(/^\/users\/(\w+)/, function(req, res, m) {
   // console.log('serving get', m);
@@ -22,15 +31,6 @@ R.get(/^\/users\/(\w+)/, function(req, res, m) {
     // login.mu presents a form that submits to /claim or /become depending on the current password status of the user
     amulet.stream(['layout.mu', 'users/login.mu'], {user: user}).pipe(res);
   });
-});
-
-/** GET /users/:user/logout
-helper page to purge ticket */
-R.get(/^\/users\/(\w+)\/logout/, function(req, res, m) {
-  logger.debug('Deleting ticket cookie "%s" (for user: "%s")', req.cookies.get('ticket'), m[1]);
-
-  req.cookies.del('ticket');
-  res.redirect('/users');
 });
 
 /** POST /users/login
@@ -84,8 +84,9 @@ R.post('/users/login', function(req, res) {
 /** GET /users
 redirect to /users/:current_user */
 R.get(/^\/users\/?$/, function(req, res, m) {
-  models.User.findById(req.user_id, function(err, user) {
-    if (err) return res.die('User.findById error ' + err);
+  // this should be fromId because it is considerably likely that an admin will land here to log in
+  models.User.fromId(req.user_id, function(err, user) {
+    if (err) return res.die('User.fromId error ' + err);
     if (!user) return res.die('User not found: ' + req.user_id);
 
     res.redirect('/users/' + user._id);
