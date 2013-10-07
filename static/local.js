@@ -128,35 +128,31 @@ var AssignmentCollection = TemplatedCollection.extend({
   url: '../Assignments'
 });
 var AssignmentView = TemplatedView.extend({
-  className: 'assignment',
   template: 'admin/assignments/one',
   preRender: function(ctx) {
-    // AssignmentStatus is one of Submitted | Approved | Rejected
+    // ctx.AssignmentStatus is one of Submitted | Approved | Rejected
     ctx[ctx.AssignmentStatus] = true;
-    ctx.reason = localStorage.current_reason;
+    ctx.reason = localStorage.bonus_reason;
   },
   events: {
     'change input[name="reason"]': function(ev) {
-      localStorage.current_reason = ev.target.value;
+      localStorage.bonus_reason = ev.target.value;
     },
     'click button.responses': function(ev) {
       var workerId = this.model.get('WorkerId');
       var worker = new MTWorker({id: workerId});
       worker.fetch({
         success: function(model, user, options) {
+          // infer required columns from list of responses
           var keys = {};
           user.responses.slice(0, 50).forEach(function(response) {
             _.extend(keys, response);
           });
 
+          // create table and simply put where the button was
           var cols = _.keys(keys).sort();
-          var data = user.responses.map(function(response) {
-            return cols.map(function(col) {
-              return response[col];
-            });
-          });
-
-          $(ev.target).replaceWith(makeTable(cols, data));
+          var table_html = tabulate(user.responses, cols);
+          $(ev.target).replaceWith(table_html);
         }
       });
     },

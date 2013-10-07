@@ -31,7 +31,7 @@ input[type="radio"], input[type="checkbox"] {
   margin: 1px .25ex;
 }
 fieldset {
-  margin: 0 0 10px 0;
+  margin: 0 10px 10px 0;
   border: 1px solid #CCC;
 }
 .code {
@@ -105,7 +105,7 @@ table {
   &.keyval {
     th {
       padding-top: 4px;
-      border-bottom: 1px solid #777;
+      border-bottom: 1px solid #999;
     }
     td:first-child {
       font-weight: bold;
@@ -139,8 +139,8 @@ table {
   background-color: #FCFCFC;
 
   .status span {
-    font-size: 110%;
     font-weight: bold;
+    margin: 10px 10px 0 0;
     &.Submitted { color: #CCC; }
     &.Approved { color: darkgreen; }
     &.Rejected { color: darkred; }
@@ -233,24 +233,6 @@ input[type="checkbox"] + span {
     }
     &:hover {
       background-color: #DDD;
-    }
-  }
-}
-
-.assignment {
-  margin-top: 10px;
-  padding-left: 10px;
-  border: 1px dotted #ddd;
-  .controls {
-    float: left;
-    width: 30%;
-  }
-  .keyval {
-    float: left;
-    width: 64%;
-    margin-left: 10px;
-    td:first-child {
-      width: 120px;
     }
   }
 }

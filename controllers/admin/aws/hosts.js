@@ -7,6 +7,7 @@ var async = require('async');
 var turk = require('turk');
 var Router = require('regex-router');
 var xmlconv = require('xmlconv');
+var url = require('url');
 
 var logger = require('../../../lib/logger');
 var misc = require('../../../lib/misc');
@@ -133,16 +134,31 @@ R.post(/Assignments\/(\w+)\/GrantBonus/, function(req, res, m) {
   });
 });
 
-// HIT/show tsv
+/** GET /admin/aws/:account_id/host/:host/HITs/:hit_id.csv
+    GET /admin/aws/:account_id/host/:host/HITs/:hit_id.csv?view
+    GET /admin/aws/:account_id/host/:host/HITs/:hit_id.tsv
+    GET /admin/aws/:account_id/host/:host/HITs/:hit_id.tsv?view
+Download or view HIT csv/tsv summary of users responses */
 R.get(/HITs\/(\w+)\.(csv|tsv)/, function(req, res, m) {
-  var HITId = m[1];
-  // var columns = ['workerId', 'duration'].concat(['choice', 'correct', 'truth',
-  //   'image_id', 'prior', 'judgments', 'reliabilities', 'batch_index', 'scene_index',
-  //   'submitted', 'task_started', 'time', 'width', 'workerId', 'version']);
-  // res.setHeader('Content-Type', delimiter == ',' ? 'text/csv' : 'text/tab-separated-values');
-  var writer = sv.Stringifier({delimiter: m[2] == 'csv' ? ',' : '\t'});
+  // instead of ?: conditionals, we have a limited input (csv/tsv) so we set up some constant mappings:
+  var content_types = {csv: 'text/csv', tsv: 'text/tab-separated-values'};
+  var delimiters = {csv: ',', tsv: '\t'};
+
+  var urlObj = url.parse(req.url, true);
+  // both ?view= and ?view parse to '' (only complete absence is undefined)
+  logger.debug('HITs/download: ?view="%s"', urlObj.query.view);
+  if (urlObj.query.view === undefined) {
+    res.setHeader('Content-Disposition', 'attachment; filename=HIT_' + m[1] + '.' + m[2]);
+    res.setHeader('Content-Type', content_types[m[2]]);
+  }
+  else {
+    res.setHeader('Content-Type', 'text/plain');
+  }
+
+  var writer = new sv.Stringifier({delimiter: delimiters[m[2]]});
   writer.pipe(res);
-  var params = {HITId: HITId, PageSize: 100, SortProperty: 'SubmitTime', SortDirection: 'Ascending'};
+
+  var params = {HITId: m[1], PageSize: 100, SortProperty: 'SubmitTime', SortDirection: 'Ascending'};
   req.turk.GetAssignmentsForHIT(params, function(err, assignments_result) {
     if (err) return writer.emit('error', err).end();
 
@@ -166,8 +182,12 @@ R.get(/HITs\/(\w+)\.(csv|tsv)/, function(req, res, m) {
         callback(null);
       });
     }, function(err) {
-      if (err) logger.error('Error encountered when iterating assignments from MTurk API', err);
+      if (err) {
+        logger.error('Error encountered when iterating assignments from MTurk API: ', err);
+        writer.emit('error', err);
+      }
 
+      // should this call end even if we hit an error?
       writer.end();
     });
   });

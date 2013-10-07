@@ -6,7 +6,7 @@ button{margin:10px 10px 0 0}
 label{margin:2px 0;display:block;vertical-align:middle}label[disabled]{color:#777}
 textarea,input{vertical-align:middle;margin:0}
 input[type="radio"],input[type="checkbox"]{margin:1px .25ex}
-fieldset{margin:0 0 10px 0;border:1px solid #ccc}
+fieldset{margin:0 10px 10px 0;border:1px solid #ccc}
 .code{font:9pt monospace}
 section,.section{vertical-align:top;margin:10px 0;padding:0 10px}section.fill,.section.fill,section.box,.section.box{padding:10px;background-color:#fff;border:1px solid #eee}
 section.fill,.section.fill{border-width:1px 0;overflow:auto}
@@ -19,12 +19,12 @@ table th{text-align:left}
 table td{font-size:90%}
 table td,table th{vertical-align:top;padding:1px 8px 2px 1px}
 table.hoverable tbody tr:hover{background-color:#ddd}
-table.keyval th{padding-top:4px;border-bottom:1px solid #777}
+table.keyval th{padding-top:4px;border-bottom:1px solid #999}
 table.keyval td:first-child{font-weight:bold}
 .fill table thead td,.fill table tbody td{border-bottom:1px solid #ddd}
 .record.delete{background-color:#ddd;color:#555;text-decoration:line-through}
 .hover-flow{word-wrap:break-word;text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.hover-flow:hover{white-space:normal;overflow:visible}
-.admin{background-color:#fcfcfc}.admin .status span{font-size:110%;font-weight:bold}.admin .status span.Submitted{color:#ccc}
+.admin{background-color:#fcfcfc}.admin .status span{font-weight:bold;margin:10px 10px 0 0}.admin .status span.Submitted{color:#ccc}
 .admin .status span.Approved{color:#006400}
 .admin .status span.Rejected{color:#8b0000}
 input[type="checkbox"]+span{display:inline-block;font-weight:bold;margin-left:.25em}
@@ -40,7 +40,5 @@ input[type="checkbox"]+span{display:inline-block;font-weight:bold;margin-left:.2
 #preview{position:fixed;max-width:50%;top:10px;right:10px;border:1px solid #ddd}#preview .content{padding:10px;background-color:#fff}
 #preview .controls{padding:10px;background-color:#eee;cursor:pointer}#preview .controls span{float:right}
 #preview .controls:hover{background-color:#ddd}
-.assignment{margin-top:10px;padding-left:10px;border:1px dotted #ddd}.assignment .controls{float:left;width:30%}
-.assignment .keyval{float:left;width:64%;margin-left:10px}.assignment .keyval td:first-child{width:120px}
 .focus{box-shadow:0 0 6px #51cbee}
 .flag{position:absolute;background-color:#000;border-radius:3px;padding:2px 6px;color:#fff}.flag .triangle{position:absolute;border:6px solid transparent}

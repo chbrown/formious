@@ -3,8 +3,14 @@
 <section class="fill">
   <h3>Download</h3>
   <ul>
-    <li><a href="{{hit.HITId}}.csv">{{hit.HITId}}.csv</a> (comma-separated)</li>
-    <li><a href="{{hit.HITId}}.tsv">{{hit.HITId}}.tsv</a> (tab-separated)</li>
+    <li>
+      <a href="{{hit.HITId}}.csv">HIT_{{hit.HITId}}.csv</a>
+      &middot; <a href="{{hit.HITId}}.csv?view">View</a>
+    </li>
+    <li>
+      <a href="{{hit.HITId}}.tsv">HIT_{{hit.HITId}}.tsv</a>
+      &middot; <a href="{{hit.HITId}}.tsv?view">View</a>
+    </li>
   </ul>
 </section>
 
@@ -32,10 +38,9 @@
   </table>
 </section>
 
-<section class="fill">
-  <h3>Assignments</h3>
-  <div id="assignments"></div>
-</section>
+<h3 class="section">Assignments</h3>
+
+<div id="assignments"></div>
 
 <script>
 var hit = new HIT({{{JSON.stringify(hit)}}});
