@@ -90,7 +90,7 @@ R.post(/Assignments\/(\w+)\/Approve/, function(req, res, m) {
     var params = {AssignmentId: AssignmentId};
     if (fields.RequesterFeedback) params.RequesterFeedback = fields.RequesterFeedback;
     req.turk.ApproveAssignment(params, function(err, result) {
-      if (err) return res.json({success: false, message: err});
+      if (err) return res.die('ApproveAssignment failed: ' + err);
 
       res.json({success: true, message: 'Approved Assignment: ' + AssignmentId});
     });
@@ -117,10 +117,11 @@ R.post(/Assignments\/(\w+)\/GrantBonus/, function(req, res, m) {
     if (fields.Reason) params.Reason = fields.Reason;
 
     req.turk.GrantBonus(params, function(err, result) {
-      if (err) return res.json({success: false, message: err});
+      if (err) return res.die('GrantBonus failed: ' + err);
 
       models.User.findById(WorkerId, function(err, user) {
-        if (err) return res.json({success: false, message: err});
+        if (err) return res.die('User.findById failed: ' + err);
+        if (!user) return res.die('User could not be found: ' + WorkerId);
 
         user.bonus_owed -= amount;
         user.bonus_paid += amount;

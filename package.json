@@ -12,7 +12,7 @@
     "cookies": "git://github.com/chbrown/cookies.git",
     "eyes": "*",
     "formidable": "*",
-    "http-enhanced": "*",
+    "http-enhanced": ">=0.3.1",
     "js-yaml": "*",
     "moment": "git://github.com/timrwood/moment.git#develop",
     "mongoose": "*",

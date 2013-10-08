@@ -165,8 +165,12 @@ var AssignmentView = TemplatedView.extend({
         params.WorkerId = this.model.get('WorkerId');
       }
       // $.post( url [, data ] [, success(data, textStatus, jqXHR) ] [, dataType ] )
-      $.post(this.model.url() + '/' + action, params, function(data, textStatus, jqXHR) {
+      var jqXHR = $.post(this.model.url() + '/' + action, params);
+      jqXHR.done(function(data, textStatus, jqXHR) {
         $(ev.target).flag({html: data.message, fade: 5000});
+      });
+      jqXHR.fail(function(jqXHR, textStatus, errorThrown) {
+        $(ev.target).flag({html: jqXHR.responseText, fade: 5000});
       });
     }
   }
