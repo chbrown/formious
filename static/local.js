@@ -6,7 +6,7 @@ $(document).on('click', 'a[data-method]', function(ev) {
   var method = this.getAttribute('data-method');
   $.ajax({
     url: this.href,
-    method: method
+    type: method
   }).done(function(data, textStatus, jqXHR) {
     $(ev.target).flag({
       anchor: 'r',
