@@ -67,14 +67,14 @@ var StimView = TemplatedView.extend({
   submit: function(ev) {
     var self = this;
     var $submit = $(ev.target);
-    var $form = $submit.closest('form');
-    // window.ev = ev;
+    var form_el = $submit.closest('form')[0];
     // we only hijack the submit if the form does not have an action
-    // return false;
-    if (!$form.attr('action')) {
+    if (!form_el.hasAttribute('action')) {
       ev.preventDefault();
       // to catch the submit and serialize its values.
-      var response = _.object($form.serializeArray());
+      var form = new Form(form_el);
+      // $.serializeArray() just doesn't work.
+      var response = form.get();
       if ($submit.attr('name')) {
         // get the button's value, because otherwise it's not serialized
         response[$submit.attr('name')] = $submit.val();
