@@ -55,12 +55,13 @@ R.get(/^\/stimlists\/(\w+)(\?|$)/, function(req, res, m) {
 
         // find next available segment
         var segments_available = _.difference(stimlist.segments, stimlist.segments_claimed);
+        if (segments_available.length === 0) {
+          // simple warning, in case we're keeping track:
+          logger.warn('No more unclaimed segments for stimlist, "%s"', stimlist._id);
+        }
+
         // if there are any unclaimed segments, or if this is a MT preview:
         if (segments_available.length === 0 || preview_mode) {
-          if (segments_available.length === 0) {
-            logger.warn('No more unclaimed segments for stimlist, "%s"', stimlist._id);
-          }
-
           var random_index = Math.random()*stimlist.segments.length | 0;
           var random_segment = stimlist.segments[random_index];
           logger.info('Assigning stimlist randomly: "%s"', random_segment);
