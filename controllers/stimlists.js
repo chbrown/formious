@@ -96,6 +96,7 @@ R.get(/^\/stimlists\/(\w+)(\?|$)/, function(req, res, m) {
         }
 
         if (stimlist.pre_stim && !preview_mode) {
+          // presumably, this is the consent form, which we don't want to show if we're in preview mode
           states.unshift({stim: stimlist.pre_stim});
         }
         if (stimlist.post_stim) {

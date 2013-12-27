@@ -59,6 +59,13 @@
   </section>
 </form>
 
+<section>
+  <h3>Preview</h3>
+  <div style="border: 1px dotted #4d8">
+    <iframe scrolling="auto" height="580" width="100%" frameborder="0" align="center" name="ExternalQuestionIFrame" src=""></iframe>
+  </div>
+</div>
+
 <script>
 var form_defaults = {
   MaxAssignments: '20',
@@ -71,12 +78,13 @@ var form_defaults = {
   AutoApprovalDelay: '24h',
   FrameHeight: '580'
 };
+
 try {
   form_defaults = JSON.parse(localStorage.new_hit_defaults);
 }
 catch (exc) {
   // look seriously it's not a big deal so don't worry about it alright?
-  // console.error(exc);
+  console.error(exc);
 }
 
 var $form = $('form');
@@ -84,7 +92,37 @@ var form = new Form($form[0]);
 form.set(form_defaults);
 
 $form.on('change', 'input', function(ev) {
-  console.log('change', ev);
   localStorage.new_hit_defaults = JSON.stringify(form.get());
 });
+
+// handle preview updating (based on url and frame height)
+var preview_frame = $('iframe[name="ExternalQuestionIFrame"]');
+
+$('[name="FrameHeight"]').on('change', function(ev) {
+  preview_frame.attr('height', this.value);
+}).trigger('change');
+
+$('[name="ExternalURL"]').on('change', function(ev) {
+  var original_url = this.value;
+
+  // use native DOM url manipulation (thanks to https://gist.github.com/jlong/2428561)
+  var anchor = document.createElement('a');
+  anchor.href = original_url;
+
+  var search_parts = anchor.search ? anchor.search.slice(1).split('&') : [];
+  // AWS adds four parameters: assignmentId, hitId, workerId, and turkSubmitTo
+  search_parts.push(
+    // Once assigned, assignmentId is a 30-character alphadecimal mess
+    'assignmentId=ASSIGNMENT_ID_NOT_AVAILABLE',
+    'hitId=0PREVIEWPREVIEWPREVIEWPREVIEW9',
+    'workerId={{ticket_user._id}}', // interpolate current user's id
+    // turkSubmitTo is normally https://workersandbox.mturk.com/ or https://www.mturk.com
+    'turkSubmitTo=//'
+  );
+  // http://turk.enron.me/stimlists/phrasestudy1?segment=11
+  anchor.search = '?' + search_parts.join('&');
+
+  var preview_url = anchor.href;
+  preview_frame.attr('src', preview_url).attr('title', preview_url);
+}).trigger('change');
 </script>
