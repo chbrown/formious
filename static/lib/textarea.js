@@ -83,6 +83,8 @@ var Textarea = (function() {
     1. Select from first line somewhere into document. Should indent all of first line.
     2. Place cursor at beginning of line (0-width selection) -- should select to end of line.
     3. Triple click some portion (so that the last newline is technically selected) -- should not shift line below.
+    4. TODO: dedent by fraction of a tab if, say, the tab is 4 spaces and there are only 2.
+
     */
 
     // if we have selected all the way to the beginning, we also want to indent the beginning of the string

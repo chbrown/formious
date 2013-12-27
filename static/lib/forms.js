@@ -1,14 +1,26 @@
-//"use strict"; /*jslint indent: 2 */
+// "use strict"; /*jslint indent: 2 */
 /** Copyright (c) 2013 Christopher Brown <io@henrian.com>, MIT Licensed
 
 https://raw.github.com/chbrown/misc-js/master/forms.js
 http://chbrown.github.io/misc-js/forms.js
 
 Usage:
-  ...
+
+    var input_container = document.querySelector('.hform');
+    var form = new Form(input_container);
+    var default_values = {
+      first_name: 'John',
+      middle_name: 'Quincy',
+      phone: '(512) ',
+    };
+    form.set(default_values);
+
+    // let user change it...
+    var user_values = form.get();
+    console.log(user_values);
 
 Unlike $.serialize(Array), this is a bit more magical
-- Also see http://api.jquery.com/serializeArray/ and http://api.jquery.com/serialize/
+- See http://api.jquery.com/serializeArray/ and http://api.jquery.com/serialize/ for alternatives.
 
 */
 var Form = (function() {
@@ -40,20 +52,6 @@ var Form = (function() {
         walk(child, callback);
       }
     }
-  }
-
-  function group(node, filterBy, groupBy) {
-    // I actually don't currently use this generic function
-    // walk -> filter(filterBy) -> group(groupBy)
-    var groups = {};
-    walk(node, function(element) {
-      if (filterBy(element)) {
-        var key = groupBy(element);
-        if (groups[key] === undefined) groups[key] = [];
-        groups[key].push(element);
-      }
-    });
-    return groups;
   }
 
   var Input = {};
@@ -90,7 +88,7 @@ var Form = (function() {
       return [{value: element.value}];
     }
     else {
-      console.info('ignoring element with unsupported tag:', element);
+      console.log('ignoring element with unsupported tag:', element);
       return [];
     }
   };
@@ -150,7 +148,7 @@ var Form = (function() {
       if (textarea_val !== undefined) element.value = textarea_val;
     }
     else {
-      console.info('ignoring element with unsupported tag:', element);
+      console.log('ignoring element with unsupported tag:', element);
     }
     return value;
   };
