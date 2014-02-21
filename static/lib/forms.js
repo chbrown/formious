@@ -65,6 +65,9 @@ var Form = (function() {
       else if (element.type === 'radio') {
         return [{value: element.value, checked: element.checked}];
       }
+      else if (element.type === 'hidden') {
+        return [{value: element.value, hidden: true}];
+      }
       else { // (type =='text' || type == 'password' || ...)
         return [{value: element.value}]; // , type: element.type
       }
@@ -171,7 +174,8 @@ var Form = (function() {
     };
 
     // handle special input[hidden] + checkbox case
-    if (fields.length == 2 && fields[0].type == 'hidden' && fields[1].checked !== undefined) {
+    // we do not have access to the field 'type' attribute anymore, btw.
+    if (fields.length == 2 && fields[0].hidden && fields[1].checked !== undefined) {
       return fields[1].checked ? fields[1].value : fields[0].value;
     }
     else if (fields.length) {

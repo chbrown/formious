@@ -1,4 +1,4 @@
-"use strict"; /*jslint indent: 2 */
+/*jslint browser: true */
 /** Copyright (c) 2013 Christopher Brown <io@henrian.com>, MIT Licensed
 
 https://raw.github.com/chbrown/misc-js/master/textarea.js
@@ -8,10 +8,23 @@ Ace editor and CodeMirror are over the top. I just want tabs and block indentati
 
 And autofit (height-wise).
 
-Your textarea should specify min-height and max-height, but not height.
+Your textarea can specify min-height and max-height, but not height.
 
 */
 var Textarea = (function() {
+  function extend(target /*, source_0, source_1, ... */) {
+    if (target === undefined) target = {};
+    for (var source_i = 1, l = arguments.length; source_i < l; source_i++) {
+      var source = arguments[source_i];
+      for (var key in source) {
+        if (source.hasOwnProperty(key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  }
+
   function copyStyle(source, target) {
     // also consider: window.getDefaultComputedStyle instead?
     var css_style_declaration = window.getComputedStyle(source);
@@ -47,6 +60,8 @@ var Textarea = (function() {
     'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
     // border-width
     'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width',
+    // border-style
+    // 'border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style',
     // font sizing
     'font-weight', 'font-size', 'font-family', 'font-size-adjust',
     // kerning/leading
@@ -54,17 +69,37 @@ var Textarea = (function() {
     'text-decoration', 'text-transform', 'text-align', 'text-indent',
     'direction',
     // and, really, the most important ones:
-    'white-space', 'word-wrap'
+    'white-space', 'word-wrap',
     // box-sizing for various vendors
-    // '-moz-box-sizing', '-webkit-box-sizing', 'box-sizing'
+    // '-moz-box-sizing', '-webkit-box-sizing',
+    'box-sizing'
   ];
 
   var createShadowElement = function() {
     var div = document.createElement('div');
-    // visibility: hidden how jQuery measures display: none elements
-    // we want display: inline-block so that we can set clientWidth and have it stick
-    div.setAttribute('style', 'position: absolute; visibility: hidden; display: block; border-style: solid');
+    // `visibility: hidden` is how jQuery measures `display: none` elements
+    // we need `display: block` or `display: inline-block` so that we can set
+    // clientWidth and have it stick.
+    // These styles are shadow properties that should not be overwrited by
+    // the original textarea element.
+    div.style.position = 'absolute';
+    div.style.visibility = 'hidden';
+    div.style.display = 'block'; // in case the css says "div { display: inline; }" or something
     return div;
+  };
+
+  var autodedent = function(string) {
+    var space = [];
+    var match = null;
+    var regex = /(^|\n)(\s+)/g;
+    while ((match = regex.exec(string)) !== null) {
+      space.push(parseInt(match[2].length, 10));
+    }
+    // calculate dedent amount
+    var common_space = Math.min.apply(null, space);
+    //
+    var replace_regex = new RegExp('(^|\n)\\s{' + common_space + '}', 'g');
+    return string.replace(replace_regex, '$1');
   };
 
   var dentSelection = function(textarea, dedent, tab) {
@@ -129,22 +164,29 @@ var Textarea = (function() {
     }
   };
 
-  var Textarea = function(textarea, opts) {
+  var Textarea = function(el, opts) {
     /** Textarea: tab and autoresize support
 
-    textarea: DOM Element with tagName 'textarea'
+    el: DOM Element with tagName 'textarea'
     opts:
         tab: String
             string to insert at the front of the line when indenting, defaults to '  ' (2 spaces)
         buffer: Number
             pixels to add to the height when a positive resize is necessary, defaults to 0
+        autodedent: Boolean
+            if true, dedent the original text as much as possible
     */
-    if (this.opts === undefined) this.opts = {};
-    if (this.opts.tab === undefined) this.opts.tab = '  ';
-    if (this.opts.tab === undefined) this.opts.tab = '  ';
+    this.opts = extend({}, {
+      tab: '  ',
+      buffer: 0,
+      autodedent: false,
+    }, opts);
 
-    this.textarea = textarea;
+    this.el = el;
 
+    if (this.opts.autodedent) {
+      this.el.value = autodedent(this.el.value);
+    }
 
     this.initTabListener();
     this.initResizeToFit();
@@ -157,7 +199,7 @@ var Textarea = (function() {
       * https://github.com/wjbryant/taboverride
     */
     var tab = this.opts.tab;
-    this.textarea.addEventListener('keydown', function(ev) {
+    this.el.addEventListener('keydown', function(ev) {
       // 9 = tab
       if (ev.which == 9) {
         ev.preventDefault();
@@ -177,29 +219,34 @@ var Textarea = (function() {
       * https://github.com/alexbardas/jQuery.fn.autoResize/blob/master/jquery.autoresize.js
       * https://github.com/akaihola/jquery-autogrow/blob/master/jquery.autogrow.js
     */
-    if (this.textarea.style.width === '') {
+    if (this.el.style.width === '') {
       // allow horizontal resizing if there is no manual width setting
-      this.textarea.style.horizontal = 'horizontal';
+      this.el.style.horizontal = 'horizontal';
     }
     else {
-      this.textarea.style.horizontal = 'none';
+      this.el.style.horizontal = 'none';
     }
 
     this.shadow = createShadowElement();
-    document.body.appendChild(this.shadow);
-    copyStyleSubset(this.textarea, this.shadow, shadow_sized_styles);
+
+    var container = this.el.parentNode;
+    // insert the shadow right before the element
+    container.insertBefore(this.shadow, this.el);
+    // document.body.appendChild(this.shadow);
+    copyStyleSubset(this.el, this.shadow, shadow_sized_styles);
 
     // should resizeToFit be called with other args based on what happened?
     // i.e., target.resize vs. shadow.resize vs. target input vs. target style change
     var resizeToFit = this.resizeToFit.bind(this);
     // https://developer.mozilla.org/en-US/docs/Web/Reference/Events
     window.addEventListener('resize', resizeToFit, false);
-    this.textarea.addEventListener('blur', resizeToFit, false);
-    this.textarea.addEventListener('keyup', resizeToFit, false);
-    this.textarea.addEventListener('change', resizeToFit, false);
-    this.textarea.addEventListener('cut', resizeToFit, false);
-    this.textarea.addEventListener('paste', resizeToFit, false);
-    // maybe use https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver in the future once it's more widely supported
+    this.el.addEventListener('blur', resizeToFit, false);
+    this.el.addEventListener('keyup', resizeToFit, false);
+    this.el.addEventListener('change', resizeToFit, false);
+    this.el.addEventListener('cut', resizeToFit, false);
+    this.el.addEventListener('paste', resizeToFit, false);
+    // maybe use https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+    // in the future once it's more widely supported
     // but for now, maybe poll the shadow div for changed height? (ewww, I know, polling)
     // ...
 
@@ -208,12 +255,12 @@ var Textarea = (function() {
   };
 
   Textarea.prototype.resizeToFit = function() {
-    if (this.shadow.clientWidth != this.textarea.clientWidth) {
-      var preresize_textarea_style = window.getComputedStyle(this.textarea);
-      this.shadow.style.width = preresize_textarea_style.width;
+    if (this.shadow.clientWidth != this.el.clientWidth) {
+      var tmp_style = window.getComputedStyle(this.el);
+      this.shadow.style.width = tmp_style.width;
     }
 
-    var html = escapeHTML(this.textarea.value);
+    var html = escapeHTML(this.el.value);
     // add extra white space to make sure the last line is rendered
     this.shadow.innerHTML = html + '&nbsp;';
 
@@ -225,29 +272,29 @@ var Textarea = (function() {
     // scrollWidth and scrollHeight:
     //   * The width and height of the entire content field, including those parts that are currently hidden.
     //   * If there's no hidden content it should be equal to clientX/Y.
-    var textarea_style = window.getComputedStyle(this.textarea);
+    var style = window.getComputedStyle(this.el);
 
     // we calculate the min/max height from the css, and have an absolute minimum of 2*line-height
-    // var line_height = parseInt(textarea_style['line-height']) || parseInt(textarea_style['font-size']);
-    var min_height = parseInt(textarea_style['min-height'], 10);
-    var max_height = parseInt(textarea_style['max-height'], 10);
+    // var line_height = parseInt(style['line-height']) || parseInt(style['font-size']);
+    var min_height = parseInt(style['min-height'], 10);
+    var max_height = parseInt(style['max-height'], 10);
 
     // the shadow div should now have resized to match the contents of the textarea, so we measure it
     var shadow_style = window.getComputedStyle(this.shadow);
     var shadow_height = shadow_style.height;
 
     if (!isNaN(max_height) && shadow_style.height > max_height) {
-      this.textarea.style.overflow = 'auto';
-      this.textarea.style.height = '';
+      this.el.style.overflow = 'auto';
+      this.el.style.height = '';
     }
     else if (!isNaN(min_height) && shadow_style.height < min_height) {
-      this.textarea.style.overflow = 'auto';
-      this.textarea.style.height = '';
+      this.el.style.overflow = 'auto';
+      this.el.style.height = '';
     }
-    else if (shadow_style.height != this.textarea.style.height) {
+    else if (shadow_style.height != this.el.style.height) {
       // we are free to be flexible, just match the shadow!
-      this.textarea.style.overflow = 'hidden';
-      this.textarea.style.height = shadow_style.height;
+      this.el.style.overflow = 'hidden';
+      this.el.style.height = shadow_style.height;
     }
   };
 

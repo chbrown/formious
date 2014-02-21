@@ -1,4 +1,14 @@
 {
+  "staticDependencies": {
+    "angular": "*",
+    "jquery": "*",
+    "ngStorage": {
+      "url": "git://github.com/gsklee/ngStorage.git",
+      "filter": ["ngStorage.js", "ngStorage.min.js"]
+    },
+    "underscore": "*"
+  },
+  "staticPattern": "static/lib/{file}",
   "staticIgnore": [
     "doc/*",
     "static/*",
