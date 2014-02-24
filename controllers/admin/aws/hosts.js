@@ -1,4 +1,4 @@
-'use strict'; /*jslint node: true, es5: true, indent: 2 */
+/*jslint node: true */
 var querystring = require('querystring');
 var _ = require('underscore');
 var sv = require('sv');
@@ -9,8 +9,8 @@ var Router = require('regex-router');
 var xmlconv = require('xmlconv');
 var url = require('url');
 
-var logger = require('../../../lib/logger');
-var misc = require('../../../lib/misc');
+var logger = require('loge');
+var misc = require('../../../lib');
 var models = require('../../../lib/models');
 
 var hosts = {
@@ -168,7 +168,7 @@ R.get(/HITs\/(\w+)\.(csv|tsv)/, function(req, res, m) {
       var assignment_answers = {};
       // pull in the Assignment level POST that AMT stores:
       var answer = xmlconv(assignment.Answer, {convention: 'castle'});
-      answer.QuestionFormAnswers.Answer.forEach(function(question_answer) {
+      answer.Answer.forEach(function(question_answer) {
         assignment_answers[question_answer.QuestionIdentifier] = question_answer.FreeText;
       });
       // For each response recorded for this user, merge in those assignment details and write to csv
@@ -223,15 +223,24 @@ R.get(/HITs\/(\w+)/, function(req, res, m) {
     var hit_assignments_result = results.GetAssignmentsForHIT.GetAssignmentsForHITResult;
     var raw_assigments = hit_assignments_result.Assignment || [];
     async.map(raw_assigments, function(assignment, callback) {
-      assignment.Answer = xmlconv(assignment.Answer, {convention: 'castle'}).QuestionFormAnswers.Answer;
+      // logger.warn('assignment.Answer', assignment.Answer);
+      var answer_json = xmlconv(assignment.Answer, {convention: 'castle'});
+      // logger.warn('answer_json', answer_json);
+      assignment.Answer = answer_json.Answer;
 
       models.User.findById(assignment.WorkerId, function(err, user) {
         if (err) return callback(err);
-        if (!user) return callback(new Error('Could not find user: ' + assignment.WorkerId));
 
-        var user_json = _.omit(user.toJSON(), 'response', '__v');
+        if (user) {
+          user = _.omit(user.toJSON(), 'response', '__v');
+        }
+        else {
+          user = {};
+          logger.info('Could not find user: ', assignment.WorkerId);
+        }
+
         // reduce to key-value pairs so that we can show in both Mu/Handlebars easily
-        assignment.user = _.map(user_json, function(value, key) {
+        assignment.user = _.map(user, function(value, key) {
           return {key: key, value: value};
         });
 

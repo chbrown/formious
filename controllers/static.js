@@ -1,21 +1,20 @@
-'use strict'; /*jslint es5: true, node: true, indent: 2 */
+/*jslint node: true */
 var path = require('path');
 var send = require('send');
 var Router = require('regex-router');
 
-var logger = require('../lib/logger');
-var models = require('../lib/models');
+var roots = {
+  static: path.join(__dirname, '..', 'static'),
+  templates: path.join(__dirname, '..', 'templates'),
+};
 
 var R = new Router(function(req, res) {
   res.die(404, 'No resource at: ' + req.url);
 });
 
-// only search up the querystring or the end of the url, in case we avert caching with ?t=[whatever]
-
-R.get(/^\/static\/([^?]+)(\?|$)/, function(req, res, m) {
-  // logger.debug('send /static: %s', m[1]);
-  send(req, m[1])
-    .root(path.join(__dirname, '..', 'static'))
+var serve = function(req, res, root, path) {
+  // logger.debug('send: %s', path);
+  send(req, path).root(root)
     .on('error', function(err) {
       res.die(err.status || 500, 'send error: ' + err.message);
     })
@@ -23,56 +22,18 @@ R.get(/^\/static\/([^?]+)(\?|$)/, function(req, res, m) {
       res.die(404, 'No resource at: ' + req.url);
     })
     .pipe(res);
-});
+};
 
-// this is a little weird, for now
-R.get(/^\/templates\/stims\/([^?]+\.bars)(\?|$)/, function(req, res, m) {
-  // only handles .bars, at the moment
-  logger.debug('/templates/stims: %s', m[1]);
-  // check if there is a StimTemplate, first
-  var _id = m[1].replace(/\.bars$/, '');
-  models.StimTemplate.findById(_id, function(err, stim_template) {
-    if (err) return res.die('StimTemplate.findById error: ' + err);
-
-    if (stim_template) {
-      logger.debug('found StimTemplate:', stim_template._id);
-
-      res.writeAll(200, 'text/x-handlebars-template', stim_template.html);
-    }
-    else {
-      // else we hope that there's a static file
-      logger.debug('send: %s', m[1]);
-      res.setHeader('Content-Type', 'text/x-handlebars-template');
-      send(req, m[1])
-        .root(path.join(__dirname, '..', 'templates', 'stims'))
-        // .on('file', function(path, stat) {})
-        .on('error', function(err) { res.die(err.status || 500, 'send error: ' + err.message); })
-        .on('directory', function() { res.die(404, 'No resource at: ' + req.url); })
-        .pipe(res);
-    }
-  });
+R.get(/^\/static\/([^?]+)(\?|$)/, function(req, res, m) {
+  serve(req, res, roots.static, m[1]);
 });
 
 R.get(/^\/templates\/([^?]+)(\?|$)/, function(req, res, m) {
-  logger.debug('send /templates: %s', m[1]);
-  send(req, m[1])
-    .root(path.join(__dirname, '..', 'templates'))
-    .on('error', function(err) {
-      res.die(err.status || 500, 'send error: ' + err.message);
-    })
-    .on('directory', function() {
-      res.die(404, 'No resource at: ' + req.url);
-    })
-    .pipe(res);
+  serve(req, res, roots.templates, m[1]);
 });
 
 R.get('/favicon.ico', function(req, res) {
-  send(req, 'favicon.ico')
-    .root(path.join(__dirname, '..', 'static'))
-    .on('error', function(err) {
-      res.die(err.status || 500, 'send error: ' + err.message);
-    })
-    .pipe(res);
+  serve(req, res, roots.static, 'favicon.ico');
 });
 
 module.exports = R.route.bind(R);

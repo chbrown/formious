@@ -5,23 +5,22 @@
   <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
   <link href="/static/site.css" rel="stylesheet" type="text/css" />
   <script src="/static/compiled.js"></script>
-  <script src="/static/templates.js"></script>
   <script src="/static/local.js"></script>
+  <script src="/static/app.js"></script>
 </head>
-<body class="admin hasnav">
+<body ng-app="app" class="admin">
   <nav>
+    <aside>
+      <a href="/admin/administrators/{{current_user.id}}">me</a>
+      <form method="POST" action="/admin/logout" style="display: inline">
+        <button class="anchor">Logout</button>
+      </form>
+    </aside>
     <a href="/admin/aws">AWS Accounts</a>
-    <a href="/admin/users">Users</a>
-    <a href="/admin/stimlists">Stimlists</a>
-    <a href="/admin/stims">Stim Templates</a>
-    <div style="float: right">
-      <a href="/admin/users/{{ticket_user._id}}">me</a>
-      <a href="/users/{{ticket_user._id}}/logout">Logout</a>
-    </div>
+    <a href="/admin/administrators">Administrators</a>
+    <a href="/admin/participants">Participants</a>
+    <a href="/admin/experiments">Experiments</a>
+    <!-- <a href="/admin/stims">Stims</a> -->
   </nav>
-  {{<}}
-  <script>
-  var started = new Date();
-  $('nav a[href="' + location.pathname + '"]').addClass('active');
-  </script>
+  <%<%>
 </body>

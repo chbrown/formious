@@ -1,40 +1,38 @@
-*{box-sizing:border-box}
-body{background-color:#fff;margin:0;font:13px "Lucida Grande",Arial,sans-serif}
+body{margin:0;font-family:"Lucida Grande",Arial,sans-serif}
 h1,h2,h3,h4,h5,h6{margin:.5ex 0}
 p{margin:1ex 0}
-button{margin:10px 10px 0 0}
-label{margin:2px 0;display:block;vertical-align:middle}
-label[disabled]{color:#777}
+label[disabled]{color:gray}
 input,textarea{vertical-align:middle;margin:0}
 input[type=checkbox],input[type=radio]{margin:1px .25ex}
 fieldset{margin:0 10px 10px 0;border:1px solid #CCC}
 .code{font:9pt monospace}
-.section,section{vertical-align:top;margin:10px 0;padding:0 10px}
-.section.box,.section.fill,section.box,section.fill{padding:10px;background-color:#fff;border:1px solid #EEE}
-.section.fill,section.fill{border-width:1px 0;overflow:auto}
-.section.box,section.box{display:inline-block;margin:0 10px}
-nav{position:fixed;top:0;padding:0 4px;background-color:#FDFDFD;width:100%;border-bottom:1px solid #CCC}
-nav a{display:inline-block;border-radius:3px;border:1px solid #BBB;padding:2px 6px;margin:2px}
-nav a.active{border:1px solid #AAA;background-color:#DDD}
-nav a:hover{border:1px solid #AAA;background-color:#EEE}
-.hasnav{padding-top:30px}
+.help{cursor:pointer;color:#9a9a9a}
+.help .summary{display:block;margin:1ex 0}
+.help .content{display:none}
+.help.expanded{color:#0d0d0d}
+.help.expanded .summary{display:none}
+.help.expanded .content{display:block}
+section{margin:10px 0}
+button.anchor{background:0 0;border:0;text-decoration:underline;cursor:pointer;font-size:100%}
+body.admin{background-color:#fbfbfb;font-size:80%;padding-top:30px}
+body.admin nav{position:fixed;top:0;width:100%;background-color:#f1f1f1;padding-left:4px;border-bottom:1px solid #BBB}
+body.admin nav a,body.admin nav button{display:inline-block;margin:3px;border-radius:3px;padding:2px 6px;border:1px solid #CCC;background-color:#f1f1f1}
+body.admin nav a.current,body.admin nav button.current{border:1px solid silver;background-color:#fbfbfb}
+body.admin nav a:hover,body.admin nav button:hover{border:1px solid #9a9a9a;background-color:#fff}
+body.admin nav aside{float:right;padding-right:8px}
+main{padding:0 10px}
+main .fill{margin-left:-10px;margin-right:-10px;padding:10px;background-color:#fff;border:1px solid #EEE;border-width:1px 0;width:100%}
+main .fill>table{width:100%}
 table{border-collapse:collapse}
-table tr.preview{background-color:#BBB}
 table th{text-align:left}
-table td{font-size:90%}
-table td,table th{vertical-align:top;padding:1px 8px 2px 1px}
+table tr.preview{background-color:#BBB}
+table td,table th{vertical-align:top;padding:0 4px 1px 1px}
 table.hoverable tbody tr:hover{background-color:#DDD}
 table.keyval th{padding-top:4px;border-bottom:1px solid #999}
 table.keyval td:first-child{font-weight:700}
-.fill table tbody td,.fill table thead td{border-bottom:1px solid #DDD}
-.record.delete{background-color:#DDD;color:#555;text-decoration:line-through}
 .hover-flow{word-wrap:break-word;text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
 .hover-flow:hover{white-space:normal;overflow:visible}
-.admin{background-color:#FCFCFC}
-.admin .status span{font-weight:700;margin:10px 10px 0 0}
-.admin .status span.Submitted{color:#CCC}
-.admin .status span.Approved{color:#006400}
-.admin .status span.Rejected{color:#8b0000}
+.login{width:300px;margin:50px auto;padding:10px;box-shadow:0 0 5px rgba(0,0,0,.05)}
 input[type=checkbox]+span{display:inline-block;font-weight:700;margin-left:.25em}
 .hform span,.vform span{vertical-align:middle}
 .hform>label,.vform>label{margin:4px 0}
@@ -43,8 +41,8 @@ input[type=checkbox]+span{display:inline-block;font-weight:700;margin-left:.25em
 .vform label span:first-child{display:block;font-weight:700;margin:2px 0}
 .truncate{display:block;max-width:10em;overflow:hidden;text-overflow:ellipsis}
 .array .controls{text-align:right}
-.array .add{margin:0;padding:0;background:0 0;border:0;font-size:105%;cursor:pointer}
-.array .add::before{font-size:90%;content:"add "}
+.array .add{margin:0;padding:0;background:0 0;border:0;cursor:pointer}
+.array .add::before{content:"add "}
 .array .remove{color:#8b0000;cursor:pointer}
 #preview{position:fixed;max-width:50%;top:10px;right:10px;border:1px solid #DDD}
 #preview .content{padding:10px;background-color:#fff}

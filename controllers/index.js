@@ -1,12 +1,11 @@
-'use strict'; /*jslint node: true, es5: true, indent: 2 */
-var formidable = require('formidable');
+/*jslint node: true */
 var amulet = require('amulet');
+var formidable = require('formidable');
+var logger = require('loge');
+var Router = require('regex-router');
 var streaming = require('streaming');
 var sv = require('sv');
-var Router = require('regex-router');
 
-var logger = require('../lib/logger');
-var misc = require('../lib/misc');
 var models = require('../lib/models');
 
 var R = new Router(function(req, res) {
@@ -15,51 +14,55 @@ var R = new Router(function(req, res) {
 
 // attach controllers
 R.any(/^\/(templates|static|favicon\.ico)/, require('./static'));
-R.any(/^\/stimlists/, require('./stimlists'));
-R.any(/^\/aircraft/, require('./aircraft'));
-R.any(/^\/digits/, require('./digits'));
+R.any(/^\/experiments/, require('./experiments'));
 R.any(/^\/admin/, require('./admin'));
-R.any(/^\/users/, require('./users'));
+R.any(/^\/api/, require('./api'));
+
+// /** GET /
+// root currently redirects to: /aircraft */
+// R.get(/^\/$/, function(req, res, m) {
+//   res.redirect('/experiments');
+// });
 
 // POST /seen
-R.post(/^\/seen$/, function(req, res, m) {
-  new formidable.IncomingForm().parse(req, function(err, fields, files) {
-    // and the fields: workerId, and "questionIds[]" that equates to a list of strings
-    // which is just multiple 'questionIds[] = string1' fields (I think).
-    var workerId = fields.workerId || req.user_id;
-    models.User.fromId(workerId, function(err, user) {
-      if (err) return res.die('User query error: ' + err);
-      if (!user) return res.die('No user "' + workerId + '" found.');
+// R.post(/^\/seen$/, function(req, res, m) {
+//   new formidable.IncomingForm().parse(req, function(err, fields, files) {
+//     // and the fields: workerId, and "questionIds[]" that equates to a list of strings
+//     // which is just multiple 'questionIds[] = string1' fields (I think).
+//     var workerId = fields.workerId || req.user_id;
+//     models.User.fromId(workerId, function(err, user) {
+//       if (err) return res.die('User query error: ' + err);
+//       if (!user) return res.die('No user "' + workerId + '" found.');
 
-      var questionIds = fields['questionIds[]'];
-      if (!Array.isArray(questionIds)) questionIds = questionIds ? [questionIds] : [];
-      questionIds.forEach(function(questionId) {
-        user.seen.push(questionId);
-      });
+//       var questionIds = fields['questionIds[]'];
+//       if (!Array.isArray(questionIds)) questionIds = questionIds ? [questionIds] : [];
+//       questionIds.forEach(function(questionId) {
+//         user.seen.push(questionId);
+//       });
 
-      user.save(function(err) {
-        if (err) logger.error('User.save error: ' + err);
+//       user.save(function(err) {
+//         if (err) logger.error('User.save error: ' + err);
 
-        res.json({success: true, message: 'Added ' + questionIds.length + ' to seen.'});
-      });
-    });
-  });
-});
+//         res.json({success: true, message: 'Added ' + questionIds.length + ' to seen.'});
+//       });
+//     });
+//   });
+// });
 
 // POST /mturk/externalSubmit
 R.post(/^\/mturk\/externalSubmit/, function(req, res, m) {
   new formidable.IncomingForm().parse(req, function(err, fields, files) {
-    var workerId = fields.workerId || req.user_id;
-    models.User.fromId(workerId, function(err, user) {
+    models.Participant.first({name: fields.workerId}, function(err, participant) {
       if (err) return res.die('User query error: ' + err);
-      if (!user) return res.die('No user "' + workerId + '" found.');
+      // if (!user) return res.die('No user "' + workerId + '" found.');
 
       user.responses.push(fields);
       user.save(function(err) {
         if (err) logger.error('User.save error: ' + err);
       });
 
-      amulet.pipe(['layout.mu', 'done.mu'], {}).pipe(res);
+
+      amulet.stream(['layout.mu', 'done.mu'], {}).pipe(res);
     });
   });
 });
@@ -70,7 +73,7 @@ R.post(/^\/responses$/, function(req, res, m) {
   req.readToEnd('utf8', function(err, data) {
     logger.debug('Saving response.', {workerId: workerId, data: data});
 
-    var response = misc.parseJSON(data);
+    // var response = misc.parseJSON(data);
     if (response instanceof Error) {
       var message = 'Could not parse response, "' + data + '". Error: ' + response;
       return res.json({success: false, message: message});
@@ -85,7 +88,8 @@ R.post(/^\/responses$/, function(req, res, m) {
   });
 });
 
-// POST /addbonus
+/** POST /addbonus
+*/
 R.post(/^\/addbonus$/, function(req, res, m) {
   var default_bonus = 0.25;
   var max_bonus = 0.25;
@@ -113,27 +117,6 @@ R.post(/^\/addbonus$/, function(req, res, m) {
       });
     });
   });
-});
-
-/** POST /sv
-parse csv-like input flexibly and write out json to response */
-R.post('/sv', function(req, res, m) {
-  // /^\/sv(.json)?$/
-  var parser = req.pipe(new sv.Parser());
-  streaming.readToEnd(parser, function(err, rows) {
-    if (err) return res.die('sv read error: ' + err);
-
-    logger.debug('/sv read %d rows of %d columns', rows.length, parser.columns.length);
-
-    // columns is a list of strings, rows is a list of objects
-    res.json({columns: parser.columns, rows: rows});
-  });
-});
-
-/** GET /
-root currently redirects to: /aircraft */
-R.get(/^\/$/, function(req, res, m) {
-  res.redirect('/aircraft');
 });
 
 module.exports = R.route.bind(R);

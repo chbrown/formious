@@ -1,28 +1,56 @@
-'use strict'; /*jslint node: true, es5: true, indent: 2 */
+/*jslint node: true */
 var _ = require('underscore');
 var url = require('url');
 var amulet = require('amulet');
 var Router = require('regex-router');
+var logger = require('loge');
 
-var logger = require('../lib/logger');
-var misc = require('../lib/misc');
 var models = require('../lib/models');
 
 var R = new Router(function(req, res) {
   res.die(404, 'No resource at: ' + req.url);
 });
 
-/** GET /stimlists/:stimlist_id
-    GET /stimlists/:stimlist_id?segment=:segment&index=:index
+// this is a little weird, for now
+// R.get(/^\/templates\/stims\/([^?]+\.bars)(\?|$)/, function(req, res, m) {
+//   // only handles .bars, at the moment
+//   logger.debug('/templates/stims: %s', m[1]);
+//   // check if there is a StimTemplate, first
+//   var _id = m[1].replace(/\.bars$/, '');
+//   models.StimTemplate.findById(_id, function(err, stim_template) {
+//     if (err) return res.die('StimTemplate.findById error: ' + err);
+
+//     if (stim_template) {
+//       logger.debug('found StimTemplate:', stim_template._id);
+
+//       res.writeAll(200, 'text/x-handlebars-template', stim_template.html);
+//     }
+//     else {
+//       // else we hope that there's a static file
+//       logger.debug('send: %s', m[1]);
+//       res.setHeader('Content-Type', 'text/x-handlebars-template');
+//       send(req, m[1])
+//         .root(path.join(__dirname, '..', 'templates', 'stims'))
+//         // .on('file', function(path, stat) {})
+//         .on('error', function(err) { res.die(err.status || 500, 'send error: ' + err.message); })
+//         .on('directory', function() { res.die(404, 'No resource at: ' + req.url); })
+//         .pipe(res);
+//     }
+//   });
+// });
+
+/** GET /experiments/:experiment_id
+    GET /experiments/:experiment_id
+    //?segment=:segment&index=:index
 Present single stimlist (given by name, not id) to worker,
 starting at given index or 0, of the next available segment.
 */
-R.get(/^\/stimlists\/(\w+)(\?|$)/, function(req, res, m) {
+R.get(/^\/experiments\/(\w+)(\?|$)/, function(req, res, m) {
   var _id = m[1];
   var urlObj = url.parse(req.url, true);
   var workerId = urlObj.query.workerId || req.user_id;
 
-  models.User.fromId(workerId, function(err, user) {
+  models.User.from({name: workerId}, function(err, user) {
     if (err) return res.die('User query error: ' + err);
     if (!user) return res.die('Could not find user: ' + workerId);
 

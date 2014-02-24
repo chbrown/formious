@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<link rel="icon" href="/static/favicon.ico" type="image/x-icon">
-<title>Experimental Interface</title>
-<script>
-var started = new Date();
-</script>
-<link href="/static/site.css" rel="stylesheet" type="text/css" />
-{{<}}
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+  <link href="/static/site.css" rel="stylesheet" type="text/css" />
+  <title>Experimental Interface</title>
+  <script>
+  var started = new Date();
+  </script>
+</head>
+<body>
+  <%<%>
+</body>

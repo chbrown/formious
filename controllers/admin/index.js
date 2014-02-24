@@ -1,105 +1,96 @@
-'use strict'; /*jslint node: true, es5: true, indent: 2 */
+/*jslint node: true */
 var _ = require('underscore');
-var sv = require('sv');
+var url = require('url');
 var querystring = require('querystring');
 var amulet = require('amulet');
-var async = require('async');
 var Router = require('regex-router');
 
-var logger = require('../../lib/logger');
-var misc = require('../../lib/misc');
+var logger = require('loge');
 var models = require('../../lib/models');
 
-// /admin/*
-var R = new Router(function(req, res) {
+// router & controllers requiring authentication
+var auth_R = new Router(function(req, res) {
   res.die(404, 'No resource at: ' + req.url);
 });
+auth_R.any(/^\/admin\/aws/, require('./aws'));
+auth_R.any(/^\/admin\/experiments/, require('./experiments'));
+auth_R.any(/^\/admin\/templates/, require('./templates'));
+auth_R.any(/^\/admin\/administrators/, require('./administrators'));
+auth_R.any(/^\/admin\/participants/, require('./participants'));
+// GET /admin -> redirect to /admin/experiments
+auth_R.any(/\/admin\/?$/, function(req, res, m) {
+  res.redirect('/admin/experiments');
+});
+/** POST /admin/logout
+Purge ticket cookie, and redirect */
+auth_R.post(/^\/admin\/logout/, function(req, res) {
+  logger.debug('Deleting ticket cookie "%s"', req.cookies.get('ticket'));
 
-// attach controllers requiring authentication
-R.any(/^\/admin\/aws/, require('./aws'));
-R.any(/^\/admin\/stimlists/, require('./stimlists'));
-R.any(/^\/admin\/stims/, require('./stims'));
-R.any(/^\/admin\/users/, require('./users'));
+  req.cookies.del('ticket');
+  res.redirect('/admin');
+});
 
-// GET /admin/responses.tsv (obsolete)
-R.get('/admin/responses.tsv', function(req, res) {
-  var stringifier = new sv.Stringifier({delimiter: '\t'});
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  stringifier.pipe(res);
+// router & actions for logging in
+var public_R = new Router(function(req, res) {
+  res.redirect('/admin/login');
+});
 
-  var user_stream = models.User.find({
-    workerId: /^A/,
-    responses: {$ne: []},
-  }).sort('-created').stream();
+var renderLogin = function(email, password, message, res) {
+  // helper, since we serve the login page from GET as well as failed login POSTs
+  var ctx = {
+    email: email,
+    password: password,
+    message: message,
+  };
+  res.writeHead(401); // HTTP 401 Unauthorized
+  amulet.stream(['layout.mu', 'admin/login.mu'], ctx).pipe(res);
+};
 
-  // flattenArrayProperty(r, 'reliabilities', 'reliability');
-  // flattenArrayProperty(r, 'judgments', 'judgment');
-  user_stream.on('data', function(user) {
-    user.responses.forEach(function(response) {
-      // ISO8601-ify dates
-      for (var key in response) {
-        if (response[key] instanceof Date) {
-          response[key] = response[key].toISOString().replace(/\..+$/, '');
+/** GET /admin/login
+show login page for this user */
+public_R.get(/^\/admin\/login\/?$/, function(req, res, m) {
+  var urlObj = url.parse(req.url, true);
+  renderLogin(urlObj.query.email, urlObj.query.password, 'Please login', res);
+});
+/** POST /admin/login
+register unclaimed (no set password) user by adding password,
+or login as claimed user by providing password */
+public_R.post(/^\/admin\/login$/, function(req, res) {
+  req.readToEnd('utf8', function(err, body) {
+    if (err) return res.die('HTTP POST error', err);
+
+    var fields = querystring.parse(body);
+
+    // artificially slow to deflect brute force attacks
+    setTimeout(function() {
+      models.Administrator.authenticate(fields.email, fields.password, function(err, ticket) {
+        if (err) {
+          return renderLogin(fields.email, fields.password, err.toString(), res);
         }
-      }
-      stringifier.write(response);
-    });
-  });
-  user_stream.on('error', function(err) {
-    logger.error('User stream error', err);
-  });
-  user_stream.on('close', function() {
-    stringifier.end();
-  });
-});
-// GET /admin/responses/:page.json (obsolete)
-R.get(/\/admin\/responses\/(\d+)\.json/, function(req, res, m) {
-  var page = parseInt(m[1], 10);
-  var per_page = 10;
-  var query = models.User
-    .find({responses: {$ne: []}})
-    .skip(page*per_page)
-    .limit(per_page)
-    .sort('-created');
-  query.exec(function(err, users) {
-    var responses = [].concat(_.pluck(users, 'responses'));
-    res.json(responses);
+
+        logger.info('Authenticated successfully. Ticket = %s', ticket);
+        req.cookies.set('ticket', ticket);
+        res.redirect('/admin');
+      });
+    }, 500);
   });
 });
 
-// GET /admin -> redirect to /admin/users
-R.get(/\/admin\/?$/, function(req, res, m) {
-  res.redirect('/admin/users');
-});
-
-// /admin/* -> handle auth and forward
 module.exports = function(req, res) {
-  // this is the checkpoint for all admin-level requests, and should drop all non-superusers
-  var workerId = req.cookies.get('workerId');
+  // handle auth and forward. this is the checkpoint for all admin-level
+  // requests, and should send all non administrators to the login page.
   var ticket = req.cookies.get('ticket');
-  models.User.withTicket(workerId, ticket, function(err, user) {
+  models.Administrator.fromTicket(ticket, function(err, administrator) {
     if (err) {
-      logger.error('User.withTicket(%s, %s) error', workerId, ticket, err);
-      return res.die(err);
+      logger.error('Administrator not authenticated:', err);
+      public_R.route(req, res);
     }
-
-    if (!user) {
-      // this return is CRUCIAL!
-      logger.info('User.withTicket(%s, %s) returned no user.', workerId, ticket);
-      return res.redirect('/users');
+    else {
+      // alright, they're in. go wild.
+      // attach administrator object to the request payload
+      req.administrator = administrator;
+      req.ctx = {current_user: administrator};
+      auth_R.route(req, res);
     }
-
-    if (!user.superuser) {
-      logger.info('User "%s" is not a superuser: 401', user._id);
-      // this return is also CRUCIAL!
-      return res.die(401, 'Access denied; your user account does not have superuser privileges.');
-    }
-
-    // alright, they're in. go wild.
-    req.user = user;
-    // and starting building the context
-    req.ctx = {ticket_user: user};
-    logger.debug('Authenticated with user: %s', user._id);
-    R.route(req, res);
   });
 };

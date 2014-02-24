@@ -77,13 +77,17 @@ CREATE TABLE stims (
   id serial PRIMARY KEY,
 
   experiment_id integer REFERENCES experiments(id),
+  template_id integer REFERENCES templates(id),
+  -- remove this template?
   template text, -- soft reference to templates(name)
   context json,
   view_order integer,
 
   created timestamp DEFAULT current_timestamp NOT NULL
 );
--- CREATE INDEX stims_experiment_id_idx ON stims(experiment_id); -- USING btree -- necessary, considering the FK?
+-- is this index necessary, considering the FK?
+-- CREATE INDEX stims_experiment_id_idx ON stims(experiment_id); -- USING btree
+
 
 CREATE TABLE responses (
   id serial PRIMARY KEY,

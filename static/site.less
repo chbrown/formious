@@ -1,10 +1,19 @@
-* {
-  box-sizing: border-box;
+// I wish I could just return a color from a function.
+// Too complicated for LESS, though, I guess.
+.border-gray(@gray) {
+  border: 1px solid rgb(@gray, @gray, @gray);
 }
+.background-gray(@gray) {
+  background-color: rgb(@gray, @gray, @gray);
+}
+.color-gray(@gray) {
+  color: rgb(@gray, @gray, @gray);
+}
+
+
 body {
-  background-color: white;
   margin: 0;
-  font: 13px "Lucida Grande", Arial, sans-serif;
+  font-family: "Lucida Grande", Arial, sans-serif;
 }
 h1, h2, h3, h4, h5, h6 {
   margin: 0.5ex 0;
@@ -13,15 +22,13 @@ p {
   margin: 1ex 0;
 }
 button {
-  margin: 10px 10px 0 0;
+  // margin: 10px 10px 0 0;
 }
-label {
-  margin: 2px 0;
-  display: block;
-  vertical-align: middle;
-  &[disabled] {
-    color: #777;
-  }
+label[disabled] {
+  .color-gray(50%);
+  // margin: 2px 0;
+  // display: block;
+  // vertical-align: middle;
 }
 textarea, input {
   vertical-align: middle;
@@ -37,67 +44,131 @@ fieldset {
 .code {
   font: 9pt monospace;
 }
-section, .section {
-  vertical-align: top;
+
+.help {
+  cursor: pointer;
+  .color-gray(60%);
+
+  .summary {
+    display: block;
+    margin: 1ex 0;
+  }
+  .content {
+    display: none;
+  }
+
+  &.expanded {
+    .color-gray(5%);
+    .summary {
+      display: none;
+    }
+    .content {
+      display: block;
+    }
+  }
+}
+
+section {
+  // vertical-align: top;
   margin: 10px 0;
+  // padding: 0 10px;
+
+  // &.fill {
+  //   border-width: 1px 0;
+  //   overflow: auto;
+  // }
+  // &.box {
+  //   display: inline-block;
+  //   // inline-block doesn't allow margin overlapping, so remove the top-bottom margins
+  //   // but also add left-right margins
+  //   margin: 0 10px;
+  // }
+}
+
+button.anchor {
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 100%;
+}
+
+body.admin {
+  .background-gray(98%);
+  font-size: 80%; // why is the default so big!?
+
+  padding-top: 30px; // accommodate the nav
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    .background-gray(94%);
+
+    padding-left: 4px;
+    border-bottom: 1px solid #BBB;
+
+    a, button {
+      display: inline-block;
+      margin: 3px;
+      border-radius: 3px;
+      padding: 2px 6px;
+      border: 1px solid #CCC;
+      .background-gray(94%);
+      &.current {
+        .border-gray(75%);
+        .background-gray(98%);
+      }
+      &:hover {
+        .border-gray(60%);
+        .background-gray(100%);
+      }
+    }
+    aside {
+      float: right;
+      padding-right: 8px
+    }
+  }
+
+  // .status span {
+  //   font-weight: bold;
+  //   margin: 10px 10px 0 0;
+  //   &.Submitted { color: #CCC; }
+  //   &.Approved { color: darkgreen; }
+  //   &.Rejected { color: darkred; }
+  // }
+}
+
+main {
+  // most immediate children of main should be padded
   padding: 0 10px;
-  &.fill, &.box {
+  .fill {
+    // negative margins squeeze back out of that padding
+    margin-left: -10px;
+    margin-right: -10px;
     padding: 10px;
     background-color: white;
     border: 1px solid #EEE;
-  }
-  &.fill {
     border-width: 1px 0;
-    overflow: auto;
-  }
-  &.box {
-    display: inline-block;
-    // inline-block doesn't allow margin overlapping, so remove the top-bottom margins
-    // but also add left-right margins
-    margin: 0 10px;
-  }
-}
-nav {
-  position: fixed;
-  top: 0;
-  padding: 0 4px;
-  background-color: #FDFDFD;
-  width: 100%;
-  border-bottom: 1px solid #CCC;
-  a {
-    display: inline-block;
-    border-radius: 3px;
-    border: 1px solid #BBB;
-    padding: 2px 6px;
-    margin: 2px;
-    &.active {
-      border: 1px solid #AAA;
-      background-color: #DDD;
-    }
-    &:hover {
-      border: 1px solid #AAA;
-      background-color: #EEE;
+    width: 100%;
+    & > table {
+      width: 100%;
     }
   }
-}
-.hasnav {
-  padding-top: 30px;
 }
 
 table {
   border-collapse: collapse;
-  tr.preview {
-    background-color: #BBB;
-  }
   th {
     text-align: left;
   }
+  tr.preview {
+    background-color: #BBB;
+  }
   td {
-    font-size: 90%;
   }
   td, th {
     vertical-align: top;
-    padding: 1px 8px 2px 1px;
+    padding: 0px 4px 1px 1px;
   }
   &.hoverable tbody tr:hover {
     background-color: #DDD;
@@ -111,17 +182,15 @@ table {
       font-weight: bold;
     }
   }
+  // thead td, tbody td {
+  //   border-bottom: 1px solid #DDD;
+  // }
 }
-.fill table {
-  thead td, tbody td {
-    border-bottom: 1px solid #DDD;
-  }
-}
-.record.delete {
-  background-color: #DDD;
-  color: #555;
-  text-decoration: line-through;
-}
+// .record.delete {
+//   background-color: #DDD;
+//   color: #555;
+//   text-decoration: line-through;
+// }
 
 .hover-flow {
   word-wrap: break-word; // normal | break-word | inherit
@@ -135,16 +204,11 @@ table {
   }
 }
 
-.admin {
-  background-color: #FCFCFC;
-
-  .status span {
-    font-weight: bold;
-    margin: 10px 10px 0 0;
-    &.Submitted { color: #CCC; }
-    &.Approved { color: darkgreen; }
-    &.Rejected { color: darkred; }
-  }
+.login {
+  width: 300px;
+  margin: 50px auto;
+  padding: 10px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
 }
 input[type="checkbox"] + span {
   // bold spans coming after checkboxes
@@ -201,11 +265,9 @@ input[type="checkbox"] + span {
     padding: 0;
     background: none;
     border: none;
-    font-size: 105%;
     cursor: pointer;
   }
   .add::before {
-    font-size: 90%;
     content: "add ";
   }
   .remove {

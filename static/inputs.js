@@ -1,4 +1,4 @@
-// "use strict"; /*jslint indent: 2 */ /*globals $ */
+/*jslint browser: true */ /*globals $ */
 (function($) {
   // requires $ and $.fn.flag
   var ListInput = function(element, opts) {

@@ -1,21 +1,8 @@
-// "use strict"; /*jslint indent: 2 */ /*globals _, $, Backbone, Handlebars, TemplatedView, TemplatedCollection */
+/*jslint browser: true */
 function time() { return (new Date()).getTime(); }
-
-$(document).on('click', 'a[data-method]', function(ev) {
-  ev.preventDefault();
-  var method = this.getAttribute('data-method');
-  $.ajax({
-    url: this.href,
-    type: method
-  }).done(function(data, textStatus, jqXHR) {
-    $(ev.target).flag({
-      anchor: 'r',
-      text: data.message,
-      fade: 3000
-    }).closest('.record').addClass(method);
-  });
-});
-
+var p = console.log.bind(console);
+var pushAll = function(array, xs) { return Array.prototype.push.apply(array, xs); };
+var flatten = function(xs) { return Array.prototype.concat.apply([], xs); };
 
 function makeTable(cols, rows) {
   var thead = '<thead><tr><th>' + cols.join('</th><th>') + '</th></tr></thead>';
@@ -25,6 +12,7 @@ function makeTable(cols, rows) {
   var tbody = '<tbody><tr>' + trs.join('</tr><tr>') + '</tr></tbody>';
   return '<table>' + thead + tbody + '</table>';
 }
+
 function tabulate(objects, keys) {
   // convert a list of objects to flat rows, using the given list of keys, then render them to a table.
   var rows = objects.map(function(object) {
@@ -49,134 +37,13 @@ function fileinputText(input, callback) {
   reader.readAsText(file); //, opt_encoding
 }
 
-// requires Backbone and Handlebars to be loaded
-
-// a stim (aka., state, when in a list of stims) is the full
-var StimView = TemplatedView.extend({
-  // usage new StimView({hit_started: Number, stimlist_id: String, ...})
-  template: 'stims/default',
-  preInitialize: function(ctx) {
-    this.ctx = ctx;
-    this.template = 'stims/' + (ctx.stim || 'default');
-  },
-  // preRender: function(ctx) {
-    // ctx.keyvals = _.map(ctx, function(val, key) {
-    //   return {key: key, val: val};
-    // });
-  // },
-  submit: function(ev) {
-    var self = this;
-    var $submit = $(ev.target);
-    var form_el = $submit.closest('form')[0];
-    // we only hijack the submit if the form does not have an action
-    if (!form_el.hasAttribute('action')) {
-      ev.preventDefault();
-      // to catch the submit and serialize its values.
-      var form = new Form(form_el);
-      // $.serializeArray() just doesn't work.
-      var response = form.get();
-      if ($submit.attr('name')) {
-        // get the button's value, because otherwise it's not serialized
-        response[$submit.attr('name')] = $submit.val();
-      }
-
-      if (_.isEmpty(response)) {
-        // don't save empty responses
-        self.trigger('finish');
-      }
-      else {
-        // fill it out with useful metadata (which is stored in this.model)
-        _.defaults(response, self.ctx);
-        response.submitted = time();
-        new Response(response).save(null, {
-          success: function(model, response, options) {
-            self.trigger('finish');
-          },
-          error: function(model, xhr, options) {
-            // alert('Failed');
-            self.trigger('finish');
-          }
-        });
-      }
+document.addEventListener('readystatechange', function(ev) {
+  var started = time();
+  if (document.readyState == 'interactive') {
+    var current_anchor = document.querySelector('a[href="' + window.location.pathname + '"]');
+    if (current_anchor) {
+      current_anchor.classList.add('current');
     }
-  },
-  events: {
-    'click form button': 'submit'
-    // 'click [type="submit"]': 'submit'
+    // else, maybe look for links that form some prefix of the current location?
   }
-});
-
-
-// ####### ADMIN #######
-var HIT = Backbone.Model.extend({});
-var HITCollection = TemplatedCollection.extend({url: 'hits'});
-var HITView = TemplatedView.extend({
-  template: 'admin/HITs/one'
-});
-var MTWorker = Backbone.Model.extend({
-  urlRoot: '../Workers'
-});
-var MTWorkerCollection = TemplatedCollection.extend({
-  url: '../Workers'
-});
-
-var Assignment = Backbone.Model.extend({
-  idAttribute: 'AssignmentId'
-});
-var AssignmentCollection = TemplatedCollection.extend({
-  model: Assignment,
-  url: '../Assignments'
-});
-var AssignmentView = TemplatedView.extend({
-  template: 'admin/assignments/one',
-  preRender: function(ctx) {
-    // ctx.AssignmentStatus is one of Submitted | Approved | Rejected
-    ctx[ctx.AssignmentStatus] = true;
-    ctx.reason = localStorage.bonus_reason;
-  },
-  events: {
-    'change input[name="reason"]': function(ev) {
-      localStorage.bonus_reason = ev.target.value;
-    },
-    'click button.responses': function(ev) {
-      var workerId = this.model.get('WorkerId');
-      var worker = new MTWorker({id: workerId});
-      worker.fetch({
-        success: function(model, user, options) {
-          // infer required columns from list of responses
-          var keys = {};
-          user.responses.slice(0, 50).forEach(function(response) {
-            _.extend(keys, response);
-          });
-
-          // create table and simply put where the button was
-          var cols = _.keys(keys).sort();
-          var table_html = tabulate(user.responses, cols);
-          $(ev.target).replaceWith(table_html);
-        }
-      });
-    },
-    'click button[data-action]': function(ev) {
-      var action = $(ev.target).attr('data-action');
-      var params = {};
-      if (action == 'GrantBonus') {
-        params.BonusAmount = this.$('.bonus input[name="amount"]').val();
-        params.Reason = this.$('.bonus input[name="reason"]').val();
-        params.WorkerId = this.model.get('WorkerId');
-      }
-      // $.post( url [, data ] [, success(data, textStatus, jqXHR) ] [, dataType ] )
-      var jqXHR = $.post(this.model.url() + '/' + action, params);
-      jqXHR.done(function(data, textStatus, jqXHR) {
-        $(ev.target).flag({html: data.message, fade: 5000});
-      });
-      jqXHR.fail(function(jqXHR, textStatus, errorThrown) {
-        $(ev.target).flag({html: jqXHR.responseText, fade: 5000});
-      });
-    }
-  }
-});
-
-// ####### EXPERIMENT #######
-var Response = Backbone.Model.extend({
-  url: '/responses'
 });

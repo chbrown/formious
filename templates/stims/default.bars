@@ -1,8 +1,0 @@
-<h3>{{_id}}</h3>
-<dl>
-{{#each .}}
-  <dt>{{@key}}</dt>
-  <dd>{{this}}</dd>
-{{/each}}
-</dl>
-<p>This is the default stim display. <b>You should customize it.</b></p>

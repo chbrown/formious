@@ -1,4 +1,4 @@
-'use strict'; /*jslint node: true, es5: true, indent: 2 */
+/*jslint node: true */
 var querystring = require('querystring');
 var _ = require('underscore');
 var sv = require('sv');
@@ -6,8 +6,7 @@ var amulet = require('amulet');
 var async = require('async');
 var Router = require('regex-router');
 
-var logger = require('../../../lib/logger');
-// var misc = require('../../../lib/misc');
+var logger = require('loge');
 var models = require('../../../lib/models');
 
 var R = new Router(function(req, res) {
@@ -15,7 +14,7 @@ var R = new Router(function(req, res) {
 });
 
 // add single sub-controller (which handles per-account API calls, as opposed to the CRUD-type things below)
-R.any(/^\/admin\/aws\/([^\/]+)\/hosts\/([^\/]+)/, require('./hosts'));
+R.any(/^\/admin\/aws\/(\d+)\/hosts\/([^\/]+)/, require('./hosts'));
 
 /** GET /admin/aws
 Index - list all AWS accounts and show creation link */

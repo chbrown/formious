@@ -1,45 +1,54 @@
 {
-  "name": "turkserv",
-  "description": "Mech Turk question server.",
+  "name": "human",
+  "description": "Experimental experience server.",
   "version": "0.1.4",
-  "homepage": "https://github.com/chbrown/turkserv",
-  "repository": "git://github.com/chbrown/turkserv.git",
+  "homepage": "https://github.com/chbrown/human",
+  "repository": "git://github.com/chbrown/human.git",
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
   "license": "MIT",
   "dependencies": {
-    "amulet": ">=1.0.4",
+    "amulet": "*",
     "async": "*",
     "cookies": "git://github.com/chbrown/cookies.git",
     "eyes": "*",
     "formidable": "*",
     "http-enhanced": ">=0.3.1",
     "js-yaml": "*",
+    "loge": "*",
     "moment": "git://github.com/timrwood/moment.git#develop",
+    "mongodb": "*",
     "mongoose": "*",
     "optimist": "*",
+    "pg": "*",
     "regex-router": "~0.2",
     "send": "*",
     "sprintf": "*",
+    "sqlcmd": "*",
     "streaming": "*",
     "sv": "*",
     "turk": "0.5.2",
     "underscore": "*",
-    "winston": "*",
     "xmlconv": "*"
   },
   "devDependencies": {
     "grunt": "*",
-    "grunt-contrib-handlebars": "git://github.com/chbrown/grunt-contrib-handlebars.git",
     "grunt-contrib-uglify": "*"
   },
   "staticPattern": "static/lib/{file}",
   "staticDependencies": {
-    "backbone": "*",
+    "angular": "*",
     "jquery": "*",
     "jquery-noty": "*",
     "jquery-tablesorter": "*",
-    "json2": "*",
     "misc-js": "git://github.com/chbrown/misc-js.git",
+    "moment": "*",
+    "ngStorage": {
+      "url": "git://github.com/gsklee/ngStorage.git",
+      "filter": ["ngStorage.js", "ngStorage.min.js"]
+    },
     "underscore": "*"
+  },
+  "bin": {
+    "human-cli": "./bin/human-cli.js"
   }
 }
