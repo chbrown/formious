@@ -40,9 +40,29 @@ R.get(/^\/admin\/experiments\/?$/, function(req, res, m) {
 /** GET /admin/experiments/new
 create new Experiment and redirect to edit it */
 R.get(/^\/admin\/experiments\/new/, function(req, res, m) {
-  req.ctx.experiment = {};
+  req.ctx.experiment = {
+    administrator_id: req.ctx.current_user.id,
+  };
   amulet.stream(['admin/layout.mu', 'admin/experiments/one.mu'], req.ctx).pipe(res);
 });
+
+/** POST /admin/experiments
+Create new experiment. */
+R.post(/^\/admin\/experiments\/?$/, function(req, res, m) {
+  req.readData(function(err, data) {
+    if (err) return res.die(err);
+
+    var fields = _.pick(data, 'name', 'administrator_id', 'parameters');
+
+    new sqlcmd.Insert({table: 'experiments'})
+    .setIf(fields)
+    .execute(db, function(err, rows) {
+      if (err) return res.die(err);
+      res.json(rows[0]);
+    });
+  });
+});
+
 
 /** GET /admin/experiments/:experiment_id
 Edit existing Experiment (or just view) */
@@ -60,7 +80,7 @@ R.get(/^\/admin\/experiments\/(\d+)$/, function(req, res, m) {
 /** PUT /admin/experiments/
 Insert new Experiment */
 R.put(/^\/admin\/experiments\/?$/, function(req, res, m) {
-  req.readJSON(function(err, data) {
+  req.readData(function(err, data) {
     if (err) return res.die(err);
 
     var fields = _.pick(data, 'name', 'administrator_id', 'parameters');
@@ -82,7 +102,7 @@ Update existing Experiment */
 R.patch(/^\/admin\/experiments\/(\d+)/, function(req, res, m) {
   // models.Experiment.from({id: m[1]}, function(err, experiment) {
   var experiment = {id: m[1]};
-  req.readJSON(function(err, data) {
+  req.readData(function(err, data) {
     if (err) return res.die(err);
 
     var fields = _.pick(data, 'name', 'administrator_id', 'parameters');
@@ -102,7 +122,9 @@ R.patch(/^\/admin\/experiments\/(\d+)/, function(req, res, m) {
 /** DELETE /admin/experiments/:experiment_id
 delete Experiment */
 R.delete(/^\/admin\/experiments\/(\d+)$/, function(req, res, m) {
-  models.Experiment.from({id: m[1]}, function(err, experiment) {
+  new sqlcmd.Delete({table: 'experiments'})
+  .where('id = ?', m[1])
+  .execute(db, function(err, rows) {
     if (err) return res.die(err);
 
     res.json({message: 'Deleted experiment'});

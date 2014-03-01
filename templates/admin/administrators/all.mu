@@ -1,5 +1,5 @@
 <main ng-controller="adminTableCtrl">
-  <h3>Administrators</h3>
+  <h2>Administrators</h2>
 
   <section class="fill">
     <table>
@@ -19,16 +19,16 @@
           <td>{{administrator.created}}</td>
           <td><a href="/admin/administrators/{{administrator.id}}">Edit</a></td>
           <td>
-            <anchorform method="DELETE" action="/admin/administrators/{{administrator.id}}">
+            <ajaxform method="DELETE" action="/admin/administrators/{{administrator.id}}">
               Delete
-            </anchorform>
+            </ajaxform>
           </td>
         </tr>
       </tbody>
     </table>
   </section>
 
-  <a href="/admin/administrators/new">Create new...</a>
+  <a href="/admin/administrators/new">Create new administrator</a>
 </main>
 <script>
 var table = <%& JSON.stringify(administrators) %>;

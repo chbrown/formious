@@ -9,7 +9,7 @@ var models = require('./lib/models');
 // amulet.set(), as opposed amulet.create(), will set the defaults on the module singleton
 var amulet = require('amulet').set({
   root: path.join(__dirname, 'templates'),
-  minify: true,
+  // minify: true,
   open: '<%',
   close: '%>',
   //   'datefmt': function(date) {
@@ -59,7 +59,6 @@ else {
 
   http.createServer(function(req, res) {
     req.cookies = new Cookies(req, res);
-    req.user_id = req.cookies.get('workerId');
 
     var started = Date.now();
     res.on('finish', function() {

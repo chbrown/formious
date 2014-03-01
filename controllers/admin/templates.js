@@ -16,11 +16,13 @@ var R = new Router(function(req, res) {
 Index: show all templates */
 R.get(/^\/admin\/templates(\/|.json)?$/, function(req, res, m) {
   new sqlcmd.Select({table: 'templates'})
-  .orderBy('created DESC')
+  .orderBy('id')
   .execute(db, function(err, templates) {
     if (err) return res.die(err);
 
     req.ctx.templates = templates;
+
+    req.ctx.templates_json = JSON.stringify(templates).replace(/<\//g, '<\\/');
     res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/templates/all.mu']);
   });
 });
@@ -30,10 +32,11 @@ R.get(/^\/admin\/templates(\/|.json)?$/, function(req, res, m) {
 New: edit blank template */
 R.get(/^\/admin\/templates\/new$/, function(req, res, m) {
   req.ctx.template = {};
+  req.ctx.template_json = '{}';
   amulet.stream(['admin/layout.mu', 'admin/templates/one.mu'], req.ctx).pipe(res);
 });
 
-/** POST /admin/administrators
+/** POST /admin/templates
 Create: insert new template */
 R.post(/^\/admin\/templates\/?$/, function(req, res, m) {
   req.readData(function(err, data) {
@@ -53,12 +56,23 @@ R.post(/^\/admin\/templates\/?$/, function(req, res, m) {
 
 /** GET /admin/templates/:id
 Show: (and edit) existing template */
-R.get(/^\/admin\/templates\/(\d+)$/, function(req, res, m) {
+R.get(/^\/admin\/templates\/(\d+)(.json)?$/, function(req, res, m) {
   models.Template.from({id: m[1]}, function(err, template) {
     if (err) return res.die(err);
 
     req.ctx.template = template;
+    req.ctx.template_json = JSON.stringify(template).replace(/<\//g, '<\\/');
     res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/templates/one.mu']);
+  });
+});
+
+/** GET /admin/templates/:id/render
+Render existing template as html */
+R.get(/^\/admin\/templates\/(\d+)\/render$/, function(req, res, m) {
+  models.Template.from({id: m[1]}, function(err, template) {
+    if (err) return res.die(err);
+
+    res.html(template.html);
   });
 });
 
@@ -89,14 +103,14 @@ R.patch(/^\/admin\/templates\/(\d+)/, function(req, res, m) {
   models.Template.from({id: m[1]}, function(err, template) {
     if (err) return res.die(err);
 
-    req.readForm(function(err, data) {
+    req.readData(function(err, data) {
       if (err) return res.die(err);
 
-      var fields = _.pick(data, 'email', 'password', 'created');
-      // handle the password better (hash it and stuff, if needed)!
+      var fields = _.pick(data, 'name', 'html', 'created');
 
-      new sqlcmd.Update({table: 'administrators'})
+      new sqlcmd.Update({table: 'templates'})
       .setIf(fields)
+      .where('id = ?', template.id)
       .execute(db, function(err, rows) {
         if (err) return res.die(err);
 

@@ -1,51 +1,51 @@
-{{#account}}
-<h3 class="section">AWS Account: {{_id}}</h3>
+<main ng-controller="adminAWSAccountEditor">
+  <h3>AWS Account: {{aws_account.name}}</h3>
 
-<section class="box">
-  <table>
-    <tr><td>ID</td><td>{{_id}}</td></tr>
-    <tr><td>Access Key ID</td><td>{{accessKeyId}}</td></tr>
-    <tr><td>Secret Access Key</td><td>{{secretAccessKey}}</td></tr>
-    <tr><td>Created</td><td>{{created}}</td></tr>
-  </table>
-</section>
+  <section class="fill">
+    <form class="vform" ng-submit="syncAWSAccount(aws_account)">
+      <label><span>Name</span>
+        <input type="text" ng-model="aws_account.name" />
+      </label>
 
-<section>
-  <a href="/admin/aws/{{_id}}/edit">Edit account</a>
-</section>
-{{/account}}
+      <label><span>Access Key ID</span>
+        <input type="text" ng-model="aws_account.access_key_id" />
+      </label>
 
-<h3 class="section">Mechanical Turk Hosts</h3>
-<section class="box">
-  <table id="hosts">
-    <thead>
-      <tr>
-        <th>Host</th>
-        <th>Available Balance</th>
-        <th></th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {{#hosts}}
+      <label><span>Secret Access Key</span>
+        <input type="text" ng-model="aws_account.secret_access_key" style="width: 500px" />
+      </label>
+
+      <label><span>Created</span>
+        {{aws_account.created}}
+      </label>
+
+      <div><button>Save</button></div>
+    </form>
+  </section>
+
+  <h3>Mechanical Turk Hosts</h3>
+  <section class="fill">
+    <table>
+      <thead>
         <tr>
-          <td>{{.}}</td>
-          <td></td>
-          <td><a href="/admin/aws/{{account._id}}/hosts/{{.}}/HITs">View HITs</a></td>
-          <td><a href="/admin/aws/{{account._id}}/hosts/{{.}}/HITs/new">Create new HIT</a></td>
+          <th>Host</th>
+          <th>Account Balance</th>
+          <th></th>
+          <th></th>
         </tr>
-      {{/hosts}}
-    </tbody>
-  </table>
-</section>
+      </thead>
+      <tbody>
+        <tr ng-repeat="host in aws_account.hosts">
+          <td>{{host.name}}</td>
+          <td>{{host.account_balance}}</td>
+          <td><a href="/admin/aws/{{aws_account.id}}/hosts/{{host.name}}/HITs">View HITs</a></td>
+          <td><a href="/admin/aws/{{aws_account.id}}/hosts/{{host.name}}/HITs/new">Create new HIT</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
 
+</main>
 <script>
-$('#hosts tbody tr').each(function(i, el) {
-  var $tr = $(el);
-  var host = $tr.children('td:nth-child(1)').text();
-  $.post('/admin/aws/{{account._id}}/hosts/' + host + '/GetAccountBalance', function(data, textStatus, jqXHR) {
-    var price = data.GetAccountBalanceResult.AvailableBalance.FormattedPrice;
-    $tr.children('td:nth-child(2)').text(price);
-  });
-});
+var aws_account = <%& JSON.stringify(aws_account) %>;
 </script>

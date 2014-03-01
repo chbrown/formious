@@ -7,7 +7,9 @@ var amulet = require('amulet');
 
 // a little layer on top of http-enhanced
 http.IncomingMessage.prototype.readJSON = function(callback) {
-  // callback signature: function(err, Object)
+  /** Really, might as well use readData
+
+  callback signature: function(err, Object) */
   this.readToEnd(function(err, body) {
     if (err) return callback(err);
 
@@ -21,7 +23,9 @@ http.IncomingMessage.prototype.readJSON = function(callback) {
   });
 };
 http.IncomingMessage.prototype.readForm = function(callback) {
-  // callback signature: function(err, Object)
+  /** Really, might as well use readData
+
+  callback signature: function(err, Object) */
   this.readToEnd(function(err, body) {
     if (err) return callback(err);
 
@@ -77,7 +81,7 @@ http.ServerResponse.prototype.adapt = function(req, ctx, templates) {
     this.json(ctx);
   }
   else { // assume html
-    amulet.stream(['admin/layout.mu', 'admin/administrators/all.mu'], req.ctx).pipe(this);
+    amulet.stream(templates, req.ctx).pipe(this);
   }
 };
 

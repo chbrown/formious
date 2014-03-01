@@ -79,6 +79,7 @@ public_R.post(/^\/admin\/login$/, function(req, res) {
 module.exports = function(req, res) {
   // handle auth and forward. this is the checkpoint for all admin-level
   // requests, and should send all non administrators to the login page.
+  // logger.info('admin.index.routing', req.url);
   var ticket = req.cookies.get('ticket');
   models.Administrator.fromTicket(ticket, function(err, administrator) {
     if (err) {

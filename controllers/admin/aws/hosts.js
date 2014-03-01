@@ -275,15 +275,14 @@ R.get(/HITs$/, function(req, res) {
 // /admin/aws/:account_id/hosts/:host
 module.exports = function(req, res, m) {
   // m is actually already set correctly; we just want to make sure
-  m = req.url.match(/^\/admin\/aws\/([^\/]+)\/hosts\/([^\/]+)/);
+  m = req.url.match(/^\/admin\/aws\/(\d+)\/hosts\/(\w+)/);
   var account_id = m[1];
   var host_id = m[2];
 
-  models.AWSAccount.findById(account_id, function(err, account) {
-    if (err) return res.die('AWSAccount.findById error: ' + err);
-    if (!account) return res.die('No AWSAccount found: ' + account_id);
+  models.AWSAccount.from({id: account_id}, function(err, aws_account) {
+    if (err) return res.die(err);
 
-    req.turk = new turk.Connection(account.accessKeyId, account.secretAccessKey, {
+    req.turk = new turk.Connection(aws_account.access_key_id, aws_account.secret_access_key, {
       url: hosts[host_id],
       logger: logger,
     });

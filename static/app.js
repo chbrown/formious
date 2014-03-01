@@ -2,121 +2,10 @@
 
 var app = angular.module('app', ['ngStorage']);
 
-app.controller('adminTableCtrl', function($scope) {
-  $scope.table = window.table;
-});
-
-app.controller('adminExperimentEditor', function($scope, $http, $localStorage) {
-  $scope.experiment = window.experiment;
-
-  $http({method: 'GET', url: '/admin/administrators.json'}).then(function(res) {
-    $scope.administrators = res.data.administrators;
-  }, p);
-
-  $http({method: 'GET', url: '/admin/templates.json'}).then(function(res) {
-    $scope.templates = res.data.templates;
-  }, p);
-
-  // so if we
-  var stims_url = Url.parse(window.location);
-  stims_url.path += '/stims.json';
-  $http({method: 'GET', url: stims_url.toString()}).then(function(res) {
-    $scope.experiment.stims = res.data.stims;
-  }, p);
-
-
-  // var workerId = this.model.get('WorkerId');
-  // var worker = new MTWorker({id: workerId});
-  // worker.fetch({
-  //   success: function(model, user, options) {
-  //     // infer required columns from list of responses
-  //     var keys = {};
-  //     user.responses.slice(0, 50).forEach(function(response) {
-  //       _.extend(keys, response);
-  //     });
-  //     // create table and simply put where the button was
-  //     var cols = _.keys(keys).sort();
-  //     var table_html = tabulate(user.responses, cols);
-  //     $(ev.target).replaceWith(table_html);
-  //   }
-  // });
-
-  var sync_options = function(record) {
-    if (record.id) {
-      // update
-      return {
-        method: 'PATCH',
-        url: window.location,
-        data: record,
-      };
-    }
-    else {
-      // create
-      return {
-        method: 'POST',
-        url: '.',
-        data: record,
-      };
-    }
+app.filter('trust', function($sce) {
+  return function(string) {
+    return $sce.trustAsHtml(string);
   };
-
-  $scope.syncExperiment = function(experiment) {
-    p('syncExperiment', experiment);
-    var opts = sync_options(experiment);
-    $http(opts).then(function(res) {
-      // var message = jqXHR.getResponseHeader('x-message') || 'Success!';
-      // if (redirect) {
-      //   // pushState/replaceState arguments: (state_object, dummy, url)
-      //   // history.pushState(form_obj, '', redirect);
-      //   window.location = redirect;
-      // }
-      p('sync response', res, res.data);
-    }, function(res) {
-      // $button.flag({text: jqXHR.responseText, fade: 3000});
-      p('sync error', res);
-    });
-  };
-
-  $scope.syncStim = function(stim) {
-    p('syncStim', stim);
-    var opts = sync_options(stim);
-    if (stim.id) {
-      opts.url = window.location + '/stims/' + stim.id;
-    }
-    else {
-      opts.url = window.location + '/stims';
-    }
-
-    $http(opts).then(function(res) {
-      p('sync response', res, res.data);
-    }, p);
-  };
-
-  // hack: wish angular.js would just wrap onchange events without the model requirement
-  var upload_el = document.querySelector('#upload');
-  angular.element(upload_el).on('change', function(ev) {
-    p('parseUpload: ', ev);
-
-    fileinputText(ev.target, function(err, file_contents, file_name, file_size) {
-
-      // var message = 'Uploading ' + file_name + ' (' + file_size + ' bytes)';
-      $http({method: 'POST', url: '/api/sv', data: file_contents}).then(function(res) {
-        // xxx: should merge parameters, not overwrite
-        $scope.experiment.parameters = res.data.columns;
-        pushAll($scope.experiment.stims, res.data.rows);
-      }, p);
-
-      // infer things about the stimlist from what they just uploaded
-      // var segmented = _.contains(data.columns, 'segment');
-      // self.set('segmented', segmented);
-      // if (segmented) {
-      //   var segments = _.pluck(data.rows, 'segment');
-      //   self.set('segments', _.uniq(segments));
-      // }
-
-      // var message = 'Processed upload into ' + self.model.get('states').length + ' rows.';
-    });
-  });
 });
 
 app.directive('help', function() {
@@ -134,12 +23,154 @@ app.directive('help', function() {
   };
 });
 
-app.directive('anchorform', function() {
+app.directive('fixedflow', function() {
+  /** This directive is intended to be used with a <nav> element, so that it
+  drops out of flow, in the current position, but creates an empty shadow
+  element to keep its place
+
+  <nav fixedflow>
+    <a href="/admin/aws">AWS Accounts</a>
+    <a href="/admin/administrators">Administrators</a>
+  </nav>
+  */
+  return {
+    restrict: 'A',
+    link: function(scope, el, attrs) {
+      var height = el.css('height');
+      // placeholder is just a super simple empty shadow element
+      var placeholder = angular.element('<div>');
+      placeholder.css('height', height);
+      el.after(placeholder);
+    }
+  };
+});
+
+
+app.directive('jsonTransform', function() {
+  return {
+    restrict: 'A',
+    require: 'ngModel',
+    link: function(scope, el, attrs, ngModel) {
+      // enhance textarea (presumably it's a textarea)
+      var textarea = el[0];
+      var textarea_enhanced = Textarea.enhance(textarea);
+
+      // set up communicating from DOM to model
+      function dom2model() {
+        ngModel.$setViewValue(el.val());
+      }
+      el.on('blur keyup change', function() {
+        scope.$apply(dom2model);
+      });
+
+      // set up communicating from model to DOM
+      function model2dom() {
+        el.val(ngModel.$viewValue);
+        textarea_enhanced.resizeToFit();
+      }
+      ngModel.$render = model2dom;
+
+      // set up translations
+      ngModel.$formatters.push(function(value) {
+        if (value === null) {
+          return '';
+        }
+        return angular.toJson(value, true);
+      });
+      ngModel.$parsers.push(function(value) {
+        // we'll interpret the empty string as 'null'
+        if (value === '') {
+          value = null;
+        }
+
+        try {
+          ngModel.$setValidity('json', true);
+          return angular.fromJson(value);
+        }
+        catch (exc) {
+          ngModel.$setValidity('json', false);
+          // return undefined;
+        }
+      });
+
+      // dom2model(); // read from page's html before from the model (thus default to empty, usually)
+    }
+  };
+});
+
+// app.directive('ngCallbackClick', function($parse) {
+//   // see angular.js:18074 for what this is based on
+//   return {
+//     restrict: 'A',
+//     link: function(scope, el, attrs) {
+//       var fn = $parse(attrs['ngCallbackClick']);
+//       var throbber_el = angular.element('<img src="/static/lib/img/throbber-16.gif" />');
+//       throbber_el.css('margin', '2px');
+//       var error_el = angular.element('<span>');
+//       error_el.css('margin', '2px');
+//       var callback = function(err) {
+//         throbber_el.remove();
+//         if (err) {
+//           error_el.text(err.toString());
+//           el.after(error_el);
+//           setTimeout(function() {
+//             error_el.remove();
+//           }, 5000);
+//         }
+//       };
+//       el.on('click', function(event) {
+//         // add progress element:
+//         error_el.remove();
+//         el.after(throbber_el);
+//         // normal click handling
+//         scope.$apply(function() {
+//           fn(scope, {$event: event, $callback: callback});
+//         });
+//       });
+//     }
+//   };
+// });
+
+app.directive('ajaxform', function($http) {
   return {
     restrict: 'E',
     replace: true,
-    template: '<form style="display: inline">' +
-      '<button ng-transclude></button></form>',
-    transclude: true
+    template: '<form style="display: inline" ng-submit="submit($event)" ng-transclude></form>',
+    transclude: true,
+    link: function(scope, el, attrs) {
+      scope.submit = function(ev) {
+        if (attrs.method === 'DELETE') {
+          ev.preventDefault();
+          $http({method: attrs.method, url: attrs.action}).then(function(res) {
+            window.location = window.location;
+          }, p);
+        }
+        // other methods can handle themselves?
+        // TODO: intercept PUT and PATCH, too
+      };
+    },
   };
 });
+
+var afterPromise = function(target, promise) {
+  var el = angular.element(target);
+  var throbber_el = angular.element('<img src="/static/lib/img/throbber-16.gif" />');
+  throbber_el.css('margin', '2px');
+  var error_el = angular.element('<span>');
+  error_el.css('margin', '2px');
+  var callback = function(err) {
+    throbber_el.remove();
+    if (err) {
+      error_el.text(err.toString());
+      el.after(error_el);
+      setTimeout(function() {
+        error_el.remove();
+      }, 5000);
+    }
+  };
+
+  // add progress element:
+  error_el.remove();
+  el.after(throbber_el);
+  promise.then(callback, callback);
+};

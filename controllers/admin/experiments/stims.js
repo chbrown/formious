@@ -67,16 +67,16 @@ Update existing stim. */
 R.patch(/stims\/(\d+)$/, function(req, res, m) {
   models.Stim.from({id: m[1]}, function(err, stim) {
     if (err) return res.die(err);
-    req.readForm(function(err, data) {
+    req.readData(function(err, data) {
       if (err) return res.die(err);
 
       // empty-string password means: don't change the password
       // if (fields.password === '') delete fields.password;
-      var fields = _.pick(data, 'email', 'password', 'created');
-      // xxx: todo: handle the password better (hash it and stuff, if needed)!
+      var fields = _.pick(data, 'template_id', 'context', 'view_order', 'created');
 
       new sqlcmd.Update({table: 'stims'})
       .setIf(fields)
+      .where('id = ?', stim.id)
       .execute(db, function(err, rows) {
         if (err) return res.die(err);
 
@@ -86,21 +86,15 @@ R.patch(/stims\/(\d+)$/, function(req, res, m) {
   });
 });
 
-
-/** PATCH /admin/administrators
-Create new administrator. */
-R.post(/^\/admin\/administrators\/(\d+)$/, function(req, res, m) {
-  req.readForm(function(err, data) {
+/** DELETE /admin/experiments/:experiment_id/stims/:stim_id
+Delete Stim */
+R.delete(/stims\/(\d+)$/, function(req, res, m) {
+  new sqlcmd.Delete({table: 'stims'})
+  .where('id = ?', m[1])
+  .execute(db, function(err, rows) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, 'email', 'password');
-
-    new sqlcmd.Insert({table: 'administrators'})
-    .setIf(fields)
-    .execute(db, function(err, rows) {
-      if (err) return res.die(err);
-      res.json(rows[0]);
-    });
+    res.json({message: 'Deleted stim'});
   });
 });
 

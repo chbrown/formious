@@ -4,11 +4,126 @@ var url = require('url');
 var amulet = require('amulet');
 var Router = require('regex-router');
 var logger = require('loge');
+var sqlcmd = require('sqlcmd');
 
+var db = require('../lib/db');
 var models = require('../lib/models');
 
 var R = new Router(function(req, res) {
   res.die(404, 'No resource at: ' + req.url);
+});
+
+/** GET /experiments/:experiment_id
+Redirect to first stim of experiment
+*/
+R.get(/^\/experiments\/(\d+)(\?|$)/, function(req, res, m) {
+  var urlObj = url.parse(req.url, true);
+  var experiment_id = m[1];
+
+  new sqlcmd.Select({table: 'stims'})
+  .where('experiment_id = ?', experiment_id)
+  .orderBy('view_order')
+  .limit(1)
+  .execute(db, function(err, stims) {
+    if (err) return res.die(err);
+
+    urlObj.pathname = '/experiments/' + experiment_id + '/stims/' + stims[0].id;
+    var stim_url = url.format(urlObj);
+
+    res.redirect(stim_url);
+  });
+});
+
+/** GET /experiments/:experiment_id/stims/:stim_id
+Render stim as html
+*/
+R.get(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
+  var experiment_id = m[1];
+  var stim_id = m[2];
+  // models.Experiment.from({id: m[1]}, function(err, experiment) { ... });
+  models.Stim.from({id: stim_id}, function(err, stim) {
+    if (err) return res.die(err);
+    models.Template.from({id: stim.template_id}, function(err, template) {
+      if (err) return res.die(err);
+
+      var ctx = {
+        context: stim.context,
+        stim_id: stim.id,
+        html: template.html,
+      };
+
+      // stim_globals is given to all stims, in case they want the values. it's mostly metadata, compared to the states.
+      // var stim_globals = {
+      //   assignmentId: '{{assignmentId}}',
+      //   hit_started: {{hit_started}},
+      //   hitId: '{{hitId}}',
+      //   host: '{{host}}',
+      //   workerId: '{{workerId}}',
+      //   stimlist: '{{stimlist_id}}'
+      // };
+      // ctx: the current state to render the template with
+      // var ctx = {
+      //   // straight from the url
+      //   host: urlObj.query.debug !== undefined ? '' : (urlObj.query.turkSubmitTo || 'https://www.mturk.com'),
+      //   workerId: user._id,
+      //   assignmentId: urlObj.query.assignmentId,
+      //   hitId: urlObj.query.hitId,
+      //   segment: urlObj.query.segment,
+      //   index: urlObj.query.index || 0,
+      //   // specific to this type of responses (stimlists)
+      //   hit_started: Date.now(),
+      //   stimlist_id: stimlist._id,
+      // };
+
+      amulet.stream(['experiments/stims/one.mu'], ctx).pipe(res);
+    });
+  });
+});
+
+var nextStimId = function(experiment_id, stim_id, callback) {
+  // callback(err, next_stim_id)
+  // or
+  // callback(null, null) if there are no more stims
+  models.Stim.from({id: stim_id}, function(err, stim) {
+    if (err) return callback(err);
+
+    new sqlcmd.Select({table: 'stims'})
+    .where('view_order > ?', stim.view_order)
+    .orderBy('view_order')
+    .limit(1)
+    .execute(db, function(err, stims) {
+      if (err) return callback(err);
+
+      callback(null, stims.length ? stims[0].id : null);
+    });
+  });
+};
+
+/** POST /experiments/:experiment_id/stims/:stim_id
+Save response
+*/
+R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
+  var experiment_id = m[1];
+  var stim_id = m[2];
+
+  req.readData(function(err, data) {
+    if (err) return res.die(err);
+
+    logger.debug('Inserting response.', {aws_worker_id: req.aws_worker_id, data: data});
+
+    models.Participant.addResponse(req.aws_worker_id, stim_id, data, function(err, responses) {
+      if (err) return res.die(err);
+
+      // res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/experiments/stims/all.mu']);
+      nextStimId(experiment_id, stim_id, function(err, next_stim_id) {
+        var next_stim_url = '/experiments/' + experiment_id + '/stims/' + next_stim_id;
+        res.redirect(next_stim_url);
+      });
+      // res.json({message: 'Inserted response.'});
+      // res.json({success: true, message: 'Saved response for user: ' + workerId});
+      // amulet.stream(['layout.mu', 'done.mu'], {}).pipe(res);
+    });
+  });
 });
 
 // this is a little weird, for now
@@ -39,104 +154,58 @@ var R = new Router(function(req, res) {
 //   });
 // });
 
-/** GET /experiments/:experiment_id
-    GET /experiments/:experiment_id
-    //?segment=:segment&index=:index
-Present single stimlist (given by name, not id) to worker,
-starting at given index or 0, of the next available segment.
-*/
-R.get(/^\/experiments\/(\w+)(\?|$)/, function(req, res, m) {
-  var _id = m[1];
-  var urlObj = url.parse(req.url, true);
-  var workerId = urlObj.query.workerId || req.user_id;
+// TODO: fix segmentation
+//   starting at given index or 0, of the next available segment.
+//   GET /experiments/:experiment_id
+//   ?segment=:segment&index=:index
+// segmentation:
+// if (stimlist.segmented && ctx.segment === undefined) {
+//   // url.format ignores .query if there is also .search, and url.parse gives us both (unfortunately)
+//   var new_urlObj = {pathname: urlObj.pathname, query: urlObj.query};
 
-  models.User.from({name: workerId}, function(err, user) {
-    if (err) return res.die('User query error: ' + err);
-    if (!user) return res.die('Could not find user: ' + workerId);
+//   // find next available segment
+//   var segments_available = _.difference(stimlist.segments, stimlist.segments_claimed);
+//   if (segments_available.length === 0) {
+//     // simple warning, in case we're keeping track:
+//     logger.warn('No more unclaimed segments for stimlist, "%s"', stimlist._id);
+//   }
 
-    // update cookie if needed
-    if (req.cookies.get('workerId') != user._id) req.cookies.set('workerId', user._id);
+//   // if there are any unclaimed segments, or if this is a MT preview:
+//   if (segments_available.length === 0 || preview_mode) {
+//     var random_index = Math.random()*stimlist.segments.length | 0;
+//     var random_segment = stimlist.segments[random_index];
+//     logger.info('Assigning stimlist randomly: "%s"', random_segment);
 
-    models.Stimlist.findById(_id, function(err, stimlist) {
-      if (err) return res.die('Stimlist.findById error: ' + err);
-      if (!stimlist) return res.die('Could not find Stimlist: ' + _id);
+//     new_urlObj.query.segment = random_segment;
+//     res.redirect(url.format(new_urlObj));
+//   }
+//   else {
+//     var next_segment = segments_available[0];
+//     stimlist.update({$push: {segments_claimed: next_segment}}, function(err) {
+//       if (err) return res.die('Could not claim segment: ' + err);
 
-      // ctx: the current state to render the template with
-      var ctx = {
-        // straight from the url
-        host: urlObj.query.debug !== undefined ? '' : (urlObj.query.turkSubmitTo || 'https://www.mturk.com'),
-        workerId: user._id,
-        assignmentId: urlObj.query.assignmentId,
-        hitId: urlObj.query.hitId,
-        segment: urlObj.query.segment,
-        index: urlObj.query.index || 0,
-        // specific to this type of responses (stimlists)
-        hit_started: Date.now(),
-        stimlist_id: stimlist._id,
-      };
+//       new_urlObj.query.segment = next_segment;
+//       res.redirect(url.format(new_urlObj));
+//     });
+//   }
+// }
+// if (stimlist.segmented) {
+//   states = states.filter(function(state) {
+//     return state.segment == ctx.segment;
+//   });
+// }
 
-      var preview_mode = ctx.assignmentId === 'ASSIGNMENT_ID_NOT_AVAILABLE';
+module.exports = function(req, res) {
+  // this is where we need the workerId cookie (aws_worker_id value)
+  req.aws_worker_id = req.cookies.get('workerId');
+  if (!req.aws_worker_id) {
+    // if the cookie has not yet been set, set it from the url
+    var urlObj = url.parse(req.url, true);
+    req.aws_worker_id = urlObj.query.workerId;
+    req.cookies.set('workerId', req.aws_worker_id);
+  }
 
-      if (stimlist.segmented && ctx.segment === undefined) {
-        // url.format ignores .query if there is also .search, and url.parse gives us both (unfortunately)
-        var new_urlObj = {pathname: urlObj.pathname, query: urlObj.query};
+  // req.aws_worker_id is now available
+  R.route(req, res);
+};
 
-        // find next available segment
-        var segments_available = _.difference(stimlist.segments, stimlist.segments_claimed);
-        if (segments_available.length === 0) {
-          // simple warning, in case we're keeping track:
-          logger.warn('No more unclaimed segments for stimlist, "%s"', stimlist._id);
-        }
-
-        // if there are any unclaimed segments, or if this is a MT preview:
-        if (segments_available.length === 0 || preview_mode) {
-          var random_index = Math.random()*stimlist.segments.length | 0;
-          var random_segment = stimlist.segments[random_index];
-          logger.info('Assigning stimlist randomly: "%s"', random_segment);
-
-          new_urlObj.query.segment = random_segment;
-          res.redirect(url.format(new_urlObj));
-        }
-        else {
-          var next_segment = segments_available[0];
-          stimlist.update({$push: {segments_claimed: next_segment}}, function(err) {
-            if (err) return res.die('Could not claim segment: ' + err);
-
-            new_urlObj.query.segment = next_segment;
-            res.redirect(url.format(new_urlObj));
-          });
-        }
-      }
-      else {
-        var states = stimlist.states;
-
-        if (stimlist.segmented) {
-          states = states.filter(function(state) {
-            return state.segment == ctx.segment;
-          });
-        }
-
-        if (stimlist.default_stim) {
-          logger.debug('Setting default stim to %s', stimlist.default_stim);
-          states.forEach(function(state) {
-            if (!state.stim) state.stim = stimlist.default_stim;
-          });
-        }
-
-        if (stimlist.pre_stim && !preview_mode) {
-          // presumably, this is the consent form, which we don't want to show if we're in preview mode
-          states.unshift({stim: stimlist.pre_stim});
-        }
-        if (stimlist.post_stim) {
-          states.push({stim: stimlist.post_stim});
-        }
-
-        ctx.states = states;
-
-        amulet.stream(['layout.mu', 'stimlists/one.mu'], ctx).pipe(res);
-      }
-    });
-  });
-});
-
-module.exports = R.route.bind(R);

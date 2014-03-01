@@ -19,6 +19,7 @@ module.exports = function(grunt) {
         files: {
           'static/compiled.js': [
             'static/lib/underscore.min.js',
+            'static/lib/jquery.min.js',
             'static/lib/angular.min.js',
             'static/lib/ngStorage.min.js',
             // from misc-js
@@ -26,7 +27,6 @@ module.exports = function(grunt) {
             'static/lib/forms.js',
             'static/lib/textarea.js',
             'static/lib/url.js',
-            // 'static/lib/jquery.js',
             // 'static/lib/jquery-flags.js',
             // 'static/lib/jquery-noty.js',
             // 'static/lib/jquery-noty.theme.js',

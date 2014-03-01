@@ -7,20 +7,19 @@
   <script src="/static/compiled.js"></script>
   <script src="/static/local.js"></script>
   <script src="/static/app.js"></script>
+  <script src="/static/app.controllers.js"></script>
 </head>
 <body ng-app="app" class="admin">
-  <nav>
+  <nav fixedflow>
     <aside>
       <a href="/admin/administrators/{{current_user.id}}">me</a>
-      <form method="POST" action="/admin/logout" style="display: inline">
-        <button class="anchor">Logout</button>
-      </form>
+      <ajaxform method="POST" action="/admin/logout"><button class="anchor">Logout</button></ajaxform>
     </aside>
     <a href="/admin/aws">AWS Accounts</a>
     <a href="/admin/administrators">Administrators</a>
     <a href="/admin/participants">Participants</a>
     <a href="/admin/experiments">Experiments</a>
-    <!-- <a href="/admin/stims">Stims</a> -->
+    <a href="/admin/templates">Templates</a>
   </nav>
   <%<%>
 </body>

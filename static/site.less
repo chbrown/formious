@@ -67,11 +67,41 @@ fieldset {
     }
   }
 }
+table.striped {
+  th, td {
+  }
+  thead {
+    th, td {
+      // .background-gray(75%);
+    }
+  }
+  tbody {
+    tr:nth-child(odd) {
+      .background-gray(99%);
+    }
+    tr:nth-child(even) {
+      // .background-gray(98%);
+    }
+  }
+  tfoot {
+    th, td {
+      // border-top: 1px solid rgb(50%, 50%, 50%);
+      .background-gray(90%);
+    }
+  }
+}
+.ng-invalid {
+  box-shadow: 0 0 10px rgb(200, 0, 0);
+}
+
+.json {
+  .code;
+  min-height: 50px;
+  min-width: 400px
+}
 
 section {
-  // vertical-align: top;
   margin: 10px 0;
-  // padding: 0 10px;
 
   // &.fill {
   //   border-width: 1px 0;
@@ -86,28 +116,34 @@ section {
 }
 
 button.anchor {
+  // vertical-align: top;
   background: none;
   border: none;
   text-decoration: underline;
   cursor: pointer;
   font-size: 100%;
+  padding: 0;
 }
 
 body.admin {
   .background-gray(98%);
   font-size: 80%; // why is the default so big!?
+  overflow-y: scroll;
 
-  padding-top: 30px; // accommodate the nav
   nav {
     position: fixed;
-    top: 0;
     width: 100%;
     .background-gray(94%);
+    box-sizing: border-box;
 
-    padding-left: 4px;
+    padding: 0 4px;
     border-bottom: 1px solid #BBB;
 
-    a, button {
+    & > span, & > a, & > button, & > img {
+      vertical-align: middle;
+    }
+
+    a, button.anchor {
       display: inline-block;
       margin: 3px;
       border-radius: 3px;
@@ -122,6 +158,9 @@ body.admin {
         .border-gray(60%);
         .background-gray(100%);
       }
+    }
+    button {
+      font-size: 100%;
     }
     aside {
       float: right;
@@ -140,7 +179,7 @@ body.admin {
 
 main {
   // most immediate children of main should be padded
-  padding: 0 10px;
+  padding: 5px 10px;
   .fill {
     // negative margins squeeze back out of that padding
     margin-left: -10px;
@@ -152,6 +191,21 @@ main {
     width: 100%;
     & > table {
       width: 100%;
+      // margin-left: -10px;
+      // margin-right: -10px;
+      // thead {
+      //   td, th {
+      //     padding: 4px 0;
+      //   }
+      // }
+      // tr {
+      //   td:first-child, th:first-child {
+      //     padding-left: 10px;
+      //   }
+      //   td:last-child, th:last-child {
+      //     padding-right: 10px;
+      //   }
+      // }
     }
   }
 }
@@ -161,31 +215,27 @@ table {
   th {
     text-align: left;
   }
-  tr.preview {
-    background-color: #BBB;
-  }
-  td {
-  }
   td, th {
     vertical-align: top;
     padding: 0px 4px 1px 1px;
   }
-  &.hoverable tbody tr:hover {
-    background-color: #DDD;
-  }
-  &.keyval {
-    th {
-      padding-top: 4px;
-      border-bottom: 1px solid #999;
-    }
-    td:first-child {
-      font-weight: bold;
-    }
-  }
+  // &.hoverable tbody tr:hover {
+  //   background-color: #DDD;
+  // }
   // thead td, tbody td {
   //   border-bottom: 1px solid #DDD;
   // }
 }
+table.keyval {
+  th {
+    padding-top: 4px;
+    border-bottom: 1px solid #999;
+  }
+  td:first-child {
+    font-weight: bold;
+  }
+}
+
 // .record.delete {
 //   background-color: #DDD;
 //   color: #555;
@@ -276,7 +326,7 @@ input[type="checkbox"] + span {
   }
 }
 
-#preview {
+.preview {
   position: fixed;
   max-width: 50%;
   top: 10px;

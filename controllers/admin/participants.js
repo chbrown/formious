@@ -30,7 +30,7 @@ R.get(/^\/admin\/participants\/?$/, function(req, res, m) {
 });
 
 /** GET /admin/participants/:user_id
-show single user */
+show single participant */
 R.get(/^\/admin\/participants\/(\w+)$/, function(req, res, m) {
   var _id = m[1];
   models.User.findById(_id, function(err, user) {

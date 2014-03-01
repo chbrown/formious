@@ -38,7 +38,7 @@ R.get(/^\/admin\/administrators\/new/, function(req, res, m) {
 /** POST /admin/administrators
 Create new administrator. */
 R.post(/^\/admin\/administrators\/?$/, function(req, res, m) {
-  req.readForm(function(err, data) {
+  req.readData(function(err, data) {
     if (err) return res.die(err);
 
     var fields = _.pick(data, 'email', 'password');
@@ -68,7 +68,7 @@ Update existing administrator. */
 R.patch(/^\/admin\/administrators\/(\d+)$/, function(req, res, m) {
   models.Administrator.from({id: m[1]}, function(err, administrator) {
     if (err) return res.die(err);
-    req.readForm(function(err, data) {
+    req.readData(function(err, data) {
       if (err) return res.die(err);
       // empty-string password means: don't change the password
       // if (fields.password === '') delete fields.password;
@@ -77,6 +77,7 @@ R.patch(/^\/admin\/administrators\/(\d+)$/, function(req, res, m) {
 
       new sqlcmd.Update({table: 'administrators'})
       .setIf(fields)
+      .where('id = ?', administrator.id)
       .execute(db, function(err, rows) {
         if (err) return res.die(err);
 

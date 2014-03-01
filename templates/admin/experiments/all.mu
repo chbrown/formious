@@ -9,7 +9,6 @@
           <th>Preview</th>
           <th>Created</th>
           <th>Owner</th>
-          <th># States</th>
           <th></th>
           <th></th>
         </tr>
@@ -20,10 +19,11 @@
           <td><a href="/experiments/{{experiment.id}}">{{experiment.name}}</a></td>
           <td>{{experiment.created}}</td>
           <td>{{experiment.administrator_id}}</td>
-          <td>{{states.length}}</td>
           <td><a href="/admin/experiments/{{experiment.id}}">Edit</a></td>
           <td>
-            <anchorform method="DELETE" action="/admin/experiments/{{experiment.id}}">Delete</anchorform>
+            <ajaxform method="DELETE" action="/admin/experiments/{{experiment.id}}">
+              <button>Delete</button>
+            </ajaxform>
           </td>
         </tr>
       </tbody>
