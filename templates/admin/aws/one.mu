@@ -47,5 +47,5 @@
 
 </main>
 <script>
-var aws_account = <%& JSON.stringify(aws_account) %>;
+var aws_account = <%& serialize(aws_account) %>;
 </script>

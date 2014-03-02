@@ -18,8 +18,12 @@
           <td><a href="/admin/templates/{{template.id}}">{{template.name}}</a></td>
           <!-- <td><a href="/admin/templates/{{template.id}}/clone">Clone</a></td> -->
           <td>{{template.html.slice(0, 100)}}</td>
-          <td>{{template.created}}</td>
+          <td><time ng-model="template.created" class="date" /></td>
           <td>
+            <!-- angular being dumb about the action -->
+            <form method="POST" action="{{'/admin/templates/' + template.id + '/clone'}}" style="display: inline">
+              <button>Clone</button>
+            </form>
             <ajaxform method="DELETE" action="/admin/templates/{{template.id}}">
               <button>Delete</button>
             </ajaxform>
@@ -32,5 +36,5 @@
   <a href="/admin/templates/new">Create new template</a>
 </main>
 <script>
-var table = <%& templates_json %>;
+var table = <%& serialize(templates) %>;
 </script>

@@ -34,5 +34,5 @@
   <a href="/admin/aws/new">Create new AWS Account</a>
 </main>
 <script>
-var table = <%& JSON.stringify(aws_accounts) %>;
+var table = <%& serialize(aws_accounts) %>;
 </script>

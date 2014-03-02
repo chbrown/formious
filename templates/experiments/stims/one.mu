@@ -6,7 +6,7 @@
   <script src="/static/lib/jquery.min.js"></script>
   <script src="/static/lib/underscore.min.js"></script>
   <script src="/static/human.js"></script>
-  <script>human.context = <%& JSON.stringify(context) %>;</script>
+  <script>human.context = <%& serialize(context) %>;</script>
 </head>
 <body>
   <%& html %>

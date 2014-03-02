@@ -16,7 +16,7 @@
       </label>
 
       <label><span>Created</span>
-        {{template.created}}
+        <time ng-model="template.created" class="datetime" />
       </label>
 
       <label><span>HTML</span>
@@ -31,7 +31,7 @@
 </div>
 
 <script>
-var template = <%& template_json %>;
+var template = <%& serialize(template) %>;
 
 var textarea = document.querySelector('textarea');
 var textarea_enhanced = Textarea.enhance(textarea);

@@ -7,6 +7,7 @@
   <script>
   var started = new Date();
   </script>
+  <!-- trying to phase this file out -->
 </head>
 <body>
   <%<%>

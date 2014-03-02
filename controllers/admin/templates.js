@@ -22,7 +22,6 @@ R.get(/^\/admin\/templates(\/|.json)?$/, function(req, res, m) {
 
     req.ctx.templates = templates;
 
-    req.ctx.templates_json = JSON.stringify(templates).replace(/<\//g, '<\\/');
     res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/templates/all.mu']);
   });
 });
@@ -49,7 +48,8 @@ R.post(/^\/admin\/templates\/?$/, function(req, res, m) {
     .execute(db, function(err, rows) {
       if (err) return res.die(err);
 
-      res.json(rows[0]);
+      req.ctx = rows[0];
+      res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/templates/one.mu']);
     });
   });
 });
@@ -61,7 +61,6 @@ R.get(/^\/admin\/templates\/(\d+)(.json)?$/, function(req, res, m) {
     if (err) return res.die(err);
 
     req.ctx.template = template;
-    req.ctx.template_json = JSON.stringify(template).replace(/<\//g, '<\\/');
     res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/templates/one.mu']);
   });
 });
@@ -77,29 +76,31 @@ R.get(/^\/admin\/templates\/(\d+)\/render$/, function(req, res, m) {
 });
 
 
-// * GET /admin/templates/:id/clone
-// create new StimTemplate as clone of other
-// R.get(/^\/admin\/templates\/(\d+)\/clone$/, function(req, res, m) {
-//   var _id = m[1];
-//   models.StimTemplate.findById(_id, function(err, stim_template) {
-//     if (err) return res.die('StimTemplate.findById() error', err);
-//     if (!stim_template) return res.die('No StimTemplate "' + _id + '" could be found');
+/* POST /admin/templates/:id/clone
+Create new template with properties of original, and go to it. */
+R.post(/^\/admin\/templates\/(\d+)\/clone$/, function(req, res, m) {
+  models.Template.from({id: m[1]}, function(err, template) {
+    if (err) return res.die(err);
 
-//     // copy properties, drop _id so new one will get inserted, and change name
-//     var clone_properties = stim_template.toObject();
-//     clone_properties._id += '_copy';
+    var fields = _.pick(template, 'name', 'html');
+    new sqlcmd.Insert({table: 'templates'})
+    .set({
+      name: template.name + ' copy',
+      html: template.html,
+    })
+    .execute(db, function(err, rows) {
+      if (err) return res.die(err);
 
-//     models.StimTemplate.create(clone_properties, function(err, stim_template) {
-//       if (err) return res.die('StimTemplate.create error: ' + err);
-
-//       res.redirect('/admin/templates/' + stim_template._id + '/edit');
-//     });
-//   });
-// });
+      // redirect so that we aren't sitting with the previous template's id in the url
+      res.redirect('/admin/templates/' + rows[0].id);
+    });
+  });
+});
 
 /** PATCH /admin/templates/:id
 Update: modify existing template */
 R.patch(/^\/admin\/templates\/(\d+)/, function(req, res, m) {
+  logger.info("Patching", m[1]);
   models.Template.from({id: m[1]}, function(err, template) {
     if (err) return res.die(err);
 

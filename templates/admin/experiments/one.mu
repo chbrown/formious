@@ -110,5 +110,5 @@
 
 </main>
 <script>
-var experiment = <%& JSON.stringify(experiment) %>;
+var experiment = <%& serialize(experiment) %>;
 </script>

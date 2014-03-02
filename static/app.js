@@ -1,4 +1,4 @@
-/*jslint browser: true, devel: true */ /*globals _, angular, Url, p, fileinputText */
+/*jslint browser: true, devel: true */ /*globals _, angular, Url, p, fileinputText, Textarea */
 
 var app = angular.module('app', ['ngStorage']);
 
@@ -131,6 +131,30 @@ app.directive('jsonTransform', function() {
 //   };
 // });
 
+app.directive('time', function() {
+  return {
+    restrict: 'E',
+    require: 'ngModel',
+    link: function(scope, el, attrs, ngModel) {
+      ngModel.$render = function() {
+        var date = new Date(ngModel.$modelValue);
+        // move the actual datetime to the attribute
+        attrs.datetime = date.toISOString();
+        // and reformat the text content according to the class
+        if (el.hasClass('date')) {
+          el.text(date.toISOString().split('T')[0]);
+        }
+        else if (el.hasClass('long')) {
+          el.text(date.toString());
+        }
+        else { // default: datetime but in short iso8601
+          el.text(date.toISOString().replace(/T/, ' ').replace(/\..+/, ''));
+        }
+      };
+    },
+  };
+});
+
 app.directive('ajaxform', function($http) {
   return {
     restrict: 'E',
@@ -145,6 +169,7 @@ app.directive('ajaxform', function($http) {
             window.location = window.location;
           }, p);
         }
+        p('Not doing anything with non-DELETE ajaxform');
         // other methods can handle themselves?
         // TODO: intercept PUT and PATCH, too
       };

@@ -12,15 +12,13 @@ var amulet = require('amulet').set({
   // minify: true,
   open: '<%',
   close: '%>',
-  //   'datefmt': function(date) {
-  //     return (date && date.toISOString) ? date.toISOString().split('T')[0] : date;
-  //   },
-  //   'datetimefmt': function(date) {
-  //     return (date && date.toISOString) ? date.toISOString().split('.')[0].replace(/T/, ' ') : date;
-  //   },
-  //   'truncate': function(string, max) {
-  //     return (string && string.length > max) ? (string.slice(0, max - 3) + '...') : string;
-  //   },
+  globals: {
+    serialize: function(obj) {
+      // stringifies and makes sure that the resulting json can be embedded in
+      // a <script> environment
+      return JSON.stringify(obj).replace(/<\//g, '<\\/');
+    }
+  }
 });
 
 var Cookies = require('cookies');

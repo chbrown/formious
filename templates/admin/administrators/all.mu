@@ -31,5 +31,5 @@
   <a href="/admin/administrators/new">Create new administrator</a>
 </main>
 <script>
-var table = <%& JSON.stringify(administrators) %>;
+var table = <%& serialize(administrators) %>;
 </script>

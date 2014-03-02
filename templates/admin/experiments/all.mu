@@ -33,5 +33,5 @@
   <a href="/admin/experiments/new">Create new experiment</a>
 </main>
 <script>
-var table = <%& JSON.stringify(experiments) %>;
+var table = <%& serialize(experiments) %>;
 </script>

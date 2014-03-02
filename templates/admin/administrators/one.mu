@@ -20,5 +20,5 @@
   </section>
 </main>
 <script>
-var administrator = <%& JSON.stringify(experiment) %>;
+var administrator = <%& serialize(experiment) %>;
 </script>
