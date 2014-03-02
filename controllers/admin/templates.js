@@ -65,18 +65,17 @@ R.get(/^\/admin\/templates\/(\d+)(.json)?$/, function(req, res, m) {
   });
 });
 
-/** GET /admin/templates/:id/render
-Render existing template as html */
-R.get(/^\/admin\/templates\/(\d+)\/render$/, function(req, res, m) {
-  models.Template.from({id: m[1]}, function(err, template) {
-    if (err) return res.die(err);
+// GET /admin/templates/:id/render
+// Render existing template as html
+// R.get(/^\/admin\/templates\/(\d+)\/render$/, function(req, res, m) {
+//   models.Template.from({id: m[1]}, function(err, template) {
+//     if (err) return res.die(err);
+//     res.html(template.html);
+//   });
+// });
 
-    res.html(template.html);
-  });
-});
 
-
-/* POST /admin/templates/:id/clone
+/** POST /admin/templates/:id/clone
 Create new template with properties of original, and go to it. */
 R.post(/^\/admin\/templates\/(\d+)\/clone$/, function(req, res, m) {
   models.Template.from({id: m[1]}, function(err, template) {
@@ -100,7 +99,6 @@ R.post(/^\/admin\/templates\/(\d+)\/clone$/, function(req, res, m) {
 /** PATCH /admin/templates/:id
 Update: modify existing template */
 R.patch(/^\/admin\/templates\/(\d+)/, function(req, res, m) {
-  logger.info("Patching", m[1]);
   models.Template.from({id: m[1]}, function(err, template) {
     if (err) return res.die(err);
 

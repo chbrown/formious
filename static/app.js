@@ -2,6 +2,12 @@
 
 var app = angular.module('app', ['ngStorage']);
 
+// here's how you can completely disable SCE:
+//   angular.module('myAppWithSceDisabledmyApp', []).config(function($sceProvider) {
+//     $sceProvider.enabled(false);
+//   });
+
+
 app.filter('trust', function($sce) {
   return function(string) {
     return $sce.trustAsHtml(string);
@@ -11,11 +17,17 @@ app.filter('trust', function($sce) {
 app.directive('help', function() {
   return {
     restrict: 'C',
-    template: '<div class="summary" ng-bind="summary"></div>' +
-      '<div class="content" ng-transclude></div>',
+    template: '<span class="summary" ng-bind="summary"></span>' +
+      '<span class="full" ng-transclude></span>',
     transclude: true,
+    scope: {},
     link: function(scope, el, attrs) {
-      scope.summary = el.text().slice(0, 50) + '...'; // &hellip;
+      var text_content = el.text().trim();
+      // p('text_content', text_content);
+      scope.summary = text_content.slice(0, 50); // &hellip;
+      if (text_content.length > 50) {
+        scope.summary += '...';
+      }
       el.on('click', function() {
         el.toggleClass('expanded');
       });
@@ -51,10 +63,6 @@ app.directive('jsonTransform', function() {
     restrict: 'A',
     require: 'ngModel',
     link: function(scope, el, attrs, ngModel) {
-      // enhance textarea (presumably it's a textarea)
-      var textarea = el[0];
-      var textarea_enhanced = Textarea.enhance(textarea);
-
       // set up communicating from DOM to model
       function dom2model() {
         ngModel.$setViewValue(el.val());
@@ -66,7 +74,9 @@ app.directive('jsonTransform', function() {
       // set up communicating from model to DOM
       function model2dom() {
         el.val(ngModel.$viewValue);
-        textarea_enhanced.resizeToFit();
+        // this will tell the textarea to resizeToFit
+        // this is awkward.
+        el[0].dispatchEvent(new Event('input'));
       }
       ngModel.$render = model2dom;
 
@@ -98,38 +108,16 @@ app.directive('jsonTransform', function() {
   };
 });
 
-// app.directive('ngCallbackClick', function($parse) {
-//   // see angular.js:18074 for what this is based on
-//   return {
-//     restrict: 'A',
-//     link: function(scope, el, attrs) {
-//       var fn = $parse(attrs['ngCallbackClick']);
-//       var throbber_el = angular.element('<img src="/static/lib/img/throbber-16.gif" />');
-//       throbber_el.css('margin', '2px');
-//       var error_el = angular.element('<span>');
-//       error_el.css('margin', '2px');
-//       var callback = function(err) {
-//         throbber_el.remove();
-//         if (err) {
-//           error_el.text(err.toString());
-//           el.after(error_el);
-//           setTimeout(function() {
-//             error_el.remove();
-//           }, 5000);
-//         }
-//       };
-//       el.on('click', function(event) {
-//         // add progress element:
-//         error_el.remove();
-//         el.after(throbber_el);
-//         // normal click handling
-//         scope.$apply(function() {
-//           fn(scope, {$event: event, $callback: callback});
-//         });
-//       });
-//     }
-//   };
-// });
+app.directive('enhance', function() {
+  return {
+    restrict: 'A',
+    link: function(scope, el, attrs) {
+      // enhance textarea (presumably it's a textarea)
+      Textarea.enhance(el[0]);
+    },
+  };
+});
+
 
 app.directive('time', function() {
   return {

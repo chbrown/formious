@@ -20,7 +20,7 @@
       </label>
 
       <label><span>HTML</span>
-        <textarea ng-model="template.html" class="code" ng-keydown="keydown($event)"
+        <textarea enhance ng-model="template.html" class="code" ng-keydown="keydown($event)"
           placeholder="HTML / Handlebars content" style="width: 100%; min-height: 200px;"></textarea>
       </label>
 
@@ -32,7 +32,4 @@
 
 <script>
 var template = <%& serialize(template) %>;
-
-var textarea = document.querySelector('textarea');
-var textarea_enhanced = Textarea.enhance(textarea);
 </script>

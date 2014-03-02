@@ -1,21 +1,22 @@
 body{margin:0;font-family:"Lucida Grande",Arial,sans-serif}
 h1,h2,h3,h4,h5,h6{margin:.5ex 0}
 p{margin:1ex 0}
+label span{vertical-align:baseline}
 label[disabled]{color:gray}
-input,textarea{vertical-align:middle;margin:0}
+input,textarea{vertical-align:baseline;margin:0}
 input[type=checkbox],input[type=radio]{margin:1px .25ex}
 fieldset{margin:0 10px 10px 0;border:1px solid #CCC}
 .code{font:9pt monospace}
 .help{cursor:pointer;color:#9a9a9a}
-.help .summary{display:block;margin:1ex 0}
-.help .content{display:none}
+.help .full{display:none}
 .help.expanded{color:#0d0d0d}
 .help.expanded .summary{display:none}
-.help.expanded .content{display:block}
+.help.expanded .full{display:inherit}
 table.striped tbody tr:nth-child(odd){background-color:#fdfdfd}
 table.striped tfoot td,table.striped tfoot th{background-color:#e6e6e6}
 .ng-invalid{box-shadow:0 0 10px #c80000}
-.json{font:9pt monospace;min-height:50px;min-width:400px}
+.json{font:9pt monospace;min-height:30px;min-width:400px}
+.unlimited{max-height:none!important;max-width:none!important}
 section{margin:10px 0}
 button.anchor{background:0 0;border:0;text-decoration:underline;cursor:pointer;font-size:100%;padding:0}
 body.admin{background-color:#fbfbfb;font-size:80%;overflow-y:scroll}

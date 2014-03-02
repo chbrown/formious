@@ -17,8 +17,7 @@ R.post(/^\/mturk\/externalSubmit/, function(req, res, m) {
     models.Participant.addResponse(aws_worker_id, null, fields, function(err, responses) {
       if (err) return res.die(err);
 
-      amulet.stream(['layout.mu', 'done.mu'], {}).pipe(res);
-      // res.json({message: 'Inserted responses'});
+      res.text('Your responses have been submitted and saved.');
     });
   });
 });

@@ -7,7 +7,7 @@ CREATE TABLE aws_accounts (
   access_key_id text NOT NULL, -- accessKeyId
   secret_access_key text NOT NULL, -- secretAccessKey
 
-  created timestamp DEFAULT current_timestamp NOT NULL
+  created timestamp with time zone DEFAULT current_timestamp NOT NULL
 );
 
 CREATE TABLE administrators (
@@ -17,7 +17,7 @@ CREATE TABLE administrators (
   password text NOT NULL
     CHECK (length(password) = 64), -- sha256 hex digest produces 64-long string
 
-  created timestamp DEFAULT current_timestamp NOT NULL
+  created timestamp with time zone DEFAULT current_timestamp NOT NULL
 );
 
 CREATE TABLE participants (
@@ -35,7 +35,7 @@ CREATE TABLE participants (
   ip_address text,
   user_agent text,
 
-  created timestamp DEFAULT current_timestamp NOT NULL
+  created timestamp with time zone DEFAULT current_timestamp NOT NULL
 );
 
 CREATE TABLE tickets (
@@ -45,7 +45,7 @@ CREATE TABLE tickets (
   user_id integer NOT NULL, -- maps to either an administrator or a participant
 
   expires timestamp,
-  created timestamp DEFAULT current_timestamp NOT NULL
+  created timestamp with time zone DEFAULT current_timestamp NOT NULL
 );
 CREATE INDEX tickets_key_idx ON tickets (key);
 
@@ -55,7 +55,7 @@ CREATE TABLE templates (
   name text UNIQUE, -- soft referenced from stims.template
   html text,
 
-  created timestamp DEFAULT current_timestamp NOT NULL
+  created timestamp with time zone DEFAULT current_timestamp NOT NULL
 );
 
 CREATE TABLE experiments (
@@ -63,12 +63,13 @@ CREATE TABLE experiments (
 
   name text,
   administrator_id integer REFERENCES administrators(id), -- owner
+  html text, -- to be included on every page, at the top of the <body>
 
   -- `parameters` should match the keys of each stim's `context` object, or most of them
   -- not really necessary, except to impose an ordering
   parameters text[],
 
-  created timestamp DEFAULT current_timestamp NOT NULL
+  created timestamp with time zone DEFAULT current_timestamp NOT NULL
 );
 
 -- `stim` refers to a completely specified stimulus,
@@ -83,7 +84,7 @@ CREATE TABLE stims (
   context json,
   view_order integer,
 
-  created timestamp DEFAULT current_timestamp NOT NULL
+  created timestamp with time zone DEFAULT current_timestamp NOT NULL
 );
 -- is this index necessary, considering the FK?
 -- CREATE INDEX stims_experiment_id_idx ON stims(experiment_id); -- USING btree
@@ -97,7 +98,7 @@ CREATE TABLE responses (
   stim_id integer REFERENCES stims(id),
   value json,
 
-  created timestamp DEFAULT current_timestamp NOT NULL
+  created timestamp with time zone DEFAULT current_timestamp NOT NULL
 );
 
 -- how to handle segmentations?

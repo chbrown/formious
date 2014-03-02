@@ -24,6 +24,8 @@ app.controller('adminTableCtrl', function($scope) {
 });
 
 app.controller('adminExperimentEditor', function($scope, $http, $localStorage) {
+  $scope.$storage = $localStorage.$default({expand_experiment_html: false});
+
   $scope.experiment = window.experiment;
 
   $http({method: 'GET', url: '/admin/administrators.json'}).then(function(res) {
@@ -34,7 +36,6 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage) {
     $scope.templates = res.data.templates;
   }, p);
 
-  // so if we
   var stims_url = Url.parse(window.location);
   stims_url.path += '/stims.json';
   $http({method: 'GET', url: stims_url.toString()}).then(function(res) {

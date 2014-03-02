@@ -10,18 +10,33 @@
   <!-- <div ng-repeat="administrator in administrators">{{administrator}}</div> -->
 
   <section class="fill">
-    <form class="vform" ng-submit="sync($event, angular.noop)">
-      <label><span>Experiment name</span>
+    <form ng-submit="sync($event)">
+      <label>
+        <div><b>Experiment name</b></div>
         <input type="text" ng-model="experiment.name" />
       </label>
 
-      <label><span>Owner</span>
+      <label>
+        <div><b>Owner</b></div>
         <select ng-model="experiment.administrator_id"
           ng-options="administrator.id as administrator.email for administrator in administrators"></select>
       </label>
 
+      <div>
+        <label style="float: right"><input type="checkbox" ng-model="$storage.expand_experiment_html"><span>Expand</span></label>
+        <label>
+          <div><b>Header html</b>
+            <span class="help">
+              <p>This will be inserted at the top of every page in the experiment, right after the &lt;body&gt; tag. You might put things like inline styles, &lt;script&gt; imports, etc., to give your experiment a unified look or to avoid having to includes those in multiple templates.</p>
+            </span>
+          </div>
+          <textarea ng-model="experiment.html" ng-class="{unlimited: $storage.expand_experiment_html}"
+            enhance class="code" style="min-height: 30px; max-height: 100px; width: 100%;"></textarea>
+        </label>
+      </div>
+
       <label><span>Parameters</span>
-        <input type="text" ng-model="experiment.parameters" ng-list />
+        <input type="text" ng-model="experiment.parameters" ng-list style="width: 100%">
       </label>
 
       <div><button>Save</button></div>
@@ -59,7 +74,7 @@
             <input ng-model="stim.context[parameter]" />
           </td> -->
           <td>
-            <textarea json-transform ng-model="stim.context" class="json"></textarea>
+            <textarea enhance json-transform ng-model="stim.context" class="json"></textarea>
           </td>
           <td>
             <input ng-model="stim.view_order" type="number" style="width: 50px" />
@@ -86,7 +101,7 @@
               ng-options="template.id as template.name for template in templates"></select>
           </td>
           <td>
-            <textarea json-transform ng-model="new_stim.context" class="json"></textarea>
+            <textarea enhance json-transform ng-model="new_stim.context" class="json"></textarea>
           </td>
           <td>
             <input ng-model="new_stim.view_order" type="number" style="width: 50px" />

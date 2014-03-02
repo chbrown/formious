@@ -24,6 +24,11 @@ p {
 button {
   // margin: 10px 10px 0 0;
 }
+label {
+  span {
+    vertical-align: baseline;
+  }
+}
 label[disabled] {
   .color-gray(50%);
   // margin: 2px 0;
@@ -31,7 +36,7 @@ label[disabled] {
   // vertical-align: middle;
 }
 textarea, input {
-  vertical-align: middle;
+  vertical-align: baseline;
   margin: 0;
 }
 input[type="radio"], input[type="checkbox"] {
@@ -50,10 +55,10 @@ fieldset {
   .color-gray(60%);
 
   .summary {
-    display: block;
-    margin: 1ex 0;
+    // display: block;
+    // margin: 1ex 0;
   }
-  .content {
+  .full {
     display: none;
   }
 
@@ -62,8 +67,8 @@ fieldset {
     .summary {
       display: none;
     }
-    .content {
-      display: block;
+    .full {
+      display: inherit;
     }
   }
 }
@@ -96,8 +101,13 @@ table.striped {
 
 .json {
   .code;
-  min-height: 50px;
+  min-height: 30px;
   min-width: 400px
+}
+
+.unlimited {
+  max-height: none !important;
+  max-width: none !important;
 }
 
 section {

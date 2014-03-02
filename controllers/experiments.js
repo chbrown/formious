@@ -2,6 +2,7 @@
 var _ = require('underscore');
 var url = require('url');
 var amulet = require('amulet');
+var async = require('async');
 var Router = require('regex-router');
 var logger = require('loge');
 var sqlcmd = require('sqlcmd');
@@ -40,43 +41,51 @@ Render stim as html
 R.get(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
   var experiment_id = m[1];
   var stim_id = m[2];
-  // models.Experiment.from({id: m[1]}, function(err, experiment) { ... });
-  models.Stim.from({id: stim_id}, function(err, stim) {
+
+  async.auto({
+    experiment: function(callback) {
+      models.Experiment.from({id: m[1]}, callback);
+    },
+    stim: function(callback) {
+      models.Stim.from({id: stim_id}, callback);
+    },
+    template: ['stim', function(callback, results) {
+      models.Template.from({id: results.stim.template_id}, callback);
+    }],
+  }, function(err, results) {
     if (err) return res.die(err);
-    models.Template.from({id: stim.template_id}, function(err, template) {
-      if (err) return res.die(err);
 
-      var ctx = {
-        context: stim.context,
-        stim_id: stim.id,
-        html: template.html,
-      };
+    var ctx = {
+      context: results.stim.context,
+      stim_id: results.stim.id,
+      header: results.experiment.html,
+      html: results.template.html,
+    };
 
-      // stim_globals is given to all stims, in case they want the values. it's mostly metadata, compared to the states.
-      // var stim_globals = {
-      //   assignmentId: '{{assignmentId}}',
-      //   hit_started: {{hit_started}},
-      //   hitId: '{{hitId}}',
-      //   host: '{{host}}',
-      //   workerId: '{{workerId}}',
-      //   stimlist: '{{stimlist_id}}'
-      // };
-      // ctx: the current state to render the template with
-      // var ctx = {
-      //   // straight from the url
-      //   host: urlObj.query.debug !== undefined ? '' : (urlObj.query.turkSubmitTo || 'https://www.mturk.com'),
-      //   workerId: user._id,
-      //   assignmentId: urlObj.query.assignmentId,
-      //   hitId: urlObj.query.hitId,
-      //   segment: urlObj.query.segment,
-      //   index: urlObj.query.index || 0,
-      //   // specific to this type of responses (stimlists)
-      //   hit_started: Date.now(),
-      //   stimlist_id: stimlist._id,
-      // };
+    // stim_globals is given to all stims, in case they want the values. it's mostly metadata, compared to the states.
+    // var stim_globals = {
+    //   assignmentId: '{{assignmentId}}',
+    //   hit_started: {{hit_started}},
+    //   hitId: '{{hitId}}',
+    //   host: '{{host}}',
+    //   workerId: '{{workerId}}',
+    //   stimlist: '{{stimlist_id}}'
+    // };
+    // ctx: the current state to render the template with
+    // var ctx = {
+    //   // straight from the url
+    //   host: urlObj.query.debug !== undefined ? '' : (urlObj.query.turkSubmitTo || 'https://www.mturk.com'),
+    //   workerId: user._id,
+    //   assignmentId: urlObj.query.assignmentId,
+    //   hitId: urlObj.query.hitId,
+    //   segment: urlObj.query.segment,
+    //   index: urlObj.query.index || 0,
+    //   // specific to this type of responses (stimlists)
+    //   hit_started: Date.now(),
+    //   stimlist_id: stimlist._id,
+    // };
 
-      amulet.stream(['experiments/stims/one.mu'], ctx).pipe(res);
-    });
+    amulet.stream(['experiments/stim.mu'], ctx).pipe(res);
   });
 });
 
@@ -109,50 +118,35 @@ R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    logger.debug('Inserting response.', {aws_worker_id: req.aws_worker_id, data: data});
+    logger.debug('Inserting response', {aws_worker_id: req.aws_worker_id, data: data});
 
-    models.Participant.addResponse(req.aws_worker_id, stim_id, data, function(err, responses) {
+    var ready = function(err) {
       if (err) return res.die(err);
 
-      // res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/experiments/stims/all.mu']);
       nextStimId(experiment_id, stim_id, function(err, next_stim_id) {
         var next_stim_url = '/experiments/' + experiment_id + '/stims/' + next_stim_id;
-        res.redirect(next_stim_url);
+
+        var ajax = req.headers['x-requested-with'] == 'XMLHttpRequest';
+        if (ajax) {
+          res.writeHead(300, {Location: next_stim_url});
+          res.end();
+        }
+        else {
+          res.redirect(next_stim_url);
+        }
       });
+    };
+
+    if (data) {
+      models.Participant.addResponse(req.aws_worker_id, stim_id, data, ready);
+    }
+    else {
+      // res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/experiments/stims/all.mu']);
       // res.json({message: 'Inserted response.'});
-      // res.json({success: true, message: 'Saved response for user: ' + workerId});
-      // amulet.stream(['layout.mu', 'done.mu'], {}).pipe(res);
-    });
+      ready();
+    }
   });
 });
-
-// this is a little weird, for now
-// R.get(/^\/templates\/stims\/([^?]+\.bars)(\?|$)/, function(req, res, m) {
-//   // only handles .bars, at the moment
-//   logger.debug('/templates/stims: %s', m[1]);
-//   // check if there is a StimTemplate, first
-//   var _id = m[1].replace(/\.bars$/, '');
-//   models.StimTemplate.findById(_id, function(err, stim_template) {
-//     if (err) return res.die('StimTemplate.findById error: ' + err);
-
-//     if (stim_template) {
-//       logger.debug('found StimTemplate:', stim_template._id);
-
-//       res.writeAll(200, 'text/x-handlebars-template', stim_template.html);
-//     }
-//     else {
-//       // else we hope that there's a static file
-//       logger.debug('send: %s', m[1]);
-//       res.setHeader('Content-Type', 'text/x-handlebars-template');
-//       send(req, m[1])
-//         .root(path.join(__dirname, '..', 'templates', 'stims'))
-//         // .on('file', function(path, stat) {})
-//         .on('error', function(err) { res.die(err.status || 500, 'send error: ' + err.message); })
-//         .on('directory', function() { res.die(404, 'No resource at: ' + req.url); })
-//         .pipe(res);
-//     }
-//   });
-// });
 
 // TODO: fix segmentation
 //   starting at given index or 0, of the next available segment.

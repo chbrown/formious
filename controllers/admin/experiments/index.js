@@ -52,7 +52,7 @@ R.post(/^\/admin\/experiments\/?$/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, 'name', 'administrator_id', 'parameters');
+    var fields = _.pick(data, models.Experiment.columns);
 
     new sqlcmd.Insert({table: 'experiments'})
     .setIf(fields)
@@ -70,8 +70,6 @@ R.get(/^\/admin\/experiments\/(\d+)$/, function(req, res, m) {
   models.Experiment.from({id: m[1]}, function(err, experiment) {
     if (err) return res.die(err);
 
-    logger.info('experiment/d', m[1], '>>', experiment);
-
     req.ctx.experiment = experiment;
     amulet.stream(['admin/layout.mu', 'admin/experiments/one.mu'], req.ctx).pipe(res);
   });
@@ -83,7 +81,7 @@ R.put(/^\/admin\/experiments\/?$/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, 'name', 'administrator_id', 'parameters');
+    var fields = _.pick(data, models.Experiment.columns);
 
     new sqlcmd.Insert({table: 'experiments'})
     .setIf(fields)
@@ -105,7 +103,7 @@ R.patch(/^\/admin\/experiments\/(\d+)/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, 'name', 'administrator_id', 'parameters');
+    var fields = _.pick(data, models.Experiment.columns);
 
     new sqlcmd.Update({table: 'experiments'})
     .setIf(fields)
