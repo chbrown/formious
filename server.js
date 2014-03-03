@@ -58,10 +58,10 @@ else {
   http.createServer(function(req, res) {
     req.cookies = new Cookies(req, res);
 
-    var started = Date.now();
-    res.on('finish', function() {
-      logger.debug('duration', {url: req.url, method: req.method, ms: Date.now() - started});
-    });
+    // var started = Date.now();
+    // res.on('finish', function() {
+    //   logger.debug('duration', {url: req.url, method: req.method, ms: Date.now() - started});
+    // });
 
     // root_controller has signature of (req, res), just like any other controller module
     root_controller(req, res);

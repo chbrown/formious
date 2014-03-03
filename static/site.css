@@ -6,6 +6,7 @@ label[disabled]{color:gray}
 input,textarea{vertical-align:baseline;margin:0}
 input[type=checkbox],input[type=radio]{margin:1px .25ex}
 fieldset{margin:0 10px 10px 0;border:1px solid #CCC}
+time{white-space:nowrap}
 .code{font:9pt monospace}
 .help{cursor:pointer;color:#9a9a9a}
 .help .full{display:none}

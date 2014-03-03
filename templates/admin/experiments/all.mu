@@ -11,6 +11,7 @@
           <th>Owner</th>
           <th></th>
           <th></th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -20,6 +21,7 @@
           <td>{{experiment.created}}</td>
           <td>{{experiment.administrator_id}}</td>
           <td><a href="/admin/experiments/{{experiment.id}}">Edit</a></td>
+          <td><a href="/admin/experiments/{{experiment.id}}/responses">Responses</a></td>
           <td>
             <ajaxform method="DELETE" action="/admin/experiments/{{experiment.id}}">
               <button>Delete</button>

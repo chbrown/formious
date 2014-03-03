@@ -1,6 +1,7 @@
 /*jslint node: true */
 var _ = require('underscore');
 var amulet = require('amulet');
+var async = require('async');
 var logger = require('loge');
 var Router = require('regex-router');
 var sqlcmd = require('sqlcmd');
@@ -118,7 +119,7 @@ R.patch(/^\/admin\/experiments\/(\d+)/, function(req, res, m) {
 });
 
 /** DELETE /admin/experiments/:experiment_id
-delete Experiment */
+Delete Experiment */
 R.delete(/^\/admin\/experiments\/(\d+)$/, function(req, res, m) {
   new sqlcmd.Delete({table: 'experiments'})
   .where('id = ?', m[1])
@@ -126,6 +127,36 @@ R.delete(/^\/admin\/experiments\/(\d+)$/, function(req, res, m) {
     if (err) return res.die(err);
 
     res.json({message: 'Deleted experiment'});
+  });
+});
+
+/** GET /admin/experiments/:experiment_id/responses
+Show the responses that reference this Experiment */
+R.get(/^\/admin\/experiments\/(\d+)\/responses$/, function(req, res, m) {
+  var experiment_id = m[1];
+  async.auto({
+    experiment: function(callback) {
+      models.Experiment.from({id: experiment_id}, callback);
+    },
+    responses: function(callback) {
+      new sqlcmd.Select({table: 'responses INNER JOIN stims ON stims.id = responses.stim_id'})
+      .add('responses.*', 'stims.context', 'stims.experiment_id')
+      .where('stims.experiment_id = ?', experiment_id)
+      .orderBy('responses.id DESC')
+      .execute(db, callback);
+    },
+    // stims: function(callback) {
+    //   new sqlcmd.Select({table: 'stims'})
+    //   .where('experiment_id = ?', experiment_id)
+    //   .execute(db, callback);
+    // }
+  }, function(err, results) {
+    if (err) return res.die(err);
+
+    // logger.debug('results::', results.responses);
+
+    _.extend(req.ctx, results);
+    amulet.stream(['admin/layout.mu', 'admin/responses/all.mu'], req.ctx).pipe(res);
   });
 });
 
