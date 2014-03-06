@@ -5,6 +5,7 @@ var pushAll = function(array, xs) { return Array.prototype.push.apply(array, xs)
 var flatten = function(xs) { return Array.prototype.concat.apply([], xs); };
 
 function makeTable(cols, rows) {
+  /** cols is a list of strings, rows is a list of objects, whose keys are cols */
   var thead = '<thead><tr><th>' + cols.join('</th><th>') + '</th></tr></thead>';
   var trs = rows.map(function(cells) {
     return '<td>' + cells.join('</td><td>') + '</td>';
@@ -23,6 +24,7 @@ function tabulate(objects, keys) {
   return makeTable(keys, rows);
 }
 
+// var FileInputHelper = function(input) {}
 function fileinputText(input, callback) {
   // callback: function(Error | null, file_contents, file_name, file_size)
   var files = input.files;

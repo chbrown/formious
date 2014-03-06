@@ -35,7 +35,8 @@
         </label>
       </div>
 
-      <label><span>Parameters</span>
+      <label>
+        <div><b>Parameters</b></div>
         <input type="text" ng-model="experiment.parameters" ng-list style="width: 100%">
       </label>
 
@@ -69,6 +70,7 @@
           <td>
             <select ng-model="stim.template_id"
               ng-options="template.id as template.name for template in templates"></select>
+            <small><a href="/admin/templates/{{stim.template_id}}">edit</a></small>
           </td>
           <!-- <td ng-repeat="parameter in experiment.parameters">
             <input ng-model="stim.context[parameter]" />

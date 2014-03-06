@@ -116,16 +116,56 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage) {
   // hack: wish angular.js would just wrap onchange events without the model requirement
   var upload_el = document.querySelector('#upload');
   angular.element(upload_el).on('change', function(ev) {
-    p('parseUpload: ', ev);
+    var input = ev.target;
 
-    fileinputText(ev.target, function(err, file_contents, file_name, file_size) {
+    var file = input.files[0];
+    p('parseUpload: ', file);
 
-      // var message = 'Uploading ' + file_name + ' (' + file_size + ' bytes)';
-      $http({method: 'POST', url: '/api/sv', data: file_contents}).then(function(res) {
-        // xxx: should merge parameters, not overwrite
-        $scope.experiment.parameters = res.data.columns;
-        pushAll($scope.experiment.stims, res.data.rows);
-      }, p);
+    // sample file = {
+    //   lastModifiedDate: Tue Mar 04 2014 15:57:25 GMT-0600 (CST)
+    //   name: "asch-stims.xlsx"
+    //   size: 34804
+    //   type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    //   webkitRelativePath: ""
+    // }
+
+    var reader = new FileReader();
+    reader.onerror = function(err) {
+      // callback(err, null, file ? file.name : undefined, file ? file.size : undefined);
+      p('File reader error', err);
+    };
+    reader.onload = function(ev) {
+      p('File reader loaded', ev, reader.result);
+      var file_name = file.name;
+      var file_size = file.size;
+      // view as basic bytes / chars
+      var data = new Uint8Array(reader.result);
+
+      p('Parsing ' + file_name + ' (' + file_size + ' bytes)');
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/table');
+      xhr.setRequestHeader('content-type', file.type);
+      xhr.setRequestHeader('x-filename', file.name);
+      xhr.onload = function(ev) {
+        p('adding to $scope.experiment.stims ...', ev);
+      };
+      xhr.send(data);
+      // $http({
+      //   method: 'POST',
+      //   url: '/api/table',
+      //   data: file.result,
+      //   headers: { 'Content-Type': undefined },
+      //   transformRequest: function(data) { return data; },
+      // }).then(function(res) {
+      //   // xxx: should merge parameters, not overwrite
+      //   p('$http response');
+      // }, p);
+    };
+    reader.readAsArrayBuffer(file);
+
+    // fileinputText(ev.target, function(err, file_contents, file_name, file_size) {
+
 
       // infer things about the stimlist from what they just uploaded
       // var segmented = _.contains(data.columns, 'segment');
@@ -136,7 +176,6 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage) {
       // }
 
       // var message = 'Processed upload into ' + self.model.get('states').length + ' rows.';
-    });
   });
 });
 

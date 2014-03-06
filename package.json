@@ -14,6 +14,7 @@
     "formidable": "*",
     "http-enhanced": ">=0.3.1",
     "js-yaml": "*",
+    "jszip": "*",
     "loge": "*",
     "moment": "git://github.com/timrwood/moment.git#develop",
     "mongodb": "*",
@@ -28,7 +29,9 @@
     "sv": "*",
     "turk": "0.5.2",
     "underscore": "*",
-    "xmlconv": "*"
+    "xmlconv": "*",
+    "xmldom": "*",
+    "xpath": "*"
   },
   "devDependencies": {
     "grunt": "*",
