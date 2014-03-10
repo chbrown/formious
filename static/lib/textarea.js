@@ -198,14 +198,17 @@ var Textarea = (function() {
         selectionStart = end_of_line;
       }
     }
-    // if (end_of_line > -1) {
     var beginning_of_previous_line = value.lastIndexOf('\n', selectionStart - 1) + 1;
     // if (beginning_of_line > -1) {
     var previous_indent = value.slice(beginning_of_previous_line).match(/^[ \t]+/);
     if (previous_indent) {
+      // need to make sure max out beginning_of_previous_line + previous_indent
+      // at selectionStart
+      // for example, select the middle of some whitespace and press enter
       var before = textarea.value.slice(0, selectionStart);
       var after = textarea.value.slice(selectionStart);
       // add the newline because we prevented default already
+      // should replace selection if we do not have a 0-width selection
       var insert = '\n' + previous_indent[0];
       textarea.value = before + insert + after;
       var cursor = selectionStart + insert.length;
@@ -214,6 +217,7 @@ var Textarea = (function() {
     }
     // don't do anything if there is no existing indent
     // don't do anything special on the very first line of the document
+    // trigger resizeToFit?
   };
 
   // setInterval(function() {
@@ -231,6 +235,8 @@ var Textarea = (function() {
             pixels to add to the height when a positive resize is necessary, defaults to 0
         autodedent: Boolean
             if true, dedent the original text as much as possible
+        poll: Number
+            interval between checking if the contents have changed, resizing if needed
     */
     this.opts = extend({}, {
       tab: '  ',
@@ -247,6 +253,14 @@ var Textarea = (function() {
     this.initTabListener();
     this.initReturnListener();
     this.initResizeToFit();
+    // todo:
+    //   'command+{' -> dedent
+    //   'command+}' -> indent
+    //   newline after opening tag / -- autoindent + normal tab
+    //   'command+option+.' -> closing currently open tag
+    //   fix problem with command+newline on lines without a previous indented line
+    //   'command+left' (home) -> jump to beginning of line, after whitespace
+    //   trim trailing white space ?
 
     if (this.opts.poll) {
       this.initValuePoll(this.opts.poll);
