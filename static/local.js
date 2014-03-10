@@ -49,3 +49,11 @@ document.addEventListener('readystatechange', function(ev) {
     // else, maybe look for links that form some prefix of the current location?
   }
 });
+
+var toMap = function(array, key, value) {
+  var map = {};
+  array.forEach(function(item) {
+    map[item[key]] = item[value];
+  });
+  return map;
+};

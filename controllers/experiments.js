@@ -96,12 +96,15 @@ var nextStimId = function(experiment_id, stim_id, callback) {
   models.Stim.from({id: stim_id}, function(err, stim) {
     if (err) return callback(err);
 
+    // find the stim of the same experiment with the lowest view_order that's greater than the current view_order
     new sqlcmd.Select({table: 'stims'})
+    .where('experiment_id = ?', experiment_id)
     .where('view_order > ?', stim.view_order)
-    .orderBy('view_order')
+    .orderBy('view_order ASC')
     .limit(1)
     .execute(db, function(err, stims) {
       if (err) return callback(err);
+      logger.info('stims', stims);
 
       callback(null, stims.length ? stims[0].id : null);
     });
@@ -124,6 +127,8 @@ R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
       if (err) return res.die(err);
 
       nextStimId(experiment_id, stim_id, function(err, next_stim_id) {
+        if (err) return callback(err);
+
         var next_stim_url = '/experiments/' + experiment_id + '/stims/' + next_stim_id;
 
         var ajax = req.headers['x-requested-with'] == 'XMLHttpRequest';

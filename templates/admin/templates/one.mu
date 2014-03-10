@@ -1,33 +1,32 @@
-<script src="/static/lib/textarea.js"></script>
-
 <div ng-controller="adminTemplateEditor">
   <nav fixedflow>
-    Template: <b>{{template.name}}</b>
+    <span>Template: <b>{{template.name}}</b></span>
     <button ng-click="sync($event)" id="save_button">Save</button>
   </nav>
 
   <!-- <a href="clone">Clone</a> -->
 
-  <main class="fill">
-    <!-- <form method="PATCH" action="/admin/templates/{{template.id}}" class="vform"> -->
-    <form ng-submit="" class="vform">
-      <label><span>Name</span>
-        <input type="text" ng-model="template.name" />
+  <main>
+    <form>
+      <label>
+        <div><b>Name</b></div>
+        <input type="text" ng-model="template.name" style="width: 100%;">
       </label>
 
-      <label><span>Created</span>
-        <time ng-model="template.created" class="datetime" />
+      <label>
+        <div><b>Created</b></div>
+        <time ng-model="template.created" class="datetime"></time>
       </label>
 
-      <label><span>HTML</span>
+      <label>
+        <div><b>HTML</b></div>
         <textarea enhance ng-model="template.html" class="code" ng-keydown="keydown($event)"
           placeholder="HTML / Handlebars content" style="width: 100%; min-height: 200px;"></textarea>
       </label>
 
+      <button ng-click="sync($event)" id="save_button">Save</button>
     </form>
   </main>
-  <!-- <h3>HTML</h3> -->
-  <!-- <pre>{ html }</pre> -->
 </div>
 
 <script>

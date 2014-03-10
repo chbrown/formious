@@ -48,10 +48,9 @@ R.post(/GetAccountBalance/, function(req, res) {
 });
 
 R.post(/CreateHIT/, function(req, res) {
-  req.readToEnd('utf8', function(err, data) {
+  req.readData(function(err, fields) {
     if (err) return res.json({success: false, message: err});
 
-    var fields = querystring.parse(data);
     var params = {
       MaxAssignments: parseInt(fields.MaxAssignments, 10),
       Title: fields.Title,
@@ -83,10 +82,9 @@ R.get(/Workers\/(\w+)/, function(req, res, m) {
 
 R.post(/Assignments\/(\w+)\/Approve/, function(req, res, m) {
   var AssignmentId = m[1];
-  req.readToEnd('utf8', function(err, data) {
+  req.readData(function(err, fields) {
     if (err) return res.json({success: false, message: err});
 
-    var fields = querystring.parse(data);
     var params = {AssignmentId: AssignmentId};
     if (fields.RequesterFeedback) params.RequesterFeedback = fields.RequesterFeedback;
     req.turk.ApproveAssignment(params, function(err, result) {
@@ -99,10 +97,9 @@ R.post(/Assignments\/(\w+)\/Approve/, function(req, res, m) {
 
 R.post(/Assignments\/(\w+)\/GrantBonus/, function(req, res, m) {
   var AssignmentId = m[1];
-  req.readToEnd('utf8', function(err, data) {
+  req.readData(function(err, fields) {
     if (err) return res.json({success: false, message: err});
 
-    var fields = querystring.parse(data);
     // set the max amount to be $5, just in case something goes wrong
     var amount = Math.min(parseFloat(fields.BonusAmount), 5);
 

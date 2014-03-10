@@ -2,25 +2,23 @@
   <h2>Administrators</h2>
 
   <section class="fill">
-    <table>
+    <table class="striped lined">
       <thead>
         <tr>
           <th>ID</th>
           <th>Email</th>
           <th>Created</th>
-          <th></th>
-          <th></th>
+          <th>Controls</th>
         </tr>
       </thead>
       <tbody>
         <tr ng-repeat="administrator in table">
           <td>{{administrator.id}}</td>
-          <td>{{administrator.email}}</td>
+          <td><a href="/admin/administrators/{{administrator.id}}">{{administrator.email}}</a></td>
           <td>{{administrator.created}}</td>
-          <td><a href="/admin/administrators/{{administrator.id}}">Edit</a></td>
           <td>
             <ajaxform method="DELETE" action="/admin/administrators/{{administrator.id}}">
-              Delete
+              <button>Delete</button>
             </ajaxform>
           </td>
         </tr>

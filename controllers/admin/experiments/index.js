@@ -43,8 +43,9 @@ create new Experiment and redirect to edit it */
 R.get(/^\/admin\/experiments\/new/, function(req, res, m) {
   req.ctx.experiment = {
     administrator_id: req.ctx.current_user.id,
+    parameters: [],
   };
-  amulet.stream(['admin/layout.mu', 'admin/experiments/one.mu'], req.ctx).pipe(res);
+  res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/experiments/one.mu']);
 });
 
 /** POST /admin/experiments
@@ -64,35 +65,14 @@ R.post(/^\/admin\/experiments\/?$/, function(req, res, m) {
   });
 });
 
-
 /** GET /admin/experiments/:experiment_id
 Edit existing Experiment (or just view) */
-R.get(/^\/admin\/experiments\/(\d+)$/, function(req, res, m) {
+R.get(/^\/admin\/experiments\/(\d+)(.json)?$/, function(req, res, m) {
   models.Experiment.from({id: m[1]}, function(err, experiment) {
     if (err) return res.die(err);
 
     req.ctx.experiment = experiment;
-    amulet.stream(['admin/layout.mu', 'admin/experiments/one.mu'], req.ctx).pipe(res);
-  });
-});
-
-/** PUT /admin/experiments/
-Insert new Experiment */
-R.put(/^\/admin\/experiments\/?$/, function(req, res, m) {
-  req.readData(function(err, data) {
-    if (err) return res.die(err);
-
-    var fields = _.pick(data, models.Experiment.columns);
-
-    new sqlcmd.Insert({table: 'experiments'})
-    .setIf(fields)
-    .execute(db, function(err, rows) {
-      if (err) return res.die(err);
-
-      // not sure how I feel about this special header business
-      // res.setHeader('x-message', 'Experiment saved: ' + experiment._id);
-      res.json(rows[0]);
-    });
+    res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/experiments/one.mu']);
   });
 });
 

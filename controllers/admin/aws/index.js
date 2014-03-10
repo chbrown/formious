@@ -84,12 +84,11 @@ R.post(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
     if (err) return res.die('AWS Account query error: ' + err);
     if (!account) return res.die(404, 'Could not find AWS Account: ' + _id);
 
-    req.readToEnd('utf8', function(err, data) {
+    req.readData(function(err, fields) {
       if (err) return res.die(err);
 
-      var values = querystring.parse(data);
       // account.extendSave lets you change the account's _id, transparently
-      account.extendSave(values, function(err, account) {
+      account.extendSave(fields, function(err, account) {
         if (err) return res.die('account.save error: ' + err);
 
         res.redirect('/admin/aws/' + account._id);

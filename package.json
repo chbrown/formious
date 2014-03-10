@@ -17,8 +17,6 @@
     "jszip": "*",
     "loge": "*",
     "moment": "git://github.com/timrwood/moment.git#develop",
-    "mongodb": "*",
-    "mongoose": "*",
     "optimist": "*",
     "pg": "*",
     "regex-router": "~0.2",

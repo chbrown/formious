@@ -2,27 +2,25 @@
   <h2>Experiments</h2>
 
   <section class="fill">
-    <table>
+    <table class="striped lined">
       <thead>
         <tr>
           <th>ID</th>
-          <th>Preview</th>
+          <th>Name</th>
           <th>Created</th>
           <th>Owner</th>
-          <th></th>
-          <th></th>
-          <th></th>
+          <th>Controls</th>
         </tr>
       </thead>
       <tbody>
         <tr ng-repeat="experiment in table">
           <td>{{experiment.id}}</td>
-          <td><a href="/experiments/{{experiment.id}}">{{experiment.name}}</a></td>
-          <td>{{experiment.created}}</td>
+          <td><a href="/admin/experiments/{{experiment.id}}">{{experiment.name}}</a></td>
+          <td><time ng-model="experiment.created" class="date"></time></td>
           <td>{{experiment.administrator_id}}</td>
-          <td><a href="/admin/experiments/{{experiment.id}}">Edit</a></td>
-          <td><a href="/admin/experiments/{{experiment.id}}/responses">Responses</a></td>
           <td>
+            <a href="/experiments/{{experiment.id}}">Public</a>
+            <a href="/admin/experiments/{{experiment.id}}/responses">Responses</a>
             <ajaxform method="DELETE" action="/admin/experiments/{{experiment.id}}">
               <button>Delete</button>
             </ajaxform>

@@ -38,6 +38,7 @@ label[disabled] {
 textarea, input {
   vertical-align: baseline;
   margin: 0;
+  box-sizing: border-box;
 }
 input[type="radio"], input[type="checkbox"] {
   margin: 1px .25ex;
@@ -45,6 +46,9 @@ input[type="radio"], input[type="checkbox"] {
 fieldset {
   margin: 0 10px 10px 0;
   border: 1px solid #CCC;
+}
+.nowrap {
+  white-space: nowrap;
 }
 time {
   white-space: nowrap;
@@ -75,29 +79,6 @@ time {
     }
   }
 }
-table.striped {
-  th, td {
-  }
-  thead {
-    th, td {
-      // .background-gray(75%);
-    }
-  }
-  tbody {
-    tr:nth-child(odd) {
-      .background-gray(99%);
-    }
-    tr:nth-child(even) {
-      // .background-gray(98%);
-    }
-  }
-  tfoot {
-    th, td {
-      // border-top: 1px solid rgb(50%, 50%, 50%);
-      .background-gray(90%);
-    }
-  }
-}
 .ng-invalid {
   box-shadow: 0 0 10px rgb(200, 0, 0);
 }
@@ -111,21 +92,6 @@ table.striped {
 .unlimited {
   max-height: none !important;
   max-width: none !important;
-}
-
-section {
-  margin: 10px 0;
-
-  // &.fill {
-  //   border-width: 1px 0;
-  //   overflow: auto;
-  // }
-  // &.box {
-  //   display: inline-block;
-  //   // inline-block doesn't allow margin overlapping, so remove the top-bottom margins
-  //   // but also add left-right margins
-  //   margin: 0 10px;
-  // }
 }
 
 button.anchor {
@@ -149,16 +115,18 @@ body.admin {
     .background-gray(94%);
     box-sizing: border-box;
 
-    padding: 0 4px;
+    padding: 0 5px;
     border-bottom: 1px solid #BBB;
 
     & > span, & > a, & > button, & > img {
       vertical-align: middle;
     }
 
+    span, a, button.anchor {
+      margin: 3px 0;
+    }
     a, button.anchor {
       display: inline-block;
-      margin: 3px;
       border-radius: 3px;
       padding: 2px 6px;
       border: 1px solid #CCC;
@@ -175,10 +143,6 @@ body.admin {
     button {
       font-size: 100%;
     }
-    aside {
-      float: right;
-      padding-right: 8px
-    }
   }
 
   // .status span {
@@ -190,35 +154,47 @@ body.admin {
   // }
 }
 
+section {
+  margin: 10px 0;
+}
 main {
+  margin: 10px 0;
+
   // most immediate children of main should be padded
-  padding: 5px 10px;
-  .fill {
-    // negative margins squeeze back out of that padding
-    margin-left: -10px;
-    margin-right: -10px;
-    padding: 10px;
+  & > div, & > form, & > h2, & > h3, & > h4, & > a, & > p {
+    padding: 0 10px;
+  }
+  // Usually sections:
+  .box-common {
     background-color: white;
     border: 1px solid #EEE;
     border-width: 1px 0;
     width: 100%;
+
     & > table {
       width: 100%;
-      // margin-left: -10px;
-      // margin-right: -10px;
-      // thead {
-      //   td, th {
-      //     padding: 4px 0;
-      //   }
-      // }
-      // tr {
-      //   td:first-child, th:first-child {
-      //     padding-left: 10px;
-      //   }
-      //   td:last-child, th:last-child {
-      //     padding-right: 10px;
-      //   }
-      // }
+    }
+  }
+  .box {
+    .box-common;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  .fill {
+    .box-common;
+    padding: 5px 0;
+  }
+  section {
+    // mostly like box, except for no horizontal padding on the table, and let the table handle its own borders
+    overflow-x: auto;
+    width: 100%;
+    & > table {
+      width: 100%;
+      // box-sizing: border-box;
+      tr td, tr th {
+        &:first-child { padding-left: 5px; }
+        &:last-child { padding-right: 5px; }
+      }
     }
   }
 }
@@ -230,14 +206,48 @@ table {
   }
   td, th {
     vertical-align: top;
-    padding: 0px 4px 1px 1px;
+    // padding: 0px 4px 1px 1px;
+  }
+}
+table.striped {
+  // th, td {}
+  thead tr {
+    background-color: white;
+  }
+  tbody {
+    tr:nth-child(odd) {
+      background-color: #FCFCFC;
+    }
+    tr:nth-child(even) {
+      background-color: #FEFEFE;
+    }
+  }
+  tfoot tr {
+    background-color: #FAFAFA;
+  }
+}
+table.lined {
+  tbody td {
+    border-top: 1px solid #FAFAFA;
+  }
+}
+table.grid {
+  // even thead cells will be td's, to make things simple
+  font-size: 90%;
+  thead {
+    font-weight: bold;
   }
   // &.hoverable tbody tr:hover {
   //   background-color: #DDD;
   // }
-  // thead td, tbody td {
-  //   border-bottom: 1px solid #DDD;
-  // }
+  td {
+    border: 1px solid #EEE;
+    padding: 2
+  }
+  tr td {
+    &:first-child { border-left: 0; }
+    &:last-child { border-right: 0; }
+  }
 }
 table.keyval {
   th {
@@ -266,13 +276,10 @@ table.keyval {
     overflow: visible;
   }
 }
-
-.login {
-  width: 300px;
-  margin: 50px auto;
-  padding: 10px;
+.shadow {
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
 }
+
 input[type="checkbox"] + span {
   // bold spans coming after checkboxes
   display: inline-block;

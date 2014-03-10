@@ -67,7 +67,7 @@ CREATE TABLE experiments (
 
   -- `parameters` should match the keys of each stim's `context` object, or most of them
   -- not really necessary, except to impose an ordering
-  parameters text[],
+  parameters text[] DEFAULT '{}'::text[],
 
   created timestamp with time zone DEFAULT current_timestamp NOT NULL
 );
@@ -80,7 +80,7 @@ CREATE TABLE stims (
   experiment_id integer REFERENCES experiments(id),
   template_id integer REFERENCES templates(id),
   -- remove this template?
-  template text, -- soft reference to templates(name)
+  -- template text, -- soft reference to templates(name)
   context json,
   view_order integer,
 

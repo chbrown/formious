@@ -75,10 +75,9 @@ R.post(/^\/admin\/participants\/(\w+)$/, function(req, res, m) {
     if (err) return res.die('User query error: ' + err);
     if (!user) return res.die(404, 'Could not find User: ' + _id);
 
-    req.readToEnd('utf8', function(err, data) {
-      if (err) return res.die('IO read error: ' + err);
+    req.readData(function(err, fields) {
+      if (err) return res.die(err);
 
-      var fields = querystring.parse(data);
       // empty-string password means: don't change the password
       if (fields.password === '') delete fields.password;
 

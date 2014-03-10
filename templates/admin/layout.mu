@@ -11,10 +11,10 @@
 </head>
 <body ng-app="app" class="admin">
   <nav fixedflow>
-    <aside>
+    <div style="float: right">
       <a href="/admin/administrators/{{current_user.id}}">me</a>
       <ajaxform method="POST" action="/admin/logout"><button class="anchor">Logout</button></ajaxform>
-    </aside>
+    </div>
     <a href="/admin/aws">AWS Accounts</a>
     <a href="/admin/administrators">Administrators</a>
     <a href="/admin/participants">Participants</a>

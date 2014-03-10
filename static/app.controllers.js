@@ -26,7 +26,11 @@ app.controller('adminTableCtrl', function($scope) {
 app.controller('adminExperimentEditor', function($scope, $http, $localStorage) {
   $scope.$storage = $localStorage.$default({expand_experiment_html: false});
 
-  $scope.experiment = window.experiment;
+  var experiment_url = Url.parse(window.location);
+  experiment_url.path += '.json';
+  $http({method: 'GET', url: experiment_url}).then(function(res) {
+    $scope.experiment = res.data.experiment;
+  }, p);
 
   $http({method: 'GET', url: '/admin/administrators.json'}).then(function(res) {
     $scope.administrators = res.data.administrators;
@@ -34,12 +38,13 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage) {
 
   $http({method: 'GET', url: '/admin/templates.json'}).then(function(res) {
     $scope.templates = res.data.templates;
+    $scope.templates_lookup = toMap($scope.templates, 'id', 'name');
   }, p);
 
   var stims_url = Url.parse(window.location);
   stims_url.path += '/stims.json';
   $http({method: 'GET', url: stims_url.toString()}).then(function(res) {
-    $scope.experiment.stims = res.data.stims;
+    $scope.stims = res.data.stims;
   }, p);
 
 
@@ -83,35 +88,89 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage) {
     }
 
     var ajax_promise = $http(opts).then(function(res) {
-      _.extend($scope.experiment, res.data);
+      _.extend(stim, res.data);
       return 'Saved';
     }, function(res) {
       return summarizeResponse(res);
     });
-    afterPromise(ev.target, ajax_promise);
+
+    if (ev) {
+      afterPromise(ev.target, ajax_promise);
+    }
   };
 
-  $scope.previewStim = function(stim) {
-    p('previewStim', stim);
-    $scope.show_preview = true;
+  // $scope.previewStim = function(stim) {
+  //   // p('previewStim', stim);
+  //   $scope.show_preview = true;
 
-    // the stim template html will expect window.context
-    var iframe = document.querySelector('iframe');
-    // var iframe_window = iframe.contentWindow;
-    // var iframe_document = iframe_window.document;
-    p('iframe', iframe, iframe.contentWindow);
+  //   // the stim template html will expect window.context
+  //   var iframe = document.querySelector('iframe');
+  //   // var iframe_window = iframe.contentWindow;
+  //   // var iframe_document = iframe_window.document;
+  //   p('iframe', iframe, iframe.contentWindow);
 
-    // iframe.contentWindow.document.addEventListener('load', function(ev) {
-    //   console.log('iframe.contentWindow', 'load', ev);
-    // });
+  //   // iframe.contentWindow.document.addEventListener('load', function(ev) {
+  //   // });
 
-    iframe.src = '/admin/experiments/' + $scope.experiment.id + '/stims/' + stim.id + '/render';
-    // console.log(iframe.contentWindow.testfn());
-    // iframe.contentWindow.init(stim.context);
-    // $http({method: 'GET', url: '/admin/templates/' + stim.template_id + '.json'}).then(function(res) {
-    //   iframe_document.body.innerHTML = res.data.template.html;
-    // }, p);
+  //   iframe.src = '/admin/experiments/' + $scope.experiment.id + '/stims/' + stim.id + '/render';
+  //   // iframe.contentWindow.init(stim.context);
+  //   // $http({method: 'GET', url: '/admin/templates/' + stim.template_id + '.json'}).then(function(res) {
+  //   //   iframe_document.body.innerHTML = res.data.template.html;
+  //   // }, p);
+  // };
+
+  $scope.next_view_order = function() {
+    var max_view_order = Math.max.apply(Math, _.pluck($scope.stims, 'view_order'));
+    return Math.max(max_view_order, 0) + 1;
   };
+
+  $scope.addStim = function(stim) {
+    // stim has properties like: context, template_id, view_order
+    // cache view_order?
+    if (stim.view_order === undefined) {
+      stim.view_order = $scope.next_view_order();
+    }
+
+    $scope.syncStim(stim);
+    $scope.stims.push(stim);
+  };
+
+  $scope.addStims = function(data) {
+    // data is an object with columns: [String] and rows: [Object]
+
+    // update the parameters first
+    var new_parameters = _.difference(data.columns, $scope.experiment.parameters, 'template');
+    $scope.experiment.parameters = $scope.experiment.parameters.concat(new_parameters);
+
+    // and then add the stims to the table
+    var view_order = $scope.next_view_order();
+    data.rows.forEach(function(row) {
+      var stim = {context: _.omit(row, 'template')};
+      if (row.template) {
+        var template = _.findWhere($scope.templates, {name: row.template});
+        if (template) {
+          stim.template_id = template.id;
+        }
+        // todo: handle templates that cannot be found
+      }
+      stim.view_order = view_order++;
+      $scope.addStim(stim);
+    });
+  };
+
+  $scope.deleteStim = function(stim) {
+    var url = window.location + '/stims/' + stim.id;
+    $http({method: 'DELETE', url: url}).then(function(res) {
+      var index = $scope.stims.indexOf(stim);
+      $scope.stims.splice(index, 1);
+    }, p);
+  };
+  $scope.deleteSelectedStims = function(ev) {
+    $scope.stims.filter(function(stim) {
+      return stim.selected;
+    }).forEach($scope.deleteStim);
+  };
+
 
   // hack: wish angular.js would just wrap onchange events without the model requirement
   var upload_el = document.querySelector('#upload');
@@ -124,58 +183,34 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage) {
     // sample file = {
     //   lastModifiedDate: Tue Mar 04 2014 15:57:25 GMT-0600 (CST)
     //   name: "asch-stims.xlsx"
-    //   size: 34804
+    //   size: 34307
     //   type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     //   webkitRelativePath: ""
     // }
 
     var reader = new FileReader();
     reader.onerror = function(err) {
-      // callback(err, null, file ? file.name : undefined, file ? file.size : undefined);
       p('File reader error', err);
     };
     reader.onload = function(ev) {
       p('File reader loaded', ev, reader.result);
       var file_name = file.name;
       var file_size = file.size;
-      // view as basic bytes / chars
+      // data is an arraybufferview as basic bytes / chars
       var data = new Uint8Array(reader.result);
-
-      p('Parsing ' + file_name + ' (' + file_size + ' bytes)');
 
       var xhr = new XMLHttpRequest();
       xhr.open('POST', '/api/table');
-      xhr.setRequestHeader('content-type', file.type);
-      xhr.setRequestHeader('x-filename', file.name);
+      xhr.setRequestHeader('Content-Type', file.type);
+      xhr.setRequestHeader('X-Filename', file.name);
       xhr.onload = function(ev) {
-        p('adding to $scope.experiment.stims ...', ev);
+        $scope.$apply(function() {
+          $scope.addStims(JSON.parse(xhr.responseText));
+        });
       };
       xhr.send(data);
-      // $http({
-      //   method: 'POST',
-      //   url: '/api/table',
-      //   data: file.result,
-      //   headers: { 'Content-Type': undefined },
-      //   transformRequest: function(data) { return data; },
-      // }).then(function(res) {
-      //   // xxx: should merge parameters, not overwrite
-      //   p('$http response');
-      // }, p);
     };
     reader.readAsArrayBuffer(file);
-
-    // fileinputText(ev.target, function(err, file_contents, file_name, file_size) {
-
-
-      // infer things about the stimlist from what they just uploaded
-      // var segmented = _.contains(data.columns, 'segment');
-      // self.set('segmented', segmented);
-      // if (segmented) {
-      //   var segments = _.pluck(data.rows, 'segment');
-      //   self.set('segments', _.uniq(segments));
-      // }
-
-      // var message = 'Processed upload into ' + self.model.get('states').length + ' rows.';
   });
 });
 

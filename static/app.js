@@ -7,12 +7,13 @@ var app = angular.module('app', ['ngStorage']);
 //     $sceProvider.enabled(false);
 //   });
 
-
 app.filter('trust', function($sce) {
+  /** | trust lets us easily trust something as html */
   return function(string) {
     return $sce.trustAsHtml(string);
   };
 });
+
 
 app.directive('help', function() {
   return {
@@ -23,7 +24,6 @@ app.directive('help', function() {
     scope: {},
     link: function(scope, el, attrs) {
       var text_content = el.text().trim();
-      // p('text_content', text_content);
       scope.summary = text_content.slice(0, 50); // &hellip;
       if (text_content.length > 50) {
         scope.summary += '...';
@@ -31,6 +31,21 @@ app.directive('help', function() {
       el.on('click', function() {
         el.toggleClass('expanded');
       });
+    }
+  };
+});
+
+app.directive('map', function() {
+  return {
+    restrict: 'A',
+    scope: {
+      key: '=',
+      map: '=',
+    },
+    link: function(scope, el, attrs) {
+      if (scope.map) {
+        el.text(scope.map[scope.key]);
+      }
     }
   };
 });
@@ -165,6 +180,8 @@ app.directive('ajaxform', function($http) {
   };
 });
 
+// app.factory('$search', function($http, $httpqueue, $localStorage) {});
+
 var afterPromise = function(target, promise) {
   var el = angular.element(target);
   var throbber_el = angular.element('<img src="/static/lib/img/throbber-16.gif" />');
@@ -187,3 +204,54 @@ var afterPromise = function(target, promise) {
   el.after(throbber_el);
   promise.then(callback, callback);
 };
+
+app.directive('checkboxSequence', function($http) {
+  return {
+    restrict: 'A',
+    link: function(scope, el, attrs) {
+      var previous_checkbox = null;
+      // previous_action == true means the last selection was to change
+      // a checkbox from unchecked to checked
+      var previous_action = null;
+
+      // addEventListener('DOMSubtreeModified', function()
+      // requires jQuery (not just jQ-lite) for the selector stuff
+      var sel = 'input[type="checkbox"]';
+      el.on('click', sel, function(ev) {
+        var action = ev.target.checked; // true = just checked, false = just unchecked
+        if (ev.shiftKey) {
+          if (action === previous_action && previous_checkbox) {
+            var checkboxes = el.find(sel);
+            var inside = false;
+            // select all entries between the two, inclusive
+            for (var i = 0, l = checkboxes.length; i < l; i++) {
+              var checkbox = checkboxes[i];
+              var boundary = checkbox == previous_checkbox || checkbox == ev.target;
+              if (boundary) {
+                if (inside === false) {
+                  // the first boundary we hit puts us inside
+                  inside = true;
+                }
+                else {
+                  // the secondary boundary puts us outside, so we break out
+                  break;
+                }
+              }
+              else if (inside) {
+                checkbox.checked = action;
+                // checkbox.dispatchEvent(new Event('input', true, true));
+                // angular.element(checkbox).trigger('click');
+                // angular.element(checkbox).trigger('change');
+                // angular.element(checkbox).prop('checked', action);
+                angular.element(checkbox).triggerHandler('click');
+              }
+            }
+          }
+        }
+        previous_checkbox = ev.target;
+        previous_action = action;
+      });
+
+    },
+  };
+});

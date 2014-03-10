@@ -3,6 +3,7 @@ var logger = require('loge');
 var Router = require('regex-router');
 var streaming = require('streaming');
 var sv = require('sv');
+var _ = require('underscore');
 
 var excel = require('../lib/excel');
 
@@ -21,14 +22,28 @@ var parseSvStream = function(readable, callback) {
   });
 };
 
+function useHeaders(rows) {
+  // convert from flat table to list of objects using the first row in rows
+  var columns = rows[0];
+  var data = rows.slice(1).map(function(cells) {
+    var pairs = _.zip(columns, cells);
+    return _.object(pairs);
+  });
+  return {
+    columns: columns,
+    rows: data,
+  };
+}
+
 /** POST /api/table
 parse csv-like input flexibly and write out json to response */
 R.post('/api/table', function(req, res) {
   var content_type = req.headers['content-type'];
   if (content_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
     req.readToEnd(function(err, data) {
-      var result = excel.parse(data);
-      // result is already a {columns: [String], rows: [Object]} object
+      var table = excel.parse(data);
+      var result = useHeaders(table);
+      // result is now a {columns: [String], rows: [Object]} object
       res.json(result);
     });
   }

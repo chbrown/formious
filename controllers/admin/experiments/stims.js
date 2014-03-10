@@ -72,7 +72,7 @@ R.patch(/stims\/(\d+)$/, function(req, res, m) {
 
       // empty-string password means: don't change the password
       // if (fields.password === '') delete fields.password;
-      var fields = _.pick(data, 'template_id', 'context', 'view_order', 'created');
+      var fields = _.pick(data, models.Stim.columns);
 
       new sqlcmd.Update({table: 'stims'})
       .setIf(fields)

@@ -50,16 +50,14 @@ var renderLogin = function(email, password, message, res) {
 show login page for this user */
 public_R.get(/^\/admin\/login\/?$/, function(req, res, m) {
   var urlObj = url.parse(req.url, true);
-  renderLogin(urlObj.query.email, urlObj.query.password, 'Please login', res);
+  renderLogin(urlObj.query.email, urlObj.query.password, '', res);
 });
 /** POST /admin/login
 register unclaimed (no set password) user by adding password,
 or login as claimed user by providing password */
 public_R.post(/^\/admin\/login$/, function(req, res) {
-  req.readToEnd('utf8', function(err, body) {
-    if (err) return res.die('HTTP POST error', err);
-
-    var fields = querystring.parse(body);
+  req.readData(function(err, fields) {
+    if (err) return res.die(err);
 
     // artificially slow to deflect brute force attacks
     setTimeout(function() {
@@ -80,7 +78,7 @@ module.exports = function(req, res) {
   // handle auth and forward. this is the checkpoint for all admin-level
   // requests, and should send all non administrators to the login page.
   // logger.info('admin.index.routing', req.url);
-  var ticket = req.cookies.get('ticket');
+  var ticket = req.cookies.get('ticket') || '';
   models.Administrator.fromTicket(ticket, function(err, administrator) {
     if (err) {
       logger.error('Administrator not authenticated:', err);
