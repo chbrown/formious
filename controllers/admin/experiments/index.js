@@ -60,7 +60,10 @@ R.post(/^\/admin\/experiments\/?$/, function(req, res, m) {
     .setIf(fields)
     .execute(db, function(err, rows) {
       if (err) return res.die(err);
-      res.json(rows[0]);
+
+      var url = '/admin/experiments/' + rows[0].id;
+      res.writeHead(300, {Location: url});
+      res.end();
     });
   });
 });

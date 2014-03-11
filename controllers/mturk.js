@@ -1,5 +1,5 @@
 /*jslint node: true */
-var formidable = require('formidable');
+// var formidable = require('formidable');
 var models = require('../lib/models');
 var amulet = require('amulet');
 var Router = require('regex-router');
@@ -9,12 +9,12 @@ var R = new Router(function(req, res) {
 });
 
 // POST /mturk/externalSubmit
-R.post(/^\/mturk\/externalSubmit/, function(req, res, m) {
-  new formidable.IncomingForm().parse(req, function(err, fields) {
-    var aws_worker_id = fields.workerId;
-    delete fields.workerId;
+R.any(/^\/mturk\/externalSubmit/, function(req, res, m) {
+  req.readData(function(err, data) {
+    var aws_worker_id = data.workerId || 'WORKER_ID_NOT_AVAILABLE';
+    delete data.workerId;
     // null stim_id
-    models.Participant.addResponse(aws_worker_id, null, fields, function(err, responses) {
+    models.Participant.addResponse(aws_worker_id, null, data, function(err, responses) {
       if (err) return res.die(err);
 
       res.text('Your responses have been submitted and saved.');

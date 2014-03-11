@@ -12,14 +12,15 @@
     "cookies": "git://github.com/chbrown/cookies.git",
     "eyes": "*",
     "formidable": "*",
-    "http-enhanced": ">=0.3.1",
+    "handlebars": "*",
+    "http-enhanced": "*",
     "js-yaml": "*",
     "jszip": "*",
     "loge": "*",
     "moment": "git://github.com/timrwood/moment.git#develop",
     "optimist": "*",
     "pg": "*",
-    "regex-router": "~0.2",
+    "regex-router": "*",
     "send": "*",
     "sprintf": "*",
     "sqlcmd": "*",
@@ -33,7 +34,8 @@
   },
   "devDependencies": {
     "grunt": "*",
-    "grunt-contrib-uglify": "*"
+    "grunt-contrib-uglify": "*",
+    "tap": "*"
   },
   "staticPattern": "static/lib/{file}",
   "staticDependencies": {

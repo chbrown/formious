@@ -1,4 +1,4 @@
-/*jslint browser: true, devel: true */ /*globals _, angular, app, Url, p, fileinputText, afterPromise */
+/*jslint browser: true, devel: true */ /*globals _, angular, app, Url, p, fileinputText, displayPromiseStatus */
 
 var sync_options = function(record) {
   if (record.id) {
@@ -84,9 +84,13 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage) {
       _.extend($scope.experiment, res.data);
       return 'Saved';
     }, function(res) {
+      if (res.status == 300) {
+        window.location = res.headers().location;
+      }
+      // otherwise is error:
       return summarizeResponse(res);
     });
-    afterPromise(ev.target, ajax_promise);
+    displayPromiseStatus(ajax_promise, ev.target);
   };
 
   $scope.syncStim = function(stim, ev) {
@@ -108,7 +112,7 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage) {
     });
 
     if (ev) {
-      afterPromise(ev.target, ajax_promise);
+      displayPromiseStatus(ajax_promise, ev.target);
     }
   };
 
@@ -252,7 +256,7 @@ app.controller('adminAWSAccountEditor', function($scope, $http, $localStorage) {
     }, function(res) {
       return summarizeResponse(res);
     });
-    afterPromise(button[0], ajax_promise);
+    displayPromiseStatus(ajax_promise, button[0]);
   };
 });
 
@@ -313,9 +317,12 @@ app.controller('adminTemplateEditor', function($scope, $http, $timeout) {
     var ajax_promise = $http(opts).then(function(res) {
       return 'Saved';
     }, function(res) {
+      if (res.status == 300) {
+        window.location = res.headers().location;
+      }
       return summarizeResponse(res);
     });
-    afterPromise(ev.target, ajax_promise);
+    displayPromiseStatus(ajax_promise, ev.target);
   };
 });
 
@@ -328,6 +335,6 @@ app.controller('adminAdministratorEditor', function($scope, $http, $timeout) {
     }, function(res) {
       return summarizeResponse(res);
     });
-    afterPromise(ev.target, ajax_promise);
+    displayPromiseStatus(ajax_promise, ev.target);
   };
 });

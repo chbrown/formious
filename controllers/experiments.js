@@ -3,11 +3,13 @@ var _ = require('underscore');
 var url = require('url');
 var amulet = require('amulet');
 var async = require('async');
+var handlebars = require('handlebars');
 var Router = require('regex-router');
 var logger = require('loge');
 var sqlcmd = require('sqlcmd');
 
 var db = require('../lib/db');
+var flat = require('../lib/flat');
 var models = require('../lib/models');
 
 var R = new Router(function(req, res) {
@@ -18,7 +20,6 @@ var R = new Router(function(req, res) {
 Redirect to first stim of experiment
 */
 R.get(/^\/experiments\/(\d+)(\?|$)/, function(req, res, m) {
-  var urlObj = url.parse(req.url, true);
   var experiment_id = m[1];
 
   new sqlcmd.Select({table: 'stims'})
@@ -29,6 +30,7 @@ R.get(/^\/experiments\/(\d+)(\?|$)/, function(req, res, m) {
     if (err) return res.die(err);
     if (stims.length === 0) return res.die('No available stims');
 
+    var urlObj = url.parse(req.url, true);
     urlObj.pathname = '/experiments/' + experiment_id + '/stims/' + stims[0].id;
     var stim_url = url.format(urlObj);
 
@@ -56,61 +58,34 @@ R.get(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
   }, function(err, results) {
     if (err) return res.die(err);
 
-    var ctx = {
-      context: results.stim.context,
-      stim_id: results.stim.id,
-      header: results.experiment.html,
-      html: results.template.html,
-    };
-
     // stim_globals is given to all stims, in case they want the values. it's mostly metadata, compared to the states.
-    // var stim_globals = {
-    //   assignmentId: '{{assignmentId}}',
-    //   hit_started: {{hit_started}},
-    //   hitId: '{{hitId}}',
-    //   host: '{{host}}',
-    //   workerId: '{{workerId}}',
-    //   stimlist: '{{stimlist_id}}'
-    // };
-    // ctx: the current state to render the template with
-    // var ctx = {
-    //   // straight from the url
-    //   host: urlObj.query.debug !== undefined ? '' : (urlObj.query.turkSubmitTo || 'https://www.mturk.com'),
-    //   workerId: user._id,
+    var urlObj = url.parse(req.url, true);
+
+    // context: the current state to render the template with
+    var context = _.extend(results.stim.context, urlObj.query);
+    // {
     //   assignmentId: urlObj.query.assignmentId,
     //   hitId: urlObj.query.hitId,
-    //   segment: urlObj.query.segment,
-    //   index: urlObj.query.index || 0,
-    //   // specific to this type of responses (stimlists)
-    //   hit_started: Date.now(),
-    //   stimlist_id: stimlist._id,
-    // };
+    //   turkSubmitTo: urlObj.query.turkSubmitTo,
+    //   workerId: urlObj.query.workerId,
+    // }
+
+    var deep_context = flat.unflatten(context);
+    // console.log('deep_context', deep_context);
+
+    // need a better default for missing html
+    var template_html = results.template.html;
+    var rendered_html = template_html ? handlebars.compile(template_html)(deep_context) : template_html;
+    var ctx = {
+      context: context,
+      stim_id: results.stim.id,
+      header: results.experiment.html,
+      html: rendered_html,
+    };
 
     amulet.stream(['experiments/stim.mu'], ctx).pipe(res);
   });
 });
-
-var nextStimId = function(experiment_id, stim_id, callback) {
-  // callback(err, next_stim_id)
-  // or
-  // callback(null, null) if there are no more stims
-  models.Stim.from({id: stim_id}, function(err, stim) {
-    if (err) return callback(err);
-
-    // find the stim of the same experiment with the lowest view_order that's greater than the current view_order
-    new sqlcmd.Select({table: 'stims'})
-    .where('experiment_id = ?', experiment_id)
-    .where('view_order > ?', stim.view_order)
-    .orderBy('view_order ASC')
-    .limit(1)
-    .execute(db, function(err, stims) {
-      if (err) return callback(err);
-      logger.info('stims', stims);
-
-      callback(null, stims.length ? stims[0].id : null);
-    });
-  });
-};
 
 /** POST /experiments/:experiment_id/stims/:stim_id
 Save response
@@ -118,37 +93,46 @@ Save response
 R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
   var experiment_id = m[1];
   var stim_id = m[2];
+  var urlObj = url.parse(req.url, true);
 
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    logger.debug('Inserting response', {aws_worker_id: req.aws_worker_id, data: data});
+    var aws_worker_id = urlObj.query.workerId || 'WORKER_ID_NOT_AVAILABLE';
+    logger.debug('Inserting response', {aws_worker_id: aws_worker_id, data: data});
 
     var ready = function(err) {
       if (err) return res.die(err);
 
-      nextStimId(experiment_id, stim_id, function(err, next_stim_id) {
-        if (err) return callback(err);
+      models.Stim.nextStimId(experiment_id, stim_id, function(err, next_stim_id) {
+        if (err) return res.die(err);
 
-        var next_stim_url = '/experiments/' + experiment_id + '/stims/' + next_stim_id;
+        // http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ExternalQuestionArticle.html
+
+        var redirect_to = urlObj.query.turkSubmitTo + '?assignmentId=' + urlObj.query.assignmentId;
+        if (next_stim_id) {
+          // only change the path part of the url
+          urlObj.pathname = '/experiments/' + experiment_id + '/stims/' + next_stim_id;
+          redirect_to = url.format(urlObj);
+        }
 
         var ajax = req.headers['x-requested-with'] == 'XMLHttpRequest';
         if (ajax) {
-          res.writeHead(300, {Location: next_stim_url});
+          res.writeHead(300, {Location: redirect_to});
           res.end();
         }
         else {
-          res.redirect(next_stim_url);
+          // res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/experiments/stims/all.mu']);
+          // res.json({message: 'Inserted response.'});
+          res.redirect(redirect_to);
         }
       });
     };
 
     if (data) {
-      models.Participant.addResponse(req.aws_worker_id, stim_id, data, ready);
+      models.Participant.addResponse(aws_worker_id, stim_id, data, ready);
     }
     else {
-      // res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/experiments/stims/all.mu']);
-      // res.json({message: 'Inserted response.'});
       ready();
     }
   });
@@ -196,16 +180,23 @@ R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
 // }
 
 module.exports = function(req, res) {
-  // this is where we need the workerId cookie (aws_worker_id value)
-  req.aws_worker_id = req.cookies.get('workerId');
-  if (!req.aws_worker_id) {
-    // if the cookie has not yet been set, set it from the url
-    var urlObj = url.parse(req.url, true);
-    req.aws_worker_id = urlObj.query.workerId;
-    req.cookies.set('workerId', req.aws_worker_id);
-  }
+  // the Amazon Mechanical Turk frame will give us the following variables
+  // https://tictactoe.amazon.com/gamesurvey.cgi?gameid=01523
+  //   &assignmentId=123RVWYBAZW00EXAMPLE456RVWYBAZW00EXAMPLE
+  //   &hitId=123RVWYBAZW00EXAMPLE
+  //   &turkSubmitTo=https://www.mturk.com/mturk/externalSubmit
+  //   &workerId=AZ3456EXAMPLE
 
-  // req.aws_worker_id is now available
+  // this is where we need the workerId cookie (aws_worker_id value)
+  // req.aws_worker_id = req.cookies.get('workerId');
+  // if (!req.aws_worker_id) {
+    // if the cookie has not yet been set, set it from the url
+  //   var urlObj = url.parse(req.url, true);
+  //   req.aws_worker_id = urlObj.query.workerId;
+  //   req.cookies.set('workerId', req.aws_worker_id);
+  // }
+
+  // req.aws_worker_id should now be set unless there was never any workerId to begin with
   R.route(req, res);
 };
 

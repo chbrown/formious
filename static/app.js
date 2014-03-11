@@ -194,27 +194,29 @@ var summarizeResponse = function(res) {
   return parts.join('');
 };
 
-var afterPromise = function(target, promise) {
-  var el = angular.element(target);
-  var throbber_el = angular.element('<img src="/static/lib/img/throbber-16.gif" />');
-  throbber_el.css('margin', '2px');
-  var error_el = angular.element('<span>');
-  error_el.css('margin', '2px');
-  var callback = function(err) {
-    throbber_el.remove();
-    if (err) {
-      error_el.text(err.toString());
-      el.after(error_el);
-      setTimeout(function() {
-        error_el.remove();
-      }, 5000);
-    }
-  };
+var flashSpan = function(el, text) {
+  var span = angular.element('<span>').css('margin', '2px').text(text);
+  el.after(span);
+  setTimeout(function() {
+    span.remove();
+  }, 5000);
+  return span;
+};
 
-  // add progress element:
-  error_el.remove();
+var displayPromiseStatus = function(promise, target) {
+  // allow target to be null? (do a popup or something)
+  var el = angular.element(target);
+  // immediately attach throbber
+  var throbber_el = angular.element('<img src="/static/lib/img/throbber-16.gif" />').css('margin', '2px');
   el.after(throbber_el);
-  promise.then(callback, callback);
+  // handle success and failure by flashing a message
+  promise.then(function(message) {
+    throbber_el.remove();
+    flashSpan(el, message);
+  }, function(err) {
+    throbber_el.remove();
+    flashSpan(el, err.toString());
+  });
 };
 
 app.directive('checkboxSequence', function($http) {

@@ -48,8 +48,9 @@ R.post(/^\/admin\/templates\/?$/, function(req, res, m) {
     .execute(db, function(err, rows) {
       if (err) return res.die(err);
 
-      req.ctx = rows[0];
-      res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/templates/one.mu']);
+      var url = '/admin/templates/' + rows[0].id;
+      res.writeHead(300, {Location: url});
+      res.end();
     });
   });
 });

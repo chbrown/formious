@@ -48,7 +48,7 @@
           <input type="text" ng-model="experiment.parameters" ng-list style="width: 100%">
         </label>
 
-        <div><button>Save</button></div>
+        <p><button>Save</button></p>
       </form>
     </section>
 

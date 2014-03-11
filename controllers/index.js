@@ -10,5 +10,6 @@ R.any(/^\/(templates|static|favicon\.ico)/, require('./static'));
 R.any(/^\/experiments/, require('./experiments'));
 R.any(/^\/admin/, require('./admin'));
 R.any(/^\/api/, require('./api'));
+R.any(/^\/mturk/, require('./mturk'));
 
 module.exports = R.route.bind(R);
