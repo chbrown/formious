@@ -2,7 +2,7 @@
   <h3>Create HIT</h3>
 
   <section class="box">
-    <form ng-submit="sync()">
+    <form ng-submit="sync($event)">
       <label>
         <div><b>Max Assignments</b>
           <span class="help">
@@ -84,7 +84,7 @@
   <h3>Preview
     <input type="checkbox" ng-model="$storage.preview_iframe">
   </h3>
-  <section class="box" ng-if="$storage.preview_iframe">
+  <section class="box" ng-show="$storage.preview_iframe">
     <iframe scrolling="auto" width="100%" frameborder="0" align="center" height="{{$storage.hit.FrameHeight}}"></iframe>
   </section>
 </main>

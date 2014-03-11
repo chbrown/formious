@@ -62,16 +62,9 @@ R.get(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
     var urlObj = url.parse(req.url, true);
 
     // context: the current state to render the template with
+    // urlObj.query will usually have the fields: assignmentId, hitId, turkSubmitTo, workerId
     var context = _.extend(results.stim.context, urlObj.query);
-    // {
-    //   assignmentId: urlObj.query.assignmentId,
-    //   hitId: urlObj.query.hitId,
-    //   turkSubmitTo: urlObj.query.turkSubmitTo,
-    //   workerId: urlObj.query.workerId,
-    // }
-
     var deep_context = flat.unflatten(context);
-    // console.log('deep_context', deep_context);
 
     // need a better default for missing html
     var template_html = results.template.html;
@@ -108,8 +101,7 @@ R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
         if (err) return res.die(err);
 
         // http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ExternalQuestionArticle.html
-
-        var redirect_to = urlObj.query.turkSubmitTo + '?assignmentId=' + urlObj.query.assignmentId;
+        var redirect_to = urlObj.query.turkSubmitTo + '/mturk/externalSubmit?assignmentId=' + urlObj.query.assignmentId;
         if (next_stim_id) {
           // only change the path part of the url
           urlObj.pathname = '/experiments/' + experiment_id + '/stims/' + next_stim_id;
@@ -179,12 +171,13 @@ R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
 //   });
 // }
 
+// module.exports = R.route.bind(R);
 module.exports = function(req, res) {
   // the Amazon Mechanical Turk frame will give us the following variables
   // https://tictactoe.amazon.com/gamesurvey.cgi?gameid=01523
   //   &assignmentId=123RVWYBAZW00EXAMPLE456RVWYBAZW00EXAMPLE
   //   &hitId=123RVWYBAZW00EXAMPLE
-  //   &turkSubmitTo=https://www.mturk.com/mturk/externalSubmit
+  //   &turkSubmitTo=https://www.mturk.com
   //   &workerId=AZ3456EXAMPLE
 
   // this is where we need the workerId cookie (aws_worker_id value)
@@ -199,4 +192,3 @@ module.exports = function(req, res) {
   // req.aws_worker_id should now be set unless there was never any workerId to begin with
   R.route(req, res);
 };
-

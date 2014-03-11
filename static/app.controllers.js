@@ -261,8 +261,12 @@ app.controller('adminAWSAccountEditor', function($scope, $http, $localStorage) {
 });
 
 app.controller('adminHITEditor', function($scope, $http, $localStorage) {
+  // defaults:
   $scope.$storage = $localStorage.$default({
     hit: {
+      // Title: 'Exciting task!',
+      // Description: 'Look at some cool pictures and answer a lot of really easy questions.',
+      // Keywords: 'linguistic,verbal,words,meaning,research',
       MaxAssignments: '20',
       Reward: '0.05',
       Keywords: 'research,science',
@@ -276,25 +280,37 @@ app.controller('adminHITEditor', function($scope, $http, $localStorage) {
 
   _.extend($scope.$storage.hit, window.hit);
 
-  $scope.sync = function() {
-
+  $scope.sync = function(ev) {
+    var ajax_promise = $http({
+      method: 'POST',
+      url: 'CreateHIT',
+      data: $scope.$storage.hit,
+    }).then(function(res) {
+      return 'Created';
+    }, function(res) {
+      if (res.status == 300) {
+        window.location = res.headers().location;
+      }
+      return summarizeResponse(res);
+    });
+    displayPromiseStatus(ajax_promise, ev.target);
   };
 
-  // AWS adds four parameters: assignmentId, hitId, workerId, and turkSubmitTo
+  // AWS adds four parameters: assignmentId, hitId, workerId, and turkSubmitTo (which is the host, not the full path)
   $scope.$watch('$storage.hit.ExternalURL', function(newVal, oldVal) {
-    // p('$watch %s -> %s', oldVal, newVal);
-    var iframe = document.querySelector('iframe');
-    if (newVal && iframe) {
+    // p('$watch %s -> %s', oldVal, newVal, iframe);
+    if (newVal && $scope.$storage.preview_iframe) {
+      var iframe = document.querySelector('iframe');
       var url = Url.parse(newVal);
       _.extend(url.query, {
         // Once assigned, assignmentId is a 30-character alphadecimal mess
-        assignmentId: 'ASSIGNMENT_ID_NOT_AVAILABLE',
+        // assignmentId: 'ASSIGNMENT_ID_NOT_AVAILABLE',
+        assignmentId: '1234567890abcdef',
         hitId: '0PREVIEWPREVIEWPREVIEWPREVIEW9',
         workerId: 'A1234TESTING',
-        // turkSubmitTo is normally https://workersandbox.mturk.com/ or https://www.mturk.com
-        turkSubmitTo: '//'
+        // turkSubmitTo is normally https://workersandbox.mturk.com or https://www.mturk.com
+        turkSubmitTo: ''
       });
-
       iframe.src = url.toString();
     }
   });

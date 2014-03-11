@@ -65,8 +65,18 @@ R.post(/CreateHIT/, function(req, res) {
 
     logger.debug('CreateHIT params:', params);
     req.turk.CreateHIT(params, function(err, result) {
-      if (err) return res.json({success: false, message: err});
-
+      if (err) return res.die(err);
+      // result is something like:
+      // {
+      //   "OperationRequest": {
+      //     "RequestId":"1b8ed7eb-dae3-3500-c2ad-73aa4EXAMPLE"
+      //   },
+      //   "HIT":{
+      //     "Request":{"IsValid":"True"},
+      //     "HITId":"FB2EF51D88F724F2A124026EXAMPLE",
+      //     "HITTypeId":"1BBB6B0FE7967122FD0243AEXAMPLE"
+      //   }
+      // }
       res.json(result);
     });
   });
@@ -193,13 +203,9 @@ R.get(/HITs\/(\w+)\.(csv|tsv)/, function(req, res, m) {
 
 // GET /admin/aws/:account/:hosts/HITs/new -> form to create new HIT
 R.get(/HITs\/new/, function(req, res, m) {
-  // defaults:
   var urlObj = url.parse(req.url, true);
-  req.ctx.hit = _.extend({
-    Title: 'Exciting task!',
-    Description: 'Look at some cool pictures and answer a lot of really easy questions.',
-    Keywords: 'linguistic,verbal,words,meaning,research',
-  }, urlObj.query);
+  // defaults come from the querystring
+  req.ctx.hit = urlObj.query;
   amulet.stream(['admin/layout.mu', 'admin/HITs/new.mu'], req.ctx).pipe(res);
 });
 
