@@ -182,6 +182,18 @@ app.directive('ajaxform', function($http) {
 
 // app.factory('$search', function($http, $httpqueue, $localStorage) {});
 
+var summarizeResponse = function(res) {
+  var parts = [];
+  if (res.status != 200) {
+    parts.push('Error ');
+  }
+  parts.push(res.status);
+  if (res.data) {
+    parts.push(': ' + res.data.toString());
+  }
+  return parts.join('');
+};
+
 var afterPromise = function(target, promise) {
   var el = angular.element(target);
   var throbber_el = angular.element('<img src="/static/lib/img/throbber-16.gif" />');

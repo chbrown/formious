@@ -1,33 +1,39 @@
-<main ng-controller="adminTableCtrl">
-  <h2>Experiment: <% experiment.name %></h2>
+<main ng-controller="adminResponsesCtrl">
+  <h3>Experiment: <% experiment.name %></h3>
 
-  <section class="fill">
-    <table>
-      <thead>
-        <tr>
-          <th>response_id</th>
-          <th>participant_id</th>
-          <th>experiment_id</th>
-          <th>stim_id</th>
-          <th>context</th>
-          <th>value</th>
-          <th>created</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr ng-repeat="experiment in table">
-          <td>{{experiment.id}}</td>
-          <td>{{experiment.participant_id}}</td>
-          <td>{{experiment.experiment_id}}</td>
-          <td>{{experiment.stim_id}}</td>
-          <td>{{experiment.context}}</td>
-          <td>{{experiment.value}}</td>
-          <td><time ng-model="experiment.created"></time></td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
+  <table class="striped grid padded responses" style="margin-top: 10px">
+    <thead>
+      <tr>
+        <td>response_id</td>
+        <td>participant_id</td>
+        <td>experiment_id</td>
+        <td>stim_id</td>
+        <td ng-repeat="key in context_keys" class="context">
+          {{key}}
+        </td>
+        <td ng-repeat="key in value_keys" class="value">
+          {{key}}
+        </td>
+        <td>created</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="response in responses">
+        <td>{{response.id}}</td>
+        <td>{{response.participant_id}}</td>
+        <td>{{response.experiment_id}}</td>
+        <td>{{response.stim_id}}</td>
+        <td ng-repeat="key in context_keys" class="context">
+          {{response.context[key]}}
+        </td>
+        <td ng-repeat="key in value_keys" class="value">
+          {{response.value[key]}}
+        </td>
+        <td><time ng-model="response.created"></time></td>
+      </tr>
+    </tbody>
+  </table>
 </main>
 <script>
-var table = <%& serialize(responses) %>;
+var responses = <%& serialize(responses) %>;
 </script>

@@ -1,13 +1,14 @@
 /*jslint node: true */
-var querystring = require('querystring');
 var _ = require('underscore');
-var sv = require('sv');
 var amulet = require('amulet');
 var async = require('async');
-var Router = require('regex-router');
-
 var logger = require('loge');
+var Router = require('regex-router');
+var sqlcmd = require('sqlcmd');
+var sv = require('sv');
+
 var models = require('../../../lib/models');
+var db = require('../../../lib/db');
 
 var R = new Router(function(req, res) {
   res.die(404, 'No resource at: ' + req.url);
@@ -19,7 +20,7 @@ R.any(/^\/admin\/aws\/(\d+)\/hosts\/([^\/]+)/, require('./hosts'));
 /** GET /admin/aws
 Index - list all AWS accounts and show creation link */
 R.get('/admin/aws', function(req, res) {
-  models.AWSAccount.find({}, function(err, accounts) {
+  models.AWSAccount.find({}, function(err, aws_accounts) {
     if (err) return res.die(err);
 
     req.ctx.aws_accounts = aws_accounts;
@@ -34,16 +35,16 @@ R.get('/admin/aws/new', function(req, res) {
   amulet.stream(['admin/layout.mu', 'admin/aws/one.mu'], req.ctx).pipe(res);
 });
 
-/** POST /admin/experiments
+/** POST /admin/aws
 Create new experiment. */
-R.post(/^\/admin\/experiments\/?$/, function(req, res, m) {
+R.post(/^\/admin\/aws\/?$/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, 'name', 'administrator_id', 'parameters');
+    var fields = _.pick(data, models.AWSAccount.columns);
 
-    new sqlcmd.Insert({table: 'experiments'})
-    .setIf(fields)
+    new sqlcmd.Insert({table: 'aws_accounts'})
+    .set(fields)
     .execute(db, function(err, rows) {
       if (err) return res.die(err);
       res.json(rows[0]);
@@ -54,9 +55,9 @@ R.post(/^\/admin\/experiments\/?$/, function(req, res, m) {
 
 /** GET /admin/aws/:account_id
 Show single AWS account */
-R.get(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
-  var _id = m[1];
-  models.AWSAccount.from({id: _id}, function(err, aws_account) {
+R.get(/^\/admin\/aws\/(\d+)$/, function(req, res, m) {
+  var account_id = m[1];
+  models.AWSAccount.from({id: account_id}, function(err, aws_account) {
     if (err) return res.die(err);
 
     req.ctx.aws_account = aws_account;
@@ -64,35 +65,23 @@ R.get(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
   });
 });
 
-/** GET /admin/aws/:account_id/edit
-Edit single user */
-R.get(/^\/admin\/aws\/(\w+)\/edit$/, function(req, res, m) {
-  var _id = m[1];
-  models.AWSAccount.findById(_id, function(err, account) {
-    if (err) return res.die(err);
-
-    req.ctx.aws_account = aws_account;
-    amulet.stream(['admin/layout.mu', 'admin/aws/one.mu'], req.ctx).pipe(res);
-  });
-});
-
-/** POST /admin/aws/:account_id
+/** PATCH /admin/aws/:account_id
 Update new AWS account */
-R.post(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
-  var _id = m[1];
-  models.AWSAccount.findById(_id, function(err, account) {
-    if (err) return res.die('AWS Account query error: ' + err);
-    if (!account) return res.die(404, 'Could not find AWS Account: ' + _id);
+R.patch(/^\/admin\/aws\/(\d+)$/, function(req, res, m) {
+  var account_id = m[1];
+  // models.AWSAccount.from({id: m[1]}, function(err, aws_account) {
+  req.readData(function(err, data) {
+    if (err) return res.die(err);
 
-    req.readData(function(err, fields) {
+    var fields = _.pick(data, models.AWSAccount.columns);
+
+    new sqlcmd.Update({table: 'aws_accounts'})
+    .setIf(fields)
+    .where('id = ?', account_id)
+    .execute(db, function(err, rows) {
       if (err) return res.die(err);
 
-      // account.extendSave lets you change the account's _id, transparently
-      account.extendSave(fields, function(err, account) {
-        if (err) return res.die('account.save error: ' + err);
-
-        res.redirect('/admin/aws/' + account._id);
-      });
+      res.json(_.extend(data, fields));
     });
   });
 });

@@ -4,8 +4,6 @@
     <button ng-click="sync($event)" id="save_button">Save</button>
   </nav>
 
-  <!-- <a href="clone">Clone</a> -->
-
   <main>
     <form>
       <label>
@@ -24,7 +22,7 @@
           placeholder="HTML / Handlebars content" style="width: 100%; min-height: 200px;"></textarea>
       </label>
 
-      <button ng-click="sync($event)" id="save_button">Save</button>
+      <button ng-click="sync($event)">Save</button>
     </form>
   </main>
 </div>

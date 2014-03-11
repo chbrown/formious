@@ -193,6 +193,13 @@ R.get(/HITs\/(\w+)\.(csv|tsv)/, function(req, res, m) {
 
 // GET /admin/aws/:account/:hosts/HITs/new -> form to create new HIT
 R.get(/HITs\/new/, function(req, res, m) {
+  // defaults:
+  var urlObj = url.parse(req.url, true);
+  req.ctx.hit = _.extend({
+    Title: 'Exciting task!',
+    Description: 'Look at some cool pictures and answer a lot of really easy questions.',
+    Keywords: 'linguistic,verbal,words,meaning,research',
+  }, urlObj.query);
   amulet.stream(['admin/layout.mu', 'admin/HITs/new.mu'], req.ctx).pipe(res);
 });
 

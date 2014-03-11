@@ -2,7 +2,7 @@
   <h2>AWS Accounts</h2>
 
   <section class="fill">
-    <table>
+    <table class="striped lined padded">
       <thead>
         <tr>
           <th></th>

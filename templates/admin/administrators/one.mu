@@ -1,24 +1,30 @@
 <main ng-controller="adminAdministratorEditor">
-  <h2>Administrator</h2>
+  <h3>Administrator</h3>
 
-  <section class="fill">
-    <form method="PATCH" action="/admin/administrators/{{administrator.id}}" class="vform">
-      <label><span>Email</span>
-        <input type="text" ng-model="administrator.email" />
+  <section class="box">
+    <!-- method="PATCH" action="/admin/administrators/{{administrator.id}}" -->
+    <form>
+      <label>
+        <div><b>Email</b></div>
+        <input type="text" ng-model="administrator.email" style="width: 200px">
       </label>
 
-      <label><span>Password (leave blank to leave unchanged)</span>
-        <input type="password" />
+      <label>
+        <div><b>Password (leave blank to leave unchanged)</b></div>
+        <input type="password" ng-model="administrator.password" style="width: 200px">
       </label>
 
-      <label><span>Created</span>
-        {{administrator.created}}
+      <label>
+        <div><b>Created</b></div>
+        <time ng-model="administrator.created" class="datetime"></time>
       </label>
 
-      <div><button>Save</button></div>
+      <p>
+        <button ng-click="sync($event)">Save</button>
+      </p>
     </form>
   </section>
 </main>
 <script>
-var administrator = <%& serialize(experiment) %>;
+var administrator = <%& serialize(administrator) %>;
 </script>

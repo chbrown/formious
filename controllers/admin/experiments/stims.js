@@ -89,12 +89,22 @@ R.patch(/stims\/(\d+)$/, function(req, res, m) {
 /** DELETE /admin/experiments/:experiment_id/stims/:stim_id
 Delete Stim */
 R.delete(/stims\/(\d+)$/, function(req, res, m) {
-  new sqlcmd.Delete({table: 'stims'})
-  .where('id = ?', m[1])
+  var stim_id = m[1];
+
+  // first delete the dependents
+  new sqlcmd.Delete({table: 'responses'})
+  .where('stim_id = ?', stim_id)
   .execute(db, function(err, rows) {
     if (err) return res.die(err);
 
-    res.json({message: 'Deleted stim'});
+    // then delete the stim
+    new sqlcmd.Delete({table: 'stims'})
+    .where('id = ?', m[1])
+    .execute(db, function(err, rows) {
+      if (err) return res.die(err);
+
+      res.json({message: 'Deleted stim'});
+    });
   });
 });
 

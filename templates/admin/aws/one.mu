@@ -1,31 +1,37 @@
 <main ng-controller="adminAWSAccountEditor">
   <h3>AWS Account: {{aws_account.name}}</h3>
 
-  <section class="fill">
-    <form class="vform" ng-submit="syncAWSAccount(aws_account)">
-      <label><span>Name</span>
+  <section class="box">
+    <form ng-submit="sync($event)">
+      <label>
+        <div><b>Name</b></div>
         <input type="text" ng-model="aws_account.name" />
       </label>
 
-      <label><span>Access Key ID</span>
+      <label>
+        <div><b>Access Key ID</b></div>
         <input type="text" ng-model="aws_account.access_key_id" />
       </label>
 
-      <label><span>Secret Access Key</span>
+      <label>
+        <div><b>Secret Access Key</b></div>
         <input type="text" ng-model="aws_account.secret_access_key" style="width: 500px" />
       </label>
 
-      <label><span>Created</span>
+      <label>
+        <div><b>Created</b></div>
         {{aws_account.created}}
       </label>
 
-      <div><button>Save</button></div>
+      <p>
+        <button>Save</button>
+      </p>
     </form>
   </section>
 
   <h3>Mechanical Turk Hosts</h3>
   <section class="fill">
-    <table>
+    <table class="lined padded">
       <thead>
         <tr>
           <th>Host</th>

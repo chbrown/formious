@@ -2,7 +2,7 @@
   <h2>Experiments</h2>
 
   <section class="fill">
-    <table class="striped lined">
+    <table class="striped lined padded">
       <thead>
         <tr>
           <th>ID</th>

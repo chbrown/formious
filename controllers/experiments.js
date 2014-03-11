@@ -27,6 +27,7 @@ R.get(/^\/experiments\/(\d+)(\?|$)/, function(req, res, m) {
   .limit(1)
   .execute(db, function(err, stims) {
     if (err) return res.die(err);
+    if (stims.length === 0) return res.die('No available stims');
 
     urlObj.pathname = '/experiments/' + experiment_id + '/stims/' + stims[0].id;
     var stim_url = url.format(urlObj);

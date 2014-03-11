@@ -23,6 +23,19 @@ app.controller('adminTableCtrl', function($scope) {
   $scope.table = window.table;
 });
 
+app.controller('adminResponsesCtrl', function($scope) {
+  $scope.responses = window.responses;
+
+  var contexts = {};
+  var values = {};
+  $scope.responses.forEach(function(response) {
+    _.extend(contexts, response.context);
+    _.extend(values, response.value);
+  });
+  $scope.context_keys = Object.keys(contexts);
+  $scope.value_keys = Object.keys(values);
+});
+
 app.controller('adminExperimentEditor', function($scope, $http, $localStorage) {
   $scope.$storage = $localStorage.$default({expand_experiment_html: false});
 
@@ -219,26 +232,70 @@ app.controller('adminAWSAccountEditor', function($scope, $http, $localStorage) {
 
   $scope.aws_account.hosts = [{name: 'deploy'}, {name: 'sandbox'}];
 
-  $scope.aws_account.hosts.forEach(function(host) {
-    var url = '/admin/aws/' + $scope.aws_account.id + '/hosts/' + host.name + '/GetAccountBalance';
-    $http({method: 'POST', url: url}).then(function(res) {
-      var price = res.data.GetAccountBalanceResult.AvailableBalance.FormattedPrice;
-      host.account_balance = price;
+  if ($scope.aws_account.id) {
+    $scope.aws_account.hosts.forEach(function(host) {
+      var url = '/admin/aws/' + $scope.aws_account.id + '/hosts/' + host.name + '/GetAccountBalance';
+      $http({method: 'POST', url: url}).then(function(res) {
+        var price = res.data.GetAccountBalanceResult.AvailableBalance.FormattedPrice;
+        host.account_balance = price;
+      });
     });
-  });
+  }
+
+  $scope.sync = function(ev) {
+    var form = angular.element(ev.target);
+    var button = form.find('button');
+
+    var opts = sync_options($scope.aws_account);
+    var ajax_promise = $http(opts).then(function(res) {
+      return 'Saved';
+    }, function(res) {
+      return summarizeResponse(res);
+    });
+    afterPromise(button[0], ajax_promise);
+  };
 });
 
-var summarizeResponse = function(res) {
-  var parts = [];
-  if (res.status != 200) {
-    parts.push('Error ');
-  }
-  parts.push(res.status);
-  if (res.data) {
-    parts.push(': ' + res.data.toString());
-  }
-  return parts.join('');
-};
+app.controller('adminHITEditor', function($scope, $http, $localStorage) {
+  $scope.$storage = $localStorage.$default({
+    hit: {
+      MaxAssignments: '20',
+      Reward: '0.05',
+      Keywords: 'research,science',
+      AssignmentDuration: '2h',
+      Lifetime: '12h',
+      AutoApprovalDelay: '24h',
+      FrameHeight: '550',
+    },
+    preview_iframe: false,
+  });
+
+  _.extend($scope.$storage.hit, window.hit);
+
+  $scope.sync = function() {
+
+  };
+
+  // AWS adds four parameters: assignmentId, hitId, workerId, and turkSubmitTo
+  $scope.$watch('$storage.hit.ExternalURL', function(newVal, oldVal) {
+    // p('$watch %s -> %s', oldVal, newVal);
+    var iframe = document.querySelector('iframe');
+    if (newVal && iframe) {
+      var url = Url.parse(newVal);
+      _.extend(url.query, {
+        // Once assigned, assignmentId is a 30-character alphadecimal mess
+        assignmentId: 'ASSIGNMENT_ID_NOT_AVAILABLE',
+        hitId: '0PREVIEWPREVIEWPREVIEWPREVIEW9',
+        workerId: 'A1234TESTING',
+        // turkSubmitTo is normally https://workersandbox.mturk.com/ or https://www.mturk.com
+        turkSubmitTo: '//'
+      });
+
+      iframe.src = url.toString();
+    }
+  });
+
+});
 
 app.controller('adminTemplateEditor', function($scope, $http, $timeout) {
   $scope.template = window.template;
@@ -253,6 +310,19 @@ app.controller('adminTemplateEditor', function($scope, $http, $timeout) {
 
   $scope.sync = function(ev) {
     var opts = sync_options($scope.template);
+    var ajax_promise = $http(opts).then(function(res) {
+      return 'Saved';
+    }, function(res) {
+      return summarizeResponse(res);
+    });
+    afterPromise(ev.target, ajax_promise);
+  };
+});
+
+app.controller('adminAdministratorEditor', function($scope, $http, $timeout) {
+  $scope.administrator = window.administrator;
+  $scope.sync = function(ev) {
+    var opts = sync_options($scope.administrator);
     var ajax_promise = $http(opts).then(function(res) {
       return 'Saved';
     }, function(res) {

@@ -17,7 +17,7 @@
     </div>
     <a href="/admin/aws">AWS Accounts</a>
     <a href="/admin/administrators">Administrators</a>
-    <a href="/admin/participants">Participants</a>
+    <!-- <a href="/admin/participants">Participants</a> -->
     <a href="/admin/experiments">Experiments</a>
     <a href="/admin/templates">Templates</a>
   </nav>

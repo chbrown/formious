@@ -31,8 +31,10 @@ R.get(/^\/admin\/administrators(\/|.json)?$/, function(req, res, m) {
 /** GET /admin/administrators/new
 Edit empty administrator */
 R.get(/^\/admin\/administrators\/new/, function(req, res, m) {
-  req.ctx.administrator = {};
-  amulet.stream(['admin/layout.mu', 'admin/administrators/one.mu'], req.ctx).pipe(res);
+  req.ctx.administrator = {
+    created: new Date(),
+  };
+  res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/administrators/one.mu']);
 });
 
 /** POST /admin/administrators
@@ -58,7 +60,7 @@ R.get(/^\/admin\/administrators\/(\d+)$/, function(req, res, m) {
   models.Administrator.from({id: m[1]}, function(err, administrator) {
     if (err) return res.die(err);
 
-    req.ctx.administrator = administrator;
+    req.ctx.administrator = _.omit(administrator, 'password');
     res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/administrators/one.mu']);
   });
 });

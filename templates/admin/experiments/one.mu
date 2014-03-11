@@ -61,11 +61,11 @@
     </section>
 
     <section>
-      <table class="striped grid">
+      <table class="striped grid padded">
         <thead>
           <tr>
             <td></td>
-            <td>Template</td>
+            <td>template</td>
             <td ng-repeat="parameter in experiment.parameters">
               {{parameter}}
             </td>
@@ -75,7 +75,7 @@
         </thead>
         <tbody checkbox-sequence>
           <tr ng-repeat="stim in stims" ng-class="{selected: stim.selected}">
-            <td><input type="checkbox" ng-model="stim.selected"></td>
+            <td style="padding-right: 5px"><input type="checkbox" ng-model="stim.selected"></td>
             <td class="nowrap">
               <!-- <select ng-model="stim.template_id"
                 ng-options="template.id as template.name for template in templates"></select> -->
