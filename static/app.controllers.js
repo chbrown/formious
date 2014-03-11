@@ -49,6 +49,11 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage) {
     $scope.administrators = res.data.administrators;
   }, p);
 
+  $http({method: 'GET', url: '/admin/aws.json'}).then(function(res) {
+    $scope.hosts = [{name: 'deploy'}, {name: 'sandbox'}];
+    $scope.aws_accounts = res.data.aws_accounts;
+  }, p);
+
   $http({method: 'GET', url: '/admin/templates.json'}).then(function(res) {
     $scope.templates = res.data.templates;
     $scope.templates_lookup = toMap($scope.templates, 'id', 'name');
@@ -60,6 +65,9 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage) {
     $scope.stims = res.data.stims;
   }, p);
 
+  $scope.localizeUrl = function(url) {
+    return Url.parse(url).toString();
+  };
 
   // var workerId = this.model.get('WorkerId');
   // var worker = new MTWorker({id: workerId});

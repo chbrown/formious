@@ -1,6 +1,16 @@
 <div ng-controller="adminExperimentEditor">
   <nav fixedflow>
     <div style="float: right">
+      <span>
+        <select ng-model="$storage.aws_account_id"
+          ng-options="aws_account.id as aws_account.name for aws_account in aws_accounts">
+          <option value="">-- AWS Account --</option>
+        </select>
+        <select ng-model="$storage.aws_host"
+          ng-options="host.name as host.name for host in hosts">
+          <option value="">-- Host --</option>
+        </select>
+        <a href="/admin/aws/{{$storage.aws_account_id}}/hosts/{{$storage.aws_host}}/HITs/new?ExternalURL={{localizeUrl('/experiments/' + experiment.id)}}">MTurk</a>
       <a href="/experiments/{{experiment.id}}">Public</a>
       <a href="/admin/experiments/{{experiment.id}}/responses">Responses</a>
     </div>

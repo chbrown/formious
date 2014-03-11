@@ -63,7 +63,10 @@ R.get(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
 
     // context: the current state to render the template with
     // urlObj.query will usually have the fields: assignmentId, hitId, turkSubmitTo, workerId
-    var context = _.extend(results.stim.context, urlObj.query);
+    var context = _.extend(results.stim.context, urlObj.query, {
+      experiment_id: experiment_id,
+      stim_id: stim_id,
+    });
     var deep_context = flat.unflatten(context);
 
     // need a better default for missing html
@@ -71,7 +74,6 @@ R.get(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
     var rendered_html = template_html ? handlebars.compile(template_html)(deep_context) : template_html;
     var ctx = {
       context: context,
-      stim_id: results.stim.id,
       header: results.experiment.html,
       html: rendered_html,
     };
@@ -101,6 +103,8 @@ R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
         if (err) return res.die(err);
 
         // http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ExternalQuestionArticle.html
+        // sadly, this redirect_to doesn't work. Hopefully the user will have a proper
+        // POST-to-MT form in their last stim
         var redirect_to = urlObj.query.turkSubmitTo + '/mturk/externalSubmit?assignmentId=' + urlObj.query.assignmentId;
         if (next_stim_id) {
           // only change the path part of the url

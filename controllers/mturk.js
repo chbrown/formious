@@ -10,11 +10,16 @@ var R = new Router(function(req, res) {
 
 // POST /mturk/externalSubmit
 R.any(/^\/mturk\/externalSubmit/, function(req, res, m) {
+  // readData uses the querystring for GET data
   req.readData(function(err, data) {
     var aws_worker_id = data.workerId || 'WORKER_ID_NOT_AVAILABLE';
     delete data.workerId;
-    // null stim_id
-    models.Participant.addResponse(aws_worker_id, null, data, function(err, responses) {
+
+    // potentially null stim_id
+    var stim_id = data.stim_id || null;
+    delete data.stim_id;
+
+    models.Participant.addResponse(aws_worker_id, stim_id, data, function(err, responses) {
       if (err) return res.die(err);
 
       res.text('Your responses have been submitted and saved.');

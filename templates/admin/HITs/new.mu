@@ -6,7 +6,7 @@
       <label>
         <div><b>Max Assignments</b>
           <span class="help">
-            The number of times the HIT can be accepted and completed before the HIT becomes unavailable.
+            The number of times the HIT can be accepted (by different users) and completed before the HIT becomes unavailable. A single user will only be able to complete the HIT once.
           </span>
         </div>
         <input type="text" ng-model="$storage.hit.MaxAssignments">
