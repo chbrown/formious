@@ -6,6 +6,7 @@ var Router = require('regex-router');
 
 var logger = require('loge');
 var models = require('../../lib/models');
+var hash = require('../../lib/hash');
 var db = require('../../lib/db');
 var sqlcmd = require('sqlcmd');
 
@@ -29,7 +30,7 @@ R.get(/^\/admin\/administrators(\/|.json)?$/, function(req, res, m) {
 });
 
 /** GET /admin/administrators/new
-Edit empty administrator */
+Show/edit empty administrator */
 R.get(/^\/admin\/administrators\/new/, function(req, res, m) {
   req.ctx.administrator = {
     created: new Date(),
@@ -43,19 +44,22 @@ R.post(/^\/admin\/administrators\/?$/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, 'email', 'password');
-
     new sqlcmd.Insert({table: 'administrators'})
-    .setIf(fields)
+    .set({
+      email: data.email,
+      password: hash.sha256(data.password),
+    })
     .execute(db, function(err, rows) {
       if (err) return res.die(err);
-      res.json(rows[0]);
+
+      var url = '/admin/administrators/' + rows[0].id;
+      res.redirect(300, url);
     });
   });
 });
 
 /** GET /admin/administrators/:administrator_id
-Show (and edit) single administrator */
+Show/edit single administrator */
 R.get(/^\/admin\/administrators\/(\d+)$/, function(req, res, m) {
   models.Administrator.from({id: m[1]}, function(err, administrator) {
     if (err) return res.die(err);
@@ -72,14 +76,16 @@ R.patch(/^\/admin\/administrators\/(\d+)$/, function(req, res, m) {
     if (err) return res.die(err);
     req.readData(function(err, data) {
       if (err) return res.die(err);
-      // empty-string password means: don't change the password
-      // if (fields.password === '') delete fields.password;
-      var fields = _.pick(data, 'email', 'password', 'created');
-      // handle the password better (hash it and stuff, if needed)!
 
-      new sqlcmd.Update({table: 'administrators'})
-      .setIf(fields)
+      var fields = {email: data.email};
+      // empty-string password means: don't change the password
+      if (data.password) {
+        fields.password = hash.sha256(data.password);
+      }
+
+      var update = new sqlcmd.Update({table: 'administrators'})
       .where('id = ?', administrator.id)
+      .setIf(fields)
       .execute(db, function(err, rows) {
         if (err) return res.die(err);
 
@@ -98,7 +104,7 @@ R.delete(/^\/admin\/administrators\/(\d+)$/, function(req, res, m) {
     // db.table('administrators').Delete()
     new sqlcmd.Delete({table: 'administrators'})
     .where('id = ?', administrator.id)
-    .execute(function(err) {
+    .execute(db, function(err) {
       if (err) return res.die(err);
 
       res.json({message: 'Deleted administrator: ' + administrator.email});

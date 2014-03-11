@@ -172,7 +172,9 @@ app.directive('ajaxform', function($http) {
             window.location = window.location;
           }, p);
         }
-        p('Not doing anything with non-DELETE ajaxform');
+        else {
+          p('Not doing anything with non-DELETE ajaxform');
+        }
         // other methods can handle themselves?
         // TODO: intercept PUT and PATCH, too
       };

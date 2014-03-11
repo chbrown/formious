@@ -357,6 +357,9 @@ app.controller('adminAdministratorEditor', function($scope, $http, $timeout) {
     var ajax_promise = $http(opts).then(function(res) {
       return 'Saved';
     }, function(res) {
+      if (res.status == 300) {
+        window.location = res.headers().location;
+      }
       return summarizeResponse(res);
     });
     displayPromiseStatus(ajax_promise, ev.target);

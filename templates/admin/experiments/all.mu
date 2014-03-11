@@ -1,5 +1,5 @@
 <main ng-controller="adminTableCtrl">
-  <h2>Experiments</h2>
+  <h3>Experiments</h3>
 
   <section class="fill">
     <table class="striped lined padded">

@@ -1,4 +1,4 @@
-<div style="width: 200px; margin: 80px auto; padding: 10px;" class="shadow">
+<div style="width: 200px; margin: 80px auto; padding: 10px; background-color: white" class="shadow">
   <form action="/admin/login" method="POST">
     <h3>Admin Login</h3>
     <p><% message %></p>

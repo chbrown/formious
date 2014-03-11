@@ -1,5 +1,5 @@
 <main ng-controller="adminTableCtrl">
-  <h2>AWS Accounts</h2>
+  <h3>AWS Accounts</h3>
 
   <section class="fill">
     <table class="striped lined padded">

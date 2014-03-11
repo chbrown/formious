@@ -10,7 +10,7 @@
       </label>
 
       <label>
-        <div><b>Password (leave blank to leave unchanged)</b></div>
+        <div><b>Password (blank to leave unchanged)</b></div>
         <input type="password" ng-model="administrator.password" style="width: 200px">
       </label>
 
