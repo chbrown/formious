@@ -19,9 +19,8 @@
         // the server will respond to the header "x-requested-with': XMLHttpRequest"
         // by responding with the status code 300, so that the browser does
         // not gloss over the redirect.
-        if (jqXHR.status == 300) {
-          var redirect = jqXHR.getResponseHeader('location');
-          console.log('advancing to', redirect);
+        var redirect = jqXHR.getResponseHeader('location');
+        if (redirect) {
           window.location = redirect;
         }
         else {
