@@ -1,68 +1,103 @@
-<!--
-/templates/admin/HITs/one.bars is almost exactly the same as this section, but we want:
-  1. not to show a url
-  2. not to show the fields that only SearchHITs returns for a HIT (like NumberOfAssignments*)
--->
-{{#hit}}
-<h3 class="section">HIT: {{Title}}</h3>
-<section class="box">
-  <table class="keyval">
-    <tr><td>HITId</td><td>{{HITId}}</td></tr>
-    <tr><td>HITTypeId</td><td>{{HITTypeId}}</td></tr>
-    <tr><td>CreationTime</td><td>{{CreationTime}}</td></tr>
-    <tr><td>Expiration</td><td>{{Expiration}}</td></tr>
-    <tr><td>Keywords</td><td>{{Keywords}}</td></tr>
-    <tr><td>Description</td><td>{{Description}}</td></tr>
-    <tr><td>HITStatus</td><td>{{HITStatus}}</td></tr>
-    <tr><td>HITReviewStatus</td><td>{{HITReviewStatus}}</td></tr>
-    <tr><td>MaxAssignments</td><td>{{MaxAssignments}}</td></tr>
-    <tr><td>Reward</td><td>{{Reward.FormattedPrice}}</td></tr>
-    <tr><td>AssignmentDurationInSeconds</td><td>{{AssignmentDurationInSeconds}}</td></tr>
-    <tr><td>AutoApprovalDelayInSeconds</td><td>{{AutoApprovalDelayInSeconds}}</td></tr>
-  </table>
-</section>
+<main ng-controller="adminHITReviewer">
+  <h3>HIT: {{hit.Title}}</h3>
 
-<section>
-  <h3>Export</h3>
-  <div>
-    <a href="{{HITId}}.csv">HIT_{{HITId}}.csv</a>
-    &middot; <a href="{{HITId}}.csv?view">View</a>
-  </div>
-  <div>
-    <a href="{{HITId}}.tsv">HIT_{{HITId}}.tsv</a>
-    &middot; <a href="{{HITId}}.tsv?view">View</a>
-  </div>
-</section>
-{{/hit}}
-
-<h3 class="section">Bonuses</h3>
-<section class="fill">
-  <table>
-    <thead>
-      <tr>
-        <th>WorkerId</th>
-        <th>BonusAmount</th>
-        <th>Reason</th>
-        <th>GrantTime</th>
+  <section class="box">
+    <table class="keyval">
+      <tr ng-repeat="(key, val) in hit">
+        <td>{{key}}</td>
+        <td>{{val}}</td>
       </tr>
-    </thead>
-    <tbody>
-    {{#BonusPayments}}
-      <tr>
-        <td>{{WorkerId}}</td>
-        <td>{{BonusAmount.FormattedPrice}}</td>
-        <td>{{Reason}}</td>
-        <td>{{GrantTime}}</td>
-      </tr>
-    {{/BonusPayments}}
-    </tbody>
-  </table>
-</section>
+    </table>
+  </section>
 
-<h3 class="section">Assignments</h3>
-<div id="assignments"></div>
+  <section class="box">
+    <h3>Export</h3>
+    <div>
+      <a href="{{HITId}}.csv">HIT_{{HITId}}.csv</a>
+      &middot; <a href="{{HITId}}.csv?view">View</a>
+    </div>
+    <div>
+      <a href="{{HITId}}.tsv">HIT_{{HITId}}.tsv</a>
+      &middot; <a href="{{HITId}}.tsv?view">View</a>
+    </div>
+  </section>
+
+  <h3>Bonuses</h3>
+  <section class="box">
+    <table>
+      <thead>
+        <tr>
+          <th>WorkerId</th>
+          <th>BonusAmount</th>
+          <th>Reason</th>
+          <th>GrantTime</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="bonus_payment in bonus_payments">
+          <td>{{bonus_payment.WorkerId}}</td>
+          <td>{{bonus_payment.BonusAmount.FormattedPrice}}</td>
+          <td>{{bonus_payment.Reason}}</td>
+          <td>{{bonus_payment.GrantTime}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <h3>Assignments</h3>
+  <section class="box" ng-repeat="assignment in assignments">
+    <h3>Assignment: {{assignment.AssignmentId}}</h3>
+
+    <div ng-controller="adminAssignmentEditor">
+      <div>
+        Status:
+        <span class="{{assignment.AssignmentStatus}}">{{assignment.AssignmentStatus}}</span>
+        <span ng-switch="assignment.AssignmentStatus">
+          <span ng-switch-when="Submitted">
+            <button ng-click="approve(assignment, $event)">Approve</button>
+            <button ng-click="reject(assignment, $event)">Reject</button>
+          </span>
+          <span ng-switch-when="Rejected">
+            <button ng-click="approve_rejected(assignment, $event)">Unreject and Approve</button>
+          </span>
+        </span>
+      </div>
+      <div>
+        <label>
+          <input value="{{assignment.bonus_owed}}" placeholder="Amount">
+        </label>
+        <label>
+          <input value="{{assignment.reason}}" placeholder="Reason">
+        </label>
+        <button ng-click="GrantBonus">Grant Bonus</button>
+      </div>
+    </div>
+
+    <div>
+      <a href="../Workers/{{assignment.WorkerId}}">Worker json</a>
+      <table class="keyval">
+        <!-- <tr><th colspan="2">AWS</th></tr> -->
+        <tr ng-repeat="(key, val) in assignment">
+          <td>{{key}}</td>
+          <td>{{val}}</td>
+        </tr>
+        <tr ng-repeat="answer in assignment.Answers">
+          <td>{{answer.QuestionIdentifier}}</td>
+          <td>{{answer.FreeText}}</td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="margin-top: 10px; white-space: nowrap;">
+      <!-- <worker worker-id="" class="responses"></worker> -->
+    </div>
+
+
+  </section>
+</main>
 
 <script>
-var assignments = new AssignmentCollection({{{JSON.stringify(assignments)}}});
-assignments.renderTo($('#assignments'), AssignmentView);
+var hit = <%& serialize(hit) %>;
+var bonus_payments = <%& serialize(bonus_payments) %>;
+var assignments = <%& serialize(assignments) %>;
 </script>

@@ -13,7 +13,6 @@ var R = new Router(function(req, res) {
 });
 
 var serve = function(req, res, root, path) {
-  // logger.debug('send: %s', path);
   send(req, path).root(root)
     .on('error', function(err) {
       res.die(err.status || 500, 'send error: ' + err.message);

@@ -16,6 +16,9 @@ var amulet = require('amulet').set({
     serialize: function(obj) {
       // stringifies and makes sure that the resulting json can be embedded in
       // a <script> environment
+      if (obj === undefined) {
+        return 'undefined';
+      }
       return JSON.stringify(obj).replace(/<\//g, '<\\/');
     }
   }

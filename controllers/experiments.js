@@ -16,6 +16,15 @@ var R = new Router(function(req, res) {
   res.die(404, 'No resource at: ' + req.url);
 });
 
+/** the Amazon Mechanical Turk frame will give us the following variables:
+
+  https://tictactoe.amazon.com/gamesurvey.cgi?gameid=01523
+     &assignmentId=123RVWYBAZW00EXAMPLE456RVWYBAZW00EXAMPLE
+     &hitId=123RVWYBAZW00EXAMPLE
+     &turkSubmitTo=https://www.mturk.com
+     &workerId=AZ3456EXAMPLE
+*/
+
 /** GET /experiments/:experiment_id
 Redirect to first stim of experiment
 */
@@ -174,24 +183,4 @@ R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
 //   });
 // }
 
-// module.exports = R.route.bind(R);
-module.exports = function(req, res) {
-  // the Amazon Mechanical Turk frame will give us the following variables
-  // https://tictactoe.amazon.com/gamesurvey.cgi?gameid=01523
-  //   &assignmentId=123RVWYBAZW00EXAMPLE456RVWYBAZW00EXAMPLE
-  //   &hitId=123RVWYBAZW00EXAMPLE
-  //   &turkSubmitTo=https://www.mturk.com
-  //   &workerId=AZ3456EXAMPLE
-
-  // this is where we need the workerId cookie (aws_worker_id value)
-  // req.aws_worker_id = req.cookies.get('workerId');
-  // if (!req.aws_worker_id) {
-    // if the cookie has not yet been set, set it from the url
-  //   var urlObj = url.parse(req.url, true);
-  //   req.aws_worker_id = urlObj.query.workerId;
-  //   req.cookies.set('workerId', req.aws_worker_id);
-  // }
-
-  // req.aws_worker_id should now be set unless there was never any workerId to begin with
-  R.route(req, res);
-};
+module.exports = R.route.bind(R);

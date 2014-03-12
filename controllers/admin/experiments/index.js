@@ -122,21 +122,21 @@ R.get(/^\/admin\/experiments\/(\d+)\/responses$/, function(req, res, m) {
       models.Experiment.from({id: experiment_id}, callback);
     },
     responses: function(callback) {
-      new sqlcmd.Select({table: 'responses INNER JOIN stims ON stims.id = responses.stim_id'})
-      .add('responses.*', 'stims.context', 'stims.experiment_id')
+      new sqlcmd.Select({
+        table: [
+          'responses',
+          'INNER JOIN stims ON stims.id = responses.stim_id',
+          'INNER JOIN participants ON participants.id = responses.participant_id',
+        ].join(' ')
+      })
+      .add('responses.*', 'stims.context', 'stims.experiment_id', 'participants.name', 'participants.aws_worker_id')
       .where('stims.experiment_id = ?', experiment_id)
       .orderBy('responses.id DESC')
+      // .limit(100)
       .execute(db, callback);
     },
-    // stims: function(callback) {
-    //   new sqlcmd.Select({table: 'stims'})
-    //   .where('experiment_id = ?', experiment_id)
-    //   .execute(db, callback);
-    // }
   }, function(err, results) {
     if (err) return res.die(err);
-
-    // logger.debug('results::', results.responses);
 
     _.extend(req.ctx, results);
     amulet.stream(['admin/layout.mu', 'admin/responses/all.mu'], req.ctx).pipe(res);

@@ -52,7 +52,6 @@ R.post(/^\/admin\/aws\/?$/, function(req, res, m) {
   });
 });
 
-
 /** GET /admin/aws/:account_id
 Show single AWS account */
 R.get(/^\/admin\/aws\/(\d+)$/, function(req, res, m) {

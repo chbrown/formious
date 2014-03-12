@@ -1,8 +1,17 @@
-<h3 class="section">HITs</h3>
+<main ng-controller="adminTableCtrl">
+  <h3>HITs</h3>
 
-<div id="hits"></div>
+  <section ng-repeat="hit in table" class="box">
+    <h3><a href="HITs/{{hit.HITId}}">{{hit.Title}}</a></h3>
+    <table class="keyval">
+      <tr ng-repeat="(key, val) in hit">
+        <td>{{key}}</td>
+        <td>{{val}}</td>
+      </tr>
+    </table>
+  </section>
+</main>
 
 <script>
-var hits = new HITCollection({{{JSON.stringify(hits)}}});
-hits.renderTo($('#hits'), HITView);
+var table = <%& serialize(hits) %>;
 </script>

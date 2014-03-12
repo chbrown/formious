@@ -6,6 +6,7 @@
       <tr>
         <td>response_id</td>
         <td>participant_id</td>
+        <td>participant_name</td>
         <td>experiment_id</td>
         <td>stim_id</td>
         <td ng-repeat="key in context_keys" class="context">
@@ -21,6 +22,7 @@
       <tr ng-repeat="response in responses">
         <td>{{response.id}}</td>
         <td>{{response.participant_id}}</td>
+        <td>{{response.name || response.aws_worker_id}}</td>
         <td>{{response.experiment_id}}</td>
         <td>{{response.stim_id}}</td>
         <td ng-repeat="key in context_keys" class="context">
@@ -34,6 +36,7 @@
     </tbody>
   </table>
 </main>
+
 <script>
 var responses = <%& serialize(responses) %>;
 </script>

@@ -1,4 +1,4 @@
-/*jslint browser: true, devel: true */ /*globals _, angular, app, Url, p, fileinputText, displayPromiseStatus */
+/*jslint browser: true, devel: true */ /*globals _, angular, app, Url, p, fileinputText, displayPromiseStatus, summarizeResponse */
 
 var sync_options = function(record) {
   if (record.id) {
@@ -304,7 +304,8 @@ app.controller('adminHITEditor', function($scope, $http, $localStorage) {
     displayPromiseStatus(ajax_promise, ev.target);
   };
 
-  // AWS adds four parameters: assignmentId, hitId, workerId, and turkSubmitTo (which is the host, not the full path)
+  // AWS adds four parameters: assignmentId, hitId, workerId, and turkSubmitTo
+  //   turkSubmitTo is the host, not the full path
   $scope.$watch('$storage.hit.ExternalURL', function(newVal, oldVal) {
     // p('$watch %s -> %s', oldVal, newVal, iframe);
     if (newVal && $scope.$storage.preview_iframe) {
@@ -322,7 +323,12 @@ app.controller('adminHITEditor', function($scope, $http, $localStorage) {
       iframe.src = url.toString();
     }
   });
+});
 
+app.controller('adminHITReviewer', function($scope, $http, $localStorage) {
+  $scope.hit = window.hit;
+  $scope.bonus_payments = window.bonus_payments;
+  $scope.assignments = window.assignments;
 });
 
 app.controller('adminTemplateEditor', function($scope, $http, $timeout) {
@@ -357,9 +363,23 @@ app.controller('adminAdministratorEditor', function($scope, $http, $timeout) {
     var ajax_promise = $http(opts).then(function(res) {
       return 'Saved';
     }, function(res) {
-      if (res.status == 300) {
-        window.location = res.headers().location;
-      }
+      var headers = res.headers();
+      if (headers.location) window.location = headers.location;
+      return summarizeResponse(res);
+    });
+    displayPromiseStatus(ajax_promise, ev.target);
+  };
+});
+
+app.controller('adminAssignmentEditor', function($scope, $http) {
+  $scope.approve = function(assignment, ev) {
+    var url = Url.parse(window.location);
+    url.path += '/Assignments/' + assignment.AssignmentId + '/Approve';
+    var ajax_promise = $http({method: 'POST', url: url}).then(function(res) {
+      return res.data.message;
+    }, function(res) {
+      var headers = res.headers();
+      if (headers.location) window.location = headers.location;
       return summarizeResponse(res);
     });
     displayPromiseStatus(ajax_promise, ev.target);

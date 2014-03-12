@@ -1,16 +1,17 @@
 /*jslint node: true */
-var querystring = require('querystring');
 var _ = require('underscore');
-var sv = require('sv');
 var amulet = require('amulet');
 var async = require('async');
-var turk = require('turk');
-var Router = require('regex-router');
-var xmlconv = require('xmlconv');
-var url = require('url');
-
 var logger = require('loge');
-var misc = require('../../../lib');
+var Router = require('regex-router');
+var sqlcmd = require('sqlcmd');
+var sv = require('sv');
+var turk = require('turk');
+var url = require('url');
+var xmlconv = require('xmlconv');
+
+var lib = require('../../../lib');
+var db = require('../../../lib/db');
 var models = require('../../../lib/models');
 
 var hosts = {
@@ -58,9 +59,9 @@ R.post(/CreateHIT/, function(req, res) {
       Reward: new turk.models.Price(parseFloat(fields.Reward)),
       Keywords: fields.Keywords,
       Question: new turk.models.ExternalQuestion(fields.ExternalURL, parseInt(fields.FrameHeight, 10)),
-      AssignmentDurationInSeconds: misc.durationStringToSeconds(fields.AssignmentDuration || 0),
-      LifetimeInSeconds: misc.durationStringToSeconds(fields.Lifetime || 0),
-      AutoApprovalDelayInSeconds: misc.durationStringToSeconds(fields.AutoApprovalDelay || 0),
+      AssignmentDurationInSeconds: lib.durationStringToSeconds(fields.AssignmentDuration || 0),
+      LifetimeInSeconds: lib.durationStringToSeconds(fields.Lifetime || 0),
+      AutoApprovalDelayInSeconds: lib.durationStringToSeconds(fields.AutoApprovalDelay || 0),
     };
 
     logger.debug('CreateHIT params:', params);
@@ -92,15 +93,17 @@ R.get(/Workers\/(\w+)/, function(req, res, m) {
 
 R.post(/Assignments\/(\w+)\/Approve/, function(req, res, m) {
   var AssignmentId = m[1];
-  req.readData(function(err, fields) {
+  req.readData(function(err, data) {
     if (err) return res.json({success: false, message: err});
 
     var params = {AssignmentId: AssignmentId};
-    if (fields.RequesterFeedback) params.RequesterFeedback = fields.RequesterFeedback;
+    if (data.RequesterFeedback) {
+      params.RequesterFeedback = data.RequesterFeedback;
+    }
     req.turk.ApproveAssignment(params, function(err, result) {
-      if (err) return res.die('ApproveAssignment failed: ' + err);
+      if (err) return res.die(err);
 
-      res.json({success: true, message: 'Approved Assignment: ' + AssignmentId});
+      res.json({message: 'Approved assignment: ' + AssignmentId});
     });
   });
 });
@@ -212,59 +215,70 @@ R.get(/HITs\/new/, function(req, res, m) {
 // HITs/show
 R.get(/HITs\/(\w+)/, function(req, res, m) {
   var HITId = m[1];
-  var params = {HITId: HITId, PageSize: 100};
-  var sort_params = {SortProperty: 'SubmitTime', SortDirection: 'Ascending'};
+  var hit_params = {HITId: HITId, PageSize: 100};
+  // var sort_params = ;
 
-  // async.auto runs each task as quickly as possible but stops the whole thing if any callback with an error
+  // async.auto runs each task as quickly as possible but
+  // stops the whole thing if any callback with an error
   async.auto({
     GetHIT: function(callback) {
       req.turk.GetHIT({HITId:  HITId}, callback);
     },
     GetAssignmentsForHIT: function(callback) {
-      var payload = _.extend({}, params, sort_params);
-      req.turk.GetAssignmentsForHIT(payload, callback);
+      var params = _.extend({SortProperty: 'SubmitTime', SortDirection: 'Ascending'}, hit_params);
+      req.turk.GetAssignmentsForHIT(params, callback);
+      // function(err, result) {
+      //   callback(result);
+      // });
     },
     GetBonusPayments: function(callback) {
-      req.turk.GetBonusPayments(params, callback);
+      req.turk.GetBonusPayments(hit_params, callback);
     },
-  }, function(err, results) {
-    if (err) return res.die('GetHIT / GetAssignmentsForHIT / GetBonusPayments error: ' + err);
-
-    var hit_assignments_result = results.GetAssignmentsForHIT.GetAssignmentsForHITResult;
-    var raw_assigments = hit_assignments_result.Assignment || [];
-    async.map(raw_assigments, function(assignment, callback) {
-      // logger.warn('assignment.Answer', assignment.Answer);
-      var answer_json = xmlconv(assignment.Answer, {convention: 'castle'});
-      // logger.warn('answer_json', answer_json);
-      assignment.Answer = answer_json.Answer;
-
-      models.User.findById(assignment.WorkerId, function(err, user) {
-        if (err) return callback(err);
-
-        if (user) {
-          user = _.omit(user.toJSON(), 'response', '__v');
-        }
-        else {
-          user = {};
-          logger.info('Could not find user: ', assignment.WorkerId);
-        }
-
-        // reduce to key-value pairs so that we can show in both Mu/Handlebars easily
-        assignment.user = _.map(user, function(value, key) {
-          return {key: key, value: value};
-        });
-
-        // assignment.bonus_owed = user.get('bonus_owed');
-        callback(null, assignment);
+    participants: ['GetAssignmentsForHIT', function(callback, results) {
+      var assignments = results.GetAssignmentsForHIT.GetAssignmentsForHITResult.Assignment || [];
+      var aws_worker_ids = assignments.map(function(assignment) {
+        return assignment.WorkerId;
       });
+
+      new sqlcmd.Select({table: 'participants'})
+      .whereIn('aws_worker_id', aws_worker_ids)
+      .execute(db, function(err, rows) {
+        if (err) return callback(err);
+        callback(null, rows);
+      });
+    }],
+  }, function(err, results) {
+    if (err) return res.die(err);
+
+    var assignments = results.GetAssignmentsForHIT.GetAssignmentsForHITResult.Assignment || [];
+    async.map(assignments, function(assignment, callback) {
+      // hack! (someone broke my xmlconv root namespace ignorance)
+      var answer_xml = assignment.Answer.replace(/xmlns=("|').+?\1/, '');
+      delete assignment.Answer;
+
+      logger.warn('answer_xml', answer_xml);
+      var answer_json = xmlconv(answer_xml, {convention: 'castle'});
+      logger.warn('answer_json', answer_json);
+      assignment.Answers = answer_json.QuestionFormAnswers.Answer;
+
+      var participant = _.findWhere(results.participants, {aws_worker_id: assignment.WorkerId});
+      if (!participant) {
+        logger.info('Could not find participant: %s', assignment.WorkerId);
+      }
+
+      // reduce to key-value pairs so that we can show in both Mu/Handlebars easily
+      assignment.user = _.map(participant, function(value, key) {
+        return {key: key, value: value};
+      });
+
+      // assignment.bonus_owed = user.get('bonus_owed');
+      callback(null, assignment);
     }, function(err, assignments) {
       if (err) return res.die('Assignment mapping error: ' + err);
 
-      var bonus_payments = results.GetBonusPayments;
-
       _.extend(req.ctx, {
         hit: results.GetHIT.HIT,
-        BonusPayments: bonus_payments.GetBonusPaymentsResult.BonusPayment,
+        bonus_payments: results.GetBonusPayments.GetBonusPaymentsResult.BonusPayment || [],
         assignments: assignments,
       });
       amulet.stream(['admin/layout.mu', 'admin/HITs/one.mu'], req.ctx).pipe(res);
@@ -275,9 +289,12 @@ R.get(/HITs\/(\w+)/, function(req, res, m) {
 // index: list all HITs
 R.get(/HITs$/, function(req, res) {
   req.turk.SearchHITs({SortDirection: 'Descending', PageSize: 100}, function(err, result) {
-    if (err) return res.die('SearchHITs error: ' + err);
+    if (err) return res.die(err);
 
-    req.ctx.hits = result.SearchHITsResult.HIT || [];
+    var hits = result.SearchHITsResult.HIT || [];
+    if (!Array.isArray(hits)) hits = [hits];
+
+    req.ctx.hits = hits;
     amulet.stream(['admin/layout.mu', 'admin/HITs/all.mu'], req.ctx).pipe(res);
   });
 });

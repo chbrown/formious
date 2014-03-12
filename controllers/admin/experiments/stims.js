@@ -32,12 +32,7 @@ R.post(/stims\/?$/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    logger.error('POST stims fields: %j', data);
-    for (var key in fields) {
-      logger.info('k-v', key, fields[key]);
-    }
-
-    var fields = _.pick(data, 'template_id', 'context', 'view_order');
+    var fields = _.pick(data, models.Stim.columns);
 
     new sqlcmd.Insert({table: 'stims'})
     .set({experiment_id: req.experiment.id})
@@ -65,23 +60,20 @@ R.get(/stims\/(\d+)$/, function(req, res, m) {
 /** PATCH /admin/experiments/:experiment_id/stims/:stim_id
 Update existing stim. */
 R.patch(/stims\/(\d+)$/, function(req, res, m) {
-  models.Stim.from({id: m[1]}, function(err, stim) {
+  var stim_id = m[1];
+  // models.Stim.from({id: stim_id}, function(err, stim) {
+  req.readData(function(err, data) {
     if (err) return res.die(err);
-    req.readData(function(err, data) {
+
+    var fields = _.pick(data, models.Stim.columns);
+
+    new sqlcmd.Update({table: 'stims'})
+    .setIf(fields)
+    .where('id = ?', stim_id)
+    .execute(db, function(err, rows) {
       if (err) return res.die(err);
 
-      // empty-string password means: don't change the password
-      // if (fields.password === '') delete fields.password;
-      var fields = _.pick(data, models.Stim.columns);
-
-      new sqlcmd.Update({table: 'stims'})
-      .setIf(fields)
-      .where('id = ?', stim.id)
-      .execute(db, function(err, rows) {
-        if (err) return res.die(err);
-
-        res.json(_.extend(stim, fields));
-      });
+      res.json(fields);
     });
   });
 });
