@@ -236,6 +236,8 @@ R.get(/HITs\/(\w+)/, function(req, res, m) {
     },
     participants: ['GetAssignmentsForHIT', function(callback, results) {
       var assignments = results.GetAssignmentsForHIT.GetAssignmentsForHITResult.Assignment || [];
+      if (!Array.isArray(assignments)) assignments = [assignments];
+
       var aws_worker_ids = assignments.map(function(assignment) {
         return assignment.WorkerId;
       });
@@ -251,6 +253,7 @@ R.get(/HITs\/(\w+)/, function(req, res, m) {
     if (err) return res.die(err);
 
     var assignments = results.GetAssignmentsForHIT.GetAssignmentsForHITResult.Assignment || [];
+    if (!Array.isArray(assignments)) assignments = [assignments];
     async.map(assignments, function(assignment, callback) {
       // hack! (someone broke my xmlconv root namespace ignorance)
       var answer_xml = assignment.Answer.replace(/xmlns=("|').+?\1/, '');
