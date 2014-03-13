@@ -134,40 +134,19 @@ R.delete(/^\/admin\/experiments\/(\d+)$/, function(req, res, m) {
 });
 
 /** GET /admin/experiments/:experiment_id/responses
-Show the responses that reference this Experiment */
+Redirect to a page with ad-hoc authorization */
 R.get(/^\/admin\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
   var experiment_id = m[1];
-  async.auto({
-    experiment: function(callback) {
-      models.Experiment.from({id: experiment_id}, callback);
-    },
-    responses: function(callback) {
-      var select = new sqlcmd.Select({
-        table: [
-          'responses',
-          'INNER JOIN stims ON stims.id = responses.stim_id',
-          'INNER JOIN participants ON participants.id = responses.participant_id',
-        ].join(' ')
-      })
-      .add('responses.*', 'stims.context', 'stims.experiment_id', 'participants.name', 'participants.aws_worker_id')
-      .where('stims.experiment_id = ?', experiment_id)
-      .orderBy('responses.id DESC');
+  // should this be a POST?
 
-      var urlObj = url.parse(req.url, true);
-      if (urlObj.query.limit) {
-        select = select.limit(urlObj.query.limit);
-      }
-
-      select.execute(db, callback);
-    },
-  }, function(err, results) {
+  // try to use an existing access token
+  models.AccessToken.findOrCreate('experiments', experiment_id, function(err, token) {
     if (err) return res.die(err);
+    logger.info('Using token: %s, to access experiment %s', token, experiment_id);
 
-    _.extend(req.ctx, results);
-    amulet.stream(['admin/layout.mu', 'admin/responses/all.mu'], req.ctx).pipe(res);
+    var url = '/experiments/' + experiment_id + '/responses?token=' + token;
+    res.redirect(url);
   });
 });
-
-// todo: link to create access token to experiment
 
 module.exports = R.route.bind(R);

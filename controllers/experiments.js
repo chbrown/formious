@@ -1,12 +1,13 @@
 /*jslint node: true */
 var _ = require('underscore');
-var url = require('url');
 var amulet = require('amulet');
 var async = require('async');
 var handlebars = require('handlebars');
-var Router = require('regex-router');
 var logger = require('loge');
+var Router = require('regex-router');
 var sqlcmd = require('sqlcmd');
+var sv = require('sv');
+var url = require('url');
 
 var db = require('../lib/db');
 var flat = require('../lib/flat');
@@ -146,6 +147,61 @@ R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
     else {
       ready();
     }
+  });
+});
+
+/** GET /experiments/:experiment_id/responses?token=ABCDEF12345
+Requires authorization! Show only the responses that reference this Experiment. */
+R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
+  var experiment_id = m[1];
+
+  var urlObj = url.parse(req.url, true);
+  models.AccessToken.check(urlObj.query.token, 'experiments', experiment_id, function(err, access_token) {
+    if (err) return res.die(err);
+
+    console.log('Access granted: ', access_token);
+
+    // okay, they're in, proceed normally
+    async.auto({
+      experiment: function(callback) {
+        models.Experiment.from({id: experiment_id}, callback);
+      },
+      responses: function(callback) {
+        var select = new sqlcmd.Select({
+          table: [
+            'responses',
+            'INNER JOIN stims ON stims.id = responses.stim_id',
+            'INNER JOIN participants ON participants.id = responses.participant_id',
+          ].join(' ')
+        })
+        .add('responses.*', 'stims.context', 'stims.experiment_id', 'participants.name', 'participants.aws_worker_id')
+        .where('stims.experiment_id = ?', experiment_id)
+        .orderBy('responses.id DESC');
+
+        select.execute(db, callback);
+      },
+    }, function(err, results) {
+      if (err) return res.die(err);
+
+      // results.experiment.name
+      var stringifier = new sv.Stringifier();
+      stringifier.pipe(res);
+      results.responses.forEach(function(response) {
+        var row = {
+          response_id: response.id,
+          participant_id: response.participant_id,
+          participant_name: response.name || response.aws_worker_id,
+          experiment_id: response.experiment_id,
+          stim_id: response.stim_id,
+          created: response.created,
+        };
+        _.extend(row, response.context, response.value);
+
+        stringifier.write(row);
+      });
+      stringifier.end();
+      // amulet.stream(['responses/all.mu'], results).pipe(res);
+    });
   });
 });
 
