@@ -5,6 +5,7 @@ var async = require('async');
 var logger = require('loge');
 var Router = require('regex-router');
 var sqlcmd = require('sqlcmd');
+var url = require('url');
 
 var db = require('../../../lib/db');
 var models = require('../../../lib/models');
@@ -115,14 +116,14 @@ R.delete(/^\/admin\/experiments\/(\d+)$/, function(req, res, m) {
 
 /** GET /admin/experiments/:experiment_id/responses
 Show the responses that reference this Experiment */
-R.get(/^\/admin\/experiments\/(\d+)\/responses$/, function(req, res, m) {
+R.get(/^\/admin\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
   var experiment_id = m[1];
   async.auto({
     experiment: function(callback) {
       models.Experiment.from({id: experiment_id}, callback);
     },
     responses: function(callback) {
-      new sqlcmd.Select({
+      var select = new sqlcmd.Select({
         table: [
           'responses',
           'INNER JOIN stims ON stims.id = responses.stim_id',
@@ -131,9 +132,14 @@ R.get(/^\/admin\/experiments\/(\d+)\/responses$/, function(req, res, m) {
       })
       .add('responses.*', 'stims.context', 'stims.experiment_id', 'participants.name', 'participants.aws_worker_id')
       .where('stims.experiment_id = ?', experiment_id)
-      .orderBy('responses.id DESC')
-      // .limit(100)
-      .execute(db, callback);
+      .orderBy('responses.id DESC');
+
+      var urlObj = url.parse(req.url, true);
+      if (urlObj.query.limit) {
+        select = select.limit(urlObj.query.limit);
+      }
+
+      select.execute(db, callback);
     },
   }, function(err, results) {
     if (err) return res.die(err);
