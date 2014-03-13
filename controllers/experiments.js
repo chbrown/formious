@@ -134,7 +134,14 @@ R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
     };
 
     if (data) {
-      models.Participant.addResponse(aws_worker_id, stim_id, data, ready);
+      models.Participant.addResponse({
+        aws_worker_id: aws_worker_id,
+        ip_address: req.headers['x-real-ip'] || req.client.remoteAddress,
+        user_agent: req.headers['user-agent'],
+      }, {
+        stim_id: stim_id,
+        value: data,
+      }, ready);
     }
     else {
       ready();

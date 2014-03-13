@@ -19,7 +19,14 @@ R.any(/^\/mturk\/externalSubmit/, function(req, res, m) {
     var stim_id = data.stim_id || null;
     delete data.stim_id;
 
-    models.Participant.addResponse(aws_worker_id, stim_id, data, function(err, responses) {
+    models.Participant.addResponse({
+      aws_worker_id: aws_worker_id,
+      ip_address: req.headers['x-real-ip'] || req.client.remoteAddress,
+      user_agent: req.headers['user-agent'],
+    }, {
+      stim_id: stim_id,
+      value: data,
+    }, function(err, responses) {
       if (err) return res.die(err);
 
       res.text('Your responses have been submitted and saved.');
