@@ -2,14 +2,6 @@
 module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    // handlebars: {
-    //   all: {
-    //     templates: 'templates/**/*.bars',
-    //     root: 'templates',
-    //     extension: 'bars',
-    //     output: 'static/templates.js',
-    //   }
-    // },
     uglify: {
       all: {
         options: {
@@ -41,10 +33,8 @@ module.exports = function(grunt) {
     }
   });
 
-  // grunt.loadNpmTasks('grunt-contrib-handlebars');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.registerTask('default', [
-    // 'handlebars',
     'uglify',
   ]);
 };
