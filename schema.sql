@@ -38,16 +38,20 @@ CREATE TABLE participants (
   created timestamp with time zone DEFAULT current_timestamp NOT NULL
 );
 
-CREATE TABLE tickets (
+CREATE TABLE access_tokens (
   id serial PRIMARY KEY,
 
-  key text UNIQUE NOT NULL, -- hash, ticket
-  user_id integer NOT NULL, -- maps to either an administrator or a participant
+  token text NOT NULL,
+  relation text NOT NULL, -- e.g., 'administrators', 'participants', 'experiments', etc.
+  foreign_id integer NOT NULL, -- maps to the primary key (id) of the relation denoted above
 
-  expires timestamp,
-  created timestamp with time zone DEFAULT current_timestamp NOT NULL
+  expires timestamp with time zone,
+  redacted timestamp with time zone,
+  created timestamp with time zone DEFAULT current_timestamp NOT NULL,
+
+  UNIQUE(token, relation)
 );
-CREATE INDEX tickets_key_idx ON tickets (key);
+CREATE INDEX access_tokens_token_idx ON access_tokens(token);
 
 CREATE TABLE templates (
   id serial PRIMARY KEY,

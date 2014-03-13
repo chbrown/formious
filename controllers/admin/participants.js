@@ -18,7 +18,6 @@ var R = new Router(function(req, res) {
 /** GET /admin/participants
 list all participants */
 R.get(/^\/admin\/participants\/?$/, function(req, res, m) {
-  // var projection = '_id created responses.length bonus_paid bonus_owed password superuser tickets';
   new sqlcmd.Select({table: 'participants'})
   .orderBy('created DESC')
   .execute(db, function(err, participants) {
@@ -104,16 +103,6 @@ R.delete(/^\/admin\/participants\/(\w*)$/, function(req, res, m) {
       res.json({success: true, message: 'Deleted user: ' + user._id});
     });
   });
-});
-
-
-/** GET /participants/:user_id/logout
-helper page to purge ticket (must come before login action below) */
-R.get(/^\/participants\/(\w+)\/logout/, function(req, res, m) {
-  logger.debug('Deleting ticket cookie "%s" (for user: "%s")', req.cookies.get('ticket'), m[1]);
-
-  req.cookies.del('ticket');
-  res.redirect('/participants');
 });
 
 module.exports = R.route.bind(R);

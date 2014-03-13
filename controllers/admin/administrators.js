@@ -18,7 +18,6 @@ var R = new Router(function(req, res) {
 /** GET /admin/administrators
 list all administrators */
 R.get(/^\/admin\/administrators(\/|.json)?$/, function(req, res, m) {
-  // var projection = '_id created responses.length bonus_paid bonus_owed password superuser tickets';
   new sqlcmd.Select({table: 'administrators'})
   .orderBy('created DESC')
   .execute(db, function(err, administrators) {

@@ -46,10 +46,10 @@
     <tr><td>Password</td><td>{{password}}</td></tr>
     <tr><td>Superuser</td><td>{{superuser}}</td></tr>
     <tr>
-      <td>Tickets</td>
+      <td>Tokens</td>
       <td>
-        {{#tickets}}
+        {{#tokens}}
           <div>{{.}}</div>
-        {{/tickets}}
+        {{/tokens}}
       </td>
     </tr>

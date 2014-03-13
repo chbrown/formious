@@ -22,11 +22,11 @@ auth_R.any(/\/admin\/?$/, function(req, res, m) {
   res.redirect('/admin/experiments');
 });
 /** POST /admin/logout
-Purge ticket cookie, and redirect */
+Purge administrator_token cookie, and redirect */
 auth_R.post(/^\/admin\/logout/, function(req, res) {
-  logger.debug('Deleting ticket cookie "%s"', req.cookies.get('ticket'));
+  logger.debug('Deleting administrator_token cookie: %s', req.cookies.get('administrator_token'));
 
-  req.cookies.del('ticket');
+  req.cookies.del('administrator_token');
   res.redirect('/admin');
 });
 
@@ -61,13 +61,13 @@ public_R.post(/^\/admin\/login$/, function(req, res) {
 
     // artificially slow to deflect brute force attacks
     setTimeout(function() {
-      models.Administrator.authenticate(fields.email, fields.password, function(err, ticket) {
+      models.Administrator.authenticate(fields.email, fields.password, function(err, token) {
         if (err) {
           return renderLogin(fields.email, fields.password, err.toString(), res);
         }
 
-        logger.info('Authenticated successfully. Ticket = %s', ticket);
-        req.cookies.set('ticket', ticket);
+        logger.info('Authenticated successfully. Token = %s', token);
+        req.cookies.set('administrator_token', token);
         res.redirect('/admin');
       });
     }, 500);
@@ -77,8 +77,8 @@ public_R.post(/^\/admin\/login$/, function(req, res) {
 module.exports = function(req, res) {
   // handle auth and forward. this is the checkpoint for all admin-level
   // requests, and should send all non administrators to the login page.
-  var ticket = req.cookies.get('ticket') || '';
-  models.Administrator.fromTicket(ticket, function(err, administrator) {
+  var token = req.cookies.get('administrator_token') || '';
+  models.Administrator.fromToken(token, function(err, administrator) {
     if (err) {
       logger.error('Administrator not authenticated:', err);
       public_R.route(req, res);
