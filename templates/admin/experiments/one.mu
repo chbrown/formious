@@ -3,11 +3,11 @@
     <div style="float: right">
       <span>
         <select ng-model="$storage.aws_account_id"
-          ng-options="aws_account.id as aws_account.name for aws_account in aws_accounts">
+          ng-options="aws_account.id as aws_account.name for aws_account in AWS.accounts">
           <option value="">-- AWS Account --</option>
         </select>
         <select ng-model="$storage.aws_host"
-          ng-options="host.name as host.name for host in hosts">
+          ng-options="host.name as host.name for host in AWS.hosts">
           <option value="">-- Host --</option>
         </select>
         <a href="/admin/aws/{{$storage.aws_account_id}}/hosts/{{$storage.aws_host}}/HITs/new?ExternalURL={{localizeUrl('/experiments/' + experiment.id)}}">MTurk</a>
@@ -25,8 +25,6 @@
       <p>Each item in the experiment is known as a "stim", and can be pretty much anything, like a consent form, instructions, or adaptive classification task.</p>
     </div>
 
-    <!-- <div ng-repeat="administrator in administrators">{{administrator}}</div> -->
-
     <section class="box">
       <form ng-submit="sync($event)">
         <label>
@@ -37,7 +35,7 @@
         <label>
           <div><b>Owner</b></div>
           <select ng-model="experiment.administrator_id"
-            ng-options="administrator.id as administrator.email for administrator in administrators"></select>
+            ng-options="administrator.id as administrator.email for administrator in Administrators.all"></select>
         </label>
 
         <div>
@@ -89,7 +87,7 @@
             <td class="nowrap">
               <!-- <select ng-model="stim.template_id"
                 ng-options="template.id as template.name for template in templates"></select> -->
-              <span key="stim.template_id" map="templates_lookup"></span>
+              <span>{{Templates.lookup[stim.template_id]}}</span>
               <!-- <small><a href="/admin/templates/{{stim.template_id}}">edit</a></small> -->
             </td>
             <!-- <td ng-repeat="parameter in experiment.parameters">

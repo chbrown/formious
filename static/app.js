@@ -271,3 +271,13 @@ app.directive('checkboxSequence', function($http) {
     },
   };
 });
+
+app.factory('$laghttp', function($q, $http) {
+  return function(config) {
+    var deferred = $q.defer();
+    setTimeout(function() {
+      $http(config).then(deferred.resolve.bind(deferred), deferred.reject.bind(deferred));
+    }, 250);
+    return deferred.promise;
+  };
+});

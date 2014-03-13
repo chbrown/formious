@@ -7,6 +7,7 @@
   <script src="/static/compiled.js"></script>
   <script src="/static/local.js"></script>
   <script src="/static/app.js"></script>
+  <script src="/static/app.services.js"></script>
   <script src="/static/app.controllers.js"></script>
 </head>
 <body ng-app="app" class="admin">

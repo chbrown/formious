@@ -36,27 +36,18 @@ app.controller('adminResponsesCtrl', function($scope) {
   $scope.value_keys = Object.keys(values);
 });
 
-app.controller('adminExperimentEditor', function($scope, $http, $localStorage) {
+app.controller('adminExperimentEditor', function($scope, $http, $localStorage, Templates, Administrators, AWS) {
   $scope.$storage = $localStorage.$default({expand_experiment_html: false});
+
+  $scope.AWS = AWS;
+  $scope.Administrators = Administrators;
+  p('Administrators', Administrators);
+  $scope.Templates = Templates;
 
   var experiment_url = Url.parse(window.location);
   experiment_url.path += '.json';
   $http({method: 'GET', url: experiment_url}).then(function(res) {
     $scope.experiment = res.data.experiment;
-  }, p);
-
-  $http({method: 'GET', url: '/admin/administrators.json'}).then(function(res) {
-    $scope.administrators = res.data.administrators;
-  }, p);
-
-  $http({method: 'GET', url: '/admin/aws.json'}).then(function(res) {
-    $scope.hosts = [{name: 'deploy'}, {name: 'sandbox'}];
-    $scope.aws_accounts = res.data.aws_accounts;
-  }, p);
-
-  $http({method: 'GET', url: '/admin/templates.json'}).then(function(res) {
-    $scope.templates = res.data.templates;
-    $scope.templates_lookup = toMap($scope.templates, 'id', 'name');
   }, p);
 
   var stims_url = Url.parse(window.location);
