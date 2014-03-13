@@ -5,7 +5,6 @@
     <table class="striped lined padded">
       <thead>
         <tr>
-          <th>ID</th>
           <th>Name</th>
           <th>Created</th>
           <th>Owner</th>
@@ -14,13 +13,17 @@
       </thead>
       <tbody>
         <tr ng-repeat="experiment in table">
-          <td>{{experiment.id}}</td>
-          <td><a href="/admin/experiments/{{experiment.id}}">{{experiment.name}}</a></td>
+          <td title="{{experiment.id}}">
+            <a href="/admin/experiments/{{experiment.id}}">{{experiment.name}}</a>
+          </td>
           <td><time ng-model="experiment.created" class="date"></time></td>
           <td>{{experiment.administrator_id}}</td>
-          <td>
+          <td class="nowrap">
             <a href="/experiments/{{experiment.id}}">Public</a>
             <a href="/admin/experiments/{{experiment.id}}/responses">Responses</a>
+            <form method="POST" action="{{'/admin/experiments/' + experiment.id + '/clone'}}" style="display: inline">
+              <button>Clone</button>
+            </form>
             <ajaxform method="DELETE" action="/admin/experiments/{{experiment.id}}">
               <button>Delete</button>
             </ajaxform>

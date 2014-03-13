@@ -1,4 +1,4 @@
-/*jslint browser: true, devel: true */ /*globals _, angular, app, Url, p, fileinputText, displayPromiseStatus, summarizeResponse */
+/*jslint browser: true, devel: true */ /*globals _, angular, app, Url, p, fileinputText, summarizeResponse */
 
 var sync_options = function(record) {
   if (record.id) {
@@ -36,12 +36,12 @@ app.controller('adminResponsesCtrl', function($scope) {
   $scope.value_keys = Object.keys(values);
 });
 
-app.controller('adminExperimentEditor', function($scope, $http, $localStorage, Templates, Administrators, AWS) {
+app.controller('adminExperimentEditor', function($scope, $http, $localStorage, $flash,
+  Templates, Administrators, AWS) {
   $scope.$storage = $localStorage.$default({expand_experiment_html: false});
 
   $scope.AWS = AWS;
   $scope.Administrators = Administrators;
-  p('Administrators', Administrators);
   $scope.Templates = Templates;
 
   var experiment_url = Url.parse(window.location);
@@ -58,6 +58,14 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage, T
 
   $scope.localizeUrl = function(url) {
     return Url.parse(url).toString();
+  };
+
+  $scope.keydown = function(ev) {
+    if (ev.which == 83 && ev.metaKey) {
+      // command+S
+      ev.preventDefault();
+      $scope.sync(ev);
+    }
   };
 
   // var workerId = this.model.get('WorkerId');
@@ -83,13 +91,12 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage, T
       _.extend($scope.experiment, res.data);
       return 'Saved';
     }, function(res) {
-      if (res.status == 300) {
-        window.location = res.headers().location;
-      }
+      var headers = res.headers();
+      if (headers.location) window.location = headers.location;
       // otherwise is error:
       return summarizeResponse(res);
     });
-    displayPromiseStatus(ajax_promise, ev.target);
+    $flash.addPromise(ajax_promise);
   };
 
   $scope.syncStim = function(stim, ev) {
@@ -111,7 +118,7 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage, T
     });
 
     if (ev) {
-      displayPromiseStatus(ajax_promise, ev.target);
+      $flash.addPromise(ajax_promise);
     }
   };
 
@@ -163,7 +170,8 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage, T
     data.rows.forEach(function(row) {
       var stim = {context: _.omit(row, 'template')};
       if (row.template) {
-        var template = _.findWhere($scope.templates, {name: row.template});
+        console.log('Templates', Templates);
+        var template = _.findWhere(Templates.all, {name: row.template});
         if (template) {
           stim.template_id = template.id;
         }
@@ -230,7 +238,7 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage, T
   });
 });
 
-app.controller('adminAWSAccountEditor', function($scope, $http, $localStorage) {
+app.controller('adminAWSAccountEditor', function($scope, $http, $localStorage, $flash) {
   $scope.aws_account = window.aws_account;
 
   $scope.aws_account.hosts = [{name: 'deploy'}, {name: 'sandbox'}];
@@ -246,20 +254,17 @@ app.controller('adminAWSAccountEditor', function($scope, $http, $localStorage) {
   }
 
   $scope.sync = function(ev) {
-    var form = angular.element(ev.target);
-    var button = form.find('button');
-
     var opts = sync_options($scope.aws_account);
     var ajax_promise = $http(opts).then(function(res) {
       return 'Saved';
     }, function(res) {
       return summarizeResponse(res);
     });
-    displayPromiseStatus(ajax_promise, button[0]);
+    $flash.addPromise(ajax_promise);
   };
 });
 
-app.controller('adminHITEditor', function($scope, $http, $localStorage) {
+app.controller('adminHITEditor', function($scope, $http, $localStorage, $flash) {
   // defaults:
   $scope.$storage = $localStorage.$default({
     hit: {
@@ -287,12 +292,12 @@ app.controller('adminHITEditor', function($scope, $http, $localStorage) {
     }).then(function(res) {
       return 'Created';
     }, function(res) {
-      if (res.status == 300) {
-        window.location = res.headers().location;
-      }
+      var headers = res.headers();
+      if (headers.location) window.location = headers.location;
+
       return summarizeResponse(res);
     });
-    displayPromiseStatus(ajax_promise, ev.target);
+    $flash.addPromise(ajax_promise);
   };
 
   // AWS adds four parameters: assignmentId, hitId, workerId, and turkSubmitTo
@@ -322,13 +327,12 @@ app.controller('adminHITReviewer', function($scope, $http, $localStorage) {
   $scope.assignments = window.assignments;
 });
 
-app.controller('adminTemplateEditor', function($scope, $http, $timeout) {
+app.controller('adminTemplateEditor', function($scope, $http, $timeout, $flash) {
   $scope.template = window.template;
   $scope.keydown = function(ev) {
     if (ev.which == 83 && ev.metaKey) {
       // command+S
       ev.preventDefault();
-      ev.target = document.getElementById('save_button');
       $scope.sync(ev);
     }
   };
@@ -338,16 +342,16 @@ app.controller('adminTemplateEditor', function($scope, $http, $timeout) {
     var ajax_promise = $http(opts).then(function(res) {
       return 'Saved';
     }, function(res) {
-      if (res.status == 300) {
-        window.location = res.headers().location;
-      }
+      var headers = res.headers();
+      if (headers.location) window.location = headers.location;
+
       return summarizeResponse(res);
     });
-    displayPromiseStatus(ajax_promise, ev.target);
+    $flash.addPromise(ajax_promise);
   };
 });
 
-app.controller('adminAdministratorEditor', function($scope, $http, $timeout) {
+app.controller('adminAdministratorEditor', function($scope, $http, $timeout, $flash) {
   $scope.administrator = window.administrator;
   $scope.sync = function(ev) {
     var opts = sync_options($scope.administrator);
@@ -358,11 +362,11 @@ app.controller('adminAdministratorEditor', function($scope, $http, $timeout) {
       if (headers.location) window.location = headers.location;
       return summarizeResponse(res);
     });
-    displayPromiseStatus(ajax_promise, ev.target);
+    $flash.addPromise(ajax_promise);
   };
 });
 
-app.controller('adminAssignmentEditor', function($scope, $http) {
+app.controller('adminAssignmentEditor', function($scope, $http, $flash) {
   $scope.approve = function(assignment, ev) {
     var url = Url.parse(window.location);
     url.path += '/Assignments/' + assignment.AssignmentId + '/Approve';
@@ -373,6 +377,6 @@ app.controller('adminAssignmentEditor', function($scope, $http) {
       if (headers.location) window.location = headers.location;
       return summarizeResponse(res);
     });
-    displayPromiseStatus(ajax_promise, ev.target);
+    $flash.addPromise(ajax_promise);
   };
 });

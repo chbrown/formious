@@ -48,9 +48,27 @@ R.post(/^\/admin\/templates\/?$/, function(req, res, m) {
     .execute(db, function(err, rows) {
       if (err) return res.die(err);
 
-      var url = '/admin/templates/' + rows[0].id;
-      res.writeHead(300, {Location: url});
-      res.end();
+      res.redirect(200, '/admin/templates/' + rows[0].id);
+    });
+  });
+});
+
+/** POST /admin/templates/:id/clone
+Create new template with properties of original, and go to it. */
+R.post(/^\/admin\/templates\/(\d+)\/clone$/, function(req, res, m) {
+  models.Template.from({id: m[1]}, function(err, template) {
+    if (err) return res.die(err);
+
+    new sqlcmd.Insert({table: 'templates'})
+    .set({
+      name: template.name + ' copy',
+      html: template.html,
+    })
+    .execute(db, function(err, rows) {
+      if (err) return res.die(err);
+
+      // redirect so that we aren't sitting with the previous template's id in the url
+      res.redirect('/admin/templates/' + rows[0].id);
     });
   });
 });
@@ -74,28 +92,6 @@ R.get(/^\/admin\/templates\/(\d+)(.json)?$/, function(req, res, m) {
 //     res.html(template.html);
 //   });
 // });
-
-
-/** POST /admin/templates/:id/clone
-Create new template with properties of original, and go to it. */
-R.post(/^\/admin\/templates\/(\d+)\/clone$/, function(req, res, m) {
-  models.Template.from({id: m[1]}, function(err, template) {
-    if (err) return res.die(err);
-
-    var fields = _.pick(template, 'name', 'html');
-    new sqlcmd.Insert({table: 'templates'})
-    .set({
-      name: template.name + ' copy',
-      html: template.html,
-    })
-    .execute(db, function(err, rows) {
-      if (err) return res.die(err);
-
-      // redirect so that we aren't sitting with the previous template's id in the url
-      res.redirect('/admin/templates/' + rows[0].id);
-    });
-  });
-});
 
 /** PATCH /admin/templates/:id
 Update: modify existing template */

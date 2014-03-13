@@ -62,12 +62,31 @@ R.post(/^\/admin\/experiments\/?$/, function(req, res, m) {
     .execute(db, function(err, rows) {
       if (err) return res.die(err);
 
-      var url = '/admin/experiments/' + rows[0].id;
-      res.writeHead(300, {Location: url});
-      res.end();
+      res.redirect(200, '/admin/experiments/' + rows[0].id);
     });
   });
 });
+
+/** POST /admin/experiments/:id/clone
+Create new experiment with properties of original (but not stims), and go to it. */
+R.post(/^\/admin\/experiments\/(\d+)\/clone$/, function(req, res, m) {
+  models.Experiment.from({id: m[1]}, function(err, experiment) {
+    if (err) return res.die(err);
+
+    var fields = _.pick(experiment, models.Experiment.columns);
+    fields.name += ' copy';
+
+    new sqlcmd.Insert({table: 'experiments'})
+    .set(fields)
+    .execute(db, function(err, rows) {
+      if (err) return res.die(err);
+
+      // redirect so that we aren't sitting with the previous template's id in the url
+      res.redirect('/admin/experiments/' + rows[0].id);
+    });
+  });
+});
+
 
 /** GET /admin/experiments/:experiment_id
 Edit existing Experiment (or just view) */

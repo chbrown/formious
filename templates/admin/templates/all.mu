@@ -5,7 +5,6 @@
     <table class="striped lined padded">
       <thead>
         <tr>
-          <th></th>
           <th>Name</th>
           <th>HTML</th>
           <th>Created</th>
@@ -14,11 +13,12 @@
       </thead>
       <tbody>
         <tr ng-repeat="template in table">
-          <td>{{template.id}}</td>
-          <td><a href="/admin/templates/{{template.id}}">{{template.name}}</a></td>
+          <td title="{{template.id}}">
+            <a href="/admin/templates/{{template.id}}">{{template.name}}</a>
+          </td>
           <td><code>{{template.html.slice(0, 100)}}</code></td>
           <td><time ng-model="template.created" class="date" /></td>
-          <td>
+          <td class="nowrap">
             <!-- angular being dumb about the action string -->
             <form method="POST" action="{{'/admin/templates/' + template.id + '/clone'}}" style="display: inline">
               <button>Clone</button>

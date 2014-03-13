@@ -11,7 +11,8 @@
   <script src="/static/app.controllers.js"></script>
 </head>
 <body ng-app="app" class="admin">
-  <nav fixedflow>
+  <div id="flash"></div>
+  <nav fixedflow class="root">
     <div style="float: right">
       <a href="/admin/administrators/<% current_user.id %>">me</a>
       <ajaxform method="POST" action="/admin/logout"><button class="anchor">Logout</button></ajaxform>

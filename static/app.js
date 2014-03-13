@@ -196,30 +196,50 @@ var summarizeResponse = function(res) {
   return parts.join('');
 };
 
-var flashSpan = function(el, text) {
-  var span = angular.element('<span>').css('margin', '2px').text(text);
-  el.after(span);
-  setTimeout(function() {
-    span.remove();
-  }, 5000);
-  return span;
-};
+app.service('$flash', function() {
+  var container = angular.element(document.getElementById('flash'));
+  var check = function() {
+    if (container.children().length === 0) {
+      container.hide();
+    }
+  };
+  var add = function(html) {
+    var el = angular.element(html);
+    container.append(el).show();
+    return el;
+  };
+  var addTemporarily = function(html, timeout) {
+    if (timeout === undefined) timeout = 3000;
 
-var displayPromiseStatus = function(promise, target) {
-  // allow target to be null? (do a popup or something)
-  var el = angular.element(target);
-  // immediately attach throbber
-  var throbber_el = angular.element('<img src="/static/lib/img/throbber-16.gif" />').css('margin', '2px');
-  el.after(throbber_el);
-  // handle success and failure by flashing a message
-  promise.then(function(message) {
-    throbber_el.remove();
-    flashSpan(el, message);
-  }, function(err) {
-    throbber_el.remove();
-    flashSpan(el, err.toString());
-  });
-};
+    var el = add(html);
+    setTimeout(function() {
+      el.remove();
+      check();
+    }, timeout);
+  };
+
+  this.addPromise = function(promise) {
+    // immediately attach throbber
+    var throbber_el = angular.element('<img src="/static/lib/img/throbber-16.gif">');
+    add(throbber_el);
+    // handle success and failure by flashing a message
+    var callback = function(res) {
+      throbber_el.remove();
+      addTemporarily('<span>' + String(res) + '</span>');
+    };
+    promise.then(callback, callback);
+  };
+});
+
+// var flashSpan = function(el, text) {
+//   var span = angular.element('<span>').css('margin', '2px').text(text);
+//   el.after(span);
+//   setTimeout(function() {
+//     span.remove();
+//   }, 5000);
+//   return span;
+// };
+
 
 app.directive('checkboxSequence', function($http) {
   return {

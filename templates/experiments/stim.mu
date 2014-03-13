@@ -17,7 +17,7 @@
     human.advance = function(response) {
       var jqXHR = human.add(response).always(function() {
         // the server will respond to the header "x-requested-with': XMLHttpRequest"
-        // by responding with the status code 300, so that the browser does
+        // by responding with the status code 200, so that the browser does
         // not gloss over the redirect.
         var redirect = jqXHR.getResponseHeader('location');
         if (redirect) {

@@ -52,7 +52,7 @@ R.post(/^\/admin\/administrators\/?$/, function(req, res, m) {
       if (err) return res.die(err);
 
       var url = '/admin/administrators/' + rows[0].id;
-      res.redirect(300, url);
+      res.redirect(200, url);
     });
   });
 });

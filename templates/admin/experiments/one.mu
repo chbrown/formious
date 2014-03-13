@@ -1,17 +1,16 @@
 <div ng-controller="adminExperimentEditor">
-  <nav fixedflow>
+  <nav fixedflow class="sub">
     <div style="float: right">
-      <span class="group">
-        <select ng-model="$storage.aws_account_id"
-          ng-options="aws_account.id as aws_account.name for aws_account in AWS.accounts">
-          <option value="">-- AWS Account --</option>
-        </select>
-        <select ng-model="$storage.aws_host"
-          ng-options="host.name as host.name for host in AWS.hosts">
-          <option value="">-- Host --</option>
-        </select>
-        <a href="/admin/aws/{{$storage.aws_account_id}}/hosts/{{$storage.aws_host}}/HITs/new?ExternalURL={{localizeUrl('/experiments/' + experiment.id)}}">MTurk</a>
-      </span>
+      <select ng-model="$storage.aws_account_id"
+        ng-options="aws_account.id as aws_account.name for aws_account in AWS.accounts">
+        <option value="">-- AWS Account --</option>
+      </select>
+      <select ng-model="$storage.aws_host"
+        ng-options="host.name as host.name for host in AWS.hosts">
+        <option value="">-- Host --</option>
+      </select>
+      <a href="/admin/aws/{{$storage.aws_account_id}}/hosts/{{$storage.aws_host}}/HITs/new?ExternalURL={{localizeUrl('/experiments/' + experiment.id)}}">MTurk</a>
+
       <a href="/experiments/{{experiment.id}}">Public</a>
       <a href="/admin/experiments/{{experiment.id}}/responses">Responses</a>
     </div>
@@ -47,8 +46,9 @@
                 <p>This will be inserted at the top of every page in the experiment, right after the &lt;body&gt; tag. You might put things like inline styles, &lt;script&gt; imports, etc., to give your experiment a unified look or to avoid having to includes those in multiple templates.</p>
               </span>
             </div>
-            <textarea ng-model="experiment.html" ng-class="{unlimited: $storage.expand_experiment_html}"
-              enhance class="code" style="min-height: 40px; max-height: 100px; width: 100%;"></textarea>
+            <textarea ng-model="experiment.html" enhance ng-keydown="keydown($event)"
+              ng-class="{unlimited: $storage.expand_experiment_html}"
+              class="code" style="min-height: 40px; max-height: 100px; width: 100%;"></textarea>
           </label>
         </div>
 
@@ -88,8 +88,7 @@
             <td class="nowrap">
               <!-- <select ng-model="stim.template_id"
                 ng-options="template.id as template.name for template in templates"></select> -->
-              <span>{{Templates.lookup[stim.template_id]}}</span>
-              <!-- <small><a href="/admin/templates/{{stim.template_id}}">edit</a></small> -->
+              <a href="/admin/templates/{{stim.template_id}}">{{Templates.lookup[stim.template_id]}}</a>
             </td>
             <!-- <td ng-repeat="parameter in experiment.parameters">
               <input ng-model="stim.context[parameter]" />

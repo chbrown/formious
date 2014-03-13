@@ -109,56 +109,61 @@ body.admin {
   font-size: 80%; // why is the default so big!?
   overflow-y: scroll;
 
+  #flash {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 23px;
+    z-index: 100; // only needs to be greater than or equal to 1
+    text-align: center;
+    color: white;
+    background-color: rgba(0, 0, 0, 66%);
+    pointer-events: none; // allows click through to elements underneath
+    img, span {
+      vertical-align: middle;
+    }
+  }
   nav {
     position: fixed;
     width: 100%;
-    .background-gray(94%);
     box-sizing: border-box;
-
     padding: 0 5px;
-    border-bottom: 1px solid #BBB;
+    font-size: 90%;
 
-    & > span, & > a, & > button, & > img {
+    span, a, button, img, select {
+      display: inline-block;
       vertical-align: middle;
+      margin: 3px 0 0 0;
     }
-
-    span, a, button.anchor {
-      margin: 3px 0;
-    }
-    span.group {
-      display: inline-block;
-      border: 1px solid #CCC;
-      border-radius: 3px;
-      padding-left: 6px;
-      select {
-        vertical-align: text-bottom;
-        font-size: 80%;
-      }
-      a, button.anchor {
-        margin: 0;
-        padding: 2px 6px;
-        border-width: 0;
-      }
-    }
-
     a, button.anchor {
-      display: inline-block;
-      padding: 2px 6px;
-      border: 1px solid #CCC;
-      border-radius: 3px;
-      .background-gray(94%);
-      &.current {
-        .border-gray(75%);
-        .background-gray(98%);
-      }
-      &:hover {
-        .border-gray(60%);
-        .background-gray(100%);
+      padding: 2px 6px 3px;
+      border-radius: 2px;
+    }
+
+    // background is especially dark for the root nav
+    &.root {
+      .background-gray(30%);
+
+      a, button.anchor {
+        border-radius: 2px 2px 0 0;
+        .background-gray(80%);
+        &:hover, &.current {
+          .background-gray(98%); // same as body.admin background
+        }
       }
     }
-    button {
-      font-size: 100%;
+    &.sub {
+      .background-gray(98%);
+
+      border-bottom: 1px solid #BBB;
     }
+
+    // span.group {
+    //   border: 1px solid #CCC;
+    //   border-radius: 3px;
+    //   padding-left: 6px;
+    // }
+
   }
 
   // .status span {
@@ -260,8 +265,8 @@ table.grid {
 }
 table.padded {
   tr td, tr th {
-    &:first-child { padding-left: 5px; }
-    &:last-child { padding-right: 5px; }
+    &:first-child { padding-left: 10px; }
+    &:last-child { padding-right: 10px; }
   }
 }
 table.keyval {
