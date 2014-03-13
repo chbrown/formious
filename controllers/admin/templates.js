@@ -16,7 +16,7 @@ var R = new Router(function(req, res) {
 Index: show all templates */
 R.get(/^\/admin\/templates(\/|.json)?$/, function(req, res, m) {
   new sqlcmd.Select({table: 'templates'})
-  .orderBy('id')
+  .orderBy('name')
   .execute(db, function(err, templates) {
     if (err) return res.die(err);
 
