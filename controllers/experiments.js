@@ -159,8 +159,6 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
   models.AccessToken.check(urlObj.query.token, 'experiments', experiment_id, function(err, access_token) {
     if (err) return res.die(err);
 
-    console.log('Access granted: ', access_token);
-
     // okay, they're in, proceed normally
     async.auto({
       experiment: function(callback) {

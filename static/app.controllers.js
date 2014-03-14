@@ -170,7 +170,6 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage, $
     data.rows.forEach(function(row) {
       var stim = {context: _.omit(row, 'template')};
       if (row.template) {
-        console.log('Templates', Templates);
         var template = _.findWhere(Templates.all, {name: row.template});
         if (template) {
           stim.template_id = template.id;

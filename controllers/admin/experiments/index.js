@@ -140,7 +140,7 @@ R.get(/^\/admin\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
   // should this be a POST?
 
   // try to use an existing access token
-  models.AccessToken.findOrCreate('experiments', experiment_id, function(err, token) {
+  models.AccessToken.findOrCreate('experiments', experiment_id, {length: 10}, function(err, token) {
     if (err) return res.die(err);
     logger.info('Using token: %s, to access experiment %s', token, experiment_id);
 
