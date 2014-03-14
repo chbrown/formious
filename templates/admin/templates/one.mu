@@ -1,5 +1,5 @@
 <div ng-controller="adminTemplateEditor">
-  <nav fixedflow>
+  <nav fixedflow class="sub">
     <span>Template: <b>{{template.name}}</b></span>
     <button ng-click="sync($event)" id="save_button">Save</button>
   </nav>
