@@ -21,8 +21,11 @@ h1, h2, h3, h4, h5, h6 {
 p {
   margin: 1ex 0;
 }
-button {
-  // margin: 10px 10px 0 0;
+section {
+  margin: 10px 0;
+}
+form {
+  display: inline-block;
 }
 label {
   span {
@@ -31,9 +34,6 @@ label {
 }
 label[disabled] {
   .color-gray(50%);
-  // margin: 2px 0;
-  // display: block;
-  // vertical-align: middle;
 }
 textarea, input {
   vertical-align: baseline;
@@ -56,48 +56,27 @@ time {
 .code {
   font: 9pt monospace;
 }
-
+.shadow {
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+}
 .help {
   cursor: pointer;
-  .color-gray(60%);
-
-  .summary {
-    // display: block;
-    // margin: 1ex 0;
-  }
-  .full {
-    display: none;
-  }
-
-  &.expanded {
-    .color-gray(5%);
-    .summary {
-      display: none;
-    }
-    .full {
-      display: inherit;
-    }
-  }
 }
 .ng-invalid {
   box-shadow: 0 0 10px rgb(200, 0, 0);
 }
-
+.unlimited {
+  max-height: none !important;
+  max-width: none !important;
+}
 .json {
   .code;
   min-height: 30px;
   min-width: 400px
 }
 
-.unlimited {
-  max-height: none !important;
-  max-width: none !important;
-}
-
 button.anchor {
-  // vertical-align: top;
-  background: none;
-  border: none;
+  border-width: 0;
   text-decoration: underline;
   cursor: pointer;
   font-size: 100%;
@@ -110,9 +89,9 @@ body.admin {
   overflow-y: scroll;
 
   #flash {
-    display: none;
     position: fixed;
-    width: 100%;
+    left: 0;
+    right: 0;
     height: 23px;
     z-index: 100; // only needs to be greater than or equal to 1
     text-align: center;
@@ -124,25 +103,30 @@ body.admin {
     }
   }
   nav {
-    position: fixed;
-    width: 100%;
-    box-sizing: border-box;
+    left: 0;
+    right: 0;
+    // box-sizing: border-box;
     padding: 0 5px;
     font-size: 90%;
 
+    // shared
     span, a, button, img, select {
       display: inline-block;
       vertical-align: middle;
-      margin: 3px 0 0 0;
     }
     a, button.anchor {
       padding: 2px 6px 3px;
       border-radius: 2px;
     }
 
-    // background is especially dark for the root nav
+    // hierarchical
     &.root {
+      // background is especially dark for the root nav
       .background-gray(30%);
+
+      span, a, button, select {
+        margin: 3px 0 0 0;
+      }
 
       a, button.anchor {
         border-radius: 2px 2px 0 0;
@@ -154,16 +138,11 @@ body.admin {
     }
     &.sub {
       .background-gray(98%);
+      padding-top: 2px;
+      padding-bottom: 2px;
 
       border-bottom: 1px solid #BBB;
     }
-
-    // span.group {
-    //   border: 1px solid #CCC;
-    //   border-radius: 3px;
-    //   padding-left: 6px;
-    // }
-
   }
 
   // .status span {
@@ -175,9 +154,6 @@ body.admin {
   // }
 }
 
-section {
-  margin: 10px 0;
-}
 main {
   margin: 10px 0;
 
@@ -185,34 +161,27 @@ main {
   & > div, & > form, & > h2, & > h3, & > h4, & > a, & > p {
     padding: 0 10px;
   }
-  // Usually sections:
-  .box-common {
+  // main usually consists of sections
+  .box {
+    padding: 10px;
     background-color: white;
     border: 1px solid #EEE;
     border-width: 1px 0;
-    width: 100%;
+    // width: 100%;
 
-    & > table {
-      width: 100%;
-    }
-  }
-  .box {
-    .box-common;
-    padding: 10px;
     box-sizing: border-box;
-  }
-  .fill {
-    .box-common;
-    padding: 5px 0;
   }
   section {
     // mostly like box, except for no horizontal padding on the table, and let the table handle its own borders
-    overflow-x: auto;
-    width: 100%;
-    & > table {
-      margin: 5px 0;
-      width: 100%;
-    }
+    padding: 5px 0;
+    background-color: white;
+    border: 1px solid #EEE;
+    border-width: 1px 0;
+    // overflow-x: auto;
+    // width: 100%;
+    // & > table {
+    //   margin: 5px 0;
+    // }
   }
 }
 
@@ -223,11 +192,10 @@ table {
   }
   td, th {
     vertical-align: top;
-    // padding: 0px 4px 1px 1px;
+    padding-right: 6px;
   }
 }
 table.striped {
-  // th, td {}
   thead tr {
     background-color: white;
   }
@@ -243,22 +211,23 @@ table.striped {
     background-color: #FAFAFA;
   }
 }
+table.fill {
+  width: 100%;
+}
 table.lined {
   tbody td {
     border-top: 1px solid #FAFAFA;
   }
 }
 table.grid {
-  // even thead cells will be td's, to make things simple
   font-size: 90%;
   thead {
     font-weight: bold;
   }
-  td {
+  td, th {
     border: 1px solid #EEE;
-    padding: 2
   }
-  tr td {
+  tr td, tr th {
     &:first-child { border-left: 0; }
     &:last-child { border-right: 0; }
   }
@@ -270,10 +239,6 @@ table.padded {
   }
 }
 table.keyval {
-  // th {
-  //   padding-top: 4px;
-  //   border-bottom: 1px solid #999;
-  // }
   td:first-child {
     font-weight: bold;
   }
@@ -286,7 +251,6 @@ table.responses {
     background-color: #F8FFF8;
   }
 }
-
 
 // .record.delete {
 //   background-color: #DDD;
@@ -304,55 +268,6 @@ table.responses {
     white-space: normal;
     overflow: visible;
   }
-}
-.shadow {
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
-}
-
-input[type="checkbox"] + span {
-  // bold spans coming after checkboxes
-  display: inline-block;
-  font-weight: bold;
-  margin-left: .25em;
-}
-.vform, .hform {
-  span {
-    vertical-align: middle;
-  }
-  & > label {
-    margin: 4px 0;
-  }
-}
-.hform {
-  label {
-    span {
-      &:first-child {
-        display: inline-block;
-        font-weight: bold;
-        width: 75px;
-      }
-    }
-  }
-}
-.vform {
-  label {
-    span {
-      margin: 2px 4px;
-      &:first-child {
-        // only match spans that come first in a label so that radio btns with postfixed spans are not blocked and bolded
-        display: block;
-        font-weight: bold;
-        margin: 2px 0;
-      }
-    }
-  }
-}
-
-.truncate {
-  display: block;
-  max-width: 10em;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .array {

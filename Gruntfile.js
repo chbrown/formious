@@ -1,40 +1,47 @@
 /*jslint node: true */
 module.exports = function(grunt) {
+  // these don't have .min options
+  var misc_js = [
+    // 'static/lib/angular-plugins.js',
+    'static/lib/cookies.js',
+    'static/lib/forms.js',
+    'static/lib/textarea.js',
+    'static/lib/url.js',
+  ];
+  var static_max = [
+    'static/lib/underscore.js',
+    'static/lib/jquery.js',
+    'static/lib/angular.js',
+    'static/lib/ngStorage.js',
+    // from misc-js
+  ];
+  var static_min = static_max.map(function(filepath) {
+    return filepath.replace(/.js$/, '.min.js');
+  });
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     uglify: {
-      all: {
+      production: {
         options: {
-          // beautify: true,
           mangle: false,
+          // compress: true,
         },
         files: {
-          'static/compiled.js': [
-            'static/lib/underscore.min.js',
-            'static/lib/jquery.min.js',
-            'static/lib/angular.min.js',
-            'static/lib/ngStorage.min.js',
-            // from misc-js
-            'static/lib/cookies.js',
-            'static/lib/forms.js',
-            'static/lib/textarea.js',
-            'static/lib/url.js',
-            // 'static/lib/jquery-flags.js',
-            // 'static/lib/jquery-noty.js',
-            // 'static/lib/jquery-noty.theme.js',
-            // 'static/lib/layouts/top.js', // the required one for noty
-            // 'static/lib/layouts/bottomRight.js',
-            // 'static/lib/backbone.js',
-            // 'static/lib/handlebars.js',
-            // 'static/lib/templating.js',
-          ]
+          'static/lib.min.js': static_min.concat(misc_js),
         }
-      }
+      },
+      development: {
+        options: {
+          mangle: false,
+          beautify: true,
+        },
+        files: {
+          'static/lib.max.js': static_max.concat(misc_js),
+        }
+      },
     }
   });
 
   grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.registerTask('default', [
-    'uglify',
-  ]);
+  grunt.registerTask('default', ['uglify']);
 };

@@ -1,4 +1,17 @@
-/*jslint browser: true, devel: true */ /*globals _, angular, app, Url, p, fileinputText, summarizeResponse */
+/*jslint browser: true, devel: true */ /*globals _, angular, app, Url, p */
+
+var summarizeResponse = function(res) {
+  var parts = [];
+  if (res.status != 200) {
+    parts.push('Error ');
+  }
+  parts.push(res.status);
+  if (res.data) {
+    parts.push(': ' + res.data.toString());
+  }
+  return parts.join('');
+};
+
 
 var sync_options = function(record) {
   if (record.id) {
@@ -85,7 +98,7 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage, $
   // });
 
   $scope.sync = function(ev) {
-    p('sync', $scope.experiment);
+    // p('sync', $scope.experiment);
     var opts = sync_options($scope.experiment);
     var ajax_promise = $http(opts).then(function(res) {
       _.extend($scope.experiment, res.data);
@@ -193,7 +206,6 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage, $
       return stim.selected;
     }).forEach($scope.deleteStim);
   };
-
 
   // hack: wish angular.js would just wrap onchange events without the model requirement
   var upload_el = document.querySelector('#upload');
@@ -350,11 +362,26 @@ app.controller('adminTemplateEditor', function($scope, $http, $timeout, $flash) 
   };
 });
 
-app.controller('adminAdministratorEditor', function($scope, $http, $timeout, $flash) {
-  $scope.administrator = window.administrator;
+app.controller('adminAdministratorEditor', function($scope, $http, $timeout, $flash, $window, AWS) {
+  $scope.administrator = $window.administrator;
+  $scope.aws_accounts = $window.aws_accounts;
+  $scope.AWS = AWS;
+
   $scope.sync = function(ev) {
     var opts = sync_options($scope.administrator);
     var ajax_promise = $http(opts).then(function(res) {
+      return 'Saved';
+    }, function(res) {
+      var headers = res.headers();
+      if (headers.location) window.location = headers.location;
+      return summarizeResponse(res);
+    });
+    $flash.addPromise(ajax_promise);
+  };
+
+  $scope.addAWSAccount = function(account) {
+    var url = '/admin/administrators/' + $scope.administrator.id + '/aws/' + account.aws_account_id;
+    var ajax_promise = $http({method: 'POST', url: url, data: {priority: account.priority}}).then(function(res) {
       return 'Saved';
     }, function(res) {
       var headers = res.headers();

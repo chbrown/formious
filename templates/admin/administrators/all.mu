@@ -1,7 +1,7 @@
 <main ng-controller="adminTableCtrl">
   <h3>Administrators</h3>
 
-  <section class="fill">
+  <section>
     <table class="striped lined padded">
       <thead>
         <tr>
@@ -15,7 +15,7 @@
         <tr ng-repeat="administrator in table">
           <td>{{administrator.id}}</td>
           <td><a href="/admin/administrators/{{administrator.id}}">{{administrator.email}}</a></td>
-          <td>{{administrator.created}}</td>
+          <td><time>{{administrator.created | date:"yyyy-MM-dd"}}</time></td>
           <td>
             <ajaxform method="DELETE" action="/admin/administrators/{{administrator.id}}">
               <button>Delete</button>

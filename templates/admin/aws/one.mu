@@ -20,7 +20,7 @@
 
       <label>
         <div><b>Created</b></div>
-        {{aws_account.created}}
+        <time>{{aws_account.created | date:"medium"}}</time>
       </label>
 
       <p>
@@ -30,7 +30,7 @@
   </section>
 
   <h3>Mechanical Turk Hosts</h3>
-  <section class="fill">
+  <section>
     <table class="lined padded">
       <thead>
         <tr>
@@ -43,7 +43,7 @@
       <tbody>
         <tr ng-repeat="host in aws_account.hosts">
           <td>{{host.name}}</td>
-          <td>{{host.account_balance}}</td>
+          <td style="text-align: right">{{host.account_balance}}</td>
           <td><a href="/admin/aws/{{aws_account.id}}/hosts/{{host.name}}/HITs">View HITs</a></td>
           <td><a href="/admin/aws/{{aws_account.id}}/hosts/{{host.name}}/HITs/new">Create new HIT</a></td>
         </tr>

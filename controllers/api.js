@@ -64,7 +64,7 @@ R.post('/api/table', function(req, res) {
 //   // var unpaid_minimum = 49;
 //   new formidable.IncomingForm().parse(req, function(err, fields, files) {
 //     var workerId = fields.workerId || req.user_id;
-//     models.User.fromId(workerId, function(err, user) {
+//     models.User.one({id: workerId}, function(err, user) {
 //       if (err) return res.die('User query error: ' + err);
 //       if (!user) return res.die('No user "' + workerId + '" found.');
 

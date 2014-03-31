@@ -4,7 +4,6 @@ var amulet = require('amulet');
 var logger = require('loge');
 var querystring = require('querystring');
 var Router = require('regex-router');
-var sqlcmd = require('sqlcmd');
 var sv = require('sv');
 
 var models = require('../../lib/models');
@@ -18,9 +17,9 @@ var R = new Router(function(req, res) {
 /** GET /admin/participants
 list all participants */
 R.get(/^\/admin\/participants\/?$/, function(req, res, m) {
-  new sqlcmd.Select({table: 'participants'})
+  db.Select('participants')
   .orderBy('created DESC')
-  .execute(db, function(err, participants) {
+  .execute(function(err, participants) {
     if (err) return res.die('User query error: ' + err);
 
     req.ctx.participants = participants;

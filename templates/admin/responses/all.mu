@@ -31,7 +31,7 @@
         <td ng-repeat="key in value_keys" class="value">
           {{response.value[key]}}
         </td>
-        <td><time ng-model="response.created"></time></td>
+        <td><time>{{response.created | date:"yyyy-MM-dd"}}</time></td>
       </tr>
     </tbody>
   </table>

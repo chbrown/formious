@@ -20,7 +20,7 @@ R.any(/^\/admin\/aws\/(\d+)\/hosts\/([^\/]+)/, require('./hosts'));
 /** GET /admin/aws
 Index - list all AWS accounts and show creation link */
 R.get(/^\/admin\/aws(\/|.json)?$/, function(req, res) {
-  models.AWSAccount.find({}, function(err, aws_accounts) {
+  models.AWSAccount.all({}, function(err, aws_accounts) {
     if (err) return res.die(err);
 
     req.ctx.aws_accounts = aws_accounts;
@@ -43,9 +43,9 @@ R.post(/^\/admin\/aws\/?$/, function(req, res, m) {
 
     var fields = _.pick(data, models.AWSAccount.columns);
 
-    new sqlcmd.Insert({table: 'aws_accounts'})
+    db.Insert('aws_accounts')
     .set(fields)
-    .execute(db, function(err, rows) {
+    .execute(function(err, rows) {
       if (err) return res.die(err);
       res.json(rows[0]);
     });
@@ -56,7 +56,7 @@ R.post(/^\/admin\/aws\/?$/, function(req, res, m) {
 Show single AWS account */
 R.get(/^\/admin\/aws\/(\d+)$/, function(req, res, m) {
   var account_id = m[1];
-  models.AWSAccount.from({id: account_id}, function(err, aws_account) {
+  models.AWSAccount.one({id: account_id}, function(err, aws_account) {
     if (err) return res.die(err);
 
     req.ctx.aws_account = aws_account;
@@ -68,16 +68,16 @@ R.get(/^\/admin\/aws\/(\d+)$/, function(req, res, m) {
 Update new AWS account */
 R.patch(/^\/admin\/aws\/(\d+)$/, function(req, res, m) {
   var account_id = m[1];
-  // models.AWSAccount.from({id: m[1]}, function(err, aws_account) {
+  // models.AWSAccount.one({id: m[1]}, function(err, aws_account) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
     var fields = _.pick(data, models.AWSAccount.columns);
 
-    new sqlcmd.Update({table: 'aws_accounts'})
-    .setIf(fields)
+    db.Update('aws_accounts')
+    .set(fields)
     .where('id = ?', account_id)
-    .execute(db, function(err, rows) {
+    .execute(function(err, rows) {
       if (err) return res.die(err);
 
       res.json(_.extend(data, fields));
@@ -89,9 +89,9 @@ R.patch(/^\/admin\/aws\/(\d+)$/, function(req, res, m) {
 Delete single AWS account */
 R.delete(/^\/admin\/aws\/(\w*)$/, function(req, res, m) {
   var aws_account_id = m[1];
-  new sqlcmd.Delete({table: 'aws_accounts'})
+  db.Delete('aws_accounts')
   .where('id = ?', aws_account_id)
-  .execute(db, function(err, rows) {
+  .execute(function(err, rows) {
     if (err) return res.die(err);
     res.json({message: 'Deleted AWS Account.'});
   });

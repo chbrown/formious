@@ -13,7 +13,7 @@
 
       <label>
         <div><b>Created</b></div>
-        <time ng-model="template.created" class="datetime"></time>
+        <time>{{template.created | date:"medium"}}</time>
       </label>
 
       <label>

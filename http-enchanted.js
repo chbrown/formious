@@ -25,6 +25,17 @@ http.ServerResponse.prototype.adapt = function(req, ctx, templates) {
   }
 };
 
+http.ServerResponse.prototype.ngjson = function(http_status_code, obj) {
+  if (obj === undefined) {
+    obj = http_status_code;
+    http_status_code = 200;
+  }
+
+  var prefix = ")]}',\n";
+  var body = JSON.stringify(obj);
+  this.writeAll(http_status_code, 'application/json', prefix + body);
+};
+
 http.ServerResponse.prototype.die = function(http_code, err) { // function(/*, error_args... */) {
   // if only one argument is specified, it must be the error string
   // var error_args = Array.prototype.slice.call(arguments, 0);

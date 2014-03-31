@@ -13,7 +13,7 @@
 
 
 
-<section class="fill">
+<section>
   <h3>Responses</h3>
   <table>
     <thead>

@@ -1,13 +1,14 @@
 <main ng-controller="adminTableCtrl">
   <h3>Experiments</h3>
 
-  <section class="fill">
-    <table class="striped lined padded">
+  <section>
+    <table class="striped lined padded fill">
       <thead>
         <tr>
           <th>Name</th>
           <th>Created</th>
           <th>Owner</th>
+          <th></th>
           <th>Controls</th>
         </tr>
       </thead>
@@ -16,11 +17,13 @@
           <td title="{{experiment.id}}">
             <a href="/admin/experiments/{{experiment.id}}">{{experiment.name}}</a>
           </td>
-          <td><time ng-model="experiment.created" class="date"></time></td>
-          <td>{{experiment.administrator_id}}</td>
+          <td><time>{{experiment.created | date:"yyyy-MM-dd"}}</time></td>
+          <td><administrator id="experiment.administrator_id"></administrator></td>
+          <td>
+            <a href="/admin/experiments/{{experiment.id}}/responses">Responses</a> ({{experiment.count}})
+          </td>
           <td class="nowrap">
             <a href="/experiments/{{experiment.id}}">Public</a>
-            <a href="/admin/experiments/{{experiment.id}}/responses">Responses</a>
             <form method="POST" action="{{'/admin/experiments/' + experiment.id + '/clone'}}" style="display: inline">
               <button>Clone</button>
             </form>

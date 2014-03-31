@@ -20,6 +20,19 @@ CREATE TABLE administrators (
   created timestamp with time zone DEFAULT current_timestamp NOT NULL
 );
 
+CREATE TABLE aws_account_administrators (
+  id serial PRIMARY KEY,
+
+  aws_account_id integer REFERENCES aws_accounts(id) NOT NULL,
+  administrator_id integer REFERENCES administrators(id) NOT NULL,
+  priority integer,
+  -- role ...
+
+  created timestamp with time zone DEFAULT current_timestamp NOT NULL,
+
+  UNIQUE(aws_account_id, administrator_id) --, role
+);
+
 CREATE TABLE participants (
   id serial PRIMARY KEY,
 
@@ -97,10 +110,15 @@ CREATE TABLE stims (
 CREATE TABLE responses (
   id serial PRIMARY KEY,
 
-  -- there may be multiple respones per stim, so we don't
+  -- there may be multiple respones per stim, so we don't set a unique on (participant_id, stim_id)
   participant_id integer REFERENCES participants(id) NOT NULL,
   stim_id integer REFERENCES stims(id),
   value json,
+
+  -- having an optional assignment_id allows merging the data on mturk into the local database,
+  -- while the unique constraint prevents merging duplicates.
+  -- this will be NULL for most responses.
+  assignment_id text UNIQUE,
 
   created timestamp with time zone DEFAULT current_timestamp NOT NULL
 );

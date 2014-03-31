@@ -1,8 +1,8 @@
 <main ng-controller="adminTableCtrl">
   <h3>Templates</h3>
 
-  <section class="fill">
-    <table class="striped lined padded">
+  <section>
+    <table class="striped lined padded fill">
       <thead>
         <tr>
           <th>Name</th>
@@ -17,10 +17,10 @@
             <a href="/admin/templates/{{template.id}}">{{template.name}}</a>
           </td>
           <td><code>{{template.html.slice(0, 100)}}</code></td>
-          <td><time ng-model="template.created" class="date" /></td>
+          <td><time>{{template.created | date:"yyyy-MM-dd"}}</time></td>
           <td class="nowrap">
             <!-- angular being dumb about the action string -->
-            <form method="POST" action="{{'/admin/templates/' + template.id + '/clone'}}" style="display: inline">
+            <form method="POST" action="{{'/admin/templates/' + template.id + '/clone'}}">
               <button>Clone</button>
             </form>
             <ajaxform method="DELETE" action="/admin/templates/{{template.id}}">

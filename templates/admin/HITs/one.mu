@@ -11,14 +11,24 @@
   </section>
 
   <section class="box">
+    <h3>Import</h3>
+    <span class="help">Import data that was submitted to Mechanical Turk directly into the local database. Because each Assignment has a unique identifier (the AssignmentId field), duplicate imports will be ignored.</span>
+    <p>
+      <form method="POST" action="{{hit.HITId + '/import'}}">
+        <button>Import</button>
+      </form>
+    </p>
+  </section>
+
+  <section class="box">
     <h3>Export</h3>
     <div>
-      <a href="{{HITId}}.csv">HIT_{{HITId}}.csv</a>
-      &middot; <a href="{{HITId}}.csv?view">View</a>
+      <a href="{{hit.HITId}}.csv">HIT_{{hit.HITId}}.csv</a>
+      &middot; <a href="{{hit.HITId}}.csv?view">View</a>
     </div>
     <div>
-      <a href="{{HITId}}.tsv">HIT_{{HITId}}.tsv</a>
-      &middot; <a href="{{HITId}}.tsv?view">View</a>
+      <a href="{{hit.HITId}}.tsv">HIT_{{hit.HITId}}.tsv</a>
+      &middot; <a href="{{hit.HITId}}.tsv?view">View</a>
     </div>
   </section>
 

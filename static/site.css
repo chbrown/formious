@@ -1,6 +1,8 @@
 body{margin:0;font-family:"Lucida Grande",Arial,sans-serif}
 h1,h2,h3,h4,h5,h6{margin:.5ex 0}
 p{margin:1ex 0}
+section{margin:10px 0}
+form{display:inline-block}
 label span{vertical-align:baseline}
 label[disabled]{color:gray}
 input,textarea{vertical-align:baseline;margin:0;box-sizing:border-box}
@@ -8,48 +10,41 @@ input[type=checkbox],input[type=radio]{margin:1px .25ex}
 fieldset{margin:0 10px 10px 0;border:1px solid #CCC}
 .nowrap,time{white-space:nowrap}
 .code{font:9pt monospace}
-.help{cursor:pointer;color:#9a9a9a}
-.help .full{display:none}
-.help.expanded{color:#0d0d0d}
-.help.expanded .summary{display:none}
-.help.expanded .full{display:inherit}
+.shadow{box-shadow:0 0 5px rgba(0,0,0,.05)}
+.help{cursor:pointer}
 .ng-invalid{box-shadow:0 0 10px #c80000}
-.json{font:9pt monospace;min-height:30px;min-width:400px}
 .unlimited{max-height:none!important;max-width:none!important}
-button.anchor{background:0 0;border:0;text-decoration:underline;cursor:pointer;font-size:100%;padding:0}
+.json{font:9pt monospace;min-height:30px;min-width:400px}
+button.anchor{border-width:0;text-decoration:underline;cursor:pointer;font-size:100%;padding:0}
 body.admin{background-color:#fbfbfb;font-size:80%;overflow-y:scroll}
-body.admin #flash{display:none;position:fixed;width:100%;height:23px;z-index:100;text-align:center;color:#fff;background-color:rgba(0,0,0,.66);pointer-events:none}
+body.admin #flash{position:fixed;left:0;right:0;height:23px;z-index:100;text-align:center;color:#fff;background-color:rgba(0,0,0,.66);pointer-events:none}
 body.admin #flash img,body.admin #flash span{vertical-align:middle}
-body.admin nav{position:fixed;width:100%;box-sizing:border-box;padding:0 5px;font-size:90%}
-body.admin nav a,body.admin nav button,body.admin nav img,body.admin nav select,body.admin nav span{display:inline-block;vertical-align:middle;margin:3px 0 0}
+body.admin nav{left:0;right:0;padding:0 5px;font-size:90%}
+body.admin nav a,body.admin nav button,body.admin nav img,body.admin nav select,body.admin nav span{display:inline-block;vertical-align:middle}
 body.admin nav a,body.admin nav button.anchor{padding:2px 6px 3px;border-radius:2px}
 body.admin nav.root{background-color:#4d4d4d}
+body.admin nav.root a,body.admin nav.root button,body.admin nav.root select,body.admin nav.root span{margin:3px 0 0}
 body.admin nav.root a,body.admin nav.root button.anchor{border-radius:2px 2px 0 0;background-color:#cdcdcd}
 body.admin nav.root a.current,body.admin nav.root a:hover,body.admin nav.root button.anchor.current,body.admin nav.root button.anchor:hover{background-color:#fbfbfb}
-body.admin nav.sub{background-color:#fbfbfb;border-bottom:1px solid #BBB}
-main,section{margin:10px 0}
+body.admin nav.sub{background-color:#fbfbfb;padding-top:2px;padding-bottom:2px;border-bottom:1px solid #BBB}
+main{margin:10px 0}
 main>a,main>div,main>form,main>h2,main>h3,main>h4,main>p{padding:0 10px}
-main .box-common{background-color:#fff;border:1px solid #EEE;border-width:1px 0;width:100%}
-main .box-common>table{width:100%}
-main .box{background-color:#fff;border:1px solid #EEE;border-width:1px 0;width:100%;padding:10px;box-sizing:border-box}
-main .box>table{width:100%}
-main .fill{background-color:#fff;border:1px solid #EEE;border-width:1px 0;width:100%;padding:5px 0}
-main .fill>table{width:100%}
-main section{overflow-x:auto;width:100%}
-main section>table{margin:5px 0;width:100%}
+main .box{padding:10px;background-color:#fff;border:1px solid #EEE;border-width:1px 0;box-sizing:border-box}
+main section{padding:5px 0;background-color:#fff;border:1px solid #EEE;border-width:1px 0}
 table{border-collapse:collapse}
 table th{text-align:left}
-table td,table th{vertical-align:top}
+table td,table th{vertical-align:top;padding-right:6px}
 table.striped thead tr{background-color:#fff}
 table.striped tbody tr:nth-child(odd){background-color:#FCFCFC}
 table.striped tbody tr:nth-child(even){background-color:#FEFEFE}
 table.striped tfoot tr{background-color:#FAFAFA}
+table.fill{width:100%}
 table.lined tbody td{border-top:1px solid #FAFAFA}
 table.grid{font-size:90%}
 table.grid thead{font-weight:700}
-table.grid td{border:1px solid #EEE;padding:2}
-table.grid tr td:first-child{border-left:0}
-table.grid tr td:last-child{border-right:0}
+table.grid td,table.grid th{border:1px solid #EEE}
+table.grid tr td:first-child,table.grid tr th:first-child{border-left:0}
+table.grid tr td:last-child,table.grid tr th:last-child{border-right:0}
 table.padded tr td:first-child,table.padded tr th:first-child{padding-left:10px}
 table.padded tr td:last-child,table.padded tr th:last-child{padding-right:10px}
 table.keyval td:first-child{font-weight:700}
@@ -57,14 +52,6 @@ table.responses td.context{background-color:#FFF8F8}
 table.responses td.value{background-color:#F8FFF8}
 .hover-flow{word-wrap:break-word;text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
 .hover-flow:hover{white-space:normal;overflow:visible}
-.shadow{box-shadow:0 0 5px rgba(0,0,0,.05)}
-input[type=checkbox]+span{display:inline-block;font-weight:700;margin-left:.25em}
-.hform span,.vform span{vertical-align:middle}
-.hform>label,.vform>label{margin:4px 0}
-.hform label span:first-child{display:inline-block;font-weight:700;width:75px}
-.vform label span{margin:2px 4px}
-.vform label span:first-child{display:block;font-weight:700;margin:2px 0}
-.truncate{display:block;max-width:10em;overflow:hidden;text-overflow:ellipsis}
 .array .controls{text-align:right}
 .array .add{margin:0;padding:0;background:0 0;border:0;cursor:pointer}
 .array .add::before{content:"add "}

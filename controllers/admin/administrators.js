@@ -1,5 +1,6 @@
 /*jslint node: true */
 var _ = require('underscore');
+var async = require('async');
 var sv = require('sv');
 var amulet = require('amulet');
 var Router = require('regex-router');
@@ -8,7 +9,6 @@ var logger = require('loge');
 var models = require('../../lib/models');
 var hash = require('../../lib/hash');
 var db = require('../../lib/db');
-var sqlcmd = require('sqlcmd');
 
 // /admin/administrators/*
 var R = new Router(function(req, res) {
@@ -18,9 +18,9 @@ var R = new Router(function(req, res) {
 /** GET /admin/administrators
 list all administrators */
 R.get(/^\/admin\/administrators(\/|.json)?$/, function(req, res, m) {
-  new sqlcmd.Select({table: 'administrators'})
+  db.Select('administrators')
   .orderBy('created DESC')
-  .execute(db, function(err, administrators) {
+  .execute(function(err, administrators) {
     if (err) return res.die(err);
 
     req.ctx.administrators = administrators;
@@ -43,12 +43,12 @@ R.post(/^\/admin\/administrators\/?$/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    new sqlcmd.Insert({table: 'administrators'})
+    db.Insert('administrators')
     .set({
       email: data.email,
       password: hash.sha256(data.password),
     })
-    .execute(db, function(err, rows) {
+    .execute(function(err, rows) {
       if (err) return res.die(err);
 
       var url = '/admin/administrators/' + rows[0].id;
@@ -60,10 +60,23 @@ R.post(/^\/admin\/administrators\/?$/, function(req, res, m) {
 /** GET /admin/administrators/:administrator_id
 Show/edit single administrator */
 R.get(/^\/admin\/administrators\/(\d+)$/, function(req, res, m) {
-  models.Administrator.from({id: m[1]}, function(err, administrator) {
+  var administrator_id = m[1];
+  async.auto({
+    administrator: function(callback) {
+      models.Administrator.one({id: administrator_id}, callback);
+    },
+    aws_accounts: function(callback) {
+      db.Select('aws_account_administrators, aws_accounts')
+      .where('aws_account_administrators.aws_account_id = aws_accounts.id')
+      .where('aws_account_administrators.administrator_id = ?', administrator_id)
+      .orderBy('aws_account_administrators.priority DESC')
+      .execute(callback);
+    },
+  }, function(err, results) {
     if (err) return res.die(err);
 
-    req.ctx.administrator = _.omit(administrator, 'password');
+    req.ctx.administrator = _.omit(results.administrator, 'password');
+    req.ctx.aws_accounts = results.aws_accounts;
     res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/administrators/one.mu']);
   });
 });
@@ -71,7 +84,7 @@ R.get(/^\/admin\/administrators\/(\d+)$/, function(req, res, m) {
 /** PATCH /admin/administrators/:administrator_id
 Update existing administrator. */
 R.patch(/^\/admin\/administrators\/(\d+)$/, function(req, res, m) {
-  models.Administrator.from({id: m[1]}, function(err, administrator) {
+  models.Administrator.one({id: m[1]}, function(err, administrator) {
     if (err) return res.die(err);
     req.readData(function(err, data) {
       if (err) return res.die(err);
@@ -82,10 +95,10 @@ R.patch(/^\/admin\/administrators\/(\d+)$/, function(req, res, m) {
         fields.password = hash.sha256(data.password);
       }
 
-      var update = new sqlcmd.Update({table: 'administrators'})
+      db.Update('administrators')
       .where('id = ?', administrator.id)
-      .setIf(fields)
-      .execute(db, function(err, rows) {
+      .set(fields)
+      .execute(function(err, rows) {
         if (err) return res.die(err);
 
         res.json(_.extend(administrator, fields));
@@ -97,17 +110,43 @@ R.patch(/^\/admin\/administrators\/(\d+)$/, function(req, res, m) {
 /** DELETE /admin/administrators/:administrator_id
 Delete single administrator */
 R.delete(/^\/admin\/administrators\/(\d+)$/, function(req, res, m) {
-  models.Administrator.fromId(m[1], function(err, administrator) {
+  models.Administrator.delete({id: m[1]}, function(err, administrator) {
     if (err) return res.die(err);
 
-    // db.table('administrators').Delete()
-    new sqlcmd.Delete({table: 'administrators'})
-    .where('id = ?', administrator.id)
-    .execute(db, function(err) {
+    res.json({message: 'Deleted administrator.'});
+  });
+});
+
+// Administrator-AWS Account many2many relationship
+
+/** POST /admin/administrators/:administrator_id/aws/:aws_account_id
+Create administrator - AWS account link */
+R.post(/^\/admin\/administrators\/(\d+)\/aws\/(\d+)$/, function(req, res, m) {
+  req.readData(function(err, data) {
+    db.Insert('aws_account_administrators')
+    .set({
+      administrator_id: m[1],
+      aws_account_id: m[2],
+      priority: data.priority,
+    })
+    .execute(function(err, rows) {
       if (err) return res.die(err);
 
-      res.json({message: 'Deleted administrator: ' + administrator.email});
+      res.json({message: 'Linked AWS account.'});
     });
+  });
+});
+
+/** DELETE /admin/administrators/:administrator_id/aws/:aws_account_id
+Delete administrator - AWS account link */
+R.delete(/^\/admin\/administrators\/(\d+)\/aws\/(\d+)$/, function(req, res, m) {
+  db.Delete('aws_account_administrators')
+  .where('administrator_id = ?', m[1])
+  .where('aws_account_id = ?', m[2])
+  .execute(function(err) {
+    if (err) return res.die(err);
+
+    res.json({message: 'Disowned AWS account.'});
   });
 });
 

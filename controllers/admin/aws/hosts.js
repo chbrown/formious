@@ -4,7 +4,6 @@ var amulet = require('amulet');
 var async = require('async');
 var logger = require('loge');
 var Router = require('regex-router');
-var sqlcmd = require('sqlcmd');
 var sv = require('sv');
 var turk = require('turk');
 var url = require('url');
@@ -45,6 +44,19 @@ R.post(/GetAccountBalance/, function(req, res) {
     // {"Amount":"10000.000","CurrencyCode":"USD","FormattedPrice":"$10,000.00"}}}}
     // var available_price = result.GetAccountBalanceResult.AvailableBalance;
     res.json(result);
+  });
+});
+
+// index: list all HITs
+R.get(/HITs$/, function(req, res) {
+  req.turk.SearchHITs({SortDirection: 'Descending', PageSize: 100}, function(err, result) {
+    if (err) return res.die(err);
+
+    var hits = result.SearchHITsResult.HIT || [];
+    if (!Array.isArray(hits)) hits = [hits];
+
+    req.ctx.hits = hits;
+    amulet.stream(['admin/layout.mu', 'admin/HITs/all.mu'], req.ctx).pipe(res);
   });
 });
 
@@ -212,8 +224,64 @@ R.get(/HITs\/new/, function(req, res, m) {
   amulet.stream(['admin/layout.mu', 'admin/HITs/new.mu'], req.ctx).pipe(res);
 });
 
+// POST HITs/:HITId/import
+R.post(/HITs\/(\w+)\/import$/, function(req, res, m) {
+  var HITId = m[1];
+
+  var hit_params = {
+    HITId: HITId,
+    PageSize: 100,
+  };
+  req.turk.GetAssignmentsForHIT(hit_params, function(err, result) {
+    if (err) return res.die(err);
+
+    var assignments = result.GetAssignmentsForHITResult.Assignment || [];
+    if (!Array.isArray(assignments)) assignments = [assignments];
+    async.map(assignments, function(assignment, callback) {
+      // hack! (someone broke my xmlconv root namespace ignorance)
+
+      var response = {
+        value: _.pick(assignment, 'HITId', 'AutoApprovalTime', 'AcceptTime', 'SubmitTime', 'ApprovalTime'),
+        assignment_id: assignment.AssignmentId,
+      };
+
+      // pick off the answers
+      var answer_xml = assignment.Answer.replace(/xmlns=("|').+?\1/, '');
+      var answer_json = xmlconv(answer_xml, {convention: 'castle'});
+      answer_json.QuestionFormAnswers.Answer.forEach(function(answer) {
+        // TODO: handle other types of values besides FreeText
+        if (answer.QuestionIdentifier == 'stim_id') {
+          // stim_id isn't required, but if it's provided, it had better be an actual stim!
+          response.stim_id = answer.FreeText;
+        }
+        else {
+          response.value[answer.QuestionIdentifier] = answer.FreeText;
+        }
+      });
+
+      logger.warn('->', assignment.WorkerId, 'response', response);
+
+      models.Participant.addResponse({aws_worker_id: assignment.WorkerId}, response, function(err) {
+        if (err) {
+          if (err.message && err.message.match(/duplicate key value violates unique constraint/)) {
+            return callback(null, 0);
+          }
+          return callback(err);
+        }
+        callback(null, 1);
+      });
+    }, function(err, assignments) {
+      if (err) return res.die(err);
+
+      var added = assignments.filter(_.identity).length;
+      res.json({message: 'Imported ' + added + ' assignments'});
+    });
+  });
+
+});
+
 // HITs/show
-R.get(/HITs\/(\w+)/, function(req, res, m) {
+R.get(/HITs\/(\w+)$/, function(req, res, m) {
   var HITId = m[1];
   var hit_params = {HITId: HITId, PageSize: 100};
   // var sort_params = ;
@@ -242,9 +310,9 @@ R.get(/HITs\/(\w+)/, function(req, res, m) {
         return assignment.WorkerId;
       });
 
-      new sqlcmd.Select({table: 'participants'})
+      db.Select('participants')
       .whereIn('aws_worker_id', aws_worker_ids)
-      .execute(db, function(err, rows) {
+      .execute(function(err, rows) {
         if (err) return callback(err);
         callback(null, rows);
       });
@@ -259,9 +327,9 @@ R.get(/HITs\/(\w+)/, function(req, res, m) {
       var answer_xml = assignment.Answer.replace(/xmlns=("|').+?\1/, '');
       delete assignment.Answer;
 
-      logger.warn('answer_xml', answer_xml);
+      // logger.warn('answer_xml', answer_xml);
       var answer_json = xmlconv(answer_xml, {convention: 'castle'});
-      logger.warn('answer_json', answer_json);
+      // logger.warn('answer_json', answer_json);
       assignment.Answers = answer_json.QuestionFormAnswers.Answer;
 
       var participant = _.findWhere(results.participants, {aws_worker_id: assignment.WorkerId});
@@ -289,19 +357,6 @@ R.get(/HITs\/(\w+)/, function(req, res, m) {
   });
 });
 
-// index: list all HITs
-R.get(/HITs$/, function(req, res) {
-  req.turk.SearchHITs({SortDirection: 'Descending', PageSize: 100}, function(err, result) {
-    if (err) return res.die(err);
-
-    var hits = result.SearchHITsResult.HIT || [];
-    if (!Array.isArray(hits)) hits = [hits];
-
-    req.ctx.hits = hits;
-    amulet.stream(['admin/layout.mu', 'admin/HITs/all.mu'], req.ctx).pipe(res);
-  });
-});
-
 // /admin/aws/:account_id/hosts/:host
 module.exports = function(req, res, m) {
   // m is actually already set correctly; we just want to make sure
@@ -309,7 +364,7 @@ module.exports = function(req, res, m) {
   var account_id = m[1];
   var host_id = m[2];
 
-  models.AWSAccount.from({id: account_id}, function(err, aws_account) {
+  models.AWSAccount.one({id: account_id}, function(err, aws_account) {
     if (err) return res.die(err);
 
     req.turk = new turk.Connection(aws_account.access_key_id, aws_account.secret_access_key, {

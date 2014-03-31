@@ -1,4 +1,4 @@
-/*jslint browser: true */
+/*jslint browser: true */ /*globals _ */
 function time() { return (new Date()).getTime(); }
 var p = console.log.bind(console);
 var pushAll = function(array, xs) { return Array.prototype.push.apply(array, xs); };
@@ -24,7 +24,6 @@ function tabulate(objects, keys) {
   return makeTable(keys, rows);
 }
 
-// var FileInputHelper = function(input) {}
 function fileinputText(input, callback) {
   // callback: function(Error | null, file_contents, file_name, file_size)
   var files = input.files;
@@ -39,17 +38,6 @@ function fileinputText(input, callback) {
   reader.readAsText(file); //, opt_encoding
 }
 
-document.addEventListener('readystatechange', function(ev) {
-  var started = time();
-  if (document.readyState == 'interactive') {
-    var current_anchor = document.querySelector('a[href="' + window.location.pathname + '"]');
-    if (current_anchor) {
-      current_anchor.classList.add('current');
-    }
-    // else, maybe look for links that form some prefix of the current location?
-  }
-});
-
 var toMap = function(array, key, value) {
   var map = {};
   array.forEach(function(item) {
@@ -57,3 +45,12 @@ var toMap = function(array, key, value) {
   });
   return map;
 };
+
+var valueWhere = function(list, predicate, prop) {
+  var match = _.findWhere(list, predicate);
+  if (match) {
+    return match[prop];
+  }
+};
+
+Error.stackTraceLimit = 50;

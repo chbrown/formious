@@ -1,26 +1,23 @@
 <main ng-controller="adminTableCtrl">
   <h3>AWS Accounts</h3>
 
-  <section class="fill">
+  <section>
     <table class="striped lined padded">
       <thead>
         <tr>
-          <th></th>
           <th>Name</th>
           <th>Access Key ID</th>
           <th>Secret Access Key</th>
           <th>Created</th>
           <th></th>
-          <th></th>
         </tr>
       </thead>
       <tbody>
         <tr ng-repeat="aws_account in table">
-          <td>{{aws_account.id}}</td>
           <td><a href="/admin/aws/{{aws_account.id}}">{{aws_account.name}}</a></td>
           <td>{{aws_account.access_key_id}}</td>
           <td>{{aws_account.secret_access_key}}</td>
-          <td>{{aws_account.created}}</td>
+          <td><time>{{aws_account.created | date:"yyyy-MM-dd"}}</time></td>
           <td>
             <ajaxform method="DELETE" action="/admin/aws/{{aws_account.id}}">
               <button>Delete</button>

@@ -1,15 +1,7 @@
 <div ng-controller="adminExperimentEditor">
   <nav fixedflow class="sub">
     <div style="float: right">
-      <select ng-model="$storage.aws_account_id"
-        ng-options="aws_account.id as aws_account.name for aws_account in AWS.accounts">
-        <option value="">-- AWS Account --</option>
-      </select>
-      <select ng-model="$storage.aws_host"
-        ng-options="host.name as host.name for host in AWS.hosts">
-        <option value="">-- Host --</option>
-      </select>
-      <a href="/admin/aws/{{$storage.aws_account_id}}/hosts/{{$storage.aws_host}}/HITs/new?ExternalURL={{localizeUrl('/experiments/' + experiment.id)}}">MTurk</a>
+      <a href="/admin/experiments/{{experiment.id}}/mturk">MTurk...</a>
 
       <a href="/experiments/{{experiment.id}}">Public</a>
       <a href="/admin/experiments/{{experiment.id}}/responses">Responses</a>
@@ -69,50 +61,48 @@
       </form>
     </section>
 
-    <section>
-      <table class="striped grid padded">
-        <thead>
-          <tr>
-            <td></td>
-            <td>template</td>
-            <td ng-repeat="parameter in experiment.parameters">
-              {{parameter}}
-            </td>
-            <td>order</td>
-            <td></td>
-          </tr>
-        </thead>
-        <tbody checkbox-sequence>
-          <tr ng-repeat="stim in stims" ng-class="{selected: stim.selected}">
-            <td style="padding-right: 5px"><input type="checkbox" ng-model="stim.selected"></td>
-            <td class="nowrap">
-              <!-- <select ng-model="stim.template_id"
-                ng-options="template.id as template.name for template in templates"></select> -->
-              <a href="/admin/templates/{{stim.template_id}}">{{Templates.lookup[stim.template_id]}}</a>
-            </td>
-            <!-- <td ng-repeat="parameter in experiment.parameters">
-              <input ng-model="stim.context[parameter]" />
-            </td> -->
-            <!-- <td>
-              <textarea enhance json-transform ng-model="stim.context" class="json"></textarea>
-            </td> -->
-            <td ng-repeat="parameter in experiment.parameters">
-              <span ng-bind="stim.context[parameter]"></span>
-            </td>
-            <td>
-              <!-- <input ng-model="stim.view_order" type="number" style="width: 50px"> -->
-              <span ng-bind="stim.view_order"></span>
-            </td>
-            <td class="nowrap">
-              <!-- <button ng-click="previewStim(stim)">Preview</button> -->
-              <a href="/experiments/{{experiment.id}}/stims/{{stim.id}}">Public</a>
-              <button ng-click="syncStim(stim, $event)">Save</button>
-              <button ng-click="deleteStim(stim, $event)">Delete</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
+    <table class="striped grid padded fill">
+      <thead>
+        <tr>
+          <td></td>
+          <td>template</td>
+          <td ng-repeat="parameter in experiment.parameters">
+            {{parameter}}
+          </td>
+          <td>order</td>
+          <td></td>
+        </tr>
+      </thead>
+      <tbody checkbox-sequence>
+        <tr ng-repeat="stim in stims" ng-class="{selected: stim.selected}">
+          <td style="padding-right: 5px"><input type="checkbox" ng-model="stim.selected"></td>
+          <td class="nowrap">
+            <!-- <select ng-model="stim.template_id"
+              ng-options="template.id as template.name for template in templates"></select> -->
+            <a href="/admin/templates/{{stim.template_id}}">{{Templates.lookup[stim.template_id]}}</a>
+          </td>
+          <!-- <td ng-repeat="parameter in experiment.parameters">
+            <input ng-model="stim.context[parameter]" />
+          </td> -->
+          <!-- <td>
+            <textarea enhance json-transform ng-model="stim.context" class="json"></textarea>
+          </td> -->
+          <td ng-repeat="parameter in experiment.parameters">
+            <span ng-bind="stim.context[parameter]"></span>
+          </td>
+          <td>
+            <!-- <input ng-model="stim.view_order" type="number" style="width: 50px"> -->
+            <span ng-bind="stim.view_order"></span>
+          </td>
+          <td class="nowrap">
+            <!-- <button ng-click="previewStim(stim)">Preview</button> -->
+            <a href="/experiments/{{experiment.id}}/stims/{{stim.id}}">Public</a>
+            <button ng-click="syncStim(stim, $event)">Save</button>
+            <button ng-click="deleteStim(stim, $event)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <p>
       <button ng-click="addStim({}, $event)">+ empty row</button>
       <button ng-click="deleteSelectedStims($event)">- delete selection</button>
