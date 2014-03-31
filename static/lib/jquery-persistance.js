@@ -1,5 +1,5 @@
-// "use strict"; /*jslint indent: 2 */ /*globals $ */
-/** Copyright 2012-2013, Christopher Brown <io@henrian.com>, MIT Licensed
+/*jslint browser: true */ /*globals $ */
+/** Copyright 2012-2014, Christopher Brown <io@henrian.com>, MIT Licensed
 
 https://raw.github.com/chbrown/misc-js/master/jquery.persistence.js
 
@@ -34,9 +34,11 @@ function findUniqueSelector(el) {
   // var candidates = [];
   for (var k in keys) {
     if (el[keys[k]]) {
-      var candidate = prefix + el[keys[k]];
-      if (isUniqueSelector(candidate))
+      // var candidate = prefix + el[keys[k]];
+      var candidate = el[keys[k]];
+      if (isUniqueSelector(candidate)) {
         return candidate;
+      }
       // candidates.push(prefix + el[keys[k]]);
     }
 

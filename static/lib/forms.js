@@ -1,5 +1,5 @@
-// "use strict"; /*jslint indent: 2 */
-/** Copyright (c) 2013 Christopher Brown <io@henrian.com>, MIT Licensed
+/*jslint browser: true */
+/** Copyright 2013-2014 Christopher Brown <io@henrian.com>, MIT Licensed
 
 https://raw.github.com/chbrown/misc-js/master/forms.js
 http://chbrown.github.io/misc-js/forms.js

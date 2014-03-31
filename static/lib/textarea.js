@@ -1,5 +1,5 @@
 /*jslint browser: true */
-/** Copyright (c) 2013 Christopher Brown <io@henrian.com>, MIT Licensed
+/** Copyright 2013-2014 Christopher Brown <io@henrian.com>, MIT Licensed
 
 https://raw.github.com/chbrown/misc-js/master/textarea.js
 http://chbrown.github.io/misc-js/textarea.js
@@ -387,6 +387,9 @@ var Textarea = (function() {
     // the shadow div should now have resized to match the contents of the textarea, so we measure it
     var shadow_style = window.getComputedStyle(this.shadow);
     var shadow_height = shadow_style.height;
+
+    // todo: if the user disables auto-expanding with max-height, make sure the shadow
+    // does not take up too much space
 
     if (!isNaN(max_height) && shadow_style.height > max_height) {
       this.el.style.overflow = 'auto';

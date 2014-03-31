@@ -1,5 +1,5 @@
-// "use strict"; /*jslint indent: 2 */ /*globals $ */
-/** Copyright 2011-2013, Christopher Brown <io@henrian.com>, MIT Licensed
+/*jslint browser: true */ /*globals $ */
+/** Copyright 2011-2014, Christopher Brown <io@henrian.com>, MIT Licensed
 
 https://raw.github.com/chbrown/misc-js/master/jquery-panes.js
 

@@ -1,5 +1,5 @@
-//"use strict"; /*jslint indent: 2 */
-/** Copyright 2012-2013, Christopher Brown <io@henrian.com>, MIT Licensed
+/*jslint browser: true */
+/** Copyright 2012-2014, Christopher Brown <io@henrian.com>, MIT Licensed
 
 Cookies v0.3.0 API:
 

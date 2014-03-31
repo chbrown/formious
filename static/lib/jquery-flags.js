@@ -1,5 +1,5 @@
-// "use strict"; /*jslint indent: 2 */ /*globals $, _ */
-/** Copyright 2011-2013, Christopher Brown <io@henrian.com>, MIT Licensed
+/*jslint browser: true */ /*globals $ */
+/** Copyright 2011-2014, Christopher Brown <io@henrian.com>, MIT Licensed
 
 https://raw.github.com/chbrown/misc-js/master/jquery.flags.js
 
@@ -25,7 +25,21 @@ Suggested CSS:
 
 */
 var Flag = (function($) {
-  var measureBox = function($el) {
+  // lib functions
+  function extend(target /*, sources... */) {
+    if (target === undefined) target = {};
+    // var sources = Array.prototype.slice.call(arguments, 1);
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (source.hasOwnProperty(key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  }
+  function measureBox($el) {
     return {
       width: $el.width() +
         parseInt($el.css('border-left-width'), 10) +
@@ -38,7 +52,8 @@ var Flag = (function($) {
         parseInt($el.css('padding-top'), 10) +
         parseInt($el.css('padding-bottom'), 10)
     };
-  };
+  }
+
   // var nesw2trbl = {n: 't', e: 'r', s: 'b', w: 'l'}; // cardinal direction to css direction
   var opposite_of = {t: 'b', r: 'l', b: 't', l: 'r'}; // opposite sides
   var full = {t: 'top', r: 'right', b: 'bottom', l: 'left', c: 'center', m: 'middle'};
@@ -74,7 +89,8 @@ var Flag = (function($) {
     */
     this.target = target;
 
-    this.opts = _.extend({
+
+    this.opts = extend({
       anchor: 'r',
       parent: document.body
     }, opts);
