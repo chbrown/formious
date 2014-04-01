@@ -180,7 +180,7 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
       if (err) return res.die(err);
 
       // results.experiment.name
-      var stringifier = new sv.Stringifier();
+      var stringifier = new sv.Stringifier({peek: 100});
       stringifier.pipe(res);
       results.responses.forEach(function(response) {
         var row = {
