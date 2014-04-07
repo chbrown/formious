@@ -2,7 +2,7 @@
 module.exports = function(grunt) {
   // these don't have .min options
   var misc_js = [
-    // 'static/lib/angular-plugins.js',
+    // 'static/lib/angular-plugins.js', // include manually due to frequent changes
     'static/lib/cookies.js',
     'static/lib/forms.js',
     'static/lib/textarea.js',
@@ -12,6 +12,7 @@ module.exports = function(grunt) {
     'static/lib/underscore.js',
     'static/lib/jquery.js',
     'static/lib/angular.js',
+    'static/lib/angular-resource.js',
     'static/lib/ngStorage.js',
     // from misc-js
   ];
