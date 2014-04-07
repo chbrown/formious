@@ -110,6 +110,8 @@ body.admin {
     // box-sizing: border-box;
     padding: 0 5px;
     font-size: 90%;
+    // for some reason elements with opacity < 1.0 float to the top, but a non-zero z-index here fixes that
+    z-index: 100;
 
     // shared
     span, a, button, img, select {

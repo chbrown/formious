@@ -19,7 +19,7 @@ button.anchor{border-width:0;text-decoration:underline;cursor:pointer;font-size:
 body.admin{background-color:#fbfbfb;font-size:80%;overflow-y:scroll}
 body.admin #flash{position:fixed;left:0;right:0;height:23px;z-index:100;text-align:center;color:#fff;background-color:rgba(0,0,0,.66);pointer-events:none}
 body.admin #flash img,body.admin #flash span{vertical-align:middle}
-body.admin nav{left:0;right:0;padding:0 5px;font-size:90%}
+body.admin nav{left:0;right:0;padding:0 5px;font-size:90%;z-index:100}
 body.admin nav a,body.admin nav button,body.admin nav img,body.admin nav select,body.admin nav span{display:inline-block;vertical-align:middle}
 body.admin nav a,body.admin nav button.anchor{padding:2px 6px 3px;border-radius:2px}
 body.admin nav.root{background-color:#4d4d4d}
