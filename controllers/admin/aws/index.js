@@ -11,7 +11,7 @@ var models = require('../../../lib/models');
 var db = require('../../../lib/db');
 
 var R = new Router(function(req, res) {
-  res.die(404, 'No resource at: ' + req.url);
+  res.status(404).die('No resource at: ' + req.url);
 });
 
 // add single sub-controller (which handles per-account API calls, as opposed to the CRUD-type things below)
@@ -24,7 +24,7 @@ R.get(/^\/admin\/aws(\/|.json)?$/, function(req, res) {
     if (err) return res.die(err);
 
     req.ctx.aws_accounts = aws_accounts;
-    res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/aws/all.mu']);
+    amulet.stream(['admin/layout.mu', 'admin/aws/all.mu'], req.ctx).pipe(res);
   });
 });
 

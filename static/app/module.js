@@ -1,28 +1,10 @@
 /*jslint browser: true, devel: true */ /*globals _, angular, Url, p, toMap, time, valueWhere */
 
-var app = angular.module('app', ['ngStorage', 'misc-js/angular-plugins']);
+var app = angular.module('app', ['ngResource', 'ngStorage', 'misc-js/angular-plugins']);
 
 app.filter('valueWhere', function() {
   return valueWhere;
 });
-
-// app.directive('map', function() {
-//   /** Use like:
-//     <div map="user_lookup" key="14"></div>
-//   */
-//   return {
-//     restrict: 'A',
-//     scope: {
-//       key: '=',
-//       map: '=',
-//     },
-//     link: function(scope, el, attrs) {
-//       if (scope.map) {
-//         el.text(scope.map[scope.key]);
-//       }
-//     }
-//   };
-// });
 
 app.directive('nav', function($window) {
   // the most specific link inside each nav that matches
@@ -50,15 +32,17 @@ app.directive('nav', function($window) {
   };
 });
 
-app.directive('administrator', function(Administrators) {
+app.directive('administrator', function(Administrator) {
   return {
     restrict: 'E',
+    template: '<span ng-bind="administrator.name"></span>',
     scope: {
       id: '=',
     },
     link: function(scope, el, attrs) {
-      var name = valueWhere(Administrators.all, scope.id, 'name');
-      el.text(name);
+      var administrators = Administrator.query(function() {
+        scope.administrator = _.findWhere(administrators, {id: scope.id});
+      });
     }
   };
 });

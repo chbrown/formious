@@ -8,7 +8,7 @@
           <th>ID</th>
           <th>Email</th>
           <th>Created</th>
-          <th>Controls</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>

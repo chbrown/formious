@@ -11,7 +11,7 @@ var db = require('../../lib/db');
 
 // /admin/participants/*
 var R = new Router(function(req, res) {
-  res.die(404, 'No resource at: ' + req.url);
+  res.status(404).die('No resource at: ' + req.url);
 });
 
 /** GET /admin/participants
@@ -33,7 +33,7 @@ R.get(/^\/admin\/participants\/(\w+)$/, function(req, res, m) {
   var _id = m[1];
   models.User.findById(_id, function(err, user) {
     if (err) return res.die('User query error: ' + err);
-    if (!user) return res.die(404, 'Could not find User: ' + _id);
+    if (!user) return res.status(404).die('Could not find User: ' + _id);
 
     user.responses.sort(function(l, r) {
       return (r.created || 0) - (l.created || 0);
@@ -58,7 +58,7 @@ R.get(/^\/admin\/participants\/(\d+)\/edit$/, function(req, res, m) {
   var user_id = m[1];
   models.User.findById(_id, function(err, user) {
     if (err) return res.die('User query error: ' + err);
-    if (!user) return res.die(404, 'Could not find User: ' + _id);
+    if (!user) return res.status(404).die('Could not find User: ' + _id);
 
     req.ctx.user = user;
     amulet.stream(['admin/layout.mu', 'admin/participants/edit.mu'], req.ctx).pipe(res);
@@ -71,7 +71,7 @@ R.post(/^\/admin\/participants\/(\w+)$/, function(req, res, m) {
   var _id = m[1];
   models.User.findById(_id, function(err, user) {
     if (err) return res.die('User query error: ' + err);
-    if (!user) return res.die(404, 'Could not find User: ' + _id);
+    if (!user) return res.status(404).die('Could not find User: ' + _id);
 
     req.readData(function(err, fields) {
       if (err) return res.die(err);
@@ -94,7 +94,7 @@ R.delete(/^\/admin\/participants\/(\w*)$/, function(req, res, m) {
   var _id = m[1];
   models.User.findById(_id, function(err, user) {
     if (err) return res.die('User query error: ' + err);
-    if (!user) return res.die(404, 'Could not find User: ' + _id);
+    if (!user) return res.status(404).die('Could not find User: ' + _id);
 
     user.remove(function(err) {
       if (err) return res.die('User remove error: ' + err);

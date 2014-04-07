@@ -2,7 +2,6 @@ body{margin:0;font-family:"Lucida Grande",Arial,sans-serif}
 h1,h2,h3,h4,h5,h6{margin:.5ex 0}
 p{margin:1ex 0}
 section{margin:10px 0}
-form{display:inline-block}
 label span{vertical-align:baseline}
 label[disabled]{color:gray}
 input,textarea{vertical-align:baseline;margin:0;box-sizing:border-box}
@@ -15,6 +14,7 @@ fieldset{margin:0 10px 10px 0;border:1px solid #CCC}
 .ng-invalid{box-shadow:0 0 10px #c80000}
 .unlimited{max-height:none!important;max-width:none!important}
 .json{font:9pt monospace;min-height:30px;min-width:400px}
+button{margin:0}
 button.anchor{border-width:0;text-decoration:underline;cursor:pointer;font-size:100%;padding:0}
 body.admin{background-color:#fbfbfb;font-size:80%;overflow-y:scroll}
 body.admin #flash{position:fixed;left:0;right:0;height:23px;z-index:100;text-align:center;color:#fff;background-color:rgba(0,0,0,.66);pointer-events:none}

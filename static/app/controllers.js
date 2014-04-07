@@ -49,67 +49,52 @@ app.controller('adminResponsesCtrl', function($scope) {
   $scope.value_keys = Object.keys(values);
 });
 
-app.controller('adminExperimentEditor', function($scope, $http, $localStorage, $flash,
-  Templates, Administrators, AWS) {
-  $scope.$storage = $localStorage.$default({expand_experiment_html: false});
-
-  $scope.AWS = AWS;
-  $scope.Administrators = Administrators;
-  $scope.Templates = Templates;
-
-  var experiment_url = Url.parse(window.location);
-  experiment_url.path += '.json';
-  $http({method: 'GET', url: experiment_url}).then(function(res) {
-    $scope.experiment = res.data.experiment;
-  }, p);
-
-  var stims_url = Url.parse(window.location);
-  stims_url.path += '/stims.json';
-  $http({method: 'GET', url: stims_url.toString()}).then(function(res) {
-    $scope.stims = res.data.stims;
-  }, p);
-
-  $scope.localizeUrl = function(url) {
-    return Url.parse(url).toString();
-  };
-
-  $scope.keydown = function(ev) {
-    if (ev.which == 83 && ev.metaKey) {
-      // command+S
-      ev.preventDefault();
-      $scope.sync(ev);
+app.controller('stimCtrl', function($scope, $http, $flash) {
+  $scope.addStim = function(stim) {
+    // stim has properties like: context, template_id, view_order
+    // cache view_order?
+    if (stim.view_order === undefined) {
+      stim.view_order = $scope.next_view_order();
     }
+
+    $scope.syncStim(stim);
+    $scope.stims.push(stim);
   };
 
-  // var workerId = this.model.get('WorkerId');
-  // var worker = new MTWorker({id: workerId});
-  // worker.fetch({
-  //   success: function(model, user, options) {
-  //     // infer required columns from list of responses
-  //     var keys = {};
-  //     user.responses.slice(0, 50).forEach(function(response) {
-  //       _.extend(keys, response);
-  //     });
-  //     // create table and simply put where the button was
-  //     var cols = _.keys(keys).sort();
-  //     var table_html = tabulate(user.responses, cols);
-  //     $(ev.target).replaceWith(table_html);
-  //   }
-  // });
+  $scope.addStims = function(data) {
+    // data is an object with columns: [String] and rows: [Object]
 
-  $scope.sync = function(ev) {
-    // p('sync', $scope.experiment);
-    var opts = sync_options($scope.experiment);
-    var ajax_promise = $http(opts).then(function(res) {
-      _.extend($scope.experiment, res.data);
-      return 'Saved';
-    }, function(res) {
-      var headers = res.headers();
-      if (headers.location) window.location = headers.location;
-      // otherwise is error:
-      return summarizeResponse(res);
+    // update the parameters first
+    var new_parameters = _.difference(data.columns, $scope.experiment.parameters, 'template');
+    $scope.experiment.parameters = $scope.experiment.parameters.concat(new_parameters);
+
+    // and then add the stims to the table
+    var view_order = $scope.next_view_order();
+    data.rows.forEach(function(row) {
+      var stim = {context: _.omit(row, 'template')};
+      if (row.template) {
+        var template = _.findWhere(Template.query(), {name: row.template});
+        if (template) {
+          stim.template_id = template.id;
+        }
+        // todo: handle templates that cannot be found
+      }
+      stim.view_order = view_order++;
+      $scope.addStim(stim);
     });
-    $flash.addPromise(ajax_promise);
+  };
+
+  $scope.deleteStim = function(stim) {
+    var url = window.location + '/stims/' + stim.id;
+    $http({method: 'DELETE', url: url}).then(function(res) {
+      var index = $scope.stims.indexOf(stim);
+      $scope.stims.splice(index, 1);
+    }, p);
+  };
+  $scope.deleteSelectedStims = function(ev) {
+    $scope.stims.filter(function(stim) {
+      return stim.selected;
+    }).forEach($scope.deleteStim);
   };
 
   $scope.syncStim = function(stim, ev) {
@@ -135,76 +120,53 @@ app.controller('adminExperimentEditor', function($scope, $http, $localStorage, $
     }
   };
 
-  // $scope.previewStim = function(stim) {
-  //   // p('previewStim', stim);
-  //   $scope.show_preview = true;
+});
 
-  //   // the stim template html will expect window.context
-  //   var iframe = document.querySelector('iframe');
-  //   // var iframe_window = iframe.contentWindow;
-  //   // var iframe_document = iframe_window.document;
-  //   p('iframe', iframe, iframe.contentWindow);
+app.controller('adminExperimentEditor', function($scope, $http, $localStorage, $flash,
+  Experiment, Template, Administrator, AWSAccount, Stim) {
+  $scope.$storage = $localStorage.$default({expand_experiment_html: false});
 
-  //   // iframe.contentWindow.document.addEventListener('load', function(ev) {
-  //   // });
+  var current_url = Url.parse(window.location);
+  var experiment_id = _.last(current_url.path.split('/'));
 
-  //   iframe.src = '/admin/experiments/' + $scope.experiment.id + '/stims/' + stim.id + '/render';
-  //   // iframe.contentWindow.init(stim.context);
-  //   // $http({method: 'GET', url: '/admin/templates/' + stim.template_id + '.json'}).then(function(res) {
-  //   //   iframe_document.body.innerHTML = res.data.template.html;
-  //   // }, p);
-  // };
+  $scope.experiment = Experiment.get({id: experiment_id});
+  $scope.aws_accounts = AWSAccount.query();
+  $scope.administrators = Administrator.query();
+  $scope.templates = Template.query();
+
+  // experiment_url.path += '.json';
+  // var stims_url = new Url(current_url);
+  $scope.stims = Stim.query({experiment_id: experiment_id});
+
+  $scope.localizeUrl = function(url) {
+    return Url.parse(url).toString();
+  };
+
+  $scope.keydown = function(ev) {
+    if (ev.which == 83 && ev.metaKey) {
+      // command+S
+      ev.preventDefault();
+      $scope.sync(ev);
+    }
+  };
+
+  $scope.sync = function(ev) {
+    var opts = sync_options($scope.experiment);
+    var ajax_promise = $http(opts).then(function(res) {
+      _.extend($scope.experiment, res.data);
+      return 'Saved';
+    }, function(res) {
+      var headers = res.headers();
+      if (headers.location) window.location = headers.location;
+      // otherwise is error:
+      return summarizeResponse(res);
+    });
+    $flash.addPromise(ajax_promise);
+  };
 
   $scope.next_view_order = function() {
     var max_view_order = Math.max.apply(Math, _.pluck($scope.stims, 'view_order'));
     return Math.max(max_view_order, 0) + 1;
-  };
-
-  $scope.addStim = function(stim) {
-    // stim has properties like: context, template_id, view_order
-    // cache view_order?
-    if (stim.view_order === undefined) {
-      stim.view_order = $scope.next_view_order();
-    }
-
-    $scope.syncStim(stim);
-    $scope.stims.push(stim);
-  };
-
-  $scope.addStims = function(data) {
-    // data is an object with columns: [String] and rows: [Object]
-
-    // update the parameters first
-    var new_parameters = _.difference(data.columns, $scope.experiment.parameters, 'template');
-    $scope.experiment.parameters = $scope.experiment.parameters.concat(new_parameters);
-
-    // and then add the stims to the table
-    var view_order = $scope.next_view_order();
-    data.rows.forEach(function(row) {
-      var stim = {context: _.omit(row, 'template')};
-      if (row.template) {
-        var template = _.findWhere(Templates.all, {name: row.template});
-        if (template) {
-          stim.template_id = template.id;
-        }
-        // todo: handle templates that cannot be found
-      }
-      stim.view_order = view_order++;
-      $scope.addStim(stim);
-    });
-  };
-
-  $scope.deleteStim = function(stim) {
-    var url = window.location + '/stims/' + stim.id;
-    $http({method: 'DELETE', url: url}).then(function(res) {
-      var index = $scope.stims.indexOf(stim);
-      $scope.stims.splice(index, 1);
-    }, p);
-  };
-  $scope.deleteSelectedStims = function(ev) {
-    $scope.stims.filter(function(stim) {
-      return stim.selected;
-    }).forEach($scope.deleteStim);
   };
 
   // hack: wish angular.js would just wrap onchange events without the model requirement
@@ -405,4 +367,8 @@ app.controller('adminAssignmentEditor', function($scope, $http, $flash) {
     });
     $flash.addPromise(ajax_promise);
   };
+});
+
+app.controller('accessTokensCtrl', function($scope, AccessToken) {
+  $scope.access_tokens = AccessToken.query();
 });

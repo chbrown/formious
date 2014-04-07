@@ -27,7 +27,7 @@
         <label>
           <div><b>Owner</b></div>
           <select ng-model="experiment.administrator_id"
-            ng-options="administrator.id as administrator.email for administrator in Administrators.all"></select>
+            ng-options="administrator.id as administrator.email for administrator in administrators"></select>
         </label>
 
         <div>
@@ -79,7 +79,10 @@
           <td class="nowrap">
             <!-- <select ng-model="stim.template_id"
               ng-options="template.id as template.name for template in templates"></select> -->
-            <a href="/admin/templates/{{stim.template_id}}">{{Templates.lookup[stim.template_id]}}</a>
+
+            <a href="/admin/templates/{{stim.template_id}}">
+              {{templates | valueWhere:{id: stim.template_id}:'name'}}
+            </a>
           </td>
           <!-- <td ng-repeat="parameter in experiment.parameters">
             <input ng-model="stim.context[parameter]" />
@@ -96,7 +99,7 @@
           </td>
           <td class="nowrap">
             <!-- <button ng-click="previewStim(stim)">Preview</button> -->
-            <a href="/experiments/{{experiment.id}}/stims/{{stim.id}}">Public</a>
+            <a href="/experiments/{{experiment.id}}/stims/{{stim.id}}?workerId=testing">Public</a>
             <button ng-click="syncStim(stim, $event)">Save</button>
             <button ng-click="deleteStim(stim, $event)">Delete</button>
           </td>
@@ -116,6 +119,3 @@
     </div>
   </main>
 </div>
-<script>
-var experiment = <%& serialize(experiment) %>;
-</script>

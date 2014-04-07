@@ -9,7 +9,7 @@ var roots = {
 };
 
 var R = new Router(function(req, res) {
-  res.die(404, 'No resource at: ' + req.url);
+  res.status(404).die('No resource at: ' + req.url);
 });
 
 var serve = function(req, res, root, path) {
@@ -18,7 +18,7 @@ var serve = function(req, res, root, path) {
       res.die(err.status || 500, 'send error: ' + err.message);
     })
     .on('directory', function() {
-      res.die(404, 'No resource at: ' + req.url);
+      res.status(404).die('No resource at: ' + req.url);
     })
     .pipe(res);
 };

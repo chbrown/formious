@@ -16,7 +16,7 @@
   <nav fixedflow class="root">
     <div style="float: right">
       <a href="/admin/administrators/<% current_user.id %>">me</a>
-      <ajaxform method="POST" action="/admin/logout">
+      <ajaxform method="POST" action="/admin/logout" style="display: inline">
         <button class="anchor">Logout</button>
       </ajaxform>
     </div>

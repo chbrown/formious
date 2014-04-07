@@ -8,7 +8,8 @@
           <th>Name</th>
           <th>HTML</th>
           <th>Created</th>
-          <th>Controls</th>
+          <th></th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -18,11 +19,13 @@
           </td>
           <td><code>{{template.html.slice(0, 100)}}</code></td>
           <td><time>{{template.created | date:"yyyy-MM-dd"}}</time></td>
-          <td class="nowrap">
+          <td>
             <!-- angular being dumb about the action string -->
             <form method="POST" action="{{'/admin/templates/' + template.id + '/clone'}}">
               <button>Clone</button>
             </form>
+          </td>
+          <td>
             <ajaxform method="DELETE" action="/admin/templates/{{template.id}}">
               <button>Delete</button>
             </ajaxform>

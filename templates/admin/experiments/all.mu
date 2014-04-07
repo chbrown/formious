@@ -9,7 +9,9 @@
           <th>Created</th>
           <th>Owner</th>
           <th></th>
-          <th>Controls</th>
+          <th></th>
+          <th></th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -24,9 +26,13 @@
           </td>
           <td class="nowrap">
             <a href="/experiments/{{experiment.id}}">Public</a>
-            <form method="POST" action="{{'/admin/experiments/' + experiment.id + '/clone'}}" style="display: inline">
+          </td>
+          <td>
+            <form method="POST" action="{{'/admin/experiments/' + experiment.id + '/clone'}}">
               <button>Clone</button>
             </form>
+          </td>
+          <td>
             <ajaxform method="DELETE" action="/admin/experiments/{{experiment.id}}">
               <button>Delete</button>
             </ajaxform>

@@ -1,54 +1,49 @@
 /*jslint browser: true */ /*globals app, p, toMap */
 
-// app.service('Administrator', function($resource) {
-//   return $resource('/api/administrators/:id', {
-//     id: '@id',
-//   });
-// });
-
-app.service('Templates', function($http, Cache) {
-  // services are singletons, so we use this. to access its scope
-  var self = this;
-
-  Cache.get('templates', function() {
-    return $http({method: 'GET', url: '/admin/templates.json'}).then(function(res) {
-      return res.data.templates;
-    });
-  }).then(function(res) {
-    self.all = res;
-    self.lookup = toMap(self.all, 'id', 'name');
-  }, function(res) {
-    p('Error', res);
+app.service('AccessToken', function($resource) {
+  return $resource('/api/access_tokens/:id', {
+    id: '@id',
   });
 });
 
-app.service('Administrators', function($http, Cache) {
-  var self = this;
-
-  Cache.get('administrators', function() {
-    return $http({method: 'GET', url: '/admin/administrators.json'}).then(function(res) {
-      return res.data.administrators;
-    });
-  }).then(function(res) {
-    self.all = res;
-    self.lookup = toMap(self.all, 'id', 'email');
-  }, function(res) {
-    p('Error', res);
+app.service('Administrator', function($resource) {
+  // map: {'id': 'email'}
+  return $resource('/api/administrators/:id', {
+    id: '@id',
   });
 });
 
-app.service('AWS', function($http, Cache) {
-  var self = this;
-  this.hosts = [{name: 'deploy'}, {name: 'sandbox'}];
+app.service('AWSAccount', function($resource) {
+  // map: {'id': 'name'}
+  // this.hosts = [{name: 'deploy'}, {name: 'sandbox'}];
+  return $resource('/api/aws_accounts/:id', {
+    id: '@id',
+  });
+});
 
-  Cache.get('aws', function() {
-    return $http({method: 'GET', url: '/admin/aws.json'}).then(function(res) {
-      return res.data.aws_accounts;
-    });
-  }).then(function(res) {
-    self.all = res;
-    self.lookup = toMap(self.all, 'id', 'name');
-  }, function(res) {
-    p('Error', res);
+app.service('Experiment', function($resource) {
+  return $resource('/api/experiments/:id', {
+    id: '@id',
+  });
+});
+
+app.service('Participant', function($resource) {
+  return $resource('/api/participants/:id', {
+    id: '@id',
+  });
+});
+
+app.service('Stim', function($resource) {
+  // map: {'id': 'name'}
+  return $resource('/api/experiments/:experiment_id/stims/:id', {
+    experiment_id: '@experiment_id',
+    id: '@id',
+  });
+});
+
+app.service('Template', function($resource) {
+  // map: {'id': 'name'}
+  return $resource('/api/templates/:id', {
+    id: '@id',
   });
 });

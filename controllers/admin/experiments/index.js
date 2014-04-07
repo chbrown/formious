@@ -11,20 +11,12 @@ var db = require('../../../lib/db');
 var models = require('../../../lib/models');
 
 var R = new Router(function(req, res) {
-  res.die(404, 'No resource at: ' + req.url);
+  res.status(404).die('No resource at: ' + req.url);
 });
 
-var stims_controller = require('./stims');
 /** ANY /admin/experiments/:experiment_id/stims/*
 Forward /stims/ requests to sub controller */
-R.any(/^\/admin\/experiments\/(\d+)\/stims/, function(req, res, m) {
-  models.Experiment.one({id: m[1]}, function(err, experiment) {
-    if (err) return res.die(err);
-
-    req.experiment = experiment;
-    stims_controller(req, res);
-  });
-});
+R.any(/^\/admin\/experiments\/(\d+)\/stims/, require('./stims'));
 
 /** GET /admin/experiments
 list all Experiments */
@@ -49,47 +41,8 @@ R.get(/^\/admin\/experiments\/new/, function(req, res, m) {
     administrator_id: req.ctx.current_user.id,
     parameters: [],
   };
-  res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/experiments/one.mu']);
+  amulet.stream(['admin/layout.mu', 'admin/experiments/one.mu'], req.ctx).pipe(res);
 });
-
-/** POST /admin/experiments
-Create new experiment. */
-R.post(/^\/admin\/experiments\/?$/, function(req, res, m) {
-  req.readData(function(err, data) {
-    if (err) return res.die(err);
-
-    var fields = _.pick(data, models.Experiment.columns);
-
-    db.Insert('experiments')
-    .set(fields)
-    .execute(function(err, rows) {
-      if (err) return res.die(err);
-
-      res.redirect(200, '/admin/experiments/' + rows[0].id);
-    });
-  });
-});
-
-/** POST /admin/experiments/:id/clone
-Create new experiment with properties of original (but not stims), and go to it. */
-R.post(/^\/admin\/experiments\/(\d+)\/clone$/, function(req, res, m) {
-  models.Experiment.one({id: m[1]}, function(err, experiment) {
-    if (err) return res.die(err);
-
-    var fields = _.pick(experiment, models.Experiment.columns);
-    fields.name += ' copy';
-
-    db.Insert('experiments')
-    .set(fields)
-    .execute(function(err, rows) {
-      if (err) return res.die(err);
-
-      // redirect so that we aren't sitting with the previous template's id in the url
-      res.redirect('/admin/experiments/' + rows[0].id);
-    });
-  });
-});
-
 
 /** GET /admin/experiments/:experiment_id
 Edit existing Experiment (or just view) */
@@ -98,41 +51,7 @@ R.get(/^\/admin\/experiments\/(\d+)(.json)?$/, function(req, res, m) {
     if (err) return res.die(err);
 
     req.ctx.experiment = experiment;
-    res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/experiments/one.mu']);
-  });
-});
-
-/** PATCH /admin/experiments/:experiment_id
-Update existing Experiment */
-R.patch(/^\/admin\/experiments\/(\d+)/, function(req, res, m) {
-  // models.Experiment.one({id: m[1]}, function(err, experiment) {
-  var experiment = {id: m[1]};
-  req.readData(function(err, data) {
-    if (err) return res.die(err);
-
-    var fields = _.pick(data, models.Experiment.columns);
-
-    db.Update('experiments')
-    .set(fields)
-    .where('id = ?', experiment.id)
-    .execute(function(err, rows) {
-      if (err) return res.die(err);
-
-      // not sure how I feel about this special header business
-      res.json(_.extend(experiment, fields));
-    });
-  });
-});
-
-/** DELETE /admin/experiments/:experiment_id
-Delete Experiment */
-R.delete(/^\/admin\/experiments\/(\d+)$/, function(req, res, m) {
-  db.Delete('experiments')
-  .where('id = ?', m[1])
-  .execute(function(err, rows) {
-    if (err) return res.die(err);
-
-    res.json({message: 'Deleted experiment'});
+    amulet.stream(['admin/layout.mu', 'admin/experiments/one.mu'], req.ctx).pipe(res);
   });
 });
 
@@ -185,7 +104,5 @@ R.get(/^\/admin\/experiments\/(\d+)\/mturk(\?|$)/, function(req, res, m) {
     res.redirect(redirect);
   });
 });
-
-
 
 module.exports = R.route.bind(R);

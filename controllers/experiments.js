@@ -13,7 +13,7 @@ var flat = require('../lib/flat');
 var models = require('../lib/models');
 
 var R = new Router(function(req, res) {
-  res.die(404, 'No resource at: ' + req.url);
+  res.status(404).die('No resource at: ' + req.url);
 });
 
 /** the Amazon Mechanical Turk frame will give us the following variables:
@@ -123,10 +123,10 @@ R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
 
         var ajax = req.headers['x-requested-with'] == 'XMLHttpRequest';
         if (ajax) {
-          res.redirect(200, redirect_to);
+          res.status(200).redirect(redirect_to);
         }
         else {
-          // res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/experiments/stims/all.mu']);
+          // ['admin/layout.mu', 'admin/experiments/stims/all.mu'];
           // res.json({message: 'Inserted response.'});
           res.redirect(redirect_to);
         }
@@ -191,6 +191,7 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
           stim_id: response.stim_id,
           created: response.created,
         };
+        // merge those static values with the dynamic context and value hashes
         _.extend(row, response.context, response.value);
 
         stringifier.write(row);

@@ -13,7 +13,7 @@
 
       <label>
         <div><b>Created</b></div>
-        <time>{{template.created | date:"medium"}}</time>
+        <time>{{template.created | date:"yyyy-MM-dd"}}</time>
       </label>
 
       <label>

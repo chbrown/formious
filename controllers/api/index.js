@@ -4,12 +4,20 @@ var Router = require('regex-router');
 var streaming = require('streaming');
 var sv = require('sv');
 var _ = require('underscore');
+var models = require('../../lib/models');
 
-var excel = require('../lib/excel');
+var excel = require('../../lib/excel');
 
 var R = new Router(function(req, res) {
-  res.die(404, 'No resource at: ' + req.url);
+  res.status(404).die('No resource at: ' + req.url);
 });
+
+R.any(/^\/api\/access_tokens/, require('./access_tokens'));
+R.any(/^\/api\/administrators/, require('./administrators'));
+R.any(/^\/api\/aws_accounts/, require('./aws_accounts'));
+R.any(/^\/api\/experiments/, require('./experiments'));
+R.any(/^\/api\/participants/, require('./participants'));
+R.any(/^\/api\/templates/, require('./templates'));
 
 var parseSvStream = function(readable, callback) {
   // callback: function(Error, {columns: [String], rows: [Object]})
@@ -52,39 +60,24 @@ R.post('/api/table', function(req, res) {
       logger.debug('/api/table: finished reading sv: %d rows, %d columns',
         result.rows.length, result.columns.length);
 
-    // var columns = ;
+      // var columns = ;
       res.json(result);
     });
   }
 });
 
-// R.post(/^\/addbonus$/, function(req, res, m) {
-//   var default_bonus = 0.25;
-//   var max_bonus = 0.25;
-//   // var unpaid_minimum = 49;
-//   new formidable.IncomingForm().parse(req, function(err, fields, files) {
-//     var workerId = fields.workerId || req.user_id;
-//     models.User.one({id: workerId}, function(err, user) {
-//       if (err) return res.die('User query error: ' + err);
-//       if (!user) return res.die('No user "' + workerId + '" found.');
-
-//       var amount = Math.min(parseFloat(fields.amount || default_bonus), max_bonus);
-//       var previous_bonus_owed = user.bonus_owed;
-
-//       user.bonus_owed = previous_bonus_owed + amount;
-//       user.save(function(err) {
-//         if (err) {
-//           logger.error(err);
-//           res.json({success: false, message: 'Error assigning bonus: ' + err.toString(), amount: amount});
-//         }
-//         else {
-//           logger.info('User bonus_owed increased from ' + previous_bonus_owed +
-//             ' by ' + amount + ' to ' + (previous_bonus_owed + amount) + '.');
-//           res.json({success: true, message: 'Bonus awarded: $' + amount, amount: amount});
-//         }
-//       });
-//     });
-//   });
-// });
-
-module.exports = R.route.bind(R);
+module.exports = function(req, res) {
+  // require administrator privileges
+  var token = req.cookies.get('administrator_token');
+  models.Administrator.fromToken(token, function(err, administrator) {
+    if (err) {
+      res.redirect('/login');
+    }
+    else {
+      // authentication succeeded!
+      req.administrator = administrator;
+      req.ctx = {current_user: administrator};
+      R.route(req, res);
+    }
+  });
+};

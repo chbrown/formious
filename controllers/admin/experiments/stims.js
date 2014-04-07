@@ -1,5 +1,6 @@
 /*jslint node: true */
 var _ = require('underscore');
+var amulet = require('amulet');
 var logger = require('loge');
 var Router = require('regex-router');
 var sqlcmd = require('sqlcmd');
@@ -8,7 +9,7 @@ var db = require('../../../lib/db');
 var models = require('../../../lib/models');
 
 var R = new Router(function(req, res) {
-  res.die(404, 'No resource at: ' + req.url);
+  res.status(404).die('No resource at: ' + req.url);
 });
 
 /** GET /admin/experiments/:experiment_id/stims
@@ -22,7 +23,7 @@ R.get(/stims(\/|.json)?$/, function(req, res, m) {
     if (err) return res.die(err);
 
     req.ctx.stims = stims;
-    res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/experiments/stims/all.mu']);
+    amulet.stream(['admin/layout.mu', 'admin/experiments/stims/all.mu'], req.ctx).pipe(res);
   });
 });
 
@@ -35,7 +36,6 @@ R.post(/stims\/?$/, function(req, res, m) {
     var fields = _.pick(data, models.Stim.columns);
 
     db.Insert('stims')
-    .set({experiment_id: req.experiment.id})
     // also need to generate view_order!?
     .set(fields)
     .execute(function(err, rows) {
@@ -53,7 +53,7 @@ R.get(/stims\/(\d+)$/, function(req, res, m) {
     if (err) return res.die(err);
 
     req.ctx.stim = stim;
-    res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/experiments/stims/one.mu']);
+    amulet.stream(['admin/layout.mu', 'admin/experiments/stims/one.mu'], req.ctx).pipe(res);
   });
 });
 
@@ -100,5 +100,12 @@ R.delete(/stims\/(\d+)$/, function(req, res, m) {
   });
 });
 
-// req.experiment should be set before this module is called
-module.exports = R.route.bind(R);
+module.exports = function(req, res, m) {
+  // var m = req.url.match(/^\/admin\/experiments\/(\d+)\/stims/);
+  models.Experiment.one({id: m[1]}, function(err, experiment) {
+    if (err) return res.die(err);
+    // set req.experiment before running anything else
+    req.experiment = experiment;
+    R.route(req, res);
+  });
+};

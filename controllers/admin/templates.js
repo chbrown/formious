@@ -9,7 +9,7 @@ var db = require('../../lib/db');
 var models = require('../../lib/models');
 
 var R = new Router(function(req, res) {
-  res.die(404, 'No resource at: ' + req.url);
+  res.status(404).die('No resource at: ' + req.url);
 });
 
 /** GET /admin/templates
@@ -22,7 +22,7 @@ R.get(/^\/admin\/templates(\/|.json)?$/, function(req, res, m) {
 
     req.ctx.templates = templates;
 
-    res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/templates/all.mu']);
+    amulet.stream(['admin/layout.mu', 'admin/templates/all.mu'], req.ctx).pipe(res);
   });
 });
 
@@ -80,7 +80,7 @@ R.get(/^\/admin\/templates\/(\d+)(.json)?$/, function(req, res, m) {
     if (err) return res.die(err);
 
     req.ctx.template = template;
-    res.adapt(req, req.ctx, ['admin/layout.mu', 'admin/templates/one.mu']);
+    amulet.stream(['admin/layout.mu', 'admin/templates/one.mu'], req.ctx).pipe(res);
   });
 });
 

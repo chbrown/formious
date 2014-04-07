@@ -33,7 +33,7 @@ Compared to aws/index.js, all actions under these routes are assured the existen
 */
 
 var R = new Router(function(req, res) {
-  res.die(404, 'No resource at: ' + req.url);
+  res.status(404).die('No resource at: ' + req.url);
 });
 
 R.post(/GetAccountBalance/, function(req, res) {
