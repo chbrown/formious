@@ -1,6 +1,7 @@
 /*jslint browser: true, devel: true */ /*globals _, angular, app, Url, p */
 
 var summarizeResponse = function(res) {
+  // p('summarizeResponse', res);
   var parts = [];
   if (res.status != 200) {
     parts.push('Error ');
@@ -109,11 +110,8 @@ app.controller('stimCtrl', function($scope, $http, $flash) {
     }
 
     var ajax_promise = $http(opts).then(function(res) {
-      _.extend(stim, res.data);
       return 'Saved';
-    }, function(res) {
-      return summarizeResponse(res);
-    });
+    }, summarizeResponse);
 
     if (ev) {
       $flash.addPromise(ajax_promise);
@@ -300,8 +298,22 @@ app.controller('adminHITReviewer', function($scope, $http, $localStorage) {
   $scope.assignments = window.assignments;
 });
 
-app.controller('adminTemplateEditor', function($scope, $http, $timeout, $flash) {
-  $scope.template = window.template;
+app.controller('adminTemplatesCtrl', function($scope, Template) {
+  $scope.templates = Template.query();
+
+  $scope.delete = function(template) {
+    // is this really the best way?
+    template.$delete(function() {
+      $scope.templates = Template.query();
+    });
+  };
+});
+app.controller('adminTemplateCtrl', function($scope, $http, $flash, Template) {
+  var current_url = Url.parse(window.location);
+  var template_id = _.last(current_url.path.split('/'));
+
+  $scope.template = Template.get({id: template_id});
+
   $scope.keydown = function(ev) {
     if (ev.which == 83 && ev.metaKey) {
       // command+S
@@ -311,46 +323,59 @@ app.controller('adminTemplateEditor', function($scope, $http, $timeout, $flash) 
   };
 
   $scope.sync = function(ev) {
-    var opts = sync_options($scope.template);
-    var ajax_promise = $http(opts).then(function(res) {
+    var promise = $scope.template.$save().then(function(res) {
+      // refactor this url / history handling somehow
+      var template_url = '/admin/templates/' + $scope.template.id;
+      p('sync', $scope.template);
+      history.replaceState(null, '', template_url);
       return 'Saved';
-    }, function(res) {
-      var headers = res.headers();
-      if (headers.location) window.location = headers.location;
-
-      return summarizeResponse(res);
-    });
-    $flash.addPromise(ajax_promise);
+    }, summarizeResponse);
+    $flash.addPromise(promise);
   };
 });
 
-app.controller('adminAdministratorEditor', function($scope, $http, $timeout, $flash, $window, AWS) {
-  $scope.administrator = $window.administrator;
-  $scope.aws_accounts = $window.aws_accounts;
-  $scope.AWS = AWS;
-
-  $scope.sync = function(ev) {
-    var opts = sync_options($scope.administrator);
-    var ajax_promise = $http(opts).then(function(res) {
-      return 'Saved';
-    }, function(res) {
-      var headers = res.headers();
-      if (headers.location) window.location = headers.location;
-      return summarizeResponse(res);
+app.controller('adminAdministratorsCtrl', function($scope, Administrator) {
+  $scope.administrators = Administrator.query();
+  $scope.delete = function(administrator) {
+    administrator.$delete(function() {
+      $scope.administrators = Administrator.query();
     });
-    $flash.addPromise(ajax_promise);
+  };
+});
+
+app.controller('adminAdministratorCtrl', function($scope, $http, $flash, $window,
+    Administrator, AWSAccount, AWSAccountAdministrator) {
+  var current_url = Url.parse(window.location);
+  var administrator_id = _.last(current_url.path.split('/'));
+
+  $scope.administrator = Administrator.get({id: administrator_id});
+  $scope.aws_accounts = AWSAccount.query();
+  $scope.administrator_aws_accounts = AWSAccountAdministrator.query({administrator_id: administrator_id});
+
+  $scope.sync = function() {
+    // var opts = sync_options($scope.administrator);
+    var promise = $scope.administrator.$save().then(function(res) {
+      return 'Saved';
+    }, summarizeResponse);
+    $flash.addPromise(promise);
   };
 
-  $scope.addAWSAccount = function(account) {
-    var url = '/admin/administrators/' + $scope.administrator.id + '/aws/' + account.aws_account_id;
-    var ajax_promise = $http({method: 'POST', url: url, data: {priority: account.priority}}).then(function(res) {
-      return 'Saved';
-    }, function(res) {
-      var headers = res.headers();
-      if (headers.location) window.location = headers.location;
-      return summarizeResponse(res);
+  $scope.unlinkAWSAccount = function(account) {
+    account.$delete(function() {
+      $scope.administrator_aws_accounts = AWSAccountAdministrator.query({administrator_id: administrator_id});
     });
-    $flash.addPromise(ajax_promise);
+  };
+
+  $scope.linkAWSAccount = function(account) {
+    var administrator_aws_account = new AWSAccountAdministrator(account);
+    administrator_aws_account.administrator_id = $scope.administrator.id;
+    p('linkAWSAccount', administrator_aws_account, account, $scope.administrator);
+    var promise = administrator_aws_account.$save(function() {
+      $scope.administrator_aws_accounts = AWSAccountAdministrator.query({administrator_id: administrator_id});
+    }).then(function() {
+      return 'Saved';
+    }, summarizeResponse);
+    $flash.addPromise(promise);
   };
 });
 
@@ -371,4 +396,9 @@ app.controller('adminAssignmentEditor', function($scope, $http, $flash) {
 
 app.controller('accessTokensCtrl', function($scope, AccessToken) {
   $scope.access_tokens = AccessToken.query();
+  $scope.delete = function(access_token) {
+    access_token.$delete(function() {
+      $scope.access_tokens = AccessToken.query();
+    });
+  };
 });

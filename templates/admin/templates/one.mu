@@ -1,4 +1,4 @@
-<div ng-controller="adminTemplateEditor">
+<div ng-controller="adminTemplateCtrl">
   <nav fixedflow class="sub">
     <span>Template: <b>{{template.name}}</b></span>
     <button ng-click="sync($event)" id="save_button">Save</button>
@@ -26,7 +26,3 @@
     </form>
   </main>
 </div>
-
-<script>
-var template = <%& serialize(template) %>;
-</script>

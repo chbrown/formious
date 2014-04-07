@@ -26,10 +26,8 @@
           <td><time>{{access_token.expires | date:"yyyy-MM-dd"}}</time></td>
           <td><time>{{access_token.redacted | date:"yyyy-MM-dd"}}</time></td>
           <td><time>{{access_token.created | date:"yyyy-MM-dd"}}</time></td>
-          <td class="nowrap">
-            <ajaxform method="DELETE" action="/api/access_tokens/{{access_token.id}}">
-              <button>Delete</button>
-            </ajaxform>
+          <td>
+            <button ng-click="delete(access_token)">Delete</button>
           </td>
         </tr>
       </tbody>

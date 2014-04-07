@@ -21,6 +21,13 @@ app.service('AWSAccount', function($resource) {
   });
 });
 
+app.service('AWSAccountAdministrator', function($resource) {
+  return $resource('/api/administrators/:administrator_id/aws_accounts/:aws_account_id', {
+    administrator_id: '@administrator_id',
+    aws_account_id: '@aws_account_id',
+  });
+});
+
 app.service('Experiment', function($resource) {
   return $resource('/api/experiments/:id', {
     id: '@id',
@@ -46,4 +53,5 @@ app.service('Template', function($resource) {
   return $resource('/api/templates/:id', {
     id: '@id',
   });
+  // }, {'delete': {method:'DELETE'} });
 });

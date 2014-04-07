@@ -22,7 +22,7 @@ R.get(/^\/api\/templates$/, function(req, res, m) {
 /** GET /api/templates/new
 Generate blank template. */
 R.get(/^\/api\/templates\/new$/, function(req, res, m) {
-  res.json({});
+  res.json({html: ''});
 });
 
 /** POST /api/templates

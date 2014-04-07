@@ -1,4 +1,4 @@
-<main ng-controller="adminTableCtrl">
+<main ng-controller="adminAdministratorsCtrl">
   <h3>Administrators</h3>
 
   <section>
@@ -12,7 +12,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="administrator in table">
+        <tr ng-repeat="administrator in administrators">
           <td>{{administrator.id}}</td>
           <td><a href="/admin/administrators/{{administrator.id}}">{{administrator.email}}</a></td>
           <td><time>{{administrator.created | date:"yyyy-MM-dd"}}</time></td>
@@ -28,6 +28,3 @@
 
   <a href="/admin/administrators/new">Create new administrator</a>
 </main>
-<script>
-var table = <%& serialize(administrators) %>;
-</script>

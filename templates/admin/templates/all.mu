@@ -1,4 +1,4 @@
-<main ng-controller="adminTableCtrl">
+<main ng-controller="adminTemplatesCtrl">
   <h3>Templates</h3>
 
   <section>
@@ -13,7 +13,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="template in table">
+        <tr ng-repeat="template in templates">
           <td title="{{template.id}}">
             <a href="/admin/templates/{{template.id}}">{{template.name}}</a>
           </td>
@@ -26,9 +26,7 @@
             </form>
           </td>
           <td>
-            <ajaxform method="DELETE" action="/admin/templates/{{template.id}}">
-              <button>Delete</button>
-            </ajaxform>
+            <button ng-click="delete(template)">Delete</button>
           </td>
         </tr>
       </tbody>
@@ -37,6 +35,3 @@
 
   <a href="/admin/templates/new">Create new template</a>
 </main>
-<script>
-var table = <%& serialize(templates) %>;
-</script>

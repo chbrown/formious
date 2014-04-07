@@ -54,6 +54,7 @@ Show existing administrator. */
 R.get(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
   models.Administrator.one({id: m[1]}, function(err, administrator) {
     if (err) return res.die(err);
+    administrator = _.omit(administrator, 'password');
     res.json(administrator);
   });
 });
@@ -92,6 +93,19 @@ R.delete(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
 
 // Administrator-AWS Account many2many relationship
 
+/** GET /api/administrators/:administrator_id/aws_accounts
+List administrator-AWS accounts linked to this administrator */
+R.get(/^\/api\/administrators\/(\d+)\/aws_accounts$/, function(req, res, m) {
+  db.Select('aws_account_administrators, aws_accounts')
+  .where('aws_account_administrators.aws_account_id = aws_accounts.id')
+  .where('aws_account_administrators.administrator_id = ?', m[1])
+  .orderBy('aws_account_administrators.priority DESC')
+  .execute(function(err, rows) {
+    if (err) return res.die(err);
+    res.ngjson(rows);
+  });
+});
+
 /** POST /api/administrators/:administrator_id/aws_accounts/:aws_account_id
 Create administrator-AWS account link */
 R.post(/^\/api\/administrators\/(\d+)\/aws_accounts\/(\d+)$/, function(req, res, m) {
@@ -112,7 +126,7 @@ R.post(/^\/api\/administrators\/(\d+)\/aws_accounts\/(\d+)$/, function(req, res,
 
 /** DELETE /api/administrators/:administrator_id/aws_accounts/:aws_account_id
 Delete administrator-AWS account link */
-R.delete(/^\/api\/administrators\/(\d+)\/aws\/(\d+)$/, function(req, res, m) {
+R.delete(/^\/api\/administrators\/(\d+)\/aws_accounts\/(\d+)$/, function(req, res, m) {
   db.Delete('aws_account_administrators')
   .where('administrator_id = ?', m[1])
   .where('aws_account_id = ?', m[2])
