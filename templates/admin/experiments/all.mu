@@ -1,4 +1,4 @@
-<main ng-controller="adminTableCtrl">
+<main ng-controller="adminExperimentsCtrl">
   <h3>Experiments</h3>
 
   <section>
@@ -15,14 +15,14 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="experiment in table">
+        <tr ng-repeat="experiment in experiments">
           <td title="{{experiment.id}}">
             <a href="/admin/experiments/{{experiment.id}}">{{experiment.name}}</a>
           </td>
           <td><time>{{experiment.created | date:"yyyy-MM-dd"}}</time></td>
           <td><administrator id="experiment.administrator_id"></administrator></td>
           <td>
-            <a href="/admin/experiments/{{experiment.id}}/responses">Responses</a> ({{experiment.count}})
+            <a href="/admin/experiments/{{experiment.id}}/responses">Responses</a> ({{experiment.count || 0}})
           </td>
           <td class="nowrap">
             <a href="/experiments/{{experiment.id}}">Public</a>
@@ -44,6 +44,3 @@
 
   <a href="/admin/experiments/new">Create new experiment</a>
 </main>
-<script>
-var table = <%& serialize(experiments) %>;
-</script>

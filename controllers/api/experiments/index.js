@@ -13,7 +13,10 @@ R.any(/^\/api\/experiments\/(\d+)\/stims/, require('./stims'));
 /** GET /api/experiments
 list all experiments */
 R.get(/^\/api\/experiments$/, function(req, res, m) {
-  db.Select('experiments')
+  db.Select([
+    'experiments',
+    'LEFT OUTER JOIN (SELECT experiment_id, COUNT(responses.id) FROM responses JOIN stims ON stims.id = responses.stim_id GROUP BY experiment_id) AS responses ON responses.experiment_id = experiments.id',
+  ].join(' '))
   .orderBy('created DESC')
   .execute(function(err, experiments) {
     if (err) return res.die(err);
@@ -36,28 +39,28 @@ R.post(/^\/api\/experiments$/, function(req, res, m) {
   });
 });
 
-/** GET /api/experiments/:id
-Get experiment details
-*/
-R.get(/^\/api\/experiments\/(\d+)$/, function(req, res, m) {
-  if (m[1] == 'new') {
-    // blank experiment
-    res.json({
-      administrator_id: req.ctx.current_user.id,
-      parameters: [],
-    });
-  }
-  else {
-    models.Experiment.one({id: m[1]}, function(err, experiment) {
-      if (err) return res.die(err);
-      res.json(experiment);
-    });
-  }
+/** GET /api/experiments/new
+Generate blank experiment. */
+R.get(/^\/api\/experiments\/new$/, function(req, res, m) {
+  res.json({
+    administrator_id: req.ctx.current_user.id,
+    html: '',
+    parameters: [],
+  });
 });
 
-/** PATCH /api/experiments/:id
+/** GET /api/experiments/:id
+Show existing experiment. */
+R.get(/^\/api\/experiments\/(\d+)$/, function(req, res, m) {
+  models.Experiment.one({id: m[1]}, function(err, experiment) {
+    if (err) return res.die(err);
+    res.json(experiment);
+  });
+});
+
+/** POST /api/experiments/:id
 Update existing experiment */
-R.patch(/^\/api\/experiments\/(\d+)/, function(req, res, m) {
+R.post(/^\/api\/experiments\/(\d+)/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 

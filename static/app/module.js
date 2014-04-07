@@ -35,7 +35,7 @@ app.directive('nav', function($window) {
 app.directive('administrator', function(Administrator) {
   return {
     restrict: 'E',
-    template: '<span ng-bind="administrator.name"></span>',
+    template: '<span ng-bind="administrator.email"></span>',
     scope: {
       id: '=',
     },

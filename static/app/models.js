@@ -42,10 +42,12 @@ app.service('Participant', function($resource) {
 
 app.service('Stim', function($resource) {
   // map: {'id': 'name'}
-  return $resource('/api/experiments/:experiment_id/stims/:id', {
+  var Stim = $resource('/api/experiments/:experiment_id/stims/:id', {
     experiment_id: '@experiment_id',
     id: '@id',
   });
+
+  return Stim;
 });
 
 app.service('Template', function($resource) {

@@ -1,4 +1,4 @@
-<div ng-controller="adminExperimentEditor">
+<div ng-controller="adminExperimentCtrl">
   <nav fixedflow class="sub">
     <div style="float: right">
       <a href="/admin/experiments/{{experiment.id}}/mturk">MTurk...</a>
@@ -31,7 +31,9 @@
         </label>
 
         <div>
-          <label style="float: right"><input type="checkbox" ng-model="$storage.expand_experiment_html"><span>Expand</span></label>
+          <label style="float: right">
+            <input type="checkbox" ng-model="$storage.expand_experiment_html"><span>Expand</span>
+          </label>
           <label>
             <div><b>Header html</b>
               <span class="help">
@@ -107,8 +109,8 @@
       </tbody>
     </table>
     <p>
-      <button ng-click="addStim({}, $event)">+ empty row</button>
-      <button ng-click="deleteSelectedStims($event)">- delete selection</button>
+      <button ng-click="addStim({})">+ empty row</button>
+      <button ng-click="deleteSelectedStims()">- delete selection</button>
     </p>
 
     <div class="preview" ng-show="show_preview">

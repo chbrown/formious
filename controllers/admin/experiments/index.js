@@ -19,19 +19,9 @@ Forward /stims/ requests to sub controller */
 R.any(/^\/admin\/experiments\/(\d+)\/stims/, require('./stims'));
 
 /** GET /admin/experiments
-list all Experiments */
+List all Experiments */
 R.get(/^\/admin\/experiments\/?$/, function(req, res, m) {
-  db.Select([
-    'experiments',
-    'LEFT OUTER JOIN (SELECT experiment_id, COUNT(responses.id) FROM responses JOIN stims ON stims.id = responses.stim_id GROUP BY experiment_id) AS responses ON responses.experiment_id = experiments.id',
-  ].join(' '))
-  .orderBy('created DESC')
-  .execute(function(err, experiments) {
-    if (err) return res.die(err);
-
-    req.ctx.experiments = experiments;
-    amulet.stream(['admin/layout.mu', 'admin/experiments/all.mu'], req.ctx).pipe(res);
-  });
+  amulet.stream(['admin/layout.mu', 'admin/experiments/all.mu'], req.ctx).pipe(res);
 });
 
 /** GET /admin/experiments/new

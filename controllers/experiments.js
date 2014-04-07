@@ -123,7 +123,8 @@ R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
 
         var ajax = req.headers['x-requested-with'] == 'XMLHttpRequest';
         if (ajax) {
-          res.status(200).redirect(redirect_to);
+          res.setHeader('Location', redirect_to);
+          res.end();
         }
         else {
           // ['admin/layout.mu', 'admin/experiments/stims/all.mu'];
