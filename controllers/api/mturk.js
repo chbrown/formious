@@ -52,7 +52,7 @@ R.post(/^\/api\/mturk\/ApproveAssignment/, function(req, res) {
   });
 });
 
-/** POST /api/mturk/ApproveAssignment
+/** POST /api/mturk/GrantBonus
 
 POST payload fields:
   WorkerId: String (required)
@@ -60,7 +60,7 @@ POST payload fields:
   BonusAmount: Number (required)
   Reason: String (optional)
 
-Approve the specified Assignment */
+Grant a bonus for the specified Assignment */
 R.post(/^\/api\/mturk\/GrantBonus/, function(req, res, m) {
   var AssignmentId = m[1];
   req.readData(function(err, data) {
@@ -165,6 +165,29 @@ R.post(/^\/api\/mturk\/HITs(\?|$)/, function(req, res) {
       res.json(result);
     });
   });
+});
+
+/** POST /api/mturk/HITs/:HITId/ExtendHIT
+Extend a HIT by the specified increment */
+R.post(/^\/api\/mturk\/HITs\/(\w+)\/ExtendHIT(\?|$)/, function(req, res) {
+  req.readData(function(err, data) {
+    if (err) return res.die(err);
+
+    var params = {HITId: data.HITId};
+    if (data.MaxAssignmentsIncrement) {
+      params.MaxAssignmentsIncrement = parseInt(data.MaxAssignmentsIncrement, 10);
+    }
+    if (data.ExpirationIncrement) {
+      params.ExpirationIncrementInSeconds = lib.durationStringToSeconds(data.ExpirationIncrement || 0);
+    }
+
+    logger.debug('ExtendHIT data: %j', params);
+    req.turk.ExtendHIT(params, function(err, result) {
+      if (err) return res.die(err);
+      res.status(204).end();
+    });
+  });
+
 });
 
 /** GET /api/mturk/HITs/:HITId

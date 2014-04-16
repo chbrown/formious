@@ -9,7 +9,7 @@ app.controller('adminMTurkNavCtrl', function($scope, $localStorage, AWSAccount) 
   $scope.hosts = [{name: 'deploy'}, {name: 'sandbox'}, {name: 'local'}];
 });
 
-app.controller('adminHITsCtrl', function($scope, $http, $localStorage, $flash, $resource) {
+app.controller('adminHITsCtrl', function($scope, $localStorage, $resource) {
   $scope.$storage = $localStorage.$default({
     aws_account_id: null,
     host: 'sandbox',
@@ -23,7 +23,7 @@ app.controller('adminHITsCtrl', function($scope, $http, $localStorage, $flash, $
   $scope.hits = HIT.query();
 });
 
-app.controller('adminHITCtrl', function($scope, $http, $localStorage, $flash, $resource) {
+app.controller('adminHITCtrl', function($scope, $localStorage, $flash, $resource) {
   $scope.$storage = $localStorage.$default({
     aws_account_id: null,
     host: 'sandbox',
@@ -44,6 +44,10 @@ app.controller('adminHITCtrl', function($scope, $http, $localStorage, $flash, $r
       url: '/api/mturk/HITs/:HITId/Assignments',
       isArray: true,
     },
+    ExtendHIT: {
+      method: 'POST',
+      url: '/api/mturk/HITs/:HITId/ExtendHIT',
+    },
   });
 
   var current_url = Url.parse(window.location);
@@ -51,6 +55,17 @@ app.controller('adminHITCtrl', function($scope, $http, $localStorage, $flash, $r
   $scope.hit = HIT.get({HITId: HITId});
   $scope.bonus_payments = HIT.bonus_payments({HITId: HITId});
   $scope.assignments = HIT.assignments({HITId: HITId});
+
+  $scope.ExtendHIT = function(ev) {
+    // var data = _.extend({}, $scope.$storage.hit, $scope.$storage.extra);
+    var data = _.extend({HITId: HITId}, $scope.extension);
+    // var data = $scope.extension;
+    console.log('ExtendHIT data', data, $scope.hit);
+    var promise = HIT.ExtendHIT(data).$promise.then(function(res) {
+      return 'Extended';
+    }, summarizeResponse);
+    $flash.addPromise(promise);
+  };
 });
 
 
@@ -120,13 +135,50 @@ app.controller('adminCreateHITCtrl', function($scope, $http, $localStorage, $fla
   });
 });
 
-app.controller('adminAssignmentEditor', function($scope, $http, $flash) {
+app.controller('adminAssignmentEditor', function($scope, $resource, $localStorage, $flash) {
+  $scope.$storage = $localStorage.$default({
+    aws_account_id: null,
+    host: 'sandbox',
+  });
+
+  var Assignment = $resource('/api/mturk/Assignments/:AssignmentId', {
+    AssignmentId: '@AssignmentId',
+    aws_account_id: $scope.$storage.aws_account_id,
+    host: $scope.$storage.host,
+  }, {
+    Approve: {
+      method: 'POST',
+      url: '/api/mturk/ApproveAssignment',
+    },
+    Reject: {
+      method: 'POST',
+      url: '/api/mturk/RejectAssignment',
+    },
+    ApproveRejected: {
+      method: 'POST',
+      url: '/api/mturk/ApproveRejectedAssignment',
+    },
+  });
+
   $scope.approve = function(assignment) {
-    var url = Url.parse(window.location);
-    url.path += '/Assignments/' + assignment.AssignmentId + '/Approve';
-    var ajax_promise = $http({method: 'POST', url: url}).then(function(res) {
-      return res.data.message;
+    var promize = Assignment.Approve({AssignmentId: assignment.AssignmentId}).$promise.then(function(res) {
+      return 'Approved';
     }, summarizeResponse);
-    $flash.addPromise(ajax_promise);
+    $flash.addPromise(promize);
   };
+
+  $scope.reject = function(assignment) {
+    var promize = Assignment.Reject({AssignmentId: assignment.AssignmentId}).$promise.then(function(res) {
+      return 'Rejected';
+    }, summarizeResponse);
+    $flash.addPromise(promize);
+  };
+
+  $scope.approve_rejected = function(assignment) {
+    var promize = Assignment.ApproveRejected({AssignmentId: assignment.AssignmentId}).$promise.then(function(res) {
+      return 'Rejected';
+    }, summarizeResponse);
+    $flash.addPromise(promize);
+  };
+
 });

@@ -11,6 +11,28 @@
   </section>
 
   <section class="box">
+    <h3>ExtendHIT</h3>
+    <span class="help">Extend the duration of this HIT or add assignments to it.</span>
+    <form ng-submit="ExtendHIT($event)">
+      <label>
+        <div><b>Max Assignments Increment</b>
+          <span class="help">
+            The number of assignments by which to increment the MaxAssignments parameter of the HIT.
+          </span>
+        </div>
+        <input type="text" ng-model="extension.MaxAssignmentsIncrement">
+      </label>
+      <label>
+        <div><b>Expiration Increment (e.g., 24h)</b>
+          <span class="help">The amount of time, in seconds, by which to extend the expiration date. If the HIT has not yet expired, this amount is added to the HIT's expiration date. If the HIT has expired, the new expiration date is the current time plus this value.</span>
+        </div>
+        <input type="text" ng-model="extension.ExpirationIncrement">
+      </label>
+      <p><button>ExtendHIT</button></p>
+    </form>
+  </section>
+
+  <section class="box">
     <h3>Import</h3>
     <span class="help">Import data that was submitted to Mechanical Turk directly into the local database.<br>
       Because each Assignment has a unique identifier (the AssignmentId field), duplicate imports will be ignored.</span>
