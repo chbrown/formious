@@ -95,6 +95,7 @@ angular.module('misc-js/angular-plugins', [])
         if (value === null) {
           return '';
         }
+        // signature: angular.toJson(obj, [pretty]);
         return angular.toJson(value, true);
       });
       ngModel.$parsers.push(function(value) {
@@ -136,8 +137,9 @@ angular.module('misc-js/angular-plugins', [])
       if (ngModel) {
         // I think the built-in ng-model will handle actually setting the value?
         ngModel.$render = function() {
-          // jslint with browser: true really ought to recognize Event
-          textarea.value = ngModel.$viewValue;
+          // handle undefined input value by representing it as the empty string
+          textarea.value = (ngModel.$viewValue === undefined || ngModel.$viewValue === null) ? '' : ngModel.$viewValue;
+          // jslint with 'browser: true' really ought to recognize 'Event' as a global type
           textarea.dispatchEvent(new Event('input'));
         };
         el.on('blur keyup change', function() {

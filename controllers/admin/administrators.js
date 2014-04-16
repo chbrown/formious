@@ -1,16 +1,7 @@
 /*jslint node: true */
-var _ = require('underscore');
-var async = require('async');
-var sv = require('sv');
 var amulet = require('amulet');
 var Router = require('regex-router');
 
-var logger = require('loge');
-var models = require('../../lib/models');
-var hash = require('../../lib/hash');
-var db = require('../../lib/db');
-
-// /admin/administrators/*
 var R = new Router(function(req, res) {
   res.status(404).die('No resource at: ' + req.url);
 });

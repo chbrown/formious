@@ -13,12 +13,13 @@ var R = new Router(function(req, res) {
   // GET /admin -> redirect to /admin/experiments
   res.redirect('/admin/experiments');
 });
-R.any(/^\/admin\/aws/, require('./aws'));
-R.any(/^\/admin\/experiments/, require('./experiments'));
-R.any(/^\/admin\/templates/, require('./templates'));
-R.any(/^\/admin\/administrators/, require('./administrators'));
-R.any(/^\/admin\/participants/, require('./participants'));
 R.any(/^\/admin\/access_tokens/, require('./access_tokens'));
+R.any(/^\/admin\/administrators/, require('./administrators'));
+R.any(/^\/admin\/aws_accounts/, require('./aws_accounts'));
+R.any(/^\/admin\/experiments/, require('./experiments'));
+R.any(/^\/admin\/mturk/, require('./mturk'));
+R.any(/^\/admin\/participants/, require('./participants'));
+R.any(/^\/admin\/templates/, require('./templates'));
 
 /** POST /admin/logout
 Purge administrator_token cookie, and redirect */

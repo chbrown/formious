@@ -1,4 +1,4 @@
-<main ng-controller="adminHITReviewer">
+<main ng-controller="adminHITCtrl">
   <h3>HIT: {{hit.Title}}</h3>
 
   <section class="box">
@@ -12,7 +12,8 @@
 
   <section class="box">
     <h3>Import</h3>
-    <span class="help">Import data that was submitted to Mechanical Turk directly into the local database. Because each Assignment has a unique identifier (the AssignmentId field), duplicate imports will be ignored.</span>
+    <span class="help">Import data that was submitted to Mechanical Turk directly into the local database.<br>
+      Because each Assignment has a unique identifier (the AssignmentId field), duplicate imports will be ignored.</span>
     <p>
       <form method="POST" action="{{hit.HITId + '/import'}}">
         <button>Import</button>
@@ -20,7 +21,7 @@
     </p>
   </section>
 
-  <section class="box">
+  <!-- <section class="box">
     <h3>Export</h3>
     <div>
       <a href="{{hit.HITId}}.csv">HIT_{{hit.HITId}}.csv</a>
@@ -30,10 +31,10 @@
       <a href="{{hit.HITId}}.tsv">HIT_{{hit.HITId}}.tsv</a>
       &middot; <a href="{{hit.HITId}}.tsv?view">View</a>
     </div>
-  </section>
+  </section> -->
 
-  <h3>Bonuses</h3>
-  <section class="box">
+  <section class="box" ng-if="bonus_payments">
+    <h3>Bonuses</h3>
     <table>
       <thead>
         <tr>
@@ -54,7 +55,6 @@
     </table>
   </section>
 
-  <h3>Assignments</h3>
   <section class="box" ng-repeat="assignment in assignments">
     <h3>Assignment: {{assignment.AssignmentId}}</h3>
 
@@ -84,9 +84,7 @@
     </div>
 
     <div>
-      <a href="../Workers/{{assignment.WorkerId}}">Worker json</a>
       <table class="keyval">
-        <!-- <tr><th colspan="2">AWS</th></tr> -->
         <tr ng-repeat="(key, val) in assignment">
           <td>{{key}}</td>
           <td>{{val}}</td>
@@ -97,17 +95,5 @@
         </tr>
       </table>
     </div>
-
-    <div style="margin-top: 10px; white-space: nowrap;">
-      <!-- <worker worker-id="" class="responses"></worker> -->
-    </div>
-
-
   </section>
 </main>
-
-<script>
-var hit = <%& serialize(hit) %>;
-var bonus_payments = <%& serialize(bonus_payments) %>;
-var assignments = <%& serialize(assignments) %>;
-</script>

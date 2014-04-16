@@ -4,11 +4,16 @@
   <title>Admin</title>
   <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
   <link href="/static/site.css" rel="stylesheet" type="text/css" />
-  <script src="/static/lib.max.js"></script>
+  <script src="/static/lib.min.js"></script>
   <script src="/static/lib/angular-plugins.js"></script>
   <script src="/static/local.js"></script>
   <script src="/static/app/module.js"></script>
-  <script src="/static/app/controllers.js"></script>
+  <script src="/static/app/controllers/index.js"></script>
+  <script src="/static/app/controllers/administrators.js"></script>
+  <script src="/static/app/controllers/aws_accounts.js"></script>
+  <script src="/static/app/controllers/experiments.js"></script>
+  <script src="/static/app/controllers/templates.js"></script>
+  <script src="/static/app/controllers/mturk/HITs.js"></script>
   <script src="/static/app/models.js"></script>
 </head>
 <body ng-app="app" class="admin">
@@ -20,7 +25,8 @@
         <button class="anchor">Logout</button>
       </ajaxform>
     </div>
-    <a href="/admin/aws">AWS Accounts</a>
+    <a href="/admin/aws_accounts">AWS Accounts</a>
+    <a href="/admin/mturk/HITs">MTurk</a>
     <a href="/admin/administrators">Administrators</a>
     <!-- <a href="/admin/participants">Participants</a> -->
     <a href="/admin/experiments">Experiments</a>

@@ -53,4 +53,17 @@ var valueWhere = function(list, predicate, prop) {
   }
 };
 
-Error.stackTraceLimit = 50;
+var summarizeResponse = function(res) {
+  // p('summarizeResponse', res);
+  var parts = [];
+  if (res.status != 200) {
+    parts.push('Error ');
+  }
+  parts.push(res.status);
+  if (res.data) {
+    parts.push(': ' + res.data.toString());
+  }
+  return parts.join('');
+};
+
+// Error.stackTraceLimit = 50;

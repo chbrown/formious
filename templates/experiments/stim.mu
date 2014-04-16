@@ -29,7 +29,6 @@
         }
       });
     };
-
     human.context = <%& serialize(context) %>;
   </script>
 </head>
@@ -37,4 +36,3 @@
   <%& header %>
   <%& html %>
 </body>
-

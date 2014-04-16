@@ -1,4 +1,4 @@
-<main ng-controller="adminAWSAccountEditor">
+<main ng-controller="adminAWSAccountCtrl">
   <h3>AWS Account: {{aws_account.name}}</h3>
 
   <section class="box">
@@ -20,7 +20,7 @@
 
       <label>
         <div><b>Created</b></div>
-        <time>{{aws_account.created | date:"medium"}}</time>
+        <time>{{aws_account.created | date:"yyyy-MM-dd"}}</time>
       </label>
 
       <p>
@@ -41,17 +41,18 @@
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="host in aws_account.hosts">
+        <tr ng-repeat="host in hosts">
           <td>{{host.name}}</td>
           <td style="text-align: right">{{host.account_balance}}</td>
-          <td><a href="/admin/aws/{{aws_account.id}}/hosts/{{host.name}}/HITs">View HITs</a></td>
-          <td><a href="/admin/aws/{{aws_account.id}}/hosts/{{host.name}}/HITs/new">Create new HIT</a></td>
+          <td><a href="/admin/mturk/HITs?aws_account_id={{aws_account.id}}&host={{host.name}}">
+            View HITs</a>
+          </td>
+          <td><a href="/admin/mturk/HITs/new?aws_account_id={{aws_account.id}}&host={{host.name}}">
+            Create new HIT</a>
+          </td>
         </tr>
       </tbody>
     </table>
   </section>
 
 </main>
-<script>
-var aws_account = <%& serialize(aws_account) %>;
-</script>

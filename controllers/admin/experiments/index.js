@@ -27,38 +27,13 @@ R.get(/^\/admin\/experiments\/?$/, function(req, res, m) {
 /** GET /admin/experiments/new
 create new Experiment and redirect to edit it */
 R.get(/^\/admin\/experiments\/new/, function(req, res, m) {
-  req.ctx.experiment = {
-    administrator_id: req.ctx.current_user.id,
-    parameters: [],
-  };
   amulet.stream(['admin/layout.mu', 'admin/experiments/one.mu'], req.ctx).pipe(res);
 });
 
 /** GET /admin/experiments/:experiment_id
 Edit existing Experiment (or just view) */
-R.get(/^\/admin\/experiments\/(\d+)(.json)?$/, function(req, res, m) {
-  models.Experiment.one({id: m[1]}, function(err, experiment) {
-    if (err) return res.die(err);
-
-    req.ctx.experiment = experiment;
-    amulet.stream(['admin/layout.mu', 'admin/experiments/one.mu'], req.ctx).pipe(res);
-  });
-});
-
-/** GET /admin/experiments/:experiment_id/responses
-Redirect to a page with ad-hoc authorization */
-R.get(/^\/admin\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
-  var experiment_id = m[1];
-  // should this be a POST?
-
-  // try to use an existing access token
-  models.AccessToken.findOrCreate('experiments', experiment_id, {length: 10}, function(err, token) {
-    if (err) return res.die(err);
-    logger.info('Using token: %s, to access experiment %s', token, experiment_id);
-
-    var redirect = '/experiments/' + experiment_id + '/responses?token=' + token;
-    res.redirect(redirect);
-  });
+R.get(/^\/admin\/experiments\/(\d+)$/, function(req, res, m) {
+  amulet.stream(['admin/layout.mu', 'admin/experiments/one.mu'], req.ctx).pipe(res);
 });
 
 /** GET /admin/experiments/:experiment_id/mturk
@@ -87,7 +62,7 @@ R.get(/^\/admin\/experiments\/(\d+)\/mturk(\?|$)/, function(req, res, m) {
     var experiment_url = '???';
     // localizeUrl('/experiments/' + experiment_id)
     var redirect = url.format({
-      pathname: '/admin/aws/' + account.aws_account_id + '/hosts/' + host + '/HITs/new',
+      pathname: '/admin/aws_accounts/' + account.aws_account_id + '/hosts/' + host + '/HITs/new',
       query: {ExternalURL: experiment_url}
     });
 

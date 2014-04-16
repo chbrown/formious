@@ -1,0 +1,384 @@
+/*jslint node: true */
+var _ = require('underscore');
+var async = require('async');
+var logger = require('loge');
+var Router = require('regex-router');
+var sv = require('sv');
+var turk = require('turk');
+var url = require('url');
+var xmlconv = require('xmlconv');
+
+var lib = require('../../lib');
+var db = require('../../lib/db');
+var models = require('../../lib/models');
+
+var R = new Router(function(req, res) {
+  res.status(404).die('No resource at: ' + req.url);
+});
+
+/** POST /api/mturk/GetAccountBalance
+Get the account balance payload for the account & host specified in the querystring */
+R.post(/^\/api\/mturk\/GetAccountBalance/, function(req, res) {
+  req.turk.GetAccountBalance({}, function(err, result) {
+    if (err) return res.die(err);
+    // {"GetAccountBalanceResponse":{"OperationRequest":{"RequestId":"9ef506b"},
+    // "GetAccountBalanceResult": {"Request":{"IsValid":"True"},"AvailableBalance":
+    // {"Amount":"10000.000","CurrencyCode":"USD","FormattedPrice":"$10,000.00"}}}}
+    // var available_price = result.GetAccountBalanceResult.AvailableBalance;
+    res.json(result);
+  });
+});
+
+/** POST /api/mturk/ApproveAssignment
+
+POST payload fields:
+  AssignmentId: String (required)
+  RequesterFeedback: String (optional)
+
+Approve the specified Assignment */
+R.post(/^\/api\/mturk\/ApproveAssignment/, function(req, res) {
+  req.readData(function(err, data) {
+    if (err) return res.die(err);
+
+    var params = {AssignmentId: data.AssignmentId};
+    if (data.RequesterFeedback) {
+      params.RequesterFeedback = data.RequesterFeedback;
+    }
+    req.turk.ApproveAssignment(params, function(err, result) {
+      if (err) return res.die(err);
+      // {message: 'Approved assignment: ' + data.AssignmentId}
+      res.status(204).end();
+    });
+  });
+});
+
+/** POST /api/mturk/ApproveAssignment
+
+POST payload fields:
+  WorkerId: String (required)
+  AssignmentId: String (required)
+  BonusAmount: Number (required)
+  Reason: String (optional)
+
+Approve the specified Assignment */
+R.post(/^\/api\/mturk\/GrantBonus/, function(req, res, m) {
+  var AssignmentId = m[1];
+  req.readData(function(err, data) {
+    if (err) return res.die(err);
+
+    // hardcode the max amount as $5, just in case something goes wrong
+    var amount = Math.min(parseFloat(data.BonusAmount), 5.0);
+
+    var WorkerId = data.WorkerId;
+    var params = {
+      WorkerId: WorkerId,
+      AssignmentId: AssignmentId,
+      BonusAmount: new turk.models.Price(amount),
+      UniqueRequestToken: AssignmentId + ':' + WorkerId + ':bonus',
+    };
+
+    if (data.Reason) {
+      params.Reason = data.Reason;
+    }
+
+    req.turk.GrantBonus(params, function(err, result) {
+      if (err) return res.die(err);
+
+      models.Participant.one({aws_worker_id: WorkerId}, function(err, participant) {
+        if (err) return res.die(err);
+
+        db.Update('participants')
+        .set({
+          bonus_owed: participant.bonus_owed - amount,
+          bonus_paid: participant.bonus_paid + amount,
+        })
+        .where('id = ?', participant.id)
+        .execute(function(err, rows) {
+          if (err) return res.die(err);
+
+          res.status(204).end();
+        });
+      });
+    });
+  });
+});
+
+/** GET /api/mturk/HITs
+List all active HITs */
+R.get(/^\/api\/mturk\/HITs(\?|$)/, function(req, res) {
+  req.turk.SearchHITs({SortDirection: 'Descending', PageSize: 100}, function(err, result) {
+    if (err) return res.die(err);
+
+    var hits = result.SearchHITsResult.HIT || [];
+    if (!Array.isArray(hits)) hits = [hits];
+
+    res.ngjson(hits);
+  });
+});
+
+/** POST /api/mturk/HITs
+
+POST payload fields:
+  Reward: Number (required)
+  Keywords: String (required)
+  Question: Number (required)
+  AssignmentDurationInSeconds: Number (required)
+  LifetimeInSeconds: Number (required)
+  AutoApprovalDelayInSeconds: Number (required)
+  ... others ...
+
+Create a new HIT */
+R.post(/^\/api\/mturk\/HITs(\?|$)/, function(req, res) {
+  req.readData(function(err, data) {
+    if (err) return res.die(err);
+
+    var params = {
+      MaxAssignments: parseInt(data.MaxAssignments, 10),
+      Title: data.Title,
+      Description: data.Description,
+      Reward: new turk.models.Price(parseFloat(data.Reward)),
+      Keywords: data.Keywords,
+      Question: new turk.models.ExternalQuestion(data.ExternalURL, parseInt(data.FrameHeight, 10)),
+      AssignmentDurationInSeconds: lib.durationStringToSeconds(data.AssignmentDuration || 0),
+      LifetimeInSeconds: lib.durationStringToSeconds(data.Lifetime || 0),
+      AutoApprovalDelayInSeconds: lib.durationStringToSeconds(data.AutoApprovalDelay || 0),
+    };
+    var extra = _.omit(data, Object.keys(params));
+    _.extend(params, extra);
+
+    logger.debug('CreateHIT data:', params, req.turk.url);
+    req.turk.CreateHIT(params, function(err, result) {
+      if (err) return res.die(err);
+      // result is something like:
+      // {
+      //   "OperationRequest": {
+      //     "RequestId":"1b8ed7eb-dae3-3500-c2ad-73aa4EXAMPLE"
+      //   },
+      //   "HIT":{
+      //     "Request":{"IsValid":"True"},
+      //     "HITId":"FB2EF51D88F724F2A124026EXAMPLE",
+      //     "HITTypeId":"1BBB6B0FE7967122FD0243AEXAMPLE"
+      //   }
+      // }
+      var url = '/admin/mturk/HITs/' + result.HIT.HITId;
+      res.status(201).setHeader('Location', url);
+      res.json(result);
+    });
+  });
+});
+
+/** GET /api/mturk/HITs/:HITId
+Show single HIT. */
+R.get(/^\/api\/mturk\/HITs\/(\w+)(\?|$)/, function(req, res, m) {
+  req.turk.GetHIT({HITId:  m[1]}, function(err, result) {
+    res.json(result.HIT);
+  });
+});
+
+/** GET /api/mturk/HITs/:HITId/BonusPayments
+Show the bonus payments associated with a single HIT. */
+R.get(/^\/api\/mturk\/HITs\/(\w+)\/BonusPayments(\?|$)/, function(req, res, m) {
+  req.turk.GetBonusPayments({HITId: m[1], PageSize: 100}, function(err, result) {
+    res.ngjson(result.GetBonusPaymentsResult.BonusPayment || []);
+  });
+});
+
+/** GET /api/mturk/HITs/:HITId/Assignments
+Show the assignments submitted for a single HIT. */
+R.get(/^\/api\/mturk\/HITs\/(\w+)\/Assignments(\?|$)/, function(req, res, m) {
+  var hit_params = {HITId: m[1], PageSize: 100};
+  var assignments_params = _.extend({
+    SortProperty: 'SubmitTime',
+    SortDirection: 'Ascending',
+  }, hit_params);
+
+  // async.auto runs each task as quickly as possible but
+  // stops the whole thing if any callback with an error
+  req.turk.GetAssignmentsForHIT(assignments_params, function(err, result) {
+    if (err) return res.die(err);
+
+    var assignments = result.GetAssignmentsForHITResult.Assignment || [];
+    if (!Array.isArray(assignments)) assignments = [assignments];
+
+    var aws_worker_ids = assignments.map(function(assignment) {
+      return assignment.WorkerId;
+    });
+
+    db.Select('participants')
+    .whereIn('aws_worker_id', aws_worker_ids)
+    .execute(function(err, participants) {
+      if (err) return res.die(err);
+
+      // merge in the participant info from the local databse query
+      assignments.forEach(function(assignment) {
+        // hack! (someone broke my xmlconv root namespace ignorance)
+        var answer_xml = assignment.Answer.replace(/xmlns=("|').+?\1/, '');
+        delete assignment.Answer;
+
+        // logger.warn('answer_xml', answer_xml);
+        var answer_json = xmlconv(answer_xml, {convention: 'castle'});
+        // logger.warn('answer_json', answer_json);
+        assignment.Answers = answer_json.QuestionFormAnswers.Answer;
+
+        var participant = _.findWhere(participants, {aws_worker_id: assignment.WorkerId});
+        if (!participant) {
+          logger.info('Could not find participant: %s', assignment.WorkerId);
+        }
+
+        // reduce to key-value pairs so that we can show in both Mu/Handlebars easily
+        assignment.user = _.map(participant, function(value, key) {
+          return {key: key, value: value};
+        });
+      });
+
+      res.ngjson(assignments);
+    });
+  });
+});
+
+/** POST /api/mturk/HITs/:HITId/import
+
+Import the assignment data for this HIT into the local database.
+*/
+R.post(/^\/api\/mturk\/HITs\/(\w+)\/import/, function(req, res, m) {
+  var HITId = m[1];
+
+  var hit_params = {
+    HITId: HITId,
+    PageSize: 100,
+  };
+  req.turk.GetAssignmentsForHIT(hit_params, function(err, result) {
+    if (err) return res.die(err);
+
+    var assignments = result.GetAssignmentsForHITResult.Assignment || [];
+    if (!Array.isArray(assignments)) assignments = [assignments];
+    async.map(assignments, function(assignment, callback) {
+      // hack! (someone broke my xmlconv root namespace ignorance)
+
+      var response = {
+        value: _.pick(assignment, 'HITId', 'AutoApprovalTime', 'AcceptTime', 'SubmitTime', 'ApprovalTime'),
+        assignment_id: assignment.AssignmentId,
+      };
+
+      // pick off the answers
+      var answer_xml = assignment.Answer.replace(/xmlns=("|').+?\1/, '');
+      var answer_json = xmlconv(answer_xml, {convention: 'castle'});
+      answer_json.QuestionFormAnswers.Answer.forEach(function(answer) {
+        // TODO: handle other types of values besides FreeText
+        if (answer.QuestionIdentifier == 'stim_id') {
+          // stim_id isn't required, but if it's provided, it had better be an actual stim!
+          response.stim_id = answer.FreeText;
+        }
+        else {
+          response.value[answer.QuestionIdentifier] = answer.FreeText;
+        }
+      });
+
+      models.Participant.addResponse({aws_worker_id: assignment.WorkerId}, response, function(err) {
+        if (err) {
+          if (err.message && err.message.match(/duplicate key value violates unique constraint/)) {
+            return callback(null, 0);
+          }
+          return callback(err);
+        }
+        callback(null, 1);
+      });
+    }, function(err, assignments) {
+      if (err) return res.die(err);
+
+      var added = assignments.filter(_.identity).length;
+      res.json({message: 'Imported ' + added + ' assignments'});
+    });
+  });
+
+});
+
+/* GET /admin/aws/:account_id/host/:host/HITs/:hit_id.csv
+    GET /admin/aws/:account_id/host/:host/HITs/:hit_id.csv?view
+    GET /admin/aws/:account_id/host/:host/HITs/:hit_id.tsv
+    GET /admin/aws/:account_id/host/:host/HITs/:hit_id.tsv?view
+Download or view HIT csv/tsv summary of users responses */
+/* R.get(/HITs\/(\w+)\.(csv|tsv)/, function(req, res, m) {
+  // instead of ?: conditionals, we have a limited input (csv/tsv) so we set up some constant mappings:
+  var content_types = {csv: 'text/csv', tsv: 'text/tab-separated-values'};
+  var delimiters = {csv: ',', tsv: '\t'};
+
+  var urlObj = url.parse(req.url, true);
+  // both ?view= and ?view parse to '' (only complete absence is undefined)
+  logger.debug('HITs/download: ?view="%s"', urlObj.query.view);
+  if (urlObj.query.view === undefined) {
+    res.setHeader('Content-Disposition', 'attachment; filename=HIT_' + m[1] + '.' + m[2]);
+    res.setHeader('Content-Type', content_types[m[2]]);
+  }
+  else {
+    res.setHeader('Content-Type', 'text/plain');
+  }
+
+  var writer = new sv.Stringifier({delimiter: delimiters[m[2]]});
+  writer.pipe(res);
+
+  var params = {HITId: m[1], PageSize: 100, SortProperty: 'SubmitTime', SortDirection: 'Ascending'};
+  req.turk.GetAssignmentsForHIT(params, function(err, assignments_result) {
+    if (err) return writer.emit('error', err).end();
+
+    var raw_assigments = assignments_result.GetAssignmentsForHITResult.Assignment;
+    async.eachSeries(raw_assigments, function(assignment, callback) {
+      var assignment_answers = {};
+      // pull in the Assignment level POST that AMT stores:
+      var answer = xmlconv(assignment.Answer, {convention: 'castle'});
+      answer.Answer.forEach(function(question_answer) {
+        assignment_answers[question_answer.QuestionIdentifier] = question_answer.FreeText;
+      });
+      // For each response recorded for this user, merge in those assignment details and write to csv
+      models.User.findById(assignment.WorkerId, function(err, user) {
+        if (err) return callback(err);
+
+        var responses = (user ? user.responses : null) || [];
+        responses.forEach(function(response) {
+          _.extend(response, assignment_answers);
+          writer.write(response);
+        });
+        callback(null);
+      });
+    }, function(err) {
+      if (err) {
+        logger.error('Error encountered when iterating assignments from MTurk API: ', err);
+        writer.emit('error', err);
+      }
+
+      writer.end();
+    });
+  });
+});*/
+
+/** ANY /api/mturk/*
+
+All requests to /api/mturk are expected to provide the aws_account_id and host name
+in the request querystring. */
+module.exports = function(req, res) {
+  var urlObj = url.parse(req.url, true);
+  // aws_account_id is provided by the user, and linked to an AWS Access Key and AWS Secret Key
+  var aws_account_id = urlObj.query.aws_account_id || null;
+  // host is either "deploy" or "sandbox", usually.
+  var host = urlObj.query.host || null;
+
+  // that host value is just a short key for one of the following urls
+  var hosts = {
+    deploy: 'https://mechanicalturk.amazonaws.com',
+    sandbox: 'https://mechanicalturk.sandbox.amazonaws.com',
+    local: '/',
+  };
+
+  models.AWSAccount.one({id: aws_account_id}, function(err, aws_account) {
+    if (err) return res.die(err);
+
+    req.turk = new turk.Connection(
+      aws_account.access_key_id,
+      aws_account.secret_access_key, {
+      url: hosts[host],
+      logger: logger,
+    });
+
+    R.route(req, res);
+  });
+};

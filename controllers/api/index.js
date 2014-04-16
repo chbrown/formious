@@ -16,6 +16,7 @@ R.any(/^\/api\/access_tokens/, require('./access_tokens'));
 R.any(/^\/api\/administrators/, require('./administrators'));
 R.any(/^\/api\/aws_accounts/, require('./aws_accounts'));
 R.any(/^\/api\/experiments/, require('./experiments'));
+R.any(/^\/api\/mturk/, require('./mturk'));
 R.any(/^\/api\/participants/, require('./participants'));
 R.any(/^\/api\/templates/, require('./templates'));
 
@@ -71,7 +72,7 @@ module.exports = function(req, res) {
   var token = req.cookies.get('administrator_token');
   models.Administrator.fromToken(token, function(err, administrator) {
     if (err) {
-      res.redirect('/login');
+      res.status(401).die('Authorization failed; you must login first.');
     }
     else {
       // authentication succeeded!

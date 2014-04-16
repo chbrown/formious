@@ -1,8 +1,9 @@
 /*jslint node: true */
 var _ = require('underscore');
-var Router = require('regex-router');
 var db = require('../../lib/db');
 var models = require('../../lib/models');
+var Router = require('regex-router');
+var url = require('url');
 
 var R = new Router(function(req, res) {
   res.status(404).die('No resource at: ' + req.url);
@@ -72,6 +73,32 @@ R.delete(/^\/api\/access_tokens\/(\d+)$/, function(req, res, m) {
   models.AccessToken.delete({id: m[1]}, function(err) {
     if (err) return res.die(err);
     res.status(204).end();
+  });
+});
+
+// other
+
+/** POST /api/access_tokens/generate?relation=experiments&id=23&length=10
+Generate or find existing access token, and return it */
+R.post(/^\/api\/access_tokens\/generate(\?|$)/, function(req, res, m) {
+  var urlObj = url.parse(req.url, true);
+  // only allow 'experiments' from this API call
+  var relation = urlObj.query.relation || null;
+  if (relation != 'experiments') {
+    relation = null;
+  }
+  var foreign_id = urlObj.query.id || null;
+  var length = parseInt(urlObj.query.length || 10, null);
+
+  // try to use an existing access token
+  //   AccessToken.findOrCreate(relation, foreign_id, opts, callback)
+  models.AccessToken.findOrCreate(relation, foreign_id, {length: length}, function(err, access_token) {
+    if (err) return res.die(err);
+
+    var url = [relation, foreign_id].join('/') + '?token=' + access_token.token;
+    // setHeader is not chainable
+    res.status(201).setHeader('Location', url);
+    res.json(access_token);
   });
 });
 

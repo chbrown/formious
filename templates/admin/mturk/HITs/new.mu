@@ -1,4 +1,4 @@
-<main ng-controller="adminHITEditor">
+<main ng-controller="adminCreateHITCtrl">
   <h3>Create HIT</h3>
 
   <section class="box">
@@ -14,7 +14,7 @@
 
       <label>
         <div><b>Title</b>
-          <span class="help">The title of the HIT. A title should be short and descriptive about the kind of task the HIT contains</span>
+          <span class="help">The title of the HIT. A title should be short and describe the kind of task the HIT contains</span>
         </div>
         <input type="text" ng-model="$storage.hit.Title" style="width: 500px">
       </label>
@@ -61,6 +61,25 @@
         <input type="text" ng-model="$storage.hit.AutoApprovalDelay">
       </label>
 
+      <label>
+        <div><b>Other settings</b>
+          <span class="help">JSON representation of any other settings to send.
+            This is an object that will be merged with the rest of the payload.
+            E.g., to require Master's qualification in production, use this:
+            <code><pre>
+              {
+                "QualificationRequirement": {
+                  "QualificationTypeId": "2F1QJWKUDD8XADTFD2Q0G6UTO95ALH",
+                  "Comparator": "Exists"
+                }
+              }
+            </pre></code>
+          </span>
+        </div>
+        <textarea json-transform enhance ng-model="$storage.extra"
+          class="code" style="width: 500px; min-height: 50px;"></textarea>
+      </label>
+
       <p></p>
 
       <label>
@@ -81,14 +100,12 @@
     </form>
   </section>
 
-  <h3>Preview
-    <input type="checkbox" ng-model="$storage.preview_iframe">
+  <h3>
+    <label>Preview
+      <input type="checkbox" ng-model="$storage.preview_iframe">
+    </label>
   </h3>
   <section class="box" ng-show="$storage.preview_iframe">
     <iframe scrolling="auto" width="100%" frameborder="0" align="center" height="{{$storage.hit.FrameHeight}}"></iframe>
   </section>
 </main>
-
-<script>
-var hit = <%& serialize(hit) %>;
-</script>

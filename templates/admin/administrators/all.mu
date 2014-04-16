@@ -17,9 +17,7 @@
           <td><a href="/admin/administrators/{{administrator.id}}">{{administrator.email}}</a></td>
           <td><time>{{administrator.created | date:"yyyy-MM-dd"}}</time></td>
           <td>
-            <ajaxform method="DELETE" action="/admin/administrators/{{administrator.id}}">
-              <button>Delete</button>
-            </ajaxform>
+            <button ng-click="delete(administrator)">Delete</button>
           </td>
         </tr>
       </tbody>
