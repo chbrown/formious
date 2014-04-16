@@ -1,12 +1,14 @@
 /*jslint node: true */
 var _ = require('underscore');
 var amulet = require('amulet');
+var stream = require('stream');
 var async = require('async');
 var handlebars = require('handlebars');
 var logger = require('loge');
 var Router = require('regex-router');
 var sv = require('sv');
 var url = require('url');
+var util = require('util');
 
 var db = require('../lib/db');
 var flat = require('../lib/flat');
@@ -150,6 +152,47 @@ R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
   });
 });
 
+var Tabulator = function(opts) {
+  sv.Stringifier.call(this, {
+    objectMode: true,
+  });
+  this.push('<table>' + this.newline, this.encoding);
+};
+util.inherits(Tabulator, sv.Stringifier);
+Tabulator.prototype._line = function(obj) {
+  // _write is already a thing, so don't use it.
+  // this.columns must be set!
+  this.push('<tr>', this.encoding);
+  if (typeof(obj) === 'string') {
+    // raw string
+    this.push('<td colspan="' + this.columns.length + '">' + obj + '</td>', this.encoding);
+  }
+  else {
+    // if obj is an array, we ignore this.columns
+    var length = obj.length;
+    if (!util.isArray(obj)) {
+      // object
+      length = this.columns.length;
+      var list = new Array(length);
+      for (var i = 0; i < length; i++) {
+        list[i] = obj[this.columns[i]] || this.missing;
+      }
+      obj = list;
+    }
+    for (var j = 0; j < length; j++) {
+      this.push('<td>' + obj[j].toString() + '</td>', this.encoding);
+    }
+  }
+  this.push('</tr>' + this.newline, this.encoding);
+};
+Tabulator.prototype._flush = function(callback) {
+  var self = this;
+  this.flush.call(this, function() {
+    self.push('</table>' + self.newline);
+    callback();
+  });
+};
+
 /** GET /experiments/:experiment_id/responses?token=ABCDEF12345
 Requires authorization! Show only the responses that reference this Experiment. */
 R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
@@ -159,7 +202,7 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
   models.AccessToken.check(urlObj.query.token, 'experiments', experiment_id, function(err, access_token) {
     if (err) return res.die(err);
 
-    // okay, they're in, proceed normally
+    // authorization granted
     async.auto({
       experiment: function(callback) {
         models.Experiment.one({id: experiment_id}, callback);
@@ -179,9 +222,17 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
       },
     }, function(err, results) {
       if (err) return res.die(err);
-
       // results.experiment.name
+
+      // var stringifier = new Tabulator({peek: 100});
+      // res.setHeader('Content-Type', 'text/html');
+      // res.write('<style>' +
+      //   'body { font-size: 80%; } ' +
+      //   'table { border-collapse: collapse; } ' +
+      //   'table td { border: 1px solid #ccc; } ' +
+      // '</style>');
       var stringifier = new sv.Stringifier({peek: 100});
+      // res.setHeader('Content-Type', 'text/csv');
       stringifier.pipe(res);
       results.responses.forEach(function(response) {
         var row = {
