@@ -42,15 +42,15 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
   // mturk
   .state('HITs', {
     url: '/admin/mturk/HITs?aws_account_id&host',
-    templateUrl: '/templates/admin/mturk/HITS/all.mu',
+    templateUrl: '/templates/admin/mturk/HITs/all.mu',
   })
   .state('HITs-new', {
     url: '/admin/mturk/HITs/new?aws_account_id&host',
-    templateUrl: '/templates/admin/mturk/HITS/new.mu',
+    templateUrl: '/templates/admin/mturk/HITs/new.mu',
   })
   .state('HITs-show', {
     url: '/admin/mturk/HITs/:HITId?aws_account_id&host',
-    templateUrl: '/templates/admin/mturk/HITS/one.mu',
+    templateUrl: '/templates/admin/mturk/HITs/one.mu',
   })
   // templates
   .state('templates', {
