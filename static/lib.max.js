@@ -8513,6 +8513,856 @@ function(window, angular, undefined) {
             }
         }, resourceFactory;
     } ]);
+}(window, window.angular), "undefined" != typeof module && "undefined" != typeof exports && module.exports === exports && (module.exports = "ui.router"), 
+function(window, angular, undefined) {
+    function inherit(parent, extra) {
+        return extend(new (extend(function() {}, {
+            prototype: parent
+        }))(), extra);
+    }
+    function merge(dst) {
+        return forEach(arguments, function(obj) {
+            obj !== dst && forEach(obj, function(value, key) {
+                dst.hasOwnProperty(key) || (dst[key] = value);
+            });
+        }), dst;
+    }
+    function ancestors(first, second) {
+        var path = [];
+        for (var n in first.path) {
+            if (first.path[n] !== second.path[n]) break;
+            path.push(first.path[n]);
+        }
+        return path;
+    }
+    function arraySearch(array, value) {
+        if (Array.prototype.indexOf) return array.indexOf(value, Number(arguments[2]) || 0);
+        var len = array.length >>> 0, from = Number(arguments[2]) || 0;
+        for (from = 0 > from ? Math.ceil(from) : Math.floor(from), 0 > from && (from += len); len > from; from++) if (from in array && array[from] === value) return from;
+        return -1;
+    }
+    function inheritParams(currentParams, newParams, $current, $to) {
+        var parentParams, parents = ancestors($current, $to), inherited = {}, inheritList = [];
+        for (var i in parents) if (parents[i].params && parents[i].params.length) {
+            parentParams = parents[i].params;
+            for (var j in parentParams) arraySearch(inheritList, parentParams[j]) >= 0 || (inheritList.push(parentParams[j]), 
+            inherited[parentParams[j]] = currentParams[parentParams[j]]);
+        }
+        return extend({}, inherited, newParams);
+    }
+    function normalize(keys, values) {
+        var normalized = {};
+        return forEach(keys, function(name) {
+            var value = values[name];
+            normalized[name] = null != value ? String(value) : null;
+        }), normalized;
+    }
+    function equalForKeys(a, b, keys) {
+        if (!keys) {
+            keys = [];
+            for (var n in a) keys.push(n);
+        }
+        for (var i = 0; i < keys.length; i++) {
+            var k = keys[i];
+            if (a[k] != b[k]) return !1;
+        }
+        return !0;
+    }
+    function filterByKeys(keys, values) {
+        var filtered = {};
+        return forEach(keys, function(name) {
+            filtered[name] = values[name];
+        }), filtered;
+    }
+    function $Resolve($q, $injector) {
+        var VISIT_IN_PROGRESS = 1, VISIT_DONE = 2, NOTHING = {}, NO_DEPENDENCIES = [], NO_LOCALS = NOTHING, NO_PARENT = extend($q.when(NOTHING), {
+            $$promises: NOTHING,
+            $$values: NOTHING
+        });
+        this.study = function(invocables) {
+            function visit(value, key) {
+                if (visited[key] !== VISIT_DONE) {
+                    if (cycle.push(key), visited[key] === VISIT_IN_PROGRESS) throw cycle.splice(0, cycle.indexOf(key)), 
+                    new Error("Cyclic dependency: " + cycle.join(" -> "));
+                    if (visited[key] = VISIT_IN_PROGRESS, isString(value)) plan.push(key, [ function() {
+                        return $injector.get(value);
+                    } ], NO_DEPENDENCIES); else {
+                        var params = $injector.annotate(value);
+                        forEach(params, function(param) {
+                            param !== key && invocables.hasOwnProperty(param) && visit(invocables[param], param);
+                        }), plan.push(key, value, params);
+                    }
+                    cycle.pop(), visited[key] = VISIT_DONE;
+                }
+            }
+            function isResolve(value) {
+                return isObject(value) && value.then && value.$$promises;
+            }
+            if (!isObject(invocables)) throw new Error("'invocables' must be an object");
+            var plan = [], cycle = [], visited = {};
+            return forEach(invocables, visit), invocables = cycle = visited = null, function(locals, parent, self) {
+                function done() {
+                    --wait || (merged || merge(values, parent.$$values), result.$$values = values, result.$$promises = !0, 
+                    resolution.resolve(values));
+                }
+                function fail(reason) {
+                    result.$$failure = reason, resolution.reject(reason);
+                }
+                function invoke(key, invocable, params) {
+                    function onfailure(reason) {
+                        invocation.reject(reason), fail(reason);
+                    }
+                    function proceed() {
+                        if (!isDefined(result.$$failure)) try {
+                            invocation.resolve($injector.invoke(invocable, self, values)), invocation.promise.then(function(result) {
+                                values[key] = result, done();
+                            }, onfailure);
+                        } catch (e) {
+                            onfailure(e);
+                        }
+                    }
+                    var invocation = $q.defer(), waitParams = 0;
+                    forEach(params, function(dep) {
+                        promises.hasOwnProperty(dep) && !locals.hasOwnProperty(dep) && (waitParams++, promises[dep].then(function(result) {
+                            values[dep] = result, --waitParams || proceed();
+                        }, onfailure));
+                    }), waitParams || proceed(), promises[key] = invocation.promise;
+                }
+                if (isResolve(locals) && self === undefined && (self = parent, parent = locals, 
+                locals = null), locals) {
+                    if (!isObject(locals)) throw new Error("'locals' must be an object");
+                } else locals = NO_LOCALS;
+                if (parent) {
+                    if (!isResolve(parent)) throw new Error("'parent' must be a promise returned by $resolve.resolve()");
+                } else parent = NO_PARENT;
+                var resolution = $q.defer(), result = resolution.promise, promises = result.$$promises = {}, values = extend({}, locals), wait = 1 + plan.length / 3, merged = !1;
+                if (isDefined(parent.$$failure)) return fail(parent.$$failure), result;
+                parent.$$values ? (merged = merge(values, parent.$$values), done()) : (extend(promises, parent.$$promises), 
+                parent.then(done, fail));
+                for (var i = 0, ii = plan.length; ii > i; i += 3) locals.hasOwnProperty(plan[i]) ? done() : invoke(plan[i], plan[i + 1], plan[i + 2]);
+                return result;
+            };
+        }, this.resolve = function(invocables, locals, parent, self) {
+            return this.study(invocables)(locals, parent, self);
+        };
+    }
+    function $TemplateFactory($http, $templateCache, $injector) {
+        this.fromConfig = function(config, params, locals) {
+            return isDefined(config.template) ? this.fromString(config.template, params) : isDefined(config.templateUrl) ? this.fromUrl(config.templateUrl, params) : isDefined(config.templateProvider) ? this.fromProvider(config.templateProvider, params, locals) : null;
+        }, this.fromString = function(template, params) {
+            return isFunction(template) ? template(params) : template;
+        }, this.fromUrl = function(url, params) {
+            return isFunction(url) && (url = url(params)), null == url ? null : $http.get(url, {
+                cache: $templateCache
+            }).then(function(response) {
+                return response.data;
+            });
+        }, this.fromProvider = function(provider, params, locals) {
+            return $injector.invoke(provider, null, locals || {
+                params: params
+            });
+        };
+    }
+    function UrlMatcher(pattern) {
+        function addParameter(id) {
+            if (!/^\w+(-+\w+)*$/.test(id)) throw new Error("Invalid parameter name '" + id + "' in pattern '" + pattern + "'");
+            if (names[id]) throw new Error("Duplicate parameter name '" + id + "' in pattern '" + pattern + "'");
+            names[id] = !0, params.push(id);
+        }
+        function quoteRegExp(string) {
+            return string.replace(/[\\\[\]\^$*+?.()|{}]/g, "\\$&");
+        }
+        var m, placeholder = /([:*])(\w+)|\{(\w+)(?:\:((?:[^{}\\]+|\\.|\{(?:[^{}\\]+|\\.)*\})+))?\}/g, names = {}, compiled = "^", last = 0, segments = this.segments = [], params = this.params = [];
+        this.source = pattern;
+        for (var id, regexp, segment; (m = placeholder.exec(pattern)) && (id = m[2] || m[3], 
+        regexp = m[4] || ("*" == m[1] ? ".*" : "[^/]*"), segment = pattern.substring(last, m.index), 
+        !(segment.indexOf("?") >= 0)); ) compiled += quoteRegExp(segment) + "(" + regexp + ")", 
+        addParameter(id), segments.push(segment), last = placeholder.lastIndex;
+        segment = pattern.substring(last);
+        var i = segment.indexOf("?");
+        if (i >= 0) {
+            var search = this.sourceSearch = segment.substring(i);
+            segment = segment.substring(0, i), this.sourcePath = pattern.substring(0, last + i), 
+            forEach(search.substring(1).split(/[&?]/), addParameter);
+        } else this.sourcePath = pattern, this.sourceSearch = "";
+        compiled += quoteRegExp(segment) + "$", segments.push(segment), this.regexp = new RegExp(compiled), 
+        this.prefix = segments[0];
+    }
+    function $UrlMatcherFactory() {
+        this.compile = function(pattern) {
+            return new UrlMatcher(pattern);
+        }, this.isMatcher = function(o) {
+            return isObject(o) && isFunction(o.exec) && isFunction(o.format) && isFunction(o.concat);
+        }, this.$get = function() {
+            return this;
+        };
+    }
+    function $UrlRouterProvider($urlMatcherFactory) {
+        function regExpPrefix(re) {
+            var prefix = /^\^((?:\\[^a-zA-Z0-9]|[^\\\[\]\^$*+?.()|{}]+)*)/.exec(re.source);
+            return null != prefix ? prefix[1].replace(/\\(.)/g, "$1") : "";
+        }
+        function interpolate(pattern, match) {
+            return pattern.replace(/\$(\$|\d{1,2})/, function(m, what) {
+                return match["$" === what ? 0 : Number(what)];
+            });
+        }
+        function handleIfMatch($injector, handler, match) {
+            if (!match) return !1;
+            var result = $injector.invoke(handler, handler, {
+                $match: match
+            });
+            return isDefined(result) ? result : !0;
+        }
+        var rules = [], otherwise = null;
+        this.rule = function(rule) {
+            if (!isFunction(rule)) throw new Error("'rule' must be a function");
+            return rules.push(rule), this;
+        }, this.otherwise = function(rule) {
+            if (isString(rule)) {
+                var redirect = rule;
+                rule = function() {
+                    return redirect;
+                };
+            } else if (!isFunction(rule)) throw new Error("'rule' must be a function");
+            return otherwise = rule, this;
+        }, this.when = function(what, handler) {
+            var redirect, handlerIsString = isString(handler);
+            if (isString(what) && (what = $urlMatcherFactory.compile(what)), !handlerIsString && !isFunction(handler) && !isArray(handler)) throw new Error("invalid 'handler' in when()");
+            var strategies = {
+                matcher: function(what, handler) {
+                    return handlerIsString && (redirect = $urlMatcherFactory.compile(handler), handler = [ "$match", function($match) {
+                        return redirect.format($match);
+                    } ]), extend(function($injector, $location) {
+                        return handleIfMatch($injector, handler, what.exec($location.path(), $location.search()));
+                    }, {
+                        prefix: isString(what.prefix) ? what.prefix : ""
+                    });
+                },
+                regex: function(what, handler) {
+                    if (what.global || what.sticky) throw new Error("when() RegExp must not be global or sticky");
+                    return handlerIsString && (redirect = handler, handler = [ "$match", function($match) {
+                        return interpolate(redirect, $match);
+                    } ]), extend(function($injector, $location) {
+                        return handleIfMatch($injector, handler, what.exec($location.path()));
+                    }, {
+                        prefix: regExpPrefix(what)
+                    });
+                }
+            }, check = {
+                matcher: $urlMatcherFactory.isMatcher(what),
+                regex: what instanceof RegExp
+            };
+            for (var n in check) if (check[n]) return this.rule(strategies[n](what, handler));
+            throw new Error("invalid 'what' in when()");
+        }, this.$get = [ "$location", "$rootScope", "$injector", function($location, $rootScope, $injector) {
+            function update(evt) {
+                function check(rule) {
+                    var handled = rule($injector, $location);
+                    return handled ? (isString(handled) && $location.replace().url(handled), !0) : !1;
+                }
+                if (!evt || !evt.defaultPrevented) {
+                    var i, n = rules.length;
+                    for (i = 0; n > i; i++) if (check(rules[i])) return;
+                    otherwise && check(otherwise);
+                }
+            }
+            return $rootScope.$on("$locationChangeSuccess", update), {
+                sync: function() {
+                    update();
+                }
+            };
+        } ];
+    }
+    function $StateProvider($urlRouterProvider, $urlMatcherFactory, $locationProvider) {
+        function isRelative(stateName) {
+            return 0 === stateName.indexOf(".") || 0 === stateName.indexOf("^");
+        }
+        function findState(stateOrName, base) {
+            var isStr = isString(stateOrName), name = isStr ? stateOrName : stateOrName.name, path = isRelative(name);
+            if (path) {
+                if (!base) throw new Error("No reference point given for path '" + name + "'");
+                for (var rel = name.split("."), i = 0, pathLength = rel.length, current = base; pathLength > i; i++) if ("" !== rel[i] || 0 !== i) {
+                    if ("^" !== rel[i]) break;
+                    if (!current.parent) throw new Error("Path '" + name + "' not valid for state '" + base.name + "'");
+                    current = current.parent;
+                } else current = base;
+                rel = rel.slice(i).join("."), name = current.name + (current.name && rel ? "." : "") + rel;
+            }
+            var state = states[name];
+            return !state || !isStr && (isStr || state !== stateOrName && state.self !== stateOrName) ? undefined : state;
+        }
+        function queueState(parentName, state) {
+            queue[parentName] || (queue[parentName] = []), queue[parentName].push(state);
+        }
+        function registerState(state) {
+            state = inherit(state, {
+                self: state,
+                resolve: state.resolve || {},
+                toString: function() {
+                    return this.name;
+                }
+            });
+            var name = state.name;
+            if (!isString(name) || name.indexOf("@") >= 0) throw new Error("State must have a valid name");
+            if (states.hasOwnProperty(name)) throw new Error("State '" + name + "'' is already defined");
+            var parentName = -1 !== name.indexOf(".") ? name.substring(0, name.lastIndexOf(".")) : isString(state.parent) ? state.parent : "";
+            if (parentName && !states[parentName]) return queueState(parentName, state.self);
+            for (var key in stateBuilder) isFunction(stateBuilder[key]) && (state[key] = stateBuilder[key](state, stateBuilder.$delegates[key]));
+            if (states[name] = state, !state[abstractKey] && state.url && $urlRouterProvider.when(state.url, [ "$match", "$stateParams", function($match, $stateParams) {
+                $state.$current.navigable == state && equalForKeys($match, $stateParams) || $state.transitionTo(state, $match, {
+                    location: !1
+                });
+            } ]), queue[name]) for (var i = 0; i < queue[name].length; i++) registerState(queue[name][i]);
+            return state;
+        }
+        function isGlob(text) {
+            return text.indexOf("*") > -1;
+        }
+        function doesStateMatchGlob(glob) {
+            var globSegments = glob.split("."), segments = $state.$current.name.split(".");
+            if ("**" === globSegments[0] && (segments = segments.slice(segments.indexOf(globSegments[1])), 
+            segments.unshift("**")), "**" === globSegments[globSegments.length - 1] && (segments.splice(segments.indexOf(globSegments[globSegments.length - 2]) + 1, Number.MAX_VALUE), 
+            segments.push("**")), globSegments.length != segments.length) return !1;
+            for (var i = 0, l = globSegments.length; l > i; i++) "*" === globSegments[i] && (segments[i] = "*");
+            return segments.join("") === globSegments.join("");
+        }
+        function decorator(name, func) {
+            return isString(name) && !isDefined(func) ? stateBuilder[name] : isFunction(func) && isString(name) ? (stateBuilder[name] && !stateBuilder.$delegates[name] && (stateBuilder.$delegates[name] = stateBuilder[name]), 
+            stateBuilder[name] = func, this) : this;
+        }
+        function state(name, definition) {
+            return isObject(name) ? definition = name : definition.name = name, registerState(definition), 
+            this;
+        }
+        function $get($rootScope, $q, $view, $injector, $resolve, $stateParams, $location, $urlRouter, $browser) {
+            function syncUrl() {
+                $location.url() !== currentLocation && ($location.url(currentLocation), $location.replace());
+            }
+            function resolveState(state, params, paramsAreFiltered, inherited, dst) {
+                var $stateParams = paramsAreFiltered ? params : filterByKeys(state.params, params), locals = {
+                    $stateParams: $stateParams
+                };
+                dst.resolve = $resolve.resolve(state.resolve, locals, dst.resolve, state);
+                var promises = [ dst.resolve.then(function(globals) {
+                    dst.globals = globals;
+                }) ];
+                return inherited && promises.push(inherited), forEach(state.views, function(view, name) {
+                    var injectables = view.resolve && view.resolve !== state.resolve ? view.resolve : {};
+                    injectables.$template = [ function() {
+                        return $view.load(name, {
+                            view: view,
+                            locals: locals,
+                            params: $stateParams,
+                            notify: !1
+                        }) || "";
+                    } ], promises.push($resolve.resolve(injectables, locals, dst.resolve, state).then(function(result) {
+                        if (isFunction(view.controllerProvider) || isArray(view.controllerProvider)) {
+                            var injectLocals = angular.extend({}, injectables, locals);
+                            result.$$controller = $injector.invoke(view.controllerProvider, null, injectLocals);
+                        } else result.$$controller = view.controller;
+                        result.$$state = state, result.$$controllerAs = view.controllerAs, dst[name] = result;
+                    }));
+                }), $q.all(promises).then(function() {
+                    return dst;
+                });
+            }
+            var TransitionSuperseded = $q.reject(new Error("transition superseded")), TransitionPrevented = $q.reject(new Error("transition prevented")), TransitionAborted = $q.reject(new Error("transition aborted")), TransitionFailed = $q.reject(new Error("transition failed")), currentLocation = $location.url(), baseHref = $browser.baseHref();
+            return root.locals = {
+                resolve: null,
+                globals: {
+                    $stateParams: {}
+                }
+            }, $state = {
+                params: {},
+                current: root.self,
+                $current: root,
+                transition: null
+            }, $state.reload = function() {
+                $state.transitionTo($state.current, $stateParams, {
+                    reload: !0,
+                    inherit: !1,
+                    notify: !1
+                });
+            }, $state.go = function(to, params, options) {
+                return this.transitionTo(to, params, extend({
+                    inherit: !0,
+                    relative: $state.$current
+                }, options));
+            }, $state.transitionTo = function(to, toParams, options) {
+                toParams = toParams || {}, options = extend({
+                    location: !0,
+                    inherit: !1,
+                    relative: null,
+                    notify: !0,
+                    reload: !1,
+                    $retry: !1
+                }, options || {});
+                var evt, from = $state.$current, fromParams = $state.params, fromPath = from.path, toState = findState(to, options.relative);
+                if (!isDefined(toState)) {
+                    var redirect = {
+                        to: to,
+                        toParams: toParams,
+                        options: options
+                    };
+                    if (evt = $rootScope.$broadcast("$stateNotFound", redirect, from.self, fromParams), 
+                    evt.defaultPrevented) return syncUrl(), TransitionAborted;
+                    if (evt.retry) {
+                        if (options.$retry) return syncUrl(), TransitionFailed;
+                        var retryTransition = $state.transition = $q.when(evt.retry);
+                        return retryTransition.then(function() {
+                            return retryTransition !== $state.transition ? TransitionSuperseded : (redirect.options.$retry = !0, 
+                            $state.transitionTo(redirect.to, redirect.toParams, redirect.options));
+                        }, function() {
+                            return TransitionAborted;
+                        }), syncUrl(), retryTransition;
+                    }
+                    if (to = redirect.to, toParams = redirect.toParams, options = redirect.options, 
+                    toState = findState(to, options.relative), !isDefined(toState)) {
+                        if (options.relative) throw new Error("Could not resolve '" + to + "' from state '" + options.relative + "'");
+                        throw new Error("No such state '" + to + "'");
+                    }
+                }
+                if (toState[abstractKey]) throw new Error("Cannot transition to abstract state '" + to + "'");
+                options.inherit && (toParams = inheritParams($stateParams, toParams || {}, $state.$current, toState)), 
+                to = toState;
+                var keep, state, toPath = to.path, locals = root.locals, toLocals = [];
+                for (keep = 0, state = toPath[keep]; state && state === fromPath[keep] && equalForKeys(toParams, fromParams, state.ownParams) && !options.reload; keep++, 
+                state = toPath[keep]) locals = toLocals[keep] = state.locals;
+                if (shouldTriggerReload(to, from, locals, options)) return to.self.reloadOnSearch !== !1 && syncUrl(), 
+                $state.transition = null, $q.when($state.current);
+                if (toParams = normalize(to.params, toParams || {}), options.notify && (evt = $rootScope.$broadcast("$stateChangeStart", to.self, toParams, from.self, fromParams), 
+                evt.defaultPrevented)) return syncUrl(), TransitionPrevented;
+                for (var resolved = $q.when(locals), l = keep; l < toPath.length; l++, state = toPath[l]) locals = toLocals[l] = inherit(locals), 
+                resolved = resolveState(state, toParams, state === to, resolved, locals);
+                var transition = $state.transition = resolved.then(function() {
+                    var l, entering, exiting;
+                    if ($state.transition !== transition) return TransitionSuperseded;
+                    for (l = fromPath.length - 1; l >= keep; l--) exiting = fromPath[l], exiting.self.onExit && $injector.invoke(exiting.self.onExit, exiting.self, exiting.locals.globals), 
+                    exiting.locals = null;
+                    for (l = keep; l < toPath.length; l++) entering = toPath[l], entering.locals = toLocals[l], 
+                    entering.self.onEnter && $injector.invoke(entering.self.onEnter, entering.self, entering.locals.globals);
+                    if ($state.transition !== transition) return TransitionSuperseded;
+                    $state.$current = to, $state.current = to.self, $state.params = toParams, copy($state.params, $stateParams), 
+                    $state.transition = null;
+                    var toNav = to.navigable;
+                    return options.location && toNav && ($location.url(toNav.url.format(toNav.locals.globals.$stateParams)), 
+                    "replace" === options.location && $location.replace()), options.notify && $rootScope.$broadcast("$stateChangeSuccess", to.self, toParams, from.self, fromParams), 
+                    currentLocation = $location.url(), $state.current;
+                }, function(error) {
+                    return $state.transition !== transition ? TransitionSuperseded : ($state.transition = null, 
+                    $rootScope.$broadcast("$stateChangeError", to.self, toParams, from.self, fromParams, error), 
+                    syncUrl(), $q.reject(error));
+                });
+                return transition;
+            }, $state.is = function(stateOrName, params) {
+                var state = findState(stateOrName);
+                return isDefined(state) ? $state.$current !== state ? !1 : isDefined(params) && null !== params ? angular.equals($stateParams, params) : !0 : undefined;
+            }, $state.includes = function(stateOrName, params) {
+                if (isString(stateOrName) && isGlob(stateOrName)) {
+                    if (!doesStateMatchGlob(stateOrName)) return !1;
+                    stateOrName = $state.$current.name;
+                }
+                var state = findState(stateOrName);
+                if (!isDefined(state)) return undefined;
+                if (!isDefined($state.$current.includes[state.name])) return !1;
+                var validParams = !0;
+                return angular.forEach(params, function(value, key) {
+                    isDefined($stateParams[key]) && $stateParams[key] === value || (validParams = !1);
+                }), validParams;
+            }, $state.href = function(stateOrName, params, options) {
+                options = extend({
+                    lossy: !0,
+                    inherit: !1,
+                    absolute: !1,
+                    relative: $state.$current
+                }, options || {});
+                var state = findState(stateOrName, options.relative);
+                if (!isDefined(state)) return null;
+                params = inheritParams($stateParams, params || {}, $state.$current, state);
+                var nav = state && options.lossy ? state.navigable : state, url = nav && nav.url ? nav.url.format(normalize(state.params, params || {})) : null;
+                return !$locationProvider.html5Mode() && url && (url = "#" + $locationProvider.hashPrefix() + url), 
+                "/" !== baseHref && ($locationProvider.html5Mode() ? url = baseHref.slice(0, -1) + url : options.absolute && (url = baseHref.slice(1) + url)), 
+                options.absolute && url && (url = $location.protocol() + "://" + $location.host() + (80 == $location.port() || 443 == $location.port() ? "" : ":" + $location.port()) + (!$locationProvider.html5Mode() && url ? "/" : "") + url), 
+                url;
+            }, $state.get = function(stateOrName, context) {
+                if (!isDefined(stateOrName)) {
+                    var list = [];
+                    return forEach(states, function(state) {
+                        list.push(state.self);
+                    }), list;
+                }
+                var state = findState(stateOrName, context);
+                return state && state.self ? state.self : null;
+            }, $state;
+        }
+        function shouldTriggerReload(to, from, locals, options) {
+            return to !== from || (locals !== from.locals || options.reload) && to.self.reloadOnSearch !== !1 ? void 0 : !0;
+        }
+        var root, $state, states = {}, queue = {}, abstractKey = "abstract", stateBuilder = {
+            parent: function(state) {
+                if (isDefined(state.parent) && state.parent) return findState(state.parent);
+                var compositeName = /^(.+)\.[^.]+$/.exec(state.name);
+                return compositeName ? findState(compositeName[1]) : root;
+            },
+            data: function(state) {
+                return state.parent && state.parent.data && (state.data = state.self.data = extend({}, state.parent.data, state.data)), 
+                state.data;
+            },
+            url: function(state) {
+                var url = state.url;
+                if (isString(url)) return "^" == url.charAt(0) ? $urlMatcherFactory.compile(url.substring(1)) : (state.parent.navigable || root).url.concat(url);
+                if ($urlMatcherFactory.isMatcher(url) || null == url) return url;
+                throw new Error("Invalid url '" + url + "' in state '" + state + "'");
+            },
+            navigable: function(state) {
+                return state.url ? state : state.parent ? state.parent.navigable : null;
+            },
+            params: function(state) {
+                if (!state.params) return state.url ? state.url.parameters() : state.parent.params;
+                if (!isArray(state.params)) throw new Error("Invalid params in state '" + state + "'");
+                if (state.url) throw new Error("Both params and url specicified in state '" + state + "'");
+                return state.params;
+            },
+            views: function(state) {
+                var views = {};
+                return forEach(isDefined(state.views) ? state.views : {
+                    "": state
+                }, function(view, name) {
+                    name.indexOf("@") < 0 && (name += "@" + state.parent.name), views[name] = view;
+                }), views;
+            },
+            ownParams: function(state) {
+                if (!state.parent) return state.params;
+                var paramNames = {};
+                forEach(state.params, function(p) {
+                    paramNames[p] = !0;
+                }), forEach(state.parent.params, function(p) {
+                    if (!paramNames[p]) throw new Error("Missing required parameter '" + p + "' in state '" + state.name + "'");
+                    paramNames[p] = !1;
+                });
+                var ownParams = [];
+                return forEach(paramNames, function(own, p) {
+                    own && ownParams.push(p);
+                }), ownParams;
+            },
+            path: function(state) {
+                return state.parent ? state.parent.path.concat(state) : [];
+            },
+            includes: function(state) {
+                var includes = state.parent ? extend({}, state.parent.includes) : {};
+                return includes[state.name] = !0, includes;
+            },
+            $delegates: {}
+        };
+        root = registerState({
+            name: "",
+            url: "^",
+            views: null,
+            "abstract": !0
+        }), root.navigable = null, this.decorator = decorator, this.state = state, this.$get = $get, 
+        $get.$inject = [ "$rootScope", "$q", "$view", "$injector", "$resolve", "$stateParams", "$location", "$urlRouter", "$browser" ];
+    }
+    function $ViewProvider() {
+        function $get($rootScope, $templateFactory) {
+            return {
+                load: function(name, options) {
+                    var result, defaults = {
+                        template: null,
+                        controller: null,
+                        view: null,
+                        locals: null,
+                        notify: !0,
+                        async: !0,
+                        params: {}
+                    };
+                    return options = extend(defaults, options), options.view && (result = $templateFactory.fromConfig(options.view, options.params, options.locals)), 
+                    result && options.notify && $rootScope.$broadcast("$viewContentLoading", options), 
+                    result;
+                }
+            };
+        }
+        this.$get = $get, $get.$inject = [ "$rootScope", "$templateFactory" ];
+    }
+    function $ViewScrollProvider() {
+        var useAnchorScroll = !1;
+        this.useAnchorScroll = function() {
+            useAnchorScroll = !0;
+        }, this.$get = [ "$anchorScroll", "$timeout", function($anchorScroll, $timeout) {
+            return useAnchorScroll ? $anchorScroll : function($element) {
+                $timeout(function() {
+                    $element[0].scrollIntoView();
+                }, 0, !1);
+            };
+        } ];
+    }
+    function $ViewDirective($state, $injector, $uiViewScroll) {
+        function getService() {
+            return $injector.has ? function(service) {
+                return $injector.has(service) ? $injector.get(service) : null;
+            } : function(service) {
+                try {
+                    return $injector.get(service);
+                } catch (e) {
+                    return null;
+                }
+            };
+        }
+        function getRenderer(attrs, scope) {
+            var statics = function() {
+                return {
+                    enter: function(element, target, cb) {
+                        target.after(element), cb();
+                    },
+                    leave: function(element, cb) {
+                        element.remove(), cb();
+                    }
+                };
+            };
+            if ($animate) return {
+                enter: function(element, target, cb) {
+                    $animate.enter(element, null, target, cb);
+                },
+                leave: function(element, cb) {
+                    $animate.leave(element, cb);
+                }
+            };
+            if ($animator) {
+                var animate = $animator && $animator(scope, attrs);
+                return {
+                    enter: function(element, target, cb) {
+                        animate.enter(element, null, target), cb();
+                    },
+                    leave: function(element, cb) {
+                        animate.leave(element), cb();
+                    }
+                };
+            }
+            return statics();
+        }
+        var service = getService(), $animator = service("$animator"), $animate = service("$animate"), directive = {
+            restrict: "ECA",
+            terminal: !0,
+            priority: 400,
+            transclude: "element",
+            compile: function(tElement, tAttrs, $transclude) {
+                return function(scope, $element, attrs) {
+                    function cleanupLastView() {
+                        previousEl && (previousEl.remove(), previousEl = null), currentScope && (currentScope.$destroy(), 
+                        currentScope = null), currentEl && (renderer.leave(currentEl, function() {
+                            previousEl = null;
+                        }), previousEl = currentEl, currentEl = null);
+                    }
+                    function updateView(firstTime) {
+                        var newScope = scope.$new(), name = currentEl && currentEl.data("$uiViewName"), previousLocals = name && $state.$current && $state.$current.locals[name];
+                        if (firstTime || previousLocals !== latestLocals) {
+                            var clone = $transclude(newScope, function(clone) {
+                                renderer.enter(clone, $element, function() {
+                                    (angular.isDefined(autoScrollExp) && !autoScrollExp || scope.$eval(autoScrollExp)) && $uiViewScroll(clone);
+                                }), cleanupLastView();
+                            });
+                            latestLocals = $state.$current.locals[clone.data("$uiViewName")], currentEl = clone, 
+                            currentScope = newScope, currentScope.$emit("$viewContentLoaded"), currentScope.$eval(onloadExp);
+                        }
+                    }
+                    var previousEl, currentEl, currentScope, latestLocals, onloadExp = attrs.onload || "", autoScrollExp = attrs.autoscroll, renderer = getRenderer(attrs, scope);
+                    scope.$on("$stateChangeSuccess", function() {
+                        updateView(!1);
+                    }), scope.$on("$viewContentLoading", function() {
+                        updateView(!1);
+                    }), updateView(!0);
+                };
+            }
+        };
+        return directive;
+    }
+    function $ViewDirectiveFill($compile, $controller, $state) {
+        return {
+            restrict: "ECA",
+            priority: -400,
+            compile: function(tElement) {
+                var initial = tElement.html();
+                return function(scope, $element, attrs) {
+                    var name = attrs.uiView || attrs.name || "", inherited = $element.inheritedData("$uiView");
+                    name.indexOf("@") < 0 && (name = name + "@" + (inherited ? inherited.state.name : "")), 
+                    $element.data("$uiViewName", name);
+                    var current = $state.$current, locals = current && current.locals[name];
+                    if (locals) {
+                        $element.data("$uiView", {
+                            name: name,
+                            state: locals.$$state
+                        }), $element.html(locals.$template ? locals.$template : initial);
+                        var link = $compile($element.contents());
+                        if (locals.$$controller) {
+                            locals.$scope = scope;
+                            var controller = $controller(locals.$$controller, locals);
+                            locals.$$controllerAs && (scope[locals.$$controllerAs] = controller), $element.data("$ngControllerController", controller), 
+                            $element.children().data("$ngControllerController", controller);
+                        }
+                        link(scope);
+                    }
+                };
+            }
+        };
+    }
+    function parseStateRef(ref) {
+        var parsed = ref.replace(/\n/g, " ").match(/^([^(]+?)\s*(\((.*)\))?$/);
+        if (!parsed || 4 !== parsed.length) throw new Error("Invalid state ref '" + ref + "'");
+        return {
+            state: parsed[1],
+            paramExpr: parsed[3] || null
+        };
+    }
+    function stateContext(el) {
+        var stateData = el.parent().inheritedData("$uiView");
+        return stateData && stateData.state && stateData.state.name ? stateData.state : void 0;
+    }
+    function $StateRefDirective($state, $timeout) {
+        var allowedOptions = [ "location", "inherit", "reload" ];
+        return {
+            restrict: "A",
+            require: "?^uiSrefActive",
+            link: function(scope, element, attrs, uiSrefActive) {
+                var ref = parseStateRef(attrs.uiSref), params = null, base = stateContext(element) || $state.$current, isForm = "FORM" === element[0].nodeName, attr = isForm ? "action" : "href", nav = !0, options = {
+                    relative: base
+                }, optionsOverride = scope.$eval(attrs.uiSrefOpts) || {};
+                angular.forEach(allowedOptions, function(option) {
+                    option in optionsOverride && (options[option] = optionsOverride[option]);
+                });
+                var update = function(newVal) {
+                    if (newVal && (params = newVal), nav) {
+                        var newHref = $state.href(ref.state, params, options);
+                        return uiSrefActive && uiSrefActive.$$setStateInfo(ref.state, params), newHref ? void (element[0][attr] = newHref) : (nav = !1, 
+                        !1);
+                    }
+                };
+                ref.paramExpr && (scope.$watch(ref.paramExpr, function(newVal) {
+                    newVal !== params && update(newVal);
+                }, !0), params = scope.$eval(ref.paramExpr)), update(), isForm || element.bind("click", function(e) {
+                    var button = e.which || e.button;
+                    button > 1 || e.ctrlKey || e.metaKey || e.shiftKey || element.attr("target") || ($timeout(function() {
+                        $state.go(ref.state, params, options);
+                    }), e.preventDefault());
+                });
+            }
+        };
+    }
+    function $StateActiveDirective($state, $stateParams, $interpolate) {
+        return {
+            restrict: "A",
+            controller: [ "$scope", "$element", "$attrs", function($scope, $element, $attrs) {
+                function update() {
+                    $state.$current.self === state && matchesParams() ? $element.addClass(activeClass) : $element.removeClass(activeClass);
+                }
+                function matchesParams() {
+                    return !params || equalForKeys(params, $stateParams);
+                }
+                var state, params, activeClass;
+                activeClass = $interpolate($attrs.uiSrefActive || "", !1)($scope), this.$$setStateInfo = function(newState, newParams) {
+                    state = $state.get(newState, stateContext($element)), params = newParams, update();
+                }, $scope.$on("$stateChangeSuccess", update);
+            } ]
+        };
+    }
+    function $IsStateFilter($state) {
+        return function(state) {
+            return $state.is(state);
+        };
+    }
+    function $IncludedByStateFilter($state) {
+        return function(state) {
+            return $state.includes(state);
+        };
+    }
+    function $RouteProvider($stateProvider, $urlRouterProvider) {
+        function onEnterRoute($$state) {
+            this.locals = $$state.locals.globals, this.params = this.locals.$stateParams;
+        }
+        function onExitRoute() {
+            this.locals = null, this.params = null;
+        }
+        function when(url, route) {
+            if (null != route.redirectTo) {
+                var handler, redirect = route.redirectTo;
+                if (isString(redirect)) handler = redirect; else {
+                    if (!isFunction(redirect)) throw new Error("Invalid 'redirectTo' in when()");
+                    handler = function(params, $location) {
+                        return redirect(params, $location.path(), $location.search());
+                    };
+                }
+                $urlRouterProvider.when(url, handler);
+            } else $stateProvider.state(inherit(route, {
+                parent: null,
+                name: "route:" + encodeURIComponent(url),
+                url: url,
+                onEnter: onEnterRoute,
+                onExit: onExitRoute
+            }));
+            return routes.push(route), this;
+        }
+        function $get($state, $rootScope, $routeParams) {
+            function stateAsRoute(state) {
+                return "" !== state.name ? state : undefined;
+            }
+            var $route = {
+                routes: routes,
+                params: $routeParams,
+                current: undefined
+            };
+            return $rootScope.$on("$stateChangeStart", function(ev, to, toParams, from) {
+                $rootScope.$broadcast("$routeChangeStart", stateAsRoute(to), stateAsRoute(from));
+            }), $rootScope.$on("$stateChangeSuccess", function(ev, to, toParams, from) {
+                $route.current = stateAsRoute(to), $rootScope.$broadcast("$routeChangeSuccess", stateAsRoute(to), stateAsRoute(from)), 
+                copy(toParams, $route.params);
+            }), $rootScope.$on("$stateChangeError", function(ev, to, toParams, from, fromParams, error) {
+                $rootScope.$broadcast("$routeChangeError", stateAsRoute(to), stateAsRoute(from), error);
+            }), $route;
+        }
+        var routes = [];
+        onEnterRoute.$inject = [ "$$state" ], this.when = when, this.$get = $get, $get.$inject = [ "$state", "$rootScope", "$routeParams" ];
+    }
+    var isDefined = angular.isDefined, isFunction = angular.isFunction, isString = angular.isString, isObject = angular.isObject, isArray = angular.isArray, forEach = angular.forEach, extend = angular.extend, copy = angular.copy;
+    angular.module("ui.router.util", [ "ng" ]), angular.module("ui.router.router", [ "ui.router.util" ]), 
+    angular.module("ui.router.state", [ "ui.router.router", "ui.router.util" ]), angular.module("ui.router", [ "ui.router.state" ]), 
+    angular.module("ui.router.compat", [ "ui.router" ]), $Resolve.$inject = [ "$q", "$injector" ], 
+    angular.module("ui.router.util").service("$resolve", $Resolve), $TemplateFactory.$inject = [ "$http", "$templateCache", "$injector" ], 
+    angular.module("ui.router.util").service("$templateFactory", $TemplateFactory), 
+    UrlMatcher.prototype.concat = function(pattern) {
+        return new UrlMatcher(this.sourcePath + pattern + this.sourceSearch);
+    }, UrlMatcher.prototype.toString = function() {
+        return this.source;
+    }, UrlMatcher.prototype.exec = function(path, searchParams) {
+        var m = this.regexp.exec(path);
+        if (!m) return null;
+        var i, params = this.params, nTotal = params.length, nPath = this.segments.length - 1, values = {};
+        if (nPath !== m.length - 1) throw new Error("Unbalanced capture group in route '" + this.source + "'");
+        for (i = 0; nPath > i; i++) values[params[i]] = m[i + 1];
+        for (;nTotal > i; i++) values[params[i]] = searchParams[params[i]];
+        return values;
+    }, UrlMatcher.prototype.parameters = function() {
+        return this.params;
+    }, UrlMatcher.prototype.format = function(values) {
+        var segments = this.segments, params = this.params;
+        if (!values) return segments.join("");
+        var i, search, value, nPath = segments.length - 1, nTotal = params.length, result = segments[0];
+        for (i = 0; nPath > i; i++) value = values[params[i]], null != value && (result += encodeURIComponent(value)), 
+        result += segments[i + 1];
+        for (;nTotal > i; i++) value = values[params[i]], null != value && (result += (search ? "&" : "?") + params[i] + "=" + encodeURIComponent(value), 
+        search = !0);
+        return result;
+    }, angular.module("ui.router.util").provider("$urlMatcherFactory", $UrlMatcherFactory), 
+    $UrlRouterProvider.$inject = [ "$urlMatcherFactoryProvider" ], angular.module("ui.router.router").provider("$urlRouter", $UrlRouterProvider), 
+    $StateProvider.$inject = [ "$urlRouterProvider", "$urlMatcherFactoryProvider", "$locationProvider" ], 
+    angular.module("ui.router.state").value("$stateParams", {}).provider("$state", $StateProvider), 
+    $ViewProvider.$inject = [], angular.module("ui.router.state").provider("$view", $ViewProvider), 
+    angular.module("ui.router.state").provider("$uiViewScroll", $ViewScrollProvider), 
+    $ViewDirective.$inject = [ "$state", "$injector", "$uiViewScroll" ], $ViewDirectiveFill.$inject = [ "$compile", "$controller", "$state" ], 
+    angular.module("ui.router.state").directive("uiView", $ViewDirective), angular.module("ui.router.state").directive("uiView", $ViewDirectiveFill), 
+    $StateRefDirective.$inject = [ "$state", "$timeout" ], $StateActiveDirective.$inject = [ "$state", "$stateParams", "$interpolate" ], 
+    angular.module("ui.router.state").directive("uiSref", $StateRefDirective).directive("uiSrefActive", $StateActiveDirective), 
+    $IsStateFilter.$inject = [ "$state" ], $IncludedByStateFilter.$inject = [ "$state" ], 
+    angular.module("ui.router.state").filter("isState", $IsStateFilter).filter("includedByState", $IncludedByStateFilter), 
+    $RouteProvider.$inject = [ "$stateProvider", "$urlRouterProvider" ], angular.module("ui.router.compat").provider("$route", $RouteProvider).directive("ngView", $ViewDirective);
 }(window, window.angular), function() {
     function _storageFactory(storageType) {
         return [ "$rootScope", "$window", "$log", function($rootScope, $window, $log) {
