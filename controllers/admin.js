@@ -6,20 +6,14 @@ var amulet = require('amulet');
 var Router = require('regex-router');
 
 var logger = require('loge');
-var models = require('../../lib/models');
+var models = require('../lib/models');
 
 // router & controllers requiring authentication
 var R = new Router(function(req, res) {
   // GET /admin -> redirect to /admin/experiments
-  res.redirect('/admin/experiments');
+  // res.redirect('/admin/experiments');
+  amulet.stream(['admin/layout.mu'], req.ctx).pipe(res);
 });
-R.any(/^\/admin\/access_tokens/, require('./access_tokens'));
-R.any(/^\/admin\/administrators/, require('./administrators'));
-R.any(/^\/admin\/aws_accounts/, require('./aws_accounts'));
-R.any(/^\/admin\/experiments/, require('./experiments'));
-R.any(/^\/admin\/mturk/, require('./mturk'));
-R.any(/^\/admin\/participants/, require('./participants'));
-R.any(/^\/admin\/templates/, require('./templates'));
 
 /** POST /admin/logout
 Purge administrator_token cookie, and redirect */

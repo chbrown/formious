@@ -76,29 +76,37 @@ R.delete(/^\/api\/access_tokens\/(\d+)$/, function(req, res, m) {
   });
 });
 
-// other
+/** POST /api/access_tokens/generate
 
-/** POST /api/access_tokens/generate?relation=experiments&id=23&length=10
-Generate or find existing access token, and return it */
+Example data:
+  relation: experiments
+  id: 23
+  length: 10
+
+Generate or find existing access token, and return it. */
 R.post(/^\/api\/access_tokens\/generate(\?|$)/, function(req, res, m) {
-  var urlObj = url.parse(req.url, true);
-  // only allow 'experiments' from this API call
-  var relation = urlObj.query.relation || null;
-  if (relation != 'experiments') {
-    relation = null;
-  }
-  var foreign_id = urlObj.query.id || null;
-  var length = parseInt(urlObj.query.length || 10, null);
-
-  // try to use an existing access token
-  //   AccessToken.findOrCreate(relation, foreign_id, opts, callback)
-  models.AccessToken.findOrCreate(relation, foreign_id, {length: length}, function(err, access_token) {
+  req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var url = [relation, foreign_id].join('/') + '?token=' + access_token.token;
-    // setHeader is not chainable
-    res.status(201).setHeader('Location', url);
-    res.json(access_token);
+    // only allow 'experiments' from this API call, for the moment
+    var relation = data.relation || null;
+    if (relation != 'experiments') {
+      relation = null;
+    }
+    var foreign_id = data.id || null;
+    var length = parseInt(data.length || 10, null);
+
+    // try to use an existing access token
+    //   AccessToken.findOrCreate(relation, foreign_id, opts, callback)
+    models.AccessToken.findOrCreate(relation, foreign_id, {length: length}, function(err, access_token) {
+      if (err) return res.die(err);
+
+      var url = ['', relation, foreign_id].join('/') + '?token=' + access_token.token;
+      // setHeader is not chainable
+      res.status(201).setHeader('Location', url);
+      res.json(access_token);
+    });
+
   });
 });
 

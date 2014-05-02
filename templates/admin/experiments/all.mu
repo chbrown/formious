@@ -11,7 +11,6 @@
           <th></th>
           <th></th>
           <th></th>
-          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -22,20 +21,14 @@
           <td><time>{{experiment.created | date:"yyyy-MM-dd"}}</time></td>
           <td><administrator id="experiment.administrator_id"></administrator></td>
           <td>
-            <a href="/admin/experiments/{{experiment.id}}/responses">Responses</a> ({{experiment.count || 0}})
+            <a href="#" ng-click="responses(experiment, $event)">Responses</a>
+            ({{experiment.count || 0}})
           </td>
           <td class="nowrap">
             <a href="/experiments/{{experiment.id}}">Public</a>
           </td>
           <td>
-            <form method="POST" action="{{'/admin/experiments/' + experiment.id + '/clone'}}">
-              <button>Clone</button>
-            </form>
-          </td>
-          <td>
-            <ajaxform method="DELETE" action="/admin/experiments/{{experiment.id}}">
-              <button>Delete</button>
-            </ajaxform>
+            <button ng-click="delete(experiment)">Delete</button>
           </td>
         </tr>
       </tbody>

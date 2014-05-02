@@ -1,26 +1,38 @@
 /*jslint browser: true, devel: true */ /*globals _, angular, app, p, Url, summarizeResponse */
 
-app.controller('adminExperimentsCtrl', function($scope, $flash, Experiment, Administrator) {
+app.controller('adminExperimentsCtrl', function($scope, $flash, $state, $location, Experiment, Administrator) {
   $scope.experiments = Experiment.query();
   $scope.administrators = Administrator.query();
+
+  $scope.delete = function(experiment) {
+    var promise = experiment.$delete().then(function() {
+      $scope.experiments.splice($scope.experiments.indexOf(experiment), 1);
+      return 'Deleted';
+    }, summarizeResponse);
+    $flash.addPromise(promise);
+  };
+
+  $scope.responses = function(experiment, ev) {
+    ev.preventDefault();
+    var promise = experiment.generateAccessToken().$promise.then(function(access_token) {
+      var url = ['', access_token.relation, access_token.foreign_id, 'responses'].join('/') + '?token=' + access_token.token;
+      // leave the realm of ui-router:
+      window.location = url;
+      return 'Generated';
+    }, summarizeResponse);
+    $flash.addPromise(promise);
+  };
 });
 
-app.controller('adminExperimentCtrl', function($scope, $http, $localStorage, $flash, $q,
+app.controller('adminExperimentCtrl', function($scope, $http, $state, $localStorage, $flash, $q,
     Experiment, Template, Administrator, AWSAccount, Stim) {
   $scope.$storage = $localStorage.$default({expand_experiment_html: false});
 
-  var current_url = Url.parse(window.location);
-  var experiment_id = _.last(current_url.path.split('/'));
-
-  $scope.experiment = Experiment.get({id: experiment_id});
+  $scope.experiment = Experiment.get($state.params);
   $scope.aws_accounts = AWSAccount.query();
   $scope.administrators = Administrator.query();
   $scope.templates = Template.query();
-  $scope.stims = Stim.query({experiment_id: experiment_id});
-
-  $scope.localizeUrl = function(url) {
-    return Url.parse(url).toString();
-  };
+  $scope.stims = Stim.query({experiment_id: $state.params.id});
 
   $scope.keydown = function(ev) {
     if (ev.which == 83 && ev.metaKey) {
@@ -32,8 +44,7 @@ app.controller('adminExperimentCtrl', function($scope, $http, $localStorage, $fl
 
   $scope.sync = function() {
     var promise = $scope.experiment.$save(function() {
-      var experiment_url = '/admin/experiments/' + $scope.experiment.id;
-      history.replaceState(null, '', experiment_url);
+      $state.go('.', {id: $scope.experiment.id}, {notify: false});
     }).then(function() {
       return 'Saved';
     }, summarizeResponse);
@@ -42,9 +53,8 @@ app.controller('adminExperimentCtrl', function($scope, $http, $localStorage, $fl
 
   $scope.deleteStim = function(stim) {
     stim.$delete(function() {
-      // var index = $scope.stims.indexOf(stim);
-      // $scope.stims.splice(index, 1);
-      $scope.stims = Stim.query({experiment_id: experiment_id});
+      // Stim.query({experiment_id: $scope.experiment.id});
+      $scope.stims.splice($scope.stims.indexOf(stim), 1);
     });
   };
 
@@ -55,9 +65,23 @@ app.controller('adminExperimentCtrl', function($scope, $http, $localStorage, $fl
       return stim.$delete();
     });
     $q.all(promises).then(function() {
-      $scope.stims = Stim.query({experiment_id: experiment_id});
+      $scope.stims = Stim.query({experiment_id: $scope.experiment.id});
     });
   };
+
+  $scope.responses = function(ev) {
+    ev.preventDefault();
+    var promise = $scope.experiment.generateAccessToken().$promise.then(function(access_token) {
+      var url = ['', access_token.relation, access_token.foreign_id, 'responses'].join('/') + '?token=' + access_token.token;
+      // leave the realm of ui-router:
+      window.location = url;
+      return 'Generated';
+    }, summarizeResponse);
+    $flash.addPromise(promise);
+  };
+
+  // generate link to hit creation page
+  $scope.site_url = Url.parse(window.location).merge({path: '/'}).toString();
 
   var addStimData = function(data) {
     // data is an object with columns: [String] and rows: [Object]
@@ -92,7 +116,7 @@ app.controller('adminExperimentCtrl', function($scope, $http, $localStorage, $fl
     });
 
     $q.all(promises).then(function() {
-      $scope.stims = Stim.query({experiment_id: experiment_id});
+      $scope.stims = Stim.query({experiment_id: $scope.experiment.id});
     });
   };
 
@@ -102,7 +126,7 @@ app.controller('adminExperimentCtrl', function($scope, $http, $localStorage, $fl
     var input = ev.target;
 
     var file = input.files[0];
-    p('parseUpload: ', file);
+    p('parseUpload:', file);
 
     // sample file = {
     //   lastModifiedDate: Tue Mar 04 2014 15:57:25 GMT-0600 (CST)

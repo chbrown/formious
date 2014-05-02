@@ -1,3 +1,4 @@
+<ng-include src="'/templates/admin/mturk/nav.html'"></ng-include>
 <main ng-controller="adminHITsCtrl">
   <h3>HITs</h3>
 

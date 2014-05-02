@@ -1,10 +1,10 @@
 <div ng-controller="adminExperimentCtrl">
   <nav fixedflow class="sub">
     <div style="float: right">
-      <a href="/admin/experiments/{{experiment.id}}/mturk">MTurk...</a>
+      <a href="/admin/mturk/HITs/new?Title={{experiment.name}}&ExternalURL={{site_url}}experiments/{{experiment.id}}">Prepare HIT</a>
 
       <a href="/experiments/{{experiment.id}}">Public</a>
-      <a href="/admin/experiments/{{experiment.id}}/responses">Responses</a>
+      <a href="#" ng-click="responses($event)">Responses</a>
     </div>
 
     <span>Experiment: <b>{{experiment.name}}</b></span>
@@ -21,7 +21,7 @@
       <form ng-submit="sync($event)">
         <label>
           <div><b>Experiment name</b></div>
-          <input type="text" ng-model="experiment.name" />
+          <input type="text" ng-model="experiment.name" style="width: 200px">
         </label>
 
         <label>

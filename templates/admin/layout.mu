@@ -15,6 +15,7 @@
   <script src="/static/app/controllers/templates.js"></script>
   <script src="/static/app/controllers/mturk/HITs.js"></script>
   <script src="/static/app/models.js"></script>
+  <script src="/static/app/config.js"></script>
 </head>
 <body ng-app="app" class="admin">
   <div id="flash" style="display: none"></div>
@@ -32,5 +33,5 @@
     <a href="/admin/experiments">Experiments</a>
     <a href="/admin/templates">Templates</a>
   </nav>
-  <%<%>
+  <div ui-view></div>
 </body>

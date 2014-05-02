@@ -26,12 +26,3 @@ app.controller('adminResponsesCtrl', function($scope) {
 //   //   $flash.addPromise(ajax_promise);
 //   // };
 // });
-
-app.controller('accessTokensCtrl', function($scope, AccessToken) {
-  $scope.access_tokens = AccessToken.query();
-  $scope.delete = function(access_token) {
-    access_token.$delete(function() {
-      $scope.access_tokens = AccessToken.query();
-    });
-  };
-});

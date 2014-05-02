@@ -5,6 +5,7 @@ var logger = require('loge');
 var Router = require('regex-router');
 var sv = require('sv');
 var turk = require('turk');
+var util = require('util');
 var url = require('url');
 var xmlconv = require('xmlconv');
 
@@ -194,6 +195,7 @@ R.post(/^\/api\/mturk\/HITs\/(\w+)\/ExtendHIT(\?|$)/, function(req, res) {
 Show single HIT. */
 R.get(/^\/api\/mturk\/HITs\/(\w+)(\?|$)/, function(req, res, m) {
   req.turk.GetHIT({HITId:  m[1]}, function(err, result) {
+    if (err) return res.die(err);
     res.json(result.HIT);
   });
 });
@@ -202,6 +204,7 @@ R.get(/^\/api\/mturk\/HITs\/(\w+)(\?|$)/, function(req, res, m) {
 Show the bonus payments associated with a single HIT. */
 R.get(/^\/api\/mturk\/HITs\/(\w+)\/BonusPayments(\?|$)/, function(req, res, m) {
   req.turk.GetBonusPayments({HITId: m[1], PageSize: 100}, function(err, result) {
+    if (err) return res.die(err);
     res.ngjson(result.GetBonusPaymentsResult.BonusPayment || []);
   });
 });
@@ -309,8 +312,11 @@ R.post(/^\/api\/mturk\/HITs\/(\w+)\/import/, function(req, res, m) {
     }, function(err, assignments) {
       if (err) return res.die(err);
 
+      var total = assignments.length;
       var added = assignments.filter(_.identity).length;
-      res.json({message: 'Imported ' + added + ' assignments'});
+      var message = util.format('Imported %d out of %d assignments (%d duplicates)',
+        added, total, total - added);
+      res.json({message: message});
     });
   });
 

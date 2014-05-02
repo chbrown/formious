@@ -1,3 +1,4 @@
+<ng-include src="'/templates/admin/mturk/nav.html'"></ng-include>
 <main ng-controller="adminHITCtrl">
   <h3>HIT: {{hit.Title}}</h3>
 
@@ -35,10 +36,11 @@
   <section class="box">
     <h3>Import</h3>
     <span class="help">Import data that was submitted to Mechanical Turk directly into the local database.<br>
-      Because each Assignment has a unique identifier (the AssignmentId field), duplicate imports will be ignored.</span>
+      Because each Assignment has a unique identifier (the AssignmentsId field), duplicate imports will be ignored.</span>
     <p>
-      <form method="POST" action="{{hit.HITId + '/import'}}">
-        <button>Import</button>
+      <!-- <form method="POST" action="{{hit.HITId + '/import'}}"></form> -->
+      <form ng-submit="import($event)">
+        <p><button>Import</button></p>
       </form>
     </p>
   </section>

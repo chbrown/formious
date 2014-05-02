@@ -3,6 +3,11 @@
 app.service('AccessToken', function($resource) {
   return $resource('/api/access_tokens/:id', {
     id: '@id',
+  }, {
+    generate: {
+      method: 'POST',
+      url: '/api/access_tokens/generate',
+    }
   });
 });
 
@@ -28,10 +33,18 @@ app.service('AWSAccountAdministrator', function($resource) {
   });
 });
 
-app.service('Experiment', function($resource) {
-  return $resource('/api/experiments/:id', {
+app.service('Experiment', function($resource, AccessToken) {
+  var Experiment = $resource('/api/experiments/:id', {
     id: '@id',
   });
+  Experiment.prototype.generateAccessToken = function() {
+    return AccessToken.generate({
+      relation: 'experiments',
+      id: this.id,
+      length: 10,
+    });
+  };
+  return Experiment;
 });
 
 app.service('Participant', function($resource) {

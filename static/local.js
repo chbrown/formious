@@ -63,6 +63,7 @@ var summarizeResponse = function(res) {
   if (res.data) {
     parts.push(': ' + res.data.toString());
   }
+  // p('summarizeResponse ->', parts.join(''));
   return parts.join('');
 };
 

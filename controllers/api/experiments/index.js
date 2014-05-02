@@ -90,20 +90,20 @@ R.delete(/^\/api\/experiments\/(\d+)$/, function(req, res, m) {
 
 // non-REST:
 
-/** POST /api/experiments/:id/clone
-Create new experiment with properties of original (but not stims) */
-R.post(/^\/api\/experiments\/(\d+)\/clone$/, function(req, res, m) {
-  models.Experiment.one({id: m[1]}, function(err, experiment) {
-    if (err) return res.die(err);
+// /** POST /api/experiments/:id/clone
+// Create new experiment with properties of original (but not stims) */
+// R.post(/^\/api\/experiments\/(\d+)\/clone$/, function(req, res, m) {
+//   models.Experiment.one({id: m[1]}, function(err, experiment) {
+//     if (err) return res.die(err);
 
-    var fields = _.pick(experiment, models.Experiment.columns);
-    fields.name += ' copy';
+//     var fields = _.pick(experiment, models.Experiment.columns);
+//     fields.name += ' copy';
 
-    models.Experiment.insert(fields, function(err, experiment) {
-      if (err) return res.die(err);
-      res.status(201).json(experiment);
-    });
-  });
-});
+//     models.Experiment.insert(fields, function(err, experiment) {
+//       if (err) return res.die(err);
+//       res.status(201).json(experiment);
+//     });
+//   });
+// });
 
 module.exports = R.route.bind(R);

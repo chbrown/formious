@@ -1,3 +1,4 @@
+<ng-include src="'/templates/admin/mturk/nav.html'"></ng-include>
 <main ng-controller="adminCreateHITCtrl">
   <h3>Create HIT</h3>
 
@@ -105,7 +106,8 @@
       <input type="checkbox" ng-model="$storage.preview_iframe">
     </label>
   </h3>
-  <section class="box" ng-show="$storage.preview_iframe">
-    <iframe scrolling="auto" width="100%" frameborder="0" align="center" height="{{$storage.hit.FrameHeight}}"></iframe>
+  <section class="box" ng-if="$storage.preview_iframe && preview_url">
+    <iframe src="{{preview_url}}"
+      scrolling="auto" width="100%" frameborder="0" align="center" height="{{$storage.hit.FrameHeight}}"></iframe>
   </section>
 </main>

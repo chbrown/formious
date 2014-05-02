@@ -2,6 +2,10 @@
   <nav fixedflow class="sub">
     <span>Template: <b>{{template.name}}</b></span>
     <button ng-click="sync($event)" id="save_button">Save</button>
+
+    <div style="float: right">
+      <button ng-click="clone()">Clone</button>
+    </div>
   </nav>
 
   <main>

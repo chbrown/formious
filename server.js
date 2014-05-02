@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 /*jslint node: true */
 var path = require('path');
-var http = require('./http-enchanted');
+var http = require('http-enhanced');
 var logger = require('loge');
-
 var models = require('./lib/models');
 
 // amulet.set(), as opposed amulet.create(), will set the defaults on the module singleton
@@ -23,6 +22,15 @@ var amulet = require('amulet').set({
     }
   }
 });
+
+// extend http-enhanced a little more
+http.ServerResponse.prototype.die = function(error) {
+  if (this.statusCode == 200) {
+    this.statusCode = 500;
+  }
+  logger.error('res.die:', error.stack, error);
+  return this.text(error ? 'Failure: ' + error.toString() : 'Failure');
+};
 
 var Cookies = require('cookies');
 Cookies.prototype.defaults = function() {

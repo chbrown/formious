@@ -1,38 +1,65 @@
-/*jslint browser: true, devel: true */ /*globals _, angular, app, p, Url, summarizeResponse */
+/*jslint browser: true */ /*globals _, angular, app, p, Url, summarizeResponse */
 
-app.controller('adminMTurkNavCtrl', function($scope, $localStorage, AWSAccount) {
-  $scope.$storage = $localStorage.$default({
-    aws_account_id: null,
-    host: 'sandbox',
+app.service('$storedStateParams', function($state, $localStorage, $rootScope) {
+  // bring in localStorage backing and automatic re-routing to reflect params changes
+  var params = angular.copy($state.params);
+  var last_params = angular.copy(params);
+
+  // _.pick ... _.defaults doesn't cut it because we want to replace both
+  // null and undefined and _.extend doesn't ignore null or undefined values
+  for (var key in params) {
+    // try to grab defaults for the current state's null params from local storage
+    // the way ui.router is set up, params[k] will never be undefined
+    if ($state.params[key] === null && $localStorage[key] !== null && $localStorage[key] !== undefined) {
+      params[key] = $localStorage[key];
+    }
+  }
+
+  function digest() {
+    if (!angular.equals(params, last_params)) {
+      _.extend($localStorage, params);
+      // actually only need to copy if the $state.go doesn't trigger a controller reload
+      last_params = angular.copy(params);
+      $state.go('.', params);
+    }
+  }
+  digest();
+
+  var _debounce;
+  $rootScope.$watch(function() {
+    if (!_debounce) {
+      _debounce = setTimeout(function() {
+        _debounce = null;
+        digest();
+      }, 100);
+    }
   });
+
+  return params;
+});
+
+app.controller('adminMTurkNavCtrl', function($scope, $storedStateParams, AWSAccount) {
+  $scope.params = $storedStateParams;
+
   $scope.aws_accounts = AWSAccount.query();
   $scope.hosts = [{name: 'deploy'}, {name: 'sandbox'}, {name: 'local'}];
 });
 
-app.controller('adminHITsCtrl', function($scope, $localStorage, $resource) {
-  $scope.$storage = $localStorage.$default({
-    aws_account_id: null,
-    host: 'sandbox',
-  });
-
+app.controller('adminHITsCtrl', function($scope, $localStorage, $resource, $stateParams, $storedStateParams) {
+  $scope.params = $storedStateParams;
   var HIT = $resource('/api/mturk/HITs/:HITId', {
     HITId: '@HITId',
-    aws_account_id: $scope.$storage.aws_account_id,
-    host: $scope.$storage.host,
+    aws_account_id: $scope.params.aws_account_id,
+    host: $scope.params.host,
   });
   $scope.hits = HIT.query();
 });
 
-app.controller('adminHITCtrl', function($scope, $localStorage, $flash, $resource) {
-  $scope.$storage = $localStorage.$default({
-    aws_account_id: null,
-    host: 'sandbox',
-  });
-
+app.controller('adminHITCtrl', function($scope, $localStorage, $flash, $resource, $storedStateParams) {
   var HIT = $resource('/api/mturk/HITs/:HITId', {
     HITId: '@HITId',
-    aws_account_id: $scope.$storage.aws_account_id,
-    host: $scope.$storage.host,
+    aws_account_id: $storedStateParams.aws_account_id,
+    host: $storedStateParams.host,
   }, {
     bonus_payments: {
       method: 'GET',
@@ -48,28 +75,36 @@ app.controller('adminHITCtrl', function($scope, $localStorage, $flash, $resource
       method: 'POST',
       url: '/api/mturk/HITs/:HITId/ExtendHIT',
     },
+    import: {
+      method: 'POST',
+      url: '/api/mturk/HITs/:HITId/import',
+    },
   });
 
-  var current_url = Url.parse(window.location);
-  var HITId = _.last(current_url.path.split('/'));
+  var HITId = $storedStateParams.HITId;
   $scope.hit = HIT.get({HITId: HITId});
   $scope.bonus_payments = HIT.bonus_payments({HITId: HITId});
   $scope.assignments = HIT.assignments({HITId: HITId});
 
   $scope.ExtendHIT = function(ev) {
-    // var data = _.extend({}, $scope.$storage.hit, $scope.$storage.extra);
     var data = _.extend({HITId: HITId}, $scope.extension);
-    // var data = $scope.extension;
-    console.log('ExtendHIT data', data, $scope.hit);
+    // console.log('ExtendHIT data', data, $scope.hit);
     var promise = HIT.ExtendHIT(data).$promise.then(function(res) {
       return 'Extended';
+    }, summarizeResponse);
+    $flash.addPromise(promise);
+  };
+
+  $scope.import = function(ev) {
+    var promise = HIT.import({HITId: HITId}).$promise.then(function(res) {
+      return res.message || 'Imported';
     }, summarizeResponse);
     $flash.addPromise(promise);
   };
 });
 
 
-app.controller('adminCreateHITCtrl', function($scope, $http, $localStorage, $flash) {
+app.controller('adminCreateHITCtrl', function($scope, $http, $location, $localStorage, $flash, $storedStateParams) {
   // defaults:
   $scope.$storage = $localStorage.$default({
     hit: {
@@ -87,17 +122,20 @@ app.controller('adminCreateHITCtrl', function($scope, $http, $localStorage, $fla
     preview_iframe: false,
   });
 
-  _.extend($scope.$storage.hit, window.hit);
+  // experiment/show may send over ExternalURL and Title query params
+  // fixme: the way we grab the variables off here before the state redirects is kind of a hack
+  var query = $location.search();
+  _.extend($scope.$storage.hit, _.omit(query, 'aws_account_id', 'host'));
 
   $scope.sync = function(ev) {
     var data = _.extend({}, $scope.$storage.hit, $scope.$storage.extra);
-    console.log('sync data', data);
+    // console.log('sync data', data);
     var promise = $http({
       method: 'POST',
       url: '/api/mturk/HITs',
       params: {
-        aws_account_id: $scope.$storage.aws_account_id,
-        host: $scope.$storage.host,
+        aws_account_id: $storedStateParams.aws_account_id,
+        host: $storedStateParams.host,
       },
       data: data,
     }).then(function(res) {
@@ -118,8 +156,7 @@ app.controller('adminCreateHITCtrl', function($scope, $http, $localStorage, $fla
   // AWS adds four parameters: assignmentId, hitId, workerId, and turkSubmitTo
   //   turkSubmitTo is the host, not the full path
   $scope.$watch('$storage.hit.ExternalURL', function(newVal, oldVal) {
-    if (newVal && newVal !== '' && $scope.$storage.preview_iframe) {
-      var iframe = document.querySelector('iframe');
+    if (newVal !== '') {
       var url = Url.parse(newVal);
       _.extend(url.query, {
         // Once assigned, assignmentId is a 30-character alphadecimal mess
@@ -130,21 +167,19 @@ app.controller('adminCreateHITCtrl', function($scope, $http, $localStorage, $fla
         // turkSubmitTo is normally https://workersandbox.mturk.com or https://www.mturk.com
         turkSubmitTo: ''
       });
-      iframe.src = url.toString();
+      $scope.preview_url = url.toString();
+    }
+    else {
+      $scope.preview_url = '';
     }
   });
 });
 
-app.controller('adminAssignmentEditor', function($scope, $resource, $localStorage, $flash) {
-  $scope.$storage = $localStorage.$default({
-    aws_account_id: null,
-    host: 'sandbox',
-  });
-
+app.controller('adminAssignmentEditor', function($scope, $resource, $localStorage, $storedStateParams, $flash) {
   var Assignment = $resource('/api/mturk/Assignments/:AssignmentId', {
     AssignmentId: '@AssignmentId',
-    aws_account_id: $scope.$storage.aws_account_id,
-    host: $scope.$storage.host,
+    aws_account_id: $storedStateParams.aws_account_id,
+    host: $storedStateParams.host,
   }, {
     Approve: {
       method: 'POST',

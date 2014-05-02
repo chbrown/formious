@@ -1,20 +1,21 @@
 /*jslint browser: true, devel: true */ /*globals _, app, Url, summarizeResponse */
 
-app.controller('adminAdministratorsCtrl', function($scope, Administrator) {
+app.controller('adminAdministratorsCtrl', function($scope, $flash, Administrator) {
   $scope.administrators = Administrator.query();
   $scope.delete = function(administrator) {
-    administrator.$delete(function() {
-      $scope.administrators = Administrator.query();
-    });
+    var promise = administrator.$delete().then(function() {
+      $scope.administrators.splice($scope.administrators.indexOf(administrator), 1);
+      return 'Deleted';
+    }, summarizeResponse);
+    $flash.addPromise(promise);
   };
 });
 
-app.controller('adminAdministratorCtrl', function($scope, $http, $flash, $window,
+app.controller('adminAdministratorCtrl', function($scope, $http, $flash, $window, $stateParams,
     Administrator, AWSAccount, AWSAccountAdministrator) {
-  var current_url = Url.parse($window.location);
-  var administrator_id = _.last(current_url.path.split('/'));
+  $scope.administrator = Administrator.get($stateParams);
 
-  $scope.administrator = Administrator.get({id: administrator_id});
+  var administrator_id = $stateParams.id;
   $scope.aws_accounts = AWSAccount.query();
   $scope.administrator_aws_accounts = AWSAccountAdministrator.query({administrator_id: administrator_id});
 

@@ -13,6 +13,7 @@ module.exports = function(grunt) {
     'static/lib/jquery.js',
     'static/lib/angular.js',
     'static/lib/angular-resource.js',
+    'static/lib/angular-ui-router.js',
     'static/lib/ngStorage.js',
     // from misc-js
   ];

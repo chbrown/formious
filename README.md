@@ -27,6 +27,13 @@ http://enron.me/
     user=chbrown
 
 
+## Development
+
+Debugging angular closures, this helps:
+
+    scope = angular.element($('[ng-controller]')).scope()
+
+
 ## License
 
 Copyright © 2011–2014 Christopher Brown. [MIT Licensed](LICENSE).

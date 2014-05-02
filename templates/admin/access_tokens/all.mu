@@ -1,4 +1,4 @@
-<main ng-controller="accessTokensCtrl">
+<main ng-controller="adminAccessTokensCtrl">
   <h3>Access Tokens</h3>
 
   <section>
@@ -27,12 +27,12 @@
           <td><time>{{access_token.redacted | date:"yyyy-MM-dd"}}</time></td>
           <td><time>{{access_token.created | date:"yyyy-MM-dd"}}</time></td>
           <td>
-            <button ng-click="delete(access_token)">Delete</button>
+            <button ng-click="delete($index)">Delete</button>
           </td>
         </tr>
       </tbody>
     </table>
   </section>
 
-  <a href="/admin/access_tokens/new">Create new access token</a>
+  <!-- <a href="/admin/access_tokens/new">Create new access token</a> -->
 </main>

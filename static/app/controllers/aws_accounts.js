@@ -9,12 +9,9 @@ app.controller('adminAWSAccountsCtrl', function($scope, AWSAccount) {
   };
 });
 
-app.controller('adminAWSAccountCtrl', function($scope, $http, $flash, AWSAccount) {
+app.controller('adminAWSAccountCtrl', function($scope, $http, $flash, $stateParams, AWSAccount) {
   $scope.hosts = [{name: 'deploy'}, {name: 'sandbox'}];
-
-  var current_url = Url.parse(window.location);
-  var aws_account_id = _.last(current_url.path.split('/'));
-  $scope.aws_account = AWSAccount.get({id: aws_account_id}, function() {
+  $scope.aws_account = AWSAccount.get($stateParams, function() {
     if ($scope.aws_account.id && $scope.aws_account.id != 'new') {
       $scope.hosts.forEach(function(host) {
         $http({
