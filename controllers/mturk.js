@@ -1,5 +1,4 @@
 /*jslint node: true */
-// var formidable = require('formidable');
 var models = require('../lib/models');
 var amulet = require('amulet');
 var Router = require('regex-router');
