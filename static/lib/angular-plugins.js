@@ -330,58 +330,17 @@ angular.module('misc-js/angular-plugins', [])
     },
   };
 })
-.directive('datetime', function($filter) {
-  /** Just pins together a input[type=date] and input[type=time] into a single
-  Date() representation. Use like:
-
-      <input datetime ng-model="post.published">
-
-  */
-  return {
-    restrict: 'A',
-    template: '<span><input type="date"><input type="time"></span>',
-    replace: true,
-    require: 'ngModel',
-    link: function(scope, element, attrs, ngModel) {
-      var inputs = element.find('input');
-      var date_el = inputs.eq(0);
-      var time_el = inputs.eq(1);
-
-      inputs.on('blur keyup change', function(ev) {
-        scope.$apply(function() {
-          ngModel.$setViewValue(date_el.val() + ' ' + time_el.val());
-        });
-      });
-
-      ngModel.$parsers.push(function(value) {
-        var date = value && angular.isString(value) ? new Date(value) : null;
-        // console.log('$parsing', value, '->', date);
-        return date;
-      });
-      ngModel.$render = function() {
-        // even though the date is displayed as MM/dd/yyyy
-        // and the time is displayed as hh:mm a
-        // they both want different underlying formats
-        var date = ngModel.$modelValue;
-        var date_string = $filter('date')(date, 'yyyy-MM-dd');
-        var time_string = $filter('date')(date, 'HH:mm');
-        date_el.val(date_string);
-        time_el.val(time_string);
-      };
-    }
-  };
-})
 .directive('mapObject', function() {
   /** Use like:
 
-      <table map-object="result.details"></map>
+      <table map-object="result.details"></table>
   */
   return {
     restrict: 'A',
     template:
       '<table class="map">' +
       '  <tr ng-repeat="(key, val) in mapObject">' +
-      '    <td>{{key}}</td><td>{{val}}</td>' +
+      '    <td ng-bind="key"></td><td ng-bind="val"></td>' +
       '  </tr>' +
       '</table>',
     replace: true,

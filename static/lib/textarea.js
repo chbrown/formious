@@ -368,6 +368,10 @@ var Textarea = (function() {
     var html = escapeHTML(this.el.value);
     // add extra white space to make sure the last line is rendered
     this.shadow.innerHTML = html + '&nbsp;';
+    // todo: too-long lines with only trailing space won't trigger a newline
+    // until you hit a visible character, which triggers an ugly shift of the
+    // text to the right as the box tries to fit a full space character into
+    // whatever space is left on that line.
 
     // element sizing, from quirskmode:
     // clientWidth and clientHeight (read/write):
