@@ -703,7 +703,7 @@
         }
     }
     function actualDisplay(name, doc) {
-        var elem = jQuery(doc.createElement(name)).appendTo(doc.body), display = window.getDefaultComputedStyle ? window.getDefaultComputedStyle(elem[0]).display : jQuery.css(elem[0], "display");
+        var style, elem = jQuery(doc.createElement(name)).appendTo(doc.body), display = window.getDefaultComputedStyle && (style = window.getDefaultComputedStyle(elem[0])) ? style.display : jQuery.css(elem[0], "display");
         return elem.detach(), display;
     }
     function defaultDisplay(nodeName) {
@@ -730,7 +730,7 @@
     function showHide(elements, show) {
         for (var display, elem, hidden, values = [], index = 0, length = elements.length; length > index; index++) elem = elements[index], 
         elem.style && (values[index] = jQuery._data(elem, "olddisplay"), display = elem.style.display, 
-        show ? (values[index] || "none" !== display || (elem.style.display = ""), "" === elem.style.display && isHidden(elem) && (values[index] = jQuery._data(elem, "olddisplay", defaultDisplay(elem.nodeName)))) : values[index] || (hidden = isHidden(elem), 
+        show ? (values[index] || "none" !== display || (elem.style.display = ""), "" === elem.style.display && isHidden(elem) && (values[index] = jQuery._data(elem, "olddisplay", defaultDisplay(elem.nodeName)))) : (hidden = isHidden(elem), 
         (display && "none" !== display || !hidden) && jQuery._data(elem, "olddisplay", hidden ? display : jQuery.css(elem, "display"))));
         for (index = 0; length > index; index++) elem = elements[index], elem.style && (show && "none" !== elem.style.display && "" !== elem.style.display || (elem.style.display = show ? values[index] || "" : "none"));
         return elements;
@@ -747,7 +747,7 @@
         return val;
     }
     function getWidthOrHeight(elem, name, extra) {
-        var valueIsBorderBox = !0, val = "width" === name ? elem.offsetWidth : elem.offsetHeight, styles = getStyles(elem), isBorderBox = support.boxSizing() && "border-box" === jQuery.css(elem, "boxSizing", !1, styles);
+        var valueIsBorderBox = !0, val = "width" === name ? elem.offsetWidth : elem.offsetHeight, styles = getStyles(elem), isBorderBox = support.boxSizing && "border-box" === jQuery.css(elem, "boxSizing", !1, styles);
         if (0 >= val || null == val) {
             if (val = curCSS(elem, name, styles), (0 > val || null == val) && (val = elem.style[name]), 
             rnumnonpx.test(val)) return val;
@@ -776,7 +776,7 @@
         for (var tween, collection = (tweeners[prop] || []).concat(tweeners["*"]), index = 0, length = collection.length; length > index; index++) if (tween = collection[index].call(animation, prop, value)) return tween;
     }
     function defaultPrefilter(elem, props, opts) {
-        var prop, value, toggle, tween, hooks, oldfire, display, dDisplay, anim = this, orig = {}, style = elem.style, hidden = elem.nodeType && isHidden(elem), dataShow = jQuery._data(elem, "fxshow");
+        var prop, value, toggle, tween, hooks, oldfire, display, checkDisplay, anim = this, orig = {}, style = elem.style, hidden = elem.nodeType && isHidden(elem), dataShow = jQuery._data(elem, "fxshow");
         opts.queue || (hooks = jQuery._queueHooks(elem, "fx"), null == hooks.unqueued && (hooks.unqueued = 0, 
         oldfire = hooks.empty.fire, hooks.empty.fire = function() {
             hooks.unqueued || oldfire();
@@ -785,8 +785,8 @@
                 hooks.unqueued--, jQuery.queue(elem, "fx").length || hooks.empty.fire();
             });
         })), 1 === elem.nodeType && ("height" in props || "width" in props) && (opts.overflow = [ style.overflow, style.overflowX, style.overflowY ], 
-        display = jQuery.css(elem, "display"), dDisplay = defaultDisplay(elem.nodeName), 
-        "none" === display && (display = dDisplay), "inline" === display && "none" === jQuery.css(elem, "float") && (support.inlineBlockNeedsLayout && "inline" !== dDisplay ? style.zoom = 1 : style.display = "inline-block")), 
+        display = jQuery.css(elem, "display"), checkDisplay = "none" === display ? jQuery._data(elem, "olddisplay") || defaultDisplay(elem.nodeName) : display, 
+        "inline" === checkDisplay && "none" === jQuery.css(elem, "float") && (support.inlineBlockNeedsLayout && "inline" !== defaultDisplay(elem.nodeName) ? style.zoom = 1 : style.display = "inline-block")), 
         opts.overflow && (style.overflow = "hidden", support.shrinkWrapBlocks() || anim.always(function() {
             style.overflow = opts.overflow[0], style.overflowX = opts.overflow[1], style.overflowY = opts.overflow[2];
         }));
@@ -796,8 +796,8 @@
                 hidden = !0;
             }
             orig[prop] = dataShow && dataShow[prop] || jQuery.style(elem, prop);
-        }
-        if (!jQuery.isEmptyObject(orig)) {
+        } else display = void 0;
+        if (jQuery.isEmptyObject(orig)) "inline" === ("none" === display ? defaultDisplay(elem.nodeName) : display) && (style.display = display); else {
             dataShow ? "hidden" in dataShow && (hidden = dataShow.hidden) : dataShow = jQuery._data(elem, "fxshow", {}), 
             toggle && (dataShow.hidden = !hidden), hidden ? jQuery(elem).show() : anim.done(function() {
                 jQuery(elem).hide();
@@ -950,7 +950,7 @@
     function getWindow(elem) {
         return jQuery.isWindow(elem) ? elem : 9 === elem.nodeType ? elem.defaultView || elem.parentWindow : !1;
     }
-    var deletedIds = [], slice = deletedIds.slice, concat = deletedIds.concat, push = deletedIds.push, indexOf = deletedIds.indexOf, class2type = {}, toString = class2type.toString, hasOwn = class2type.hasOwnProperty, trim = "".trim, support = {}, version = "1.11.0", jQuery = function(selector, context) {
+    var deletedIds = [], slice = deletedIds.slice, concat = deletedIds.concat, push = deletedIds.push, indexOf = deletedIds.indexOf, class2type = {}, toString = class2type.toString, hasOwn = class2type.hasOwnProperty, support = {}, version = "1.11.1", jQuery = function(selector, context) {
         return new jQuery.fn.init(selector, context);
     }, rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, rmsPrefix = /^-ms-/, rdashAlpha = /-([\da-z])/gi, fcamelCase = function(all, letter) {
         return letter.toUpperCase();
@@ -1023,7 +1023,7 @@
             return null != obj && obj == obj.window;
         },
         isNumeric: function(obj) {
-            return obj - parseFloat(obj) >= 0;
+            return !jQuery.isArray(obj) && obj - parseFloat(obj) >= 0;
         },
         isEmptyObject: function(obj) {
             var name;
@@ -1066,9 +1066,7 @@
             value === !1) break;
             return obj;
         },
-        trim: trim && !trim.call("﻿ ") ? function(text) {
-            return null == text ? "" : trim.call(text);
-        } : function(text) {
+        trim: function(text) {
             return null == text ? "" : (text + "").replace(rtrim, "");
         },
         makeArray: function(arr, results) {
@@ -1203,26 +1201,6 @@
             return context && typeof context.getElementsByTagName !== strundefined && context;
         }
         function setFilters() {}
-        function tokenize(selector, parseOnly) {
-            var matched, match, tokens, type, soFar, groups, preFilters, cached = tokenCache[selector + " "];
-            if (cached) return parseOnly ? 0 : cached.slice(0);
-            for (soFar = selector, groups = [], preFilters = Expr.preFilter; soFar; ) {
-                (!matched || (match = rcomma.exec(soFar))) && (match && (soFar = soFar.slice(match[0].length) || soFar), 
-                groups.push(tokens = [])), matched = !1, (match = rcombinators.exec(soFar)) && (matched = match.shift(), 
-                tokens.push({
-                    value: matched,
-                    type: match[0].replace(rtrim, " ")
-                }), soFar = soFar.slice(matched.length));
-                for (type in Expr.filter) !(match = matchExpr[type].exec(soFar)) || preFilters[type] && !(match = preFilters[type](match)) || (matched = match.shift(), 
-                tokens.push({
-                    value: matched,
-                    type: type,
-                    matches: match
-                }), soFar = soFar.slice(matched.length));
-                if (!matched) break;
-            }
-            return parseOnly ? soFar.length : soFar ? Sizzle.error(selector) : tokenCache(selector, groups).slice(0);
-        }
         function toSelector(tokens) {
             for (var i = 0, len = tokens.length, selector = ""; len > i; i++) selector += tokens[i].value;
             return selector;
@@ -1246,6 +1224,10 @@
                 for (var i = matchers.length; i--; ) if (!matchers[i](elem, context, xml)) return !1;
                 return !0;
             } : matchers[0];
+        }
+        function multipleContexts(selector, contexts, results) {
+            for (var i = 0, len = contexts.length; len > i; i++) Sizzle(selector, contexts[i], results);
+            return results;
         }
         function condense(unmatched, map, filter, context, xml) {
             for (var elem, newUnmatched = [], i = 0, len = unmatched.length, mapped = null != map; len > i; i++) (elem = unmatched[i]) && (!filter || filter(elem, context, xml)) && (newUnmatched.push(elem), 
@@ -1315,34 +1297,12 @@
             };
             return bySet ? markFunction(superMatcher) : superMatcher;
         }
-        function multipleContexts(selector, contexts, results) {
-            for (var i = 0, len = contexts.length; len > i; i++) Sizzle(selector, contexts[i], results);
-            return results;
-        }
-        function select(selector, context, results, seed) {
-            var i, tokens, token, type, find, match = tokenize(selector);
-            if (!seed && 1 === match.length) {
-                if (tokens = match[0] = match[0].slice(0), tokens.length > 2 && "ID" === (token = tokens[0]).type && support.getById && 9 === context.nodeType && documentIsHTML && Expr.relative[tokens[1].type]) {
-                    if (context = (Expr.find.ID(token.matches[0].replace(runescape, funescape), context) || [])[0], 
-                    !context) return results;
-                    selector = selector.slice(tokens.shift().value.length);
-                }
-                for (i = matchExpr.needsContext.test(selector) ? 0 : tokens.length; i-- && (token = tokens[i], 
-                !Expr.relative[type = token.type]); ) if ((find = Expr.find[type]) && (seed = find(token.matches[0].replace(runescape, funescape), rsibling.test(tokens[0].type) && testContext(context.parentNode) || context))) {
-                    if (tokens.splice(i, 1), selector = seed.length && toSelector(tokens), !selector) return push.apply(results, seed), 
-                    results;
-                    break;
-                }
-            }
-            return compile(selector, match)(seed, context, !documentIsHTML, results, rsibling.test(selector) && testContext(context.parentNode) || context), 
-            results;
-        }
-        var i, support, Expr, getText, isXML, compile, outermostContext, sortInput, hasDuplicate, setDocument, document, docElem, documentIsHTML, rbuggyQSA, rbuggyMatches, matches, contains, expando = "sizzle" + -new Date(), preferredDoc = window.document, dirruns = 0, done = 0, classCache = createCache(), tokenCache = createCache(), compilerCache = createCache(), sortOrder = function(a, b) {
+        var i, support, Expr, getText, isXML, tokenize, compile, select, outermostContext, sortInput, hasDuplicate, setDocument, document, docElem, documentIsHTML, rbuggyQSA, rbuggyMatches, matches, contains, expando = "sizzle" + -new Date(), preferredDoc = window.document, dirruns = 0, done = 0, classCache = createCache(), tokenCache = createCache(), compilerCache = createCache(), sortOrder = function(a, b) {
             return a === b && (hasDuplicate = !0), 0;
         }, strundefined = "undefined", MAX_NEGATIVE = 1 << 31, hasOwn = {}.hasOwnProperty, arr = [], pop = arr.pop, push_native = arr.push, push = arr.push, slice = arr.slice, indexOf = arr.indexOf || function(elem) {
             for (var i = 0, len = this.length; len > i; i++) if (this[i] === elem) return i;
             return -1;
-        }, booleans = "checked|selected|async|autofocus|autoplay|controls|defer|disabled|hidden|ismap|loop|multiple|open|readonly|required|scoped", whitespace = "[\\x20\\t\\r\\n\\f]", characterEncoding = "(?:\\\\.|[\\w-]|[^\\x00-\\xa0])+", identifier = characterEncoding.replace("w", "w#"), attributes = "\\[" + whitespace + "*(" + characterEncoding + ")" + whitespace + "*(?:([*^$|!~]?=)" + whitespace + "*(?:(['\"])((?:\\\\.|[^\\\\])*?)\\3|(" + identifier + ")|)|)" + whitespace + "*\\]", pseudos = ":(" + characterEncoding + ")(?:\\(((['\"])((?:\\\\.|[^\\\\])*?)\\3|((?:\\\\.|[^\\\\()[\\]]|" + attributes.replace(3, 8) + ")*)|.*)\\)|)", rtrim = new RegExp("^" + whitespace + "+|((?:^|[^\\\\])(?:\\\\.)*)" + whitespace + "+$", "g"), rcomma = new RegExp("^" + whitespace + "*," + whitespace + "*"), rcombinators = new RegExp("^" + whitespace + "*([>+~]|" + whitespace + ")" + whitespace + "*"), rattributeQuotes = new RegExp("=" + whitespace + "*([^\\]'\"]*?)" + whitespace + "*\\]", "g"), rpseudo = new RegExp(pseudos), ridentifier = new RegExp("^" + identifier + "$"), matchExpr = {
+        }, booleans = "checked|selected|async|autofocus|autoplay|controls|defer|disabled|hidden|ismap|loop|multiple|open|readonly|required|scoped", whitespace = "[\\x20\\t\\r\\n\\f]", characterEncoding = "(?:\\\\.|[\\w-]|[^\\x00-\\xa0])+", identifier = characterEncoding.replace("w", "w#"), attributes = "\\[" + whitespace + "*(" + characterEncoding + ")(?:" + whitespace + "*([*^$|!~]?=)" + whitespace + "*(?:'((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\"|(" + identifier + "))|)" + whitespace + "*\\]", pseudos = ":(" + characterEncoding + ")(?:\\((('((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\")|((?:\\\\.|[^\\\\()[\\]]|" + attributes + ")*)|.*)\\)|)", rtrim = new RegExp("^" + whitespace + "+|((?:^|[^\\\\])(?:\\\\.)*)" + whitespace + "+$", "g"), rcomma = new RegExp("^" + whitespace + "*," + whitespace + "*"), rcombinators = new RegExp("^" + whitespace + "*([>+~]|" + whitespace + ")" + whitespace + "*"), rattributeQuotes = new RegExp("=" + whitespace + "*([^\\]'\"]*?)" + whitespace + "*\\]", "g"), rpseudo = new RegExp(pseudos), ridentifier = new RegExp("^" + identifier + "$"), matchExpr = {
             ID: new RegExp("^#(" + characterEncoding + ")"),
             CLASS: new RegExp("^\\.(" + characterEncoding + ")"),
             TAG: new RegExp("^(" + characterEncoding.replace("w", "w*") + ")"),
@@ -1415,7 +1375,8 @@
             }, Expr.find.CLASS = support.getElementsByClassName && function(className, context) {
                 return typeof context.getElementsByClassName !== strundefined && documentIsHTML ? context.getElementsByClassName(className) : void 0;
             }, rbuggyMatches = [], rbuggyQSA = [], (support.qsa = rnative.test(doc.querySelectorAll)) && (assert(function(div) {
-                div.innerHTML = "<select t=''><option selected=''></option></select>", div.querySelectorAll("[t^='']").length && rbuggyQSA.push("[*^$]=" + whitespace + "*(?:''|\"\")"), 
+                div.innerHTML = "<select msallowclip=''><option selected=''></option></select>", 
+                div.querySelectorAll("[msallowclip^='']").length && rbuggyQSA.push("[*^$]=" + whitespace + "*(?:''|\"\")"), 
                 div.querySelectorAll("[selected]").length || rbuggyQSA.push("\\[" + whitespace + "*(?:value|" + booleans + ")"), 
                 div.querySelectorAll(":checked").length || rbuggyQSA.push(":checked");
             }), assert(function(div) {
@@ -1424,7 +1385,7 @@
                 div.querySelectorAll("[name=d]").length && rbuggyQSA.push("name" + whitespace + "*[*^$|!~]?="), 
                 div.querySelectorAll(":enabled").length || rbuggyQSA.push(":enabled", ":disabled"), 
                 div.querySelectorAll("*,:x"), rbuggyQSA.push(",.*:");
-            })), (support.matchesSelector = rnative.test(matches = docElem.webkitMatchesSelector || docElem.mozMatchesSelector || docElem.oMatchesSelector || docElem.msMatchesSelector)) && assert(function(div) {
+            })), (support.matchesSelector = rnative.test(matches = docElem.matches || docElem.webkitMatchesSelector || docElem.mozMatchesSelector || docElem.oMatchesSelector || docElem.msMatchesSelector)) && assert(function(div) {
                 support.disconnectedMatch = matches.call(div, "div"), matches.call(div, "[s!='']:x"), 
                 rbuggyMatches.push("!=", pseudos);
             }), rbuggyQSA = rbuggyQSA.length && new RegExp(rbuggyQSA.join("|")), rbuggyMatches = rbuggyMatches.length && new RegExp(rbuggyMatches.join("|")), 
@@ -1508,7 +1469,7 @@
             },
             preFilter: {
                 ATTR: function(match) {
-                    return match[1] = match[1].replace(runescape, funescape), match[3] = (match[4] || match[5] || "").replace(runescape, funescape), 
+                    return match[1] = match[1].replace(runescape, funescape), match[3] = (match[3] || match[4] || match[5] || "").replace(runescape, funescape), 
                     "~=" === match[2] && (match[3] = " " + match[3] + " "), match.slice(0, 4);
                 },
                 CHILD: function(match) {
@@ -1518,8 +1479,8 @@
                     match;
                 },
                 PSEUDO: function(match) {
-                    var excess, unquoted = !match[5] && match[2];
-                    return matchExpr.CHILD.test(match[0]) ? null : (match[3] && void 0 !== match[4] ? match[2] = match[4] : unquoted && rpseudo.test(unquoted) && (excess = tokenize(unquoted, !0)) && (excess = unquoted.indexOf(")", unquoted.length - excess) - unquoted.length) && (match[0] = match[0].slice(0, excess), 
+                    var excess, unquoted = !match[6] && match[2];
+                    return matchExpr.CHILD.test(match[0]) ? null : (match[3] ? match[2] = match[4] || match[5] || "" : unquoted && rpseudo.test(unquoted) && (excess = tokenize(unquoted, !0)) && (excess = unquoted.indexOf(")", unquoted.length - excess) - unquoted.length) && (match[0] = match[0].slice(0, excess), 
                     match[2] = unquoted.slice(0, excess)), match.slice(0, 3));
                 }
             },
@@ -1693,14 +1654,51 @@
             reset: !0
         }) Expr.pseudos[i] = createButtonPseudo(i);
         return setFilters.prototype = Expr.filters = Expr.pseudos, Expr.setFilters = new setFilters(), 
-        compile = Sizzle.compile = function(selector, group) {
+        tokenize = Sizzle.tokenize = function(selector, parseOnly) {
+            var matched, match, tokens, type, soFar, groups, preFilters, cached = tokenCache[selector + " "];
+            if (cached) return parseOnly ? 0 : cached.slice(0);
+            for (soFar = selector, groups = [], preFilters = Expr.preFilter; soFar; ) {
+                (!matched || (match = rcomma.exec(soFar))) && (match && (soFar = soFar.slice(match[0].length) || soFar), 
+                groups.push(tokens = [])), matched = !1, (match = rcombinators.exec(soFar)) && (matched = match.shift(), 
+                tokens.push({
+                    value: matched,
+                    type: match[0].replace(rtrim, " ")
+                }), soFar = soFar.slice(matched.length));
+                for (type in Expr.filter) !(match = matchExpr[type].exec(soFar)) || preFilters[type] && !(match = preFilters[type](match)) || (matched = match.shift(), 
+                tokens.push({
+                    value: matched,
+                    type: type,
+                    matches: match
+                }), soFar = soFar.slice(matched.length));
+                if (!matched) break;
+            }
+            return parseOnly ? soFar.length : soFar ? Sizzle.error(selector) : tokenCache(selector, groups).slice(0);
+        }, compile = Sizzle.compile = function(selector, match) {
             var i, setMatchers = [], elementMatchers = [], cached = compilerCache[selector + " "];
             if (!cached) {
-                for (group || (group = tokenize(selector)), i = group.length; i--; ) cached = matcherFromTokens(group[i]), 
+                for (match || (match = tokenize(selector)), i = match.length; i--; ) cached = matcherFromTokens(match[i]), 
                 cached[expando] ? setMatchers.push(cached) : elementMatchers.push(cached);
-                cached = compilerCache(selector, matcherFromGroupMatchers(elementMatchers, setMatchers));
+                cached = compilerCache(selector, matcherFromGroupMatchers(elementMatchers, setMatchers)), 
+                cached.selector = selector;
             }
             return cached;
+        }, select = Sizzle.select = function(selector, context, results, seed) {
+            var i, tokens, token, type, find, compiled = "function" == typeof selector && selector, match = !seed && tokenize(selector = compiled.selector || selector);
+            if (results = results || [], 1 === match.length) {
+                if (tokens = match[0] = match[0].slice(0), tokens.length > 2 && "ID" === (token = tokens[0]).type && support.getById && 9 === context.nodeType && documentIsHTML && Expr.relative[tokens[1].type]) {
+                    if (context = (Expr.find.ID(token.matches[0].replace(runescape, funescape), context) || [])[0], 
+                    !context) return results;
+                    compiled && (context = context.parentNode), selector = selector.slice(tokens.shift().value.length);
+                }
+                for (i = matchExpr.needsContext.test(selector) ? 0 : tokens.length; i-- && (token = tokens[i], 
+                !Expr.relative[type = token.type]); ) if ((find = Expr.find[type]) && (seed = find(token.matches[0].replace(runescape, funescape), rsibling.test(tokens[0].type) && testContext(context.parentNode) || context))) {
+                    if (tokens.splice(i, 1), selector = seed.length && toSelector(tokens), !selector) return push.apply(results, seed), 
+                    results;
+                    break;
+                }
+            }
+            return (compiled || compile(selector, match))(seed, context, !documentIsHTML, results, rsibling.test(selector) && testContext(context.parentNode) || context), 
+            results;
         }, support.sortStable = expando.split("").sort(sortOrder).join("") === expando, 
         support.detectDuplicates = !!hasDuplicate, setDocument(), support.sortDetached = assert(function(div1) {
             return 1 & div1.compareDocumentPosition(document.createElement("div"));
@@ -1975,7 +1973,7 @@
             if (wait === !0 ? !--jQuery.readyWait : !jQuery.isReady) {
                 if (!document.body) return setTimeout(jQuery.ready);
                 jQuery.isReady = !0, wait !== !0 && --jQuery.readyWait > 0 || (readyList.resolveWith(document, [ jQuery ]), 
-                jQuery.fn.trigger && jQuery(document).trigger("ready").off("ready"));
+                jQuery.fn.triggerHandler && (jQuery(document).triggerHandler("ready"), jQuery(document).off("ready")));
             }
         }
     }), jQuery.ready.promise = function(obj) {
@@ -2002,12 +2000,12 @@
     var i, strundefined = "undefined";
     for (i in jQuery(support)) break;
     support.ownLast = "0" !== i, support.inlineBlockNeedsLayout = !1, jQuery(function() {
-        var container, div, body = document.getElementsByTagName("body")[0];
-        body && (container = document.createElement("div"), container.style.cssText = "border:0;width:0;height:0;position:absolute;top:0;left:-9999px;margin-top:1px", 
-        div = document.createElement("div"), body.appendChild(container).appendChild(div), 
-        typeof div.style.zoom !== strundefined && (div.style.cssText = "border:0;margin:0;width:1px;padding:1px;display:inline;zoom:1", 
-        (support.inlineBlockNeedsLayout = 3 === div.offsetWidth) && (body.style.zoom = 1)), 
-        body.removeChild(container), container = div = null);
+        var val, div, body, container;
+        body = document.getElementsByTagName("body")[0], body && body.style && (div = document.createElement("div"), 
+        container = document.createElement("div"), container.style.cssText = "position:absolute;border:0;width:0;height:0;top:0;left:-9999px", 
+        body.appendChild(container).appendChild(div), typeof div.style.zoom !== strundefined && (div.style.cssText = "display:inline;margin:0;border:0;padding:1px;width:1px;zoom:1", 
+        support.inlineBlockNeedsLayout = val = 3 === div.offsetWidth, val && (body.style.zoom = 1)), 
+        body.removeChild(container));
     }), function() {
         var div = document.createElement("div");
         if (null == support.deleteExpando) {
@@ -2052,8 +2050,8 @@
             var i, name, data, elem = this[0], attrs = elem && elem.attributes;
             if (void 0 === key) {
                 if (this.length && (data = jQuery.data(elem), 1 === elem.nodeType && !jQuery._data(elem, "parsedAttrs"))) {
-                    for (i = attrs.length; i--; ) name = attrs[i].name, 0 === name.indexOf("data-") && (name = jQuery.camelCase(name.slice(5)), 
-                    dataAttr(elem, name, data[name]));
+                    for (i = attrs.length; i--; ) attrs[i] && (name = attrs[i].name, 0 === name.indexOf("data-") && (name = jQuery.camelCase(name.slice(5)), 
+                    dataAttr(elem, name, data[name])));
                     jQuery._data(elem, "parsedAttrs", !0);
                 }
                 return data;
@@ -2131,8 +2129,8 @@
         return chainable ? elems : bulk ? fn.call(elems) : length ? fn(elems[0], key) : emptyGet;
     }, rcheckableType = /^(?:checkbox|radio)$/i;
     !function() {
-        var fragment = document.createDocumentFragment(), div = document.createElement("div"), input = document.createElement("input");
-        if (div.setAttribute("className", "t"), div.innerHTML = "  <link/><table></table><a href='/a'>a</a>", 
+        var input = document.createElement("input"), div = document.createElement("div"), fragment = document.createDocumentFragment();
+        if (div.innerHTML = "  <link/><table></table><a href='/a'>a</a><input type='checkbox'/>", 
         support.leadingWhitespace = 3 === div.firstChild.nodeType, support.tbody = !div.getElementsByTagName("tbody").length, 
         support.htmlSerialize = !!div.getElementsByTagName("link").length, support.html5Clone = "<:nav></:nav>" !== document.createElement("nav").cloneNode(!0).outerHTML, 
         input.type = "checkbox", input.checked = !0, fragment.appendChild(input), support.appendChecked = input.checked, 
@@ -2149,7 +2147,6 @@
                 support.deleteExpando = !1;
             }
         }
-        fragment = div = input = null;
     }(), function() {
         var i, eventName, div = document.createElement("div");
         for (i in {
@@ -2160,7 +2157,7 @@
         support[i + "Bubbles"] = div.attributes[eventName].expando === !1);
         div = null;
     }();
-    var rformElems = /^(?:input|select|textarea)$/i, rkeyEvent = /^key/, rmouseEvent = /^(?:mouse|contextmenu)|click/, rfocusMorph = /^(?:focusinfocus|focusoutblur)$/, rtypenamespace = /^([^.]*)(?:\.(.+)|)$/;
+    var rformElems = /^(?:input|select|textarea)$/i, rkeyEvent = /^key/, rmouseEvent = /^(?:mouse|pointer|contextmenu)|click/, rfocusMorph = /^(?:focusinfocus|focusoutblur)$/, rtypenamespace = /^([^.]*)(?:\.(.+)|)$/;
     jQuery.event = {
         global: {},
         add: function(elem, types, handler, data, selector) {
@@ -2319,7 +2316,7 @@
             },
             beforeunload: {
                 postDispatch: function(event) {
-                    void 0 !== event.result && (event.originalEvent.returnValue = event.result);
+                    void 0 !== event.result && event.originalEvent && (event.originalEvent.returnValue = event.result);
                 }
             }
         },
@@ -2340,7 +2337,7 @@
         elem.detachEvent(name, handle));
     }, jQuery.Event = function(src, props) {
         return this instanceof jQuery.Event ? (src && src.type ? (this.originalEvent = src, 
-        this.type = src.type, this.isDefaultPrevented = src.defaultPrevented || void 0 === src.defaultPrevented && (src.returnValue === !1 || src.getPreventDefault && src.getPreventDefault()) ? returnTrue : returnFalse) : this.type = src, 
+        this.type = src.type, this.isDefaultPrevented = src.defaultPrevented || void 0 === src.defaultPrevented && src.returnValue === !1 ? returnTrue : returnFalse) : this.type = src, 
         props && jQuery.extend(this, props), this.timeStamp = src && src.timeStamp || jQuery.now(), 
         void (this[jQuery.expando] = !0)) : new jQuery.Event(src, props);
     }, jQuery.Event.prototype = {
@@ -2357,11 +2354,15 @@
             e.cancelBubble = !0);
         },
         stopImmediatePropagation: function() {
-            this.isImmediatePropagationStopped = returnTrue, this.stopPropagation();
+            var e = this.originalEvent;
+            this.isImmediatePropagationStopped = returnTrue, e && e.stopImmediatePropagation && e.stopImmediatePropagation(), 
+            this.stopPropagation();
         }
     }, jQuery.each({
         mouseenter: "mouseover",
-        mouseleave: "mouseout"
+        mouseleave: "mouseout",
+        pointerenter: "pointerover",
+        pointerleave: "pointerout"
     }, function(orig, fix) {
         jQuery.event.special[orig] = {
             delegateType: fix,
@@ -2626,23 +2627,16 @@
     });
     var iframe, elemdisplay = {};
     !function() {
-        var a, shrinkWrapBlocksVal, div = document.createElement("div"), divReset = "-webkit-box-sizing:content-box;-moz-box-sizing:content-box;box-sizing:content-box;display:block;padding:0;margin:0;border:0";
-        div.innerHTML = "  <link/><table></table><a href='/a'>a</a><input type='checkbox'/>", 
-        a = div.getElementsByTagName("a")[0], a.style.cssText = "float:left;opacity:.5", 
-        support.opacity = /^0.5/.test(a.style.opacity), support.cssFloat = !!a.style.cssFloat, 
-        div.style.backgroundClip = "content-box", div.cloneNode(!0).style.backgroundClip = "", 
-        support.clearCloneStyle = "content-box" === div.style.backgroundClip, a = div = null, 
+        var shrinkWrapBlocksVal;
         support.shrinkWrapBlocks = function() {
-            var body, container, div, containerStyles;
-            if (null == shrinkWrapBlocksVal) {
-                if (body = document.getElementsByTagName("body")[0], !body) return;
-                containerStyles = "border:0;width:0;height:0;position:absolute;top:0;left:-9999px", 
-                container = document.createElement("div"), div = document.createElement("div"), 
-                body.appendChild(container).appendChild(div), shrinkWrapBlocksVal = !1, typeof div.style.zoom !== strundefined && (div.style.cssText = divReset + ";width:1px;padding:1px;zoom:1", 
-                div.innerHTML = "<div></div>", div.firstChild.style.width = "5px", shrinkWrapBlocksVal = 3 !== div.offsetWidth), 
-                body.removeChild(container), body = container = div = null;
-            }
-            return shrinkWrapBlocksVal;
+            if (null != shrinkWrapBlocksVal) return shrinkWrapBlocksVal;
+            shrinkWrapBlocksVal = !1;
+            var div, body, container;
+            return body = document.getElementsByTagName("body")[0], body && body.style ? (div = document.createElement("div"), 
+            container = document.createElement("div"), container.style.cssText = "position:absolute;border:0;width:0;height:0;top:0;left:-9999px", 
+            body.appendChild(container).appendChild(div), typeof div.style.zoom !== strundefined && (div.style.cssText = "-webkit-box-sizing:content-box;-moz-box-sizing:content-box;box-sizing:content-box;display:block;margin:0;border:0;padding:1px;width:1px;zoom:1", 
+            div.appendChild(document.createElement("div")).style.width = "5px", shrinkWrapBlocksVal = 3 !== div.offsetWidth), 
+            body.removeChild(container), shrinkWrapBlocksVal) : void 0;
         };
     }();
     var getStyles, curCSS, rmargin = /^margin/, rnumnonpx = new RegExp("^(" + pnum + ")(?!px)[a-z%]+$", "i"), rposition = /^(top|right|bottom|left)$/;
@@ -2667,40 +2661,30 @@
         rsLeft && (rs.left = rsLeft)), void 0 === ret ? ret : ret + "" || "auto";
     }), function() {
         function computeStyleTests() {
-            var container, div, body = document.getElementsByTagName("body")[0];
-            body && (container = document.createElement("div"), div = document.createElement("div"), 
-            container.style.cssText = containerStyles, body.appendChild(container).appendChild(div), 
-            div.style.cssText = "-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;position:absolute;display:block;padding:1px;border:1px;width:4px;margin-top:1%;top:1%", 
-            jQuery.swap(body, null != body.style.zoom ? {
-                zoom: 1
-            } : {}, function() {
-                boxSizingVal = 4 === div.offsetWidth;
-            }), boxSizingReliableVal = !0, pixelPositionVal = !1, reliableMarginRightVal = !0, 
-            window.getComputedStyle && (pixelPositionVal = "1%" !== (window.getComputedStyle(div, null) || {}).top, 
+            var div, body, container, contents;
+            body = document.getElementsByTagName("body")[0], body && body.style && (div = document.createElement("div"), 
+            container = document.createElement("div"), container.style.cssText = "position:absolute;border:0;width:0;height:0;top:0;left:-9999px", 
+            body.appendChild(container).appendChild(div), div.style.cssText = "-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;display:block;margin-top:1%;top:1%;border:1px;padding:1px;width:4px;position:absolute", 
+            pixelPositionVal = boxSizingReliableVal = !1, reliableMarginRightVal = !0, window.getComputedStyle && (pixelPositionVal = "1%" !== (window.getComputedStyle(div, null) || {}).top, 
             boxSizingReliableVal = "4px" === (window.getComputedStyle(div, null) || {
                 width: "4px"
-            }).width), body.removeChild(container), div = body = null);
+            }).width, contents = div.appendChild(document.createElement("div")), contents.style.cssText = div.style.cssText = "-webkit-box-sizing:content-box;-moz-box-sizing:content-box;box-sizing:content-box;display:block;margin:0;border:0;padding:0", 
+            contents.style.marginRight = contents.style.width = "0", div.style.width = "1px", 
+            reliableMarginRightVal = !parseFloat((window.getComputedStyle(contents, null) || {}).marginRight)), 
+            div.innerHTML = "<table><tr><td></td><td>t</td></tr></table>", contents = div.getElementsByTagName("td"), 
+            contents[0].style.cssText = "margin:0;border:0;padding:0;display:none", reliableHiddenOffsetsVal = 0 === contents[0].offsetHeight, 
+            reliableHiddenOffsetsVal && (contents[0].style.display = "", contents[1].style.display = "none", 
+            reliableHiddenOffsetsVal = 0 === contents[0].offsetHeight), body.removeChild(container));
         }
-        var a, reliableHiddenOffsetsVal, boxSizingVal, boxSizingReliableVal, pixelPositionVal, reliableMarginRightVal, div = document.createElement("div"), containerStyles = "border:0;width:0;height:0;position:absolute;top:0;left:-9999px", divReset = "-webkit-box-sizing:content-box;-moz-box-sizing:content-box;box-sizing:content-box;display:block;padding:0;margin:0;border:0";
-        div.innerHTML = "  <link/><table></table><a href='/a'>a</a><input type='checkbox'/>", 
-        a = div.getElementsByTagName("a")[0], a.style.cssText = "float:left;opacity:.5", 
-        support.opacity = /^0.5/.test(a.style.opacity), support.cssFloat = !!a.style.cssFloat, 
+        var div, style, a, pixelPositionVal, boxSizingReliableVal, reliableHiddenOffsetsVal, reliableMarginRightVal;
+        div = document.createElement("div"), div.innerHTML = "  <link/><table></table><a href='/a'>a</a><input type='checkbox'/>", 
+        a = div.getElementsByTagName("a")[0], style = a && a.style, style && (style.cssText = "float:left;opacity:.5", 
+        support.opacity = "0.5" === style.opacity, support.cssFloat = !!style.cssFloat, 
         div.style.backgroundClip = "content-box", div.cloneNode(!0).style.backgroundClip = "", 
-        support.clearCloneStyle = "content-box" === div.style.backgroundClip, a = div = null, 
+        support.clearCloneStyle = "content-box" === div.style.backgroundClip, support.boxSizing = "" === style.boxSizing || "" === style.MozBoxSizing || "" === style.WebkitBoxSizing, 
         jQuery.extend(support, {
             reliableHiddenOffsets: function() {
-                if (null != reliableHiddenOffsetsVal) return reliableHiddenOffsetsVal;
-                var container, tds, isSupported, div = document.createElement("div"), body = document.getElementsByTagName("body")[0];
-                if (body) return div.setAttribute("className", "t"), div.innerHTML = "  <link/><table></table><a href='/a'>a</a><input type='checkbox'/>", 
-                container = document.createElement("div"), container.style.cssText = containerStyles, 
-                body.appendChild(container).appendChild(div), div.innerHTML = "<table><tr><td></td><td>t</td></tr></table>", 
-                tds = div.getElementsByTagName("td"), tds[0].style.cssText = "padding:0;margin:0;border:0;display:none", 
-                isSupported = 0 === tds[0].offsetHeight, tds[0].style.display = "", tds[1].style.display = "none", 
-                reliableHiddenOffsetsVal = isSupported && 0 === tds[0].offsetHeight, body.removeChild(container), 
-                div = body = null, reliableHiddenOffsetsVal;
-            },
-            boxSizing: function() {
-                return null == boxSizingVal && computeStyleTests(), boxSizingVal;
+                return null == reliableHiddenOffsetsVal && computeStyleTests(), reliableHiddenOffsetsVal;
             },
             boxSizingReliable: function() {
                 return null == boxSizingReliableVal && computeStyleTests(), boxSizingReliableVal;
@@ -2709,19 +2693,9 @@
                 return null == pixelPositionVal && computeStyleTests(), pixelPositionVal;
             },
             reliableMarginRight: function() {
-                var body, container, div, marginDiv;
-                if (null == reliableMarginRightVal && window.getComputedStyle) {
-                    if (body = document.getElementsByTagName("body")[0], !body) return;
-                    container = document.createElement("div"), div = document.createElement("div"), 
-                    container.style.cssText = containerStyles, body.appendChild(container).appendChild(div), 
-                    marginDiv = div.appendChild(document.createElement("div")), marginDiv.style.cssText = div.style.cssText = divReset, 
-                    marginDiv.style.marginRight = marginDiv.style.width = "0", div.style.width = "1px", 
-                    reliableMarginRightVal = !parseFloat((window.getComputedStyle(marginDiv, null) || {}).marginRight), 
-                    body.removeChild(container);
-                }
-                return reliableMarginRightVal;
+                return null == reliableMarginRightVal && computeStyleTests(), reliableMarginRightVal;
             }
-        });
+        }));
     }(), jQuery.swap = function(elem, options, callback, args) {
         var ret, name, old = {};
         for (name in options) old[name] = elem.style[name], elem.style[name] = options[name];
@@ -2734,8 +2708,8 @@
         visibility: "hidden",
         display: "block"
     }, cssNormalTransform = {
-        letterSpacing: 0,
-        fontWeight: 400
+        letterSpacing: "0",
+        fontWeight: "400"
     }, cssPrefixes = [ "Webkit", "O", "Moz", "ms" ];
     jQuery.extend({
         cssHooks: {
@@ -2751,6 +2725,8 @@
         cssNumber: {
             columnCount: !0,
             fillOpacity: !0,
+            flexGrow: !0,
+            flexShrink: !0,
             fontWeight: !0,
             lineHeight: !0,
             opacity: !0,
@@ -2772,7 +2748,7 @@
                 type = "number"), null != value && value === value && ("number" !== type || jQuery.cssNumber[origName] || (value += "px"), 
                 support.clearCloneStyle || "" !== value || 0 !== name.indexOf("background") || (style[name] = "inherit"), 
                 !(hooks && "set" in hooks && void 0 === (value = hooks.set(elem, value, extra))))) try {
-                    style[name] = "", style[name] = value;
+                    style[name] = value;
                 } catch (e) {}
             }
         },
@@ -2786,13 +2762,13 @@
     }), jQuery.each([ "height", "width" ], function(i, name) {
         jQuery.cssHooks[name] = {
             get: function(elem, computed, extra) {
-                return computed ? 0 === elem.offsetWidth && rdisplayswap.test(jQuery.css(elem, "display")) ? jQuery.swap(elem, cssShow, function() {
+                return computed ? rdisplayswap.test(jQuery.css(elem, "display")) && 0 === elem.offsetWidth ? jQuery.swap(elem, cssShow, function() {
                     return getWidthOrHeight(elem, name, extra);
                 }) : getWidthOrHeight(elem, name, extra) : void 0;
             },
             set: function(elem, value, extra) {
                 var styles = extra && getStyles(elem);
-                return setPositiveNumber(elem, value, extra ? augmentWidthOrHeight(elem, name, extra, support.boxSizing() && "border-box" === jQuery.css(elem, "boxSizing", !1, styles), styles) : 0);
+                return setPositiveNumber(elem, value, extra ? augmentWidthOrHeight(elem, name, extra, support.boxSizing && "border-box" === jQuery.css(elem, "boxSizing", !1, styles), styles) : 0);
             }
         };
     }), support.opacity || (jQuery.cssHooks.opacity = {
@@ -2993,8 +2969,8 @@
             };
         });
     }, function() {
-        var a, input, select, opt, div = document.createElement("div");
-        div.setAttribute("className", "t"), div.innerHTML = "  <link/><table></table><a href='/a'>a</a><input type='checkbox'/>", 
+        var input, div, select, a, opt;
+        div = document.createElement("div"), div.setAttribute("className", "t"), div.innerHTML = "  <link/><table></table><a href='/a'>a</a><input type='checkbox'/>", 
         a = div.getElementsByTagName("a")[0], select = document.createElement("select"), 
         opt = select.appendChild(document.createElement("option")), input = div.getElementsByTagName("input")[0], 
         a.style.cssText = "top:1px", support.getSetAttribute = "t" !== div.className, support.style = /top/.test(a.getAttribute("style")), 
@@ -3002,8 +2978,7 @@
         support.optSelected = opt.selected, support.enctype = !!document.createElement("form").enctype, 
         select.disabled = !0, support.optDisabled = !opt.disabled, input = document.createElement("input"), 
         input.setAttribute("value", ""), support.input = "" === input.getAttribute("value"), 
-        input.value = "t", input.setAttribute("type", "radio"), support.radioValue = "t" === input.value, 
-        a = input = select = opt = div = null;
+        input.value = "t", input.setAttribute("type", "radio"), support.radioValue = "t" === input.value;
     }();
     var rreturn = /\r/g;
     jQuery.fn.extend({
@@ -3028,7 +3003,7 @@
             option: {
                 get: function(elem) {
                     var val = jQuery.find.attr(elem, "value");
-                    return null != val ? val : jQuery.text(elem);
+                    return null != val ? val : jQuery.trim(jQuery.text(elem));
                 }
             },
             select: {
@@ -3610,7 +3585,7 @@
     jQuery.fn.load = function(url, params, callback) {
         if ("string" != typeof url && _load) return _load.apply(this, arguments);
         var selector, response, type, self = this, off = url.indexOf(" ");
-        return off >= 0 && (selector = url.slice(off, url.length), url = url.slice(0, off)), 
+        return off >= 0 && (selector = jQuery.trim(url.slice(off, url.length)), url = url.slice(0, off)), 
         jQuery.isFunction(params) ? (callback = params, params = void 0) : params && "object" == typeof params && (type = "POST"), 
         self.length > 0 && jQuery.ajax({
             url: url,
@@ -3727,7 +3702,7 @@
             for (message = prefix + template.replace(/\{\d+\}/g, function(match) {
                 var arg, index = +match.slice(1, -1);
                 return index + 2 < templateArgs.length ? (arg = templateArgs[index + 2], "function" == typeof arg ? arg.toString().replace(/ ?\{[\s\S]*$/, "") : "undefined" == typeof arg ? "undefined" : "string" != typeof arg ? toJson(arg) : arg) : match;
-            }), message = message + "\nhttp://errors.angularjs.org/1.2.13/" + (module ? module + "/" : "") + code, 
+            }), message = message + "\nhttp://errors.angularjs.org/1.2.16/" + (module ? module + "/" : "") + code, 
             i = 2; i < arguments.length; i++) message = message + (2 == i ? "?" : "&") + "p" + (i - 2) + "=" + encodeURIComponent(stringify(arguments[i]));
             return new Error(message);
         };
@@ -3829,8 +3804,11 @@
     function isFile(obj) {
         return "[object File]" === toString.call(obj);
     }
+    function isBlob(obj) {
+        return "[object Blob]" === toString.call(obj);
+    }
     function isElement(node) {
-        return !(!node || !(node.nodeName || node.on && node.find));
+        return !(!node || !(node.nodeName || node.prop && node.attr && node.find));
     }
     function map(obj, iterator, context) {
         var results = [];
@@ -4206,7 +4184,9 @@
                 $sniffer: $SnifferProvider,
                 $templateCache: $TemplateCacheProvider,
                 $timeout: $TimeoutProvider,
-                $window: $WindowProvider
+                $window: $WindowProvider,
+                $$rAF: $$RAFProvider,
+                $$asyncCallback: $$AsyncCallbackProvider
             });
         } ]);
     }
@@ -4231,6 +4211,25 @@
         originalJqFn = originalJqFn.$original || originalJqFn, removePatch.$original = originalJqFn, 
         jQuery.fn[name] = removePatch;
     }
+    function jqLiteIsTextNode(html) {
+        return !HTML_REGEXP.test(html);
+    }
+    function jqLiteBuildFragment(html, context) {
+        var tmp, tag, wrap, i, j, jj, fragment = context.createDocumentFragment(), nodes = [];
+        if (jqLiteIsTextNode(html)) nodes.push(context.createTextNode(html)); else {
+            for (tmp = fragment.appendChild(context.createElement("div")), tag = (TAG_NAME_REGEXP.exec(html) || [ "", "" ])[1].toLowerCase(), 
+            wrap = wrapMap[tag] || wrapMap._default, tmp.innerHTML = "<div>&#160;</div>" + wrap[1] + html.replace(XHTML_TAG_REGEXP, "<$1></$2>") + wrap[2], 
+            tmp.removeChild(tmp.firstChild), i = wrap[0]; i--; ) tmp = tmp.lastChild;
+            for (j = 0, jj = tmp.childNodes.length; jj > j; ++j) nodes.push(tmp.childNodes[j]);
+            tmp = fragment.firstChild, tmp.textContent = "";
+        }
+        return fragment.textContent = "", fragment.innerHTML = "", nodes;
+    }
+    function jqLiteParseHTML(html, context) {
+        context = context || document;
+        var parsed;
+        return (parsed = SINGLE_TAG_REGEXP.exec(html)) ? [ context.createElement(parsed[1]) ] : jqLiteBuildFragment(html, context);
+    }
     function JQLite(element) {
         if (element instanceof JQLite) return element;
         if (isString(element) && (element = trim(element)), !(this instanceof JQLite)) {
@@ -4238,9 +4237,7 @@
             return new JQLite(element);
         }
         if (isString(element)) {
-            var div = document.createElement("div");
-            div.innerHTML = "<div>&#160;</div>" + element, div.removeChild(div.firstChild), 
-            jqLiteAddNodes(this, div.childNodes);
+            jqLiteAddNodes(this, jqLiteParseHTML(element));
             var fragment = jqLite(document.createDocumentFragment());
             fragment.append(this);
         } else jqLiteAddNodes(this, element);
@@ -4310,8 +4307,8 @@
     function jqLiteInheritedData(element, name, value) {
         element = jqLite(element), 9 == element[0].nodeType && (element = element.find("html"));
         for (var names = isArray(name) ? name : [ name ]; element.length; ) {
-            for (var i = 0, ii = names.length; ii > i; i++) if ((value = element.data(names[i])) !== undefined) return value;
-            element = element.parent();
+            for (var node = element[0], i = 0, ii = names.length; ii > i; i++) if ((value = element.data(names[i])) !== undefined) return value;
+            element = jqLite(node.parentNode || 11 === node.nodeType && node.host);
         }
     }
     function jqLiteEmpty(element) {
@@ -4496,6 +4493,15 @@
             }), scroll;
         } ];
     }
+    function $$AsyncCallbackProvider() {
+        this.$get = [ "$$rAF", "$timeout", function($$rAF, $timeout) {
+            return $$rAF.supported ? function(fn) {
+                return $$rAF(fn);
+            } : function(fn) {
+                return $timeout(fn, 0, !1);
+            };
+        } ];
+    }
     function Browser(window, document, $log, $sniffer) {
         function completeOutstandingRequest(fn) {
             try {
@@ -4599,20 +4605,31 @@
                 }), data = {}, capacity = options && options.capacity || Number.MAX_VALUE, lruHash = {}, freshEnd = null, staleEnd = null;
                 return caches[cacheId] = {
                     put: function(key, value) {
-                        var lruEntry = lruHash[key] || (lruHash[key] = {
-                            key: key
-                        });
-                        return refresh(lruEntry), isUndefined(value) ? void 0 : (key in data || size++, 
-                        data[key] = value, size > capacity && this.remove(staleEnd.key), value);
+                        if (capacity < Number.MAX_VALUE) {
+                            var lruEntry = lruHash[key] || (lruHash[key] = {
+                                key: key
+                            });
+                            refresh(lruEntry);
+                        }
+                        if (!isUndefined(value)) return key in data || size++, data[key] = value, size > capacity && this.remove(staleEnd.key), 
+                        value;
                     },
                     get: function(key) {
-                        var lruEntry = lruHash[key];
-                        if (lruEntry) return refresh(lruEntry), data[key];
+                        if (capacity < Number.MAX_VALUE) {
+                            var lruEntry = lruHash[key];
+                            if (!lruEntry) return;
+                            refresh(lruEntry);
+                        }
+                        return data[key];
                     },
                     remove: function(key) {
-                        var lruEntry = lruHash[key];
-                        lruEntry && (lruEntry == freshEnd && (freshEnd = lruEntry.p), lruEntry == staleEnd && (staleEnd = lruEntry.n), 
-                        link(lruEntry.n, lruEntry.p), delete lruHash[key], delete data[key], size--);
+                        if (capacity < Number.MAX_VALUE) {
+                            var lruEntry = lruHash[key];
+                            if (!lruEntry) return;
+                            lruEntry == freshEnd && (freshEnd = lruEntry.p), lruEntry == staleEnd && (staleEnd = lruEntry.n), 
+                            link(lruEntry.n, lruEntry.p), delete lruHash[key];
+                        }
+                        delete data[key], size--;
                     },
                     removeAll: function() {
                         data = {}, size = 0, lruHash = {}, freshEnd = staleEnd = null;
@@ -4644,7 +4661,7 @@
         } ];
     }
     function $CompileProvider($provide, $$sanitizeUriProvider) {
-        var hasDirectives = {}, Suffix = "Directive", COMMENT_DIRECTIVE_REGEXP = /^\s*directive\:\s*([\d\w\-_]+)\s+(.*)$/, CLASS_DIRECTIVE_REGEXP = /(([\d\w\-_]+)(?:\:([^;]+))?;?)/, TABLE_CONTENT_REGEXP = /^<\s*(tr|th|td|tbody)(\s+[^>]*)?>/i, EVENT_HANDLER_ATTR_REGEXP = /^(on[a-z]+|formaction)$/;
+        var hasDirectives = {}, Suffix = "Directive", COMMENT_DIRECTIVE_REGEXP = /^\s*directive\:\s*([\d\w\-_]+)\s+(.*)$/, CLASS_DIRECTIVE_REGEXP = /(([\d\w\-_]+)(?:\:([^;]+))?;?)/, EVENT_HANDLER_ATTR_REGEXP = /^(on[a-z]+|formaction)$/;
         this.directive = function registerDirective(name, directiveFactory) {
             return assertNotHasOwnProperty(name, "directive"), isString(name) ? (assertArg(directiveFactory, "directiveFactory"), 
             hasDirectives.hasOwnProperty(name) || (hasDirectives[name] = [], $provide.factory(name + Suffix, [ "$injector", "$exceptionHandler", function($injector, $exceptionHandler) {
@@ -4887,7 +4904,7 @@
                     childTranscludeFn = compile($template, transcludeFn))), directive.template) if (assertNoDuplicate("template", templateDirective, directive, $compileNode), 
                     templateDirective = directive, directiveValue = isFunction(directive.template) ? directive.template($compileNode, templateAttrs) : directive.template, 
                     directiveValue = denormalizeTemplate(directiveValue), directive.replace) {
-                        if (replaceDirective = directive, $template = directiveTemplateContents(directiveValue), 
+                        if (replaceDirective = directive, $template = jqLiteIsTextNode(directiveValue) ? [] : jqLite(directiveValue), 
                         compileNode = $template[0], 1 != $template.length || 1 !== compileNode.nodeType) throw $compileMinErr("tplrt", "Template for directive '{0}' must have exactly one root element. {1}", directiveName, "");
                         replaceWith(jqCollection, $compileNode, compileNode);
                         var newTemplateAttrs = {
@@ -4943,16 +4960,6 @@
                     dstAttr[key] = srcAttr[key]);
                 });
             }
-            function directiveTemplateContents(template) {
-                var type;
-                if (template = trim(template), type = TABLE_CONTENT_REGEXP.exec(template)) {
-                    type = type[1].toLowerCase();
-                    var table = jqLite("<table>" + template + "</table>"), tbody = table.children("tbody"), leaf = /(td|th)/.test(type) && table.find("tr");
-                    return tbody.length && "tbody" !== type && (table = tbody), leaf && leaf.length && (table = leaf), 
-                    table.contents();
-                }
-                return jqLite("<div>" + template + "</div>").contents();
-            }
             function compileTemplateUrl(directives, $compileNode, tAttrs, $rootElement, childTranscludeFn, preLinkFns, postLinkFns, previousCompileContext) {
                 var afterTemplateNodeLinkFn, afterTemplateChildLinkFn, linkQueue = [], beforeTemplateCompileNode = $compileNode[0], origAsyncDirective = directives.shift(), derivedSyncDirective = extend({}, origAsyncDirective, {
                     templateUrl: null,
@@ -4965,7 +4972,7 @@
                 }).success(function(content) {
                     var compileNode, tempTemplateAttrs, $template, childBoundTranscludeFn;
                     if (content = denormalizeTemplate(content), origAsyncDirective.replace) {
-                        if ($template = directiveTemplateContents(content), compileNode = $template[0], 
+                        if ($template = jqLiteIsTextNode(content) ? [] : jqLite(content), compileNode = $template[0], 
                         1 != $template.length || 1 !== compileNode.nodeType) throw $compileMinErr("tplrt", "Template for directive '{0}' must have exactly one root element. {1}", origAsyncDirective.name, templateUrl);
                         tempTemplateAttrs = {
                             $attr: {}
@@ -5178,7 +5185,7 @@
                 data;
             } ],
             transformRequest: [ function(d) {
-                return isObject(d) && !isFile(d) ? toJson(d) : d;
+                return !isObject(d) || isFile(d) || isBlob(d) ? d : toJson(d);
             } ],
             headers: {
                 common: {
@@ -5217,6 +5224,7 @@
                     return reqHeaders;
                 }
                 var config = {
+                    method: "get",
                     transformRequest: defaults.transformRequest,
                     transformResponse: defaults.transformResponse
                 }, headers = mergeHeaders(requestConfig);
@@ -5270,16 +5278,17 @@
                 });
             }
             function sendReq(config, reqData, reqHeaders) {
-                function done(status, response, headersString) {
-                    cache && (isSuccess(status) ? cache.put(url, [ status, response, parseHeaders(headersString) ]) : cache.remove(url)), 
-                    resolvePromise(response, status, headersString), $rootScope.$$phase || $rootScope.$apply();
+                function done(status, response, headersString, statusText) {
+                    cache && (isSuccess(status) ? cache.put(url, [ status, response, parseHeaders(headersString), statusText ]) : cache.remove(url)), 
+                    resolvePromise(response, status, headersString, statusText), $rootScope.$$phase || $rootScope.$apply();
                 }
-                function resolvePromise(response, status, headers) {
+                function resolvePromise(response, status, headers, statusText) {
                     status = Math.max(status, 0), (isSuccess(status) ? deferred.resolve : deferred.reject)({
                         data: response,
                         status: status,
                         headers: headersGetter(headers),
-                        config: config
+                        config: config,
+                        statusText: statusText
                     });
                 }
                 function removePendingReq() {
@@ -5292,7 +5301,7 @@
                 cache) if (cachedResp = cache.get(url), isDefined(cachedResp)) {
                     if (cachedResp.then) return cachedResp.then(removePendingReq, removePendingReq), 
                     cachedResp;
-                    isArray(cachedResp) ? resolvePromise(cachedResp[1], cachedResp[0], copy(cachedResp[2])) : resolvePromise(cachedResp, 200, {});
+                    isArray(cachedResp) ? resolvePromise(cachedResp[1], cachedResp[0], copy(cachedResp[2]), cachedResp[3]) : resolvePromise(cachedResp, 200, {}, "OK");
                 } else cache.put(url, promise);
                 return isUndefined(cachedResp) && $httpBackend(config.method, url, reqData, done, reqHeaders, config.timeout, config.withCredentials, config.responseType), 
                 promise;
@@ -5305,7 +5314,8 @@
                     forEach(value, function(v) {
                         isObject(v) && (v = toJson(v)), parts.push(encodeUriQuery(key) + "=" + encodeUriQuery(v));
                     }));
-                }), url + (-1 == url.indexOf("?") ? "?" : "&") + parts.join("&");
+                }), parts.length > 0 && (url += (-1 == url.indexOf("?") ? "?" : "&") + parts.join("&")), 
+                url;
             }
             var defaultCache = $cacheFactory("$http"), reversedInterceptors = [];
             return forEach(interceptorFactories, function(interceptorFactory) {
@@ -5351,9 +5361,9 @@
             function timeoutRequest() {
                 status = ABORTED, jsonpDone && jsonpDone(), xhr && xhr.abort();
             }
-            function completeRequest(callback, status, response, headersString) {
-                timeoutId && $browserDefer.cancel(timeoutId), jsonpDone = xhr = null, status = 0 === status ? response ? 200 : 404 : status, 
-                status = 1223 == status ? 204 : status, callback(status, response, headersString), 
+            function completeRequest(callback, status, response, headersString, statusText) {
+                timeoutId && $browserDefer.cancel(timeoutId), jsonpDone = xhr = null, 0 === status && (status = response ? 200 : "file" == urlResolve(url).protocol ? 404 : 0), 
+                status = 1223 === status ? 204 : status, statusText = statusText || "", callback(status, response, headersString, statusText), 
                 $browser.$$completeOutstandingRequest(noop);
             }
             var status;
@@ -5374,7 +5384,7 @@
                     if (xhr && 4 == xhr.readyState) {
                         var responseHeaders = null, response = null;
                         status !== ABORTED && (responseHeaders = xhr.getAllResponseHeaders(), response = "response" in xhr ? xhr.response : xhr.responseText), 
-                        completeRequest(callback, status || xhr.status, response, responseHeaders);
+                        completeRequest(callback, status || xhr.status, response, responseHeaders, xhr.statusText || "");
                     }
                 }, withCredentials && (xhr.withCredentials = !0), responseType) try {
                     xhr.responseType = responseType;
@@ -5656,7 +5666,7 @@
         if (obj) {
             if (obj.constructor === obj) throw $parseMinErr("isecfn", "Referencing Function in Angular expressions is disallowed! Expression: {0}", fullExpression);
             if (obj.document && obj.location && obj.alert && obj.setInterval) throw $parseMinErr("isecwindow", "Referencing the Window in Angular expressions is disallowed! Expression: {0}", fullExpression);
-            if (obj.children && (obj.nodeName || obj.on && obj.find)) throw $parseMinErr("isecdom", "Referencing DOM nodes in Angular expressions is disallowed! Expression: {0}", fullExpression);
+            if (obj.children && (obj.nodeName || obj.prop && obj.attr && obj.find)) throw $parseMinErr("isecdom", "Referencing DOM nodes in Angular expressions is disallowed! Expression: {0}", fullExpression);
         }
         return obj;
     }
@@ -5934,6 +5944,22 @@
             all: all
         };
     }
+    function $$RAFProvider() {
+        this.$get = [ "$window", "$timeout", function($window, $timeout) {
+            var requestAnimationFrame = $window.requestAnimationFrame || $window.webkitRequestAnimationFrame || $window.mozRequestAnimationFrame, cancelAnimationFrame = $window.cancelAnimationFrame || $window.webkitCancelAnimationFrame || $window.mozCancelAnimationFrame || $window.webkitCancelRequestAnimationFrame, rafSupported = !!requestAnimationFrame, raf = rafSupported ? function(fn) {
+                var id = requestAnimationFrame(fn);
+                return function() {
+                    cancelAnimationFrame(id);
+                };
+            } : function(fn) {
+                var timer = $timeout(fn, 16.66, !1);
+                return function() {
+                    $timeout.cancel(timer);
+                };
+            };
+            return raf.supported = rafSupported, raf;
+        } ];
+    }
     function $RootScopeProvider() {
         var TTL = 10, $rootScopeMinErr = minErr("$rootScope"), lastDirtyWatch = null;
         this.digestTtl = function(value) {
@@ -6002,8 +6028,10 @@
                             oldValue !== internalArray && (oldValue = internalArray, oldLength = oldValue.length = 0, 
                             changeDetected++), newLength = newValue.length, oldLength !== newLength && (changeDetected++, 
                             oldValue.length = oldLength = newLength);
-                            for (var i = 0; newLength > i; i++) oldValue[i] !== newValue[i] && (changeDetected++, 
-                            oldValue[i] = newValue[i]);
+                            for (var i = 0; newLength > i; i++) {
+                                var bothNaN = oldValue[i] !== oldValue[i] && newValue[i] !== newValue[i];
+                                bothNaN || oldValue[i] === newValue[i] || (changeDetected++, oldValue[i] = newValue[i]);
+                            }
                         } else {
                             oldValue !== internalObject && (oldValue = internalObject = {}, oldLength = 0, changeDetected++), 
                             newLength = 0;
@@ -6018,9 +6046,16 @@
                         return changeDetected;
                     }
                     function $watchCollectionAction() {
-                        listener(newValue, oldValue, self);
+                        if (initRun ? (initRun = !1, listener(newValue, newValue, self)) : listener(newValue, veryOldValue, self), 
+                        trackVeryOldValue) if (isObject(newValue)) if (isArrayLike(newValue)) {
+                            veryOldValue = new Array(newValue.length);
+                            for (var i = 0; i < newValue.length; i++) veryOldValue[i] = newValue[i];
+                        } else {
+                            veryOldValue = {};
+                            for (var key in newValue) hasOwnProperty.call(newValue, key) && (veryOldValue[key] = newValue[key]);
+                        } else veryOldValue = newValue;
                     }
-                    var oldValue, newValue, self = this, changeDetected = 0, objGetter = $parse(obj), internalArray = [], internalObject = {}, oldLength = 0;
+                    var newValue, oldValue, veryOldValue, self = this, trackVeryOldValue = listener.length > 1, changeDetected = 0, objGetter = $parse(obj), internalArray = [], internalObject = {}, initRun = !0, oldLength = 0;
                     return this.$watch($watchCollectionWatch, $watchCollectionAction);
                 },
                 $digest: function() {
@@ -6065,7 +6100,11 @@
                         this.$broadcast("$destroy"), this.$$destroyed = !0, this !== $rootScope && (forEach(this.$$listenerCount, bind(null, decrementListenerCount, this)), 
                         parent.$$childHead == this && (parent.$$childHead = this.$$nextSibling), parent.$$childTail == this && (parent.$$childTail = this.$$prevSibling), 
                         this.$$prevSibling && (this.$$prevSibling.$$nextSibling = this.$$nextSibling), this.$$nextSibling && (this.$$nextSibling.$$prevSibling = this.$$prevSibling), 
-                        this.$parent = this.$$nextSibling = this.$$prevSibling = this.$$childHead = this.$$childTail = null);
+                        this.$parent = this.$$nextSibling = this.$$prevSibling = this.$$childHead = this.$$childTail = this.$root = null, 
+                        this.$$listeners = {}, this.$$watchers = this.$$asyncQueue = this.$$postDigestQueue = [], 
+                        this.$destroy = this.$digest = this.$apply = noop, this.$on = this.$watch = function() {
+                            return noop;
+                        });
                     }
                 },
                 $eval: function(expr, locals) {
@@ -6469,7 +6508,7 @@
         };
     }
     function formatNumber(number, pattern, groupSep, decimalSep, fractionSize) {
-        if (isNaN(number) || !isFinite(number)) return "";
+        if (null == number || !isFinite(number) || isObject(number)) return "";
         var isNegative = 0 > number;
         number = Math.abs(number);
         var numStr = number + "", formatedText = "", parts = [], hasExponent = !1;
@@ -6584,8 +6623,14 @@
             if (!sortPredicate) return array;
             sortPredicate = isArray(sortPredicate) ? sortPredicate : [ sortPredicate ], sortPredicate = map(sortPredicate, function(predicate) {
                 var descending = !1, get = predicate || identity;
-                return isString(predicate) && (("+" == predicate.charAt(0) || "-" == predicate.charAt(0)) && (descending = "-" == predicate.charAt(0), 
-                predicate = predicate.substring(1)), get = $parse(predicate)), reverseComparator(function(a, b) {
+                if (isString(predicate) && (("+" == predicate.charAt(0) || "-" == predicate.charAt(0)) && (descending = "-" == predicate.charAt(0), 
+                predicate = predicate.substring(1)), get = $parse(predicate), get.constant)) {
+                    var key = get();
+                    return reverseComparator(function(a, b) {
+                        return compare(a[key], b[key]);
+                    }, descending);
+                }
+                return reverseComparator(function(a, b) {
                     return compare(get(a), get(b));
                 }, descending);
             });
@@ -6598,10 +6643,11 @@
             link: directive
         }), directive.restrict = directive.restrict || "AC", valueFn(directive);
     }
-    function FormController(element, attrs) {
+    function FormController(element, attrs, $scope, $animate) {
         function toggleValidCss(isValid, validationErrorKey) {
             validationErrorKey = validationErrorKey ? "-" + snake_case(validationErrorKey, "-") : "", 
-            element.removeClass((isValid ? INVALID_CLASS : VALID_CLASS) + validationErrorKey).addClass((isValid ? VALID_CLASS : INVALID_CLASS) + validationErrorKey);
+            $animate.removeClass(element, (isValid ? INVALID_CLASS : VALID_CLASS) + validationErrorKey), 
+            $animate.addClass(element, (isValid ? VALID_CLASS : INVALID_CLASS) + validationErrorKey);
         }
         var form = this, parentForm = element.parent().controller("form") || nullFormCtrl, invalidCount = 0, errors = form.$error = {}, controls = [];
         form.$name = attrs.name || attrs.ngForm, form.$dirty = !1, form.$pristine = !0, 
@@ -6625,11 +6671,11 @@
                 queue.push(control), form.$valid = !1, form.$invalid = !0;
             }
         }, form.$setDirty = function() {
-            element.removeClass(PRISTINE_CLASS).addClass(DIRTY_CLASS), form.$dirty = !0, form.$pristine = !1, 
-            parentForm.$setDirty();
+            $animate.removeClass(element, PRISTINE_CLASS), $animate.addClass(element, DIRTY_CLASS), 
+            form.$dirty = !0, form.$pristine = !1, parentForm.$setDirty();
         }, form.$setPristine = function() {
-            element.removeClass(DIRTY_CLASS).addClass(PRISTINE_CLASS), form.$dirty = !1, form.$pristine = !0, 
-            forEach(controls, function(control) {
+            $animate.removeClass(element, DIRTY_CLASS), $animate.addClass(element, PRISTINE_CLASS), 
+            form.$dirty = !1, form.$pristine = !0, forEach(controls, function(control) {
                 control.$setPristine();
             });
         };
@@ -6637,7 +6683,17 @@
     function validate(ctrl, validatorName, validity, value) {
         return ctrl.$setValidity(validatorName, validity), validity ? value : undefined;
     }
+    function addNativeHtml5Validators(ctrl, validatorName, element) {
+        var validity = element.prop("validity");
+        if (isObject(validity)) {
+            var validator = function(value) {
+                return ctrl.$error[validatorName] || !(validity.badInput || validity.customError || validity.typeMismatch) || validity.valueMissing ? value : void ctrl.$setValidity(validatorName, !1);
+            };
+            ctrl.$parsers.push(validator);
+        }
+    }
     function textInputType(scope, element, attr, ctrl, $sniffer, $browser) {
+        var validity = element.prop("validity");
         if (!$sniffer.android) {
             var composing = !1;
             element.on("compositionstart", function() {
@@ -6649,7 +6705,7 @@
         var listener = function() {
             if (!composing) {
                 var value = element.val();
-                toBoolean(attr.ngTrim || "T") && (value = trim(value)), ctrl.$viewValue !== value && (scope.$$phase ? ctrl.$setViewValue(value) : scope.$apply(function() {
+                toBoolean(attr.ngTrim || "T") && (value = trim(value)), (ctrl.$viewValue !== value || validity && "" === value && !validity.valueMissing) && (scope.$$phase ? ctrl.$setViewValue(value) : scope.$apply(function() {
                     ctrl.$setViewValue(value);
                 }));
             }
@@ -6700,7 +6756,7 @@
             var empty = ctrl.$isEmpty(value);
             return empty || NUMBER_REGEXP.test(value) ? (ctrl.$setValidity("number", !0), "" === value ? null : empty ? value : parseFloat(value)) : (ctrl.$setValidity("number", !1), 
             undefined);
-        }), ctrl.$formatters.push(function(value) {
+        }), addNativeHtml5Validators(ctrl, "number", element), ctrl.$formatters.push(function(value) {
             return ctrl.$isEmpty(value) ? "" : "" + value;
         }), attr.min) {
             var minValidator = function(value) {
@@ -6762,26 +6818,60 @@
         });
     }
     function classDirective(name, selector) {
-        return name = "ngClass" + name, function() {
+        return name = "ngClass" + name, [ "$animate", function($animate) {
+            function arrayDifference(tokens1, tokens2) {
+                var values = [];
+                outer: for (var i = 0; i < tokens1.length; i++) {
+                    for (var token = tokens1[i], j = 0; j < tokens2.length; j++) if (token == tokens2[j]) continue outer;
+                    values.push(token);
+                }
+                return values;
+            }
+            function arrayClasses(classVal) {
+                if (isArray(classVal)) return classVal;
+                if (isString(classVal)) return classVal.split(" ");
+                if (isObject(classVal)) {
+                    var classes = [];
+                    return forEach(classVal, function(v, k) {
+                        v && classes.push(k);
+                    }), classes;
+                }
+                return classVal;
+            }
             return {
                 restrict: "AC",
                 link: function(scope, element, attr) {
+                    function addClasses(classes) {
+                        var newClasses = digestClassCounts(classes, 1);
+                        attr.$addClass(newClasses);
+                    }
+                    function removeClasses(classes) {
+                        var newClasses = digestClassCounts(classes, -1);
+                        attr.$removeClass(newClasses);
+                    }
+                    function digestClassCounts(classes, count) {
+                        var classCounts = element.data("$classCounts") || {}, classesToUpdate = [];
+                        return forEach(classes, function(className) {
+                            (count > 0 || classCounts[className]) && (classCounts[className] = (classCounts[className] || 0) + count, 
+                            classCounts[className] === +(count > 0) && classesToUpdate.push(className));
+                        }), element.data("$classCounts", classCounts), classesToUpdate.join(" ");
+                    }
+                    function updateClasses(oldClasses, newClasses) {
+                        var toAdd = arrayDifference(newClasses, oldClasses), toRemove = arrayDifference(oldClasses, newClasses);
+                        toRemove = digestClassCounts(toRemove, -1), toAdd = digestClassCounts(toAdd, 1), 
+                        0 === toAdd.length ? $animate.removeClass(element, toRemove) : 0 === toRemove.length ? $animate.addClass(element, toAdd) : $animate.setClass(element, toAdd, toRemove);
+                    }
                     function ngClassWatchAction(newVal) {
                         if (selector === !0 || scope.$index % 2 === selector) {
-                            var newClasses = flattenClasses(newVal || "");
-                            oldVal ? equals(newVal, oldVal) || attr.$updateClass(newClasses, flattenClasses(oldVal)) : attr.$addClass(newClasses);
+                            var newClasses = arrayClasses(newVal || []);
+                            if (oldVal) {
+                                if (!equals(newVal, oldVal)) {
+                                    var oldClasses = arrayClasses(oldVal);
+                                    updateClasses(oldClasses, newClasses);
+                                }
+                            } else addClasses(newClasses);
                         }
                         oldVal = copy(newVal);
-                    }
-                    function flattenClasses(classVal) {
-                        if (isArray(classVal)) return classVal.join(" ");
-                        if (isObject(classVal)) {
-                            var classes = [];
-                            return forEach(classVal, function(v, k) {
-                                v && classes.push(k);
-                            }), classes.join(" ");
-                        }
-                        return classVal;
                     }
                     var oldVal;
                     scope.$watch(attr[name], ngClassWatchAction, !0), attr.$observe("class", function() {
@@ -6789,13 +6879,13 @@
                     }), "ngClass" !== name && scope.$watch("$index", function($index, old$index) {
                         var mod = 1 & $index;
                         if (mod !== old$index & 1) {
-                            var classes = flattenClasses(scope.$eval(attr[name]));
-                            mod === selector ? attr.$addClass(classes) : attr.$removeClass(classes);
+                            var classes = arrayClasses(scope.$eval(attr[name]));
+                            mod === selector ? addClasses(classes) : removeClasses(classes);
                         }
                     });
                 }
             };
-        };
+        } ];
     }
     var lowercase = function(string) {
         return isString(string) ? string.toLowerCase() : string;
@@ -6828,11 +6918,11 @@
         return element.nodeName ? element.nodeName : element[0].nodeName;
     };
     var SNAKE_CASE_REGEXP = /[A-Z]/g, version = {
-        full: "1.2.13",
+        full: "1.2.16",
         major: 1,
         minor: 2,
-        dot: 13,
-        codeName: "romantic-transclusion"
+        dot: 16,
+        codeName: "badger-enumeration"
     }, jqCache = JQLite.cache = {}, jqName = JQLite.expando = "ng-" + new Date().getTime(), jqId = 1, addEventListenerFn = window.document.addEventListener ? function(element, type, fn) {
         element.addEventListener(type, fn, !1);
     } : function(element, type, fn) {
@@ -6843,7 +6933,17 @@
         element.detachEvent("on" + type, fn);
     }, SPECIAL_CHARS_REGEXP = (JQLite._data = function(node) {
         return this.cache[node[this.expando]] || {};
-    }, /([\:\-\_]+(.))/g), MOZ_HACK_REGEXP = /^moz([A-Z])/, jqLiteMinErr = minErr("jqLite"), JQLitePrototype = JQLite.prototype = {
+    }, /([\:\-\_]+(.))/g), MOZ_HACK_REGEXP = /^moz([A-Z])/, jqLiteMinErr = minErr("jqLite"), SINGLE_TAG_REGEXP = /^<(\w+)\s*\/?>(?:<\/\1>|)$/, HTML_REGEXP = /<|&#?\w+;/, TAG_NAME_REGEXP = /<([\w:]+)/, XHTML_TAG_REGEXP = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/gi, wrapMap = {
+        option: [ 1, '<select multiple="multiple">', "</select>" ],
+        thead: [ 1, "<table>", "</table>" ],
+        col: [ 2, "<table><colgroup>", "</colgroup></table>" ],
+        tr: [ 2, "<table><tbody>", "</tbody></table>" ],
+        td: [ 3, "<table><tbody><tr>", "</tr></tbody></table>" ],
+        _default: [ 0, "", "" ]
+    };
+    wrapMap.optgroup = wrapMap.option, wrapMap.tbody = wrapMap.tfoot = wrapMap.colgroup = wrapMap.caption = wrapMap.thead, 
+    wrapMap.th = wrapMap.td;
+    var JQLitePrototype = JQLite.prototype = {
         ready: function(fn) {
             function trigger() {
                 fired || (fired = !0, fn());
@@ -7009,7 +7109,7 @@
             }), children;
         },
         contents: function(element) {
-            return element.childNodes || [];
+            return element.contentDocument || element.childNodes || [];
         },
         append: function(element, node) {
             forEach(new JQLite(node), function(child) {
@@ -7043,7 +7143,11 @@
         addClass: jqLiteAddClass,
         removeClass: jqLiteRemoveClass,
         toggleClass: function(element, selector, condition) {
-            isUndefined(condition) && (condition = !jqLiteHasClass(element, selector)), (condition ? jqLiteAddClass : jqLiteRemoveClass)(element, selector);
+            selector && forEach(selector.split(" "), function(className) {
+                var classCondition = condition;
+                isUndefined(classCondition) && (classCondition = !jqLiteHasClass(element, className)), 
+                (classCondition ? jqLiteAddClass : jqLiteRemoveClass)(element, className);
+            });
         },
         parent: function(element) {
             var parent = element.parentNode;
@@ -7095,14 +7199,17 @@
         }, this.classNameFilter = function(expression) {
             return 1 === arguments.length && (this.$$classNameFilter = expression instanceof RegExp ? expression : null), 
             this.$$classNameFilter;
-        }, this.$get = [ "$timeout", function($timeout) {
+        }, this.$get = [ "$timeout", "$$asyncCallback", function($timeout, $$asyncCallback) {
+            function async(fn) {
+                fn && $$asyncCallback(fn);
+            }
             return {
                 enter: function(element, parent, after, done) {
                     after ? after.after(element) : (parent && parent[0] || (parent = after.parent()), 
-                    parent.append(element)), done && $timeout(done, 0, !1);
+                    parent.append(element)), async(done);
                 },
                 leave: function(element, done) {
-                    element.remove(), done && $timeout(done, 0, !1);
+                    element.remove(), async(done);
                 },
                 move: function(element, parent, after, done) {
                     this.enter(element, parent, after, done);
@@ -7111,18 +7218,18 @@
                     className = isString(className) ? className : isArray(className) ? className.join(" ") : "", 
                     forEach(element, function(element) {
                         jqLiteAddClass(element, className);
-                    }), done && $timeout(done, 0, !1);
+                    }), async(done);
                 },
                 removeClass: function(element, className, done) {
                     className = isString(className) ? className : isArray(className) ? className.join(" ") : "", 
                     forEach(element, function(element) {
                         jqLiteRemoveClass(element, className);
-                    }), done && $timeout(done, 0, !1);
+                    }), async(done);
                 },
                 setClass: function(element, add, remove, done) {
                     forEach(element, function(element) {
                         jqLiteAddClass(element, add), jqLiteRemoveClass(element, remove);
-                    }), done && $timeout(done, 0, !1);
+                    }), async(done);
                 },
                 enabled: noop
             };
@@ -7407,9 +7514,11 @@
     var Parser = function(lexer, $filter, options) {
         this.lexer = lexer, this.$filter = $filter, this.options = options;
     };
-    Parser.ZERO = function() {
+    Parser.ZERO = extend(function() {
         return 0;
-    }, Parser.prototype = {
+    }, {
+        constant: !0
+    }), Parser.prototype = {
         constructor: Parser,
         parse: function(text, json) {
             this.text = text, this.json = json, this.tokens = this.lexer.lex(text), json && (this.assignment = this.logicalOR, 
@@ -7596,6 +7705,7 @@
         arrayDeclaration: function() {
             var elementFns = [], allConstant = !0;
             if ("]" !== this.peekToken().text) do {
+                if (this.peek("]")) break;
                 var elementFn = this.expression();
                 elementFns.push(elementFn), elementFn.constant || (allConstant = !1);
             } while (this.expect(","));
@@ -7610,6 +7720,7 @@
         object: function() {
             var keyValues = [], allConstant = !0;
             if ("}" !== this.peekToken().text) do {
+                if (this.peek("}")) break;
                 var token = this.expect(), key = token.string || token.text;
                 this.consume(":");
                 var value = this.expression();
@@ -7698,8 +7809,10 @@
             return {
                 priority: 99,
                 link: function(scope, element, attr) {
-                    attr.$observe(normalized, function(value) {
-                        value && (attr.$set(attrName, value), msie && element.prop(attrName, attr[attrName]));
+                    var propName = attrName, name = attrName;
+                    "href" === attrName && "[object SVGAnimatedString]" === toString.call(element.prop("href")) && (name = "xlinkHref", 
+                    attr.$attr[name] = "xlink:href", propName = null), attr.$observe(normalized, function(value) {
+                        value && (attr.$set(name, value), msie && propName && element.prop(propName, attr[name]));
                     });
                 }
             };
@@ -7712,7 +7825,7 @@
         $setDirty: noop,
         $setPristine: noop
     };
-    FormController.$inject = [ "$element", "$attrs", "$scope" ];
+    FormController.$inject = [ "$element", "$attrs", "$scope", "$animate" ];
     var formDirectiveFactory = function(isNgForm) {
         return [ "$timeout", function($timeout) {
             var formDirective = {
@@ -7763,10 +7876,11 @@
                 ctrl && (inputType[lowercase(attr.type)] || inputType.text)(scope, element, attr, ctrl, $sniffer, $browser);
             }
         };
-    } ], VALID_CLASS = "ng-valid", INVALID_CLASS = "ng-invalid", PRISTINE_CLASS = "ng-pristine", DIRTY_CLASS = "ng-dirty", NgModelController = [ "$scope", "$exceptionHandler", "$attrs", "$element", "$parse", function($scope, $exceptionHandler, $attr, $element, $parse) {
+    } ], VALID_CLASS = "ng-valid", INVALID_CLASS = "ng-invalid", PRISTINE_CLASS = "ng-pristine", DIRTY_CLASS = "ng-dirty", NgModelController = [ "$scope", "$exceptionHandler", "$attrs", "$element", "$parse", "$animate", function($scope, $exceptionHandler, $attr, $element, $parse, $animate) {
         function toggleValidCss(isValid, validationErrorKey) {
             validationErrorKey = validationErrorKey ? "-" + snake_case(validationErrorKey, "-") : "", 
-            $element.removeClass((isValid ? INVALID_CLASS : VALID_CLASS) + validationErrorKey).addClass((isValid ? VALID_CLASS : INVALID_CLASS) + validationErrorKey);
+            $animate.removeClass($element, (isValid ? INVALID_CLASS : VALID_CLASS) + validationErrorKey), 
+            $animate.addClass($element, (isValid ? VALID_CLASS : INVALID_CLASS) + validationErrorKey);
         }
         this.$viewValue = Number.NaN, this.$modelValue = Number.NaN, this.$parsers = [], 
         this.$formatters = [], this.$viewChangeListeners = [], this.$pristine = !0, this.$dirty = !1, 
@@ -7783,11 +7897,12 @@
             this.$invalid = !0, this.$valid = !1, invalidCount++), $error[validationErrorKey] = !isValid, 
             toggleValidCss(isValid, validationErrorKey), parentForm.$setValidity(validationErrorKey, isValid, this));
         }, this.$setPristine = function() {
-            this.$dirty = !1, this.$pristine = !0, $element.removeClass(DIRTY_CLASS).addClass(PRISTINE_CLASS);
+            this.$dirty = !1, this.$pristine = !0, $animate.removeClass($element, DIRTY_CLASS), 
+            $animate.addClass($element, PRISTINE_CLASS);
         }, this.$setViewValue = function(value) {
             this.$viewValue = value, this.$pristine && (this.$dirty = !0, this.$pristine = !1, 
-            $element.removeClass(PRISTINE_CLASS).addClass(DIRTY_CLASS), parentForm.$setDirty()), 
-            forEach(this.$parsers, function(fn) {
+            $animate.removeClass($element, PRISTINE_CLASS), $animate.addClass($element, DIRTY_CLASS), 
+            parentForm.$setDirty()), forEach(this.$parsers, function(fn) {
                 value = fn(value);
             }), this.$modelValue !== value && (this.$modelValue = value, ngModelSet($scope, value), 
             forEach(this.$viewChangeListeners, function(listener) {
@@ -7934,15 +8049,18 @@
             restrict: "A",
             $$tlb: !0,
             link: function($scope, $element, $attr, ctrl, $transclude) {
-                var block, childScope;
+                var block, childScope, previousElements;
                 $scope.$watch($attr.ngIf, function(value) {
                     toBoolean(value) ? childScope || (childScope = $scope.$new(), $transclude(childScope, function(clone) {
                         clone[clone.length++] = document.createComment(" end ngIf: " + $attr.ngIf + " "), 
                         block = {
                             clone: clone
                         }, $animate.enter(clone, $element.parent(), $element);
-                    })) : (childScope && (childScope.$destroy(), childScope = null), block && ($animate.leave(getBlockElements(block.clone)), 
-                    block = null));
+                    })) : (previousElements && (previousElements.remove(), previousElements = null), 
+                    childScope && (childScope.$destroy(), childScope = null), block && (previousElements = getBlockElements(block.clone), 
+                    $animate.leave(previousElements, function() {
+                        previousElements = null;
+                    }), block = null));
                 });
             }
         };
@@ -7956,9 +8074,11 @@
             compile: function(element, attr) {
                 var srcExp = attr.ngInclude || attr.src, onloadExp = attr.onload || "", autoScrollExp = attr.autoscroll;
                 return function(scope, $element, $attr, ctrl, $transclude) {
-                    var currentScope, currentElement, changeCounter = 0, cleanupLastIncludeContent = function() {
-                        currentScope && (currentScope.$destroy(), currentScope = null), currentElement && ($animate.leave(currentElement), 
-                        currentElement = null);
+                    var currentScope, previousElement, currentElement, changeCounter = 0, cleanupLastIncludeContent = function() {
+                        previousElement && (previousElement.remove(), previousElement = null), currentScope && (currentScope.$destroy(), 
+                        currentScope = null), currentElement && ($animate.leave(currentElement, function() {
+                            previousElement = null;
+                        }), previousElement = currentElement, currentElement = null);
                     };
                     scope.$watch($sce.parseAsResourceUrl(srcExp), function(src) {
                         var afterAnimation = function() {
@@ -8124,10 +8244,21 @@
                 this.cases = {};
             } ],
             link: function(scope, element, attr, ngSwitchController) {
-                var selectedTranscludes, selectedElements, watchExpr = attr.ngSwitch || attr.on, selectedScopes = [];
+                var selectedTranscludes, selectedElements, previousElements, watchExpr = attr.ngSwitch || attr.on, selectedScopes = [];
                 scope.$watch(watchExpr, function(value) {
-                    for (var i = 0, ii = selectedScopes.length; ii > i; i++) selectedScopes[i].$destroy(), 
-                    $animate.leave(selectedElements[i]);
+                    var i, ii = selectedScopes.length;
+                    if (ii > 0) {
+                        if (previousElements) {
+                            for (i = 0; ii > i; i++) previousElements[i].remove();
+                            previousElements = null;
+                        }
+                        for (previousElements = [], i = 0; ii > i; i++) {
+                            var selected = selectedElements[i];
+                            selectedScopes[i].$destroy(), previousElements[i] = selected, $animate.leave(selected, function() {
+                                previousElements.splice(i, 1), 0 === previousElements.length && (previousElements = null);
+                            });
+                        }
+                    }
                     selectedElements = [], selectedScopes = [], (selectedTranscludes = ngSwitchController.cases["!" + value] || ngSwitchController.cases["?"]) && (scope.$eval(attr.change), 
                     forEach(selectedTranscludes, function(selectedTransclude) {
                         var selectedScope = scope.$new();
@@ -8286,7 +8417,7 @@
                             (existingOption = existingOptions[index + 1]) ? (lastElement = existingOption.element, 
                             existingOption.label !== option.label && lastElement.text(existingOption.label = option.label), 
                             existingOption.id !== option.id && lastElement.val(existingOption.id = option.id), 
-                            lastElement[0].selected !== option.selected && lastElement.prop("selected", existingOption.selected = option.selected)) : ("" === option.id && nullOption ? element = nullOption : (element = optionTemplate.clone()).val(option.id).attr("selected", option.selected).text(option.label), 
+                            existingOption.selected !== option.selected && lastElement.prop("selected", existingOption.selected = option.selected)) : ("" === option.id && nullOption ? element = nullOption : (element = optionTemplate.clone()).val(option.id).attr("selected", option.selected).text(option.label), 
                             existingOptions.push(existingOption = {
                                 element: element,
                                 label: option.label,
@@ -8315,14 +8446,17 @@
                                     trackFn(scope, locals) != key); trackIndex++) ; else locals[valueName] = collection[key];
                                     value.push(valueFn(scope, locals));
                                 }
-                            } else if (key = selectElement.val(), "?" == key) value = undefined; else if ("" === key) value = null; else if (trackFn) {
-                                for (trackIndex = 0; trackIndex < collection.length; trackIndex++) if (locals[valueName] = collection[trackIndex], 
-                                trackFn(scope, locals) == key) {
-                                    value = valueFn(scope, locals);
-                                    break;
-                                }
-                            } else locals[valueName] = collection[key], keyName && (locals[keyName] = key), 
-                            value = valueFn(scope, locals);
+                            } else {
+                                if (key = selectElement.val(), "?" == key) value = undefined; else if ("" === key) value = null; else if (trackFn) {
+                                    for (trackIndex = 0; trackIndex < collection.length; trackIndex++) if (locals[valueName] = collection[trackIndex], 
+                                    trackFn(scope, locals) == key) {
+                                        value = valueFn(scope, locals);
+                                        break;
+                                    }
+                                } else locals[valueName] = collection[key], keyName && (locals[keyName] = key), 
+                                value = valueFn(scope, locals);
+                                optionGroupsCache[0].length > 1 && optionGroupsCache[0][1].id !== key && (optionGroupsCache[0][1].selected = !1);
+                            }
                             ctrl.$setViewValue(value);
                         });
                     }), ctrl.$render = render, scope.$watch(render);
@@ -8367,9 +8501,10 @@
         restrict: "E",
         terminal: !0
     });
-    bindJQuery(), publishExternalAPI(angular), jqLite(document).ready(function() {
+    return window.angular.bootstrap ? void console.log("WARNING: Tried to load angular more than once.") : (bindJQuery(), 
+    publishExternalAPI(angular), void jqLite(document).ready(function() {
         angularInit(document, bootstrap);
-    });
+    }));
 }(window, document), !angular.$$csp() && angular.element(document).find("head").prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide{display:none !important;}ng\\:form{display:block;}.ng-animate-block-transitions{transition:0s all!important;-webkit-transition:0s all!important;}</style>'), 
 function(window, angular, undefined) {
     function isValidDottedPath(path) {
@@ -9365,8 +9500,8 @@ function(window, angular, undefined) {
     $RouteProvider.$inject = [ "$stateProvider", "$urlRouterProvider" ], angular.module("ui.router.compat").provider("$route", $RouteProvider).directive("ngView", $ViewDirective);
 }(window, window.angular), function() {
     function _storageFactory(storageType) {
-        return [ "$rootScope", "$window", "$log", function($rootScope, $window, $log) {
-            for (var _last$storage, _debounce, k, webStorage = $window[storageType] || ($log.warn("This browser does not support Web Storage!"), 
+        return [ "$rootScope", "$window", function($rootScope, $window) {
+            for (var _last$storage, _debounce, k, webStorage = $window[storageType] || (console.warn("This browser does not support Web Storage!"), 
             {}), $storage = {
                 $default: function(items) {
                     for (var k in items) angular.isDefined($storage[k]) || ($storage[k] = items[k]);
