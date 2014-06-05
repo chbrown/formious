@@ -1,44 +1,36 @@
 /*jslint node: true */
 module.exports = function(grunt) {
   // these don't have .min options
-  var misc_js = [
-    // 'static/lib/angular-plugins.js', // include manually due to frequent changes
-    'static/lib/cookies.js',
-    'static/lib/forms.js',
-    'static/lib/textarea.js',
-    'static/lib/url.js',
+  var scripts = [
+    'underscore.js',
+    'jquery.js',
+    'angular.js',
+    'angular-resource.js',
+    'angular-ui-router.js',
+    'ngStorage.js',
   ];
-  var static_max = [
-    'static/lib/underscore.js',
-    'static/lib/jquery.js',
-    'static/lib/angular.js',
-    'static/lib/angular-resource.js',
-    'static/lib/angular-ui-router.js',
-    'static/lib/ngStorage.js',
-    // from misc-js
+  var misc_scripts = [
+    'cookies.js',
+    'forms.js',
+    'textarea.js',
+    'url.js',
   ];
-  var static_min = static_max.map(function(filepath) {
-    return filepath.replace(/.js$/, '.min.js');
-  });
+  var staticLibPrefix = function(path) { return 'static/lib/' + path; };
+  var minExtension = function(path) { return path.replace(/.js$/, '.min.js'); };
+
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     uglify: {
       production: {
-        options: {
-          mangle: false,
-          // compress: true,
-        },
+        options: {mangle: false},
         files: {
-          'static/lib.min.js': static_min.concat(misc_js),
+          'static/lib.min.js': scripts.map(staticLibPrefix).map(minExtension).concat(misc_scripts.map(staticLibPrefix)),
         }
       },
       development: {
-        options: {
-          mangle: false,
-          beautify: true,
-        },
+        options: {mangle: false, beautify: true},
         files: {
-          'static/lib.max.js': static_max.concat(misc_js),
+          'static/lib.max.js': scripts.map(staticLibPrefix).concat(misc_scripts.map(staticLibPrefix)),
         }
       },
     }

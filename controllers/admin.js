@@ -1,7 +1,5 @@
 /*jslint node: true */
 var _ = require('underscore');
-var url = require('url');
-var querystring = require('querystring');
 var amulet = require('amulet');
 var Router = require('regex-router');
 
