@@ -7,7 +7,7 @@ var sv = require('sv');
 var turk = require('turk');
 var util = require('util');
 var url = require('url');
-var xmlconv = require('xmlconv');
+var xml2js = require('xml2js');
 
 var lib = require('../../lib');
 var db = require('../../lib/db');

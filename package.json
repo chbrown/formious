@@ -1,9 +1,10 @@
 {
-  "name": "human",
+  "name": "formious",
   "description": "Experimental experience server.",
-  "version": "0.1.4",
-  "homepage": "https://github.com/chbrown/human",
-  "repository": "git://github.com/chbrown/human.git",
+  "keywords" : ["forms", "surveys"],
+  "version": "0.1.5",
+  "homepage": "https://github.com/chbrown/formious",
+  "repository": "git://github.com/chbrown/formious.git",
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
   "license": "MIT",
   "dependencies": {
@@ -23,30 +24,33 @@
     "sv": "*",
     "turk": "0.5.2",
     "underscore": "*",
-    "xmlconv": "*",
     "xmldom": "*",
+    "xml2js": "*",
     "xpath": "*"
   },
   "devDependencies": {
-    "grunt": "*",
-    "grunt-contrib-uglify": "*",
     "tap": "*"
   },
   "staticPattern": "static/lib/{file}",
   "staticDependencies": {
     "angular": "*",
+    "angular-ui-router": "*",
     "jquery": "*",
-    "jquery-noty": "*",
     "jquery-tablesorter": "*",
+    "lo-dash": "*",
     "misc-js": "git://github.com/chbrown/misc-js.git",
     "moment": "*",
-    "ngStorage": {
-      "url": "git://github.com/gsklee/ngStorage.git",
-      "filter": ["ngStorage.js", "ngStorage.min.js"]
+    "restangular": {
+      "url": "git://github.com/mgonto/restangular.git",
+      "filter": ["dist/restangular.js", "dist/restangular.min.js"]
     },
+    "ng-storage": "*",
     "underscore": "*"
   },
-  "bin": {
-    "human-cli": "./bin/human-cli.js"
+  "config": {
+    "host": "127.0.0.1",
+    "port": 1451,
+    "database": "formious",
+    "salt": "rNxROdgCbAkBI2WvZJtH"
   }
 }

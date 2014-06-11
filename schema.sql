@@ -1,36 +1,11 @@
--- $ dropdb human; createdb human; psql human -f schema.sql
-
-CREATE TABLE aws_accounts (
-  id serial PRIMARY KEY,
-
-  name text UNIQUE,
-  access_key_id text NOT NULL, -- accessKeyId
-  secret_access_key text NOT NULL, -- secretAccessKey
-
-  created timestamp with time zone DEFAULT current_timestamp NOT NULL
-);
-
 CREATE TABLE administrators (
   id serial PRIMARY KEY,
 
   email text UNIQUE NOT NULL,
-  password text NOT NULL
-    CHECK (length(password) = 64), -- sha256 hex digest produces 64-long string
+  -- sha256 hex digest produces 64-character string
+  password text NOT NULL CHECK (length(password) = 64),
 
   created timestamp with time zone DEFAULT current_timestamp NOT NULL
-);
-
-CREATE TABLE aws_account_administrators (
-  id serial PRIMARY KEY,
-
-  aws_account_id integer REFERENCES aws_accounts(id) NOT NULL,
-  administrator_id integer REFERENCES administrators(id) NOT NULL,
-  priority integer,
-  -- role ...
-
-  created timestamp with time zone DEFAULT current_timestamp NOT NULL,
-
-  UNIQUE(aws_account_id, administrator_id) --, role
 );
 
 CREATE TABLE participants (
@@ -79,6 +54,7 @@ CREATE TABLE experiments (
   id serial PRIMARY KEY,
 
   name text,
+  -- slug text,
   administrator_id integer REFERENCES administrators(id), -- owner
   html text, -- to be included on every page, at the top of the <body>
 
@@ -132,3 +108,28 @@ CREATE TABLE responses (
 -- },
 -- segments: [String], // set of segment names (from "participant" column in states)
 -- segments_claimed: [String], // subset of segment names
+
+-- MTurk should be factored out somehow
+
+CREATE TABLE aws_accounts (
+  id serial PRIMARY KEY,
+
+  name text UNIQUE,
+  access_key_id text NOT NULL, -- accessKeyId
+  secret_access_key text NOT NULL, -- secretAccessKey
+
+  created timestamp with time zone DEFAULT current_timestamp NOT NULL
+);
+
+CREATE TABLE aws_account_administrators (
+  id serial PRIMARY KEY,
+
+  aws_account_id integer REFERENCES aws_accounts(id) NOT NULL,
+  administrator_id integer REFERENCES administrators(id) NOT NULL,
+  priority integer,
+  -- role ...
+
+  created timestamp with time zone DEFAULT current_timestamp NOT NULL,
+
+  UNIQUE(aws_account_id, administrator_id) --, role
+);

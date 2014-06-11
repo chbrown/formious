@@ -3,7 +3,6 @@
 var path = require('path');
 var http = require('http-enhanced');
 var logger = require('loge');
-var models = require('./lib/models');
 
 // amulet.set(), as opposed amulet.create(), will set the defaults on the module singleton
 var amulet = require('amulet').set({
@@ -23,7 +22,7 @@ var amulet = require('amulet').set({
   }
 });
 
-// extend http-enhanced a little more
+// enhance http-enhanced a little more
 http.ServerResponse.prototype.die = function(error) {
   if (this.statusCode == 200) {
     this.statusCode = 500;
@@ -68,6 +67,7 @@ else {
 
   http.createServer(function(req, res) {
     req.cookies = new Cookies(req, res);
+    // req.ip = req.headers['x-real-ip'] || req.client.remoteAddress;
 
     // var started = Date.now();
     // res.on('finish', function() {

@@ -5,8 +5,8 @@
   <title>Experimental Interface</title>
   <script src="/static/lib/jquery.min.js"></script>
   <script>
-    var human = {};
-    human.add = function(response) {
+    var formious = {};
+    formious.add = function(response) {
       return $.ajax({
         method: 'POST',
         url: window.location,
@@ -14,8 +14,8 @@
         data: JSON.stringify(response),
       });
     };
-    human.advance = function(response) {
-      var jqXHR = human.add(response).always(function() {
+    formious.advance = function(response) {
+      var jqXHR = formious.add(response).always(function() {
         // the server will respond to the header "x-requested-with': XMLHttpRequest"
         // by responding with the status code 200, so that the browser does
         // not gloss over the redirect.
@@ -29,7 +29,7 @@
         }
       });
     };
-    human.context = <%& serialize(context) %>;
+    formious.context = <%& serialize(context) %>;
   </script>
 </head>
 <body>
