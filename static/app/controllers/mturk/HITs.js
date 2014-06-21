@@ -45,7 +45,7 @@ app.controller('adminMTurkNavCtrl', function($scope, $storedStateParams, AWSAcco
   $scope.hosts = [{name: 'deploy'}, {name: 'sandbox'}, {name: 'local'}];
 });
 
-app.controller('adminHITsCtrl', function($scope, $localStorage, $resource, $stateParams, $storedStateParams) {
+app.controller('adminHITsCtrl', function($scope, $resource, $stateParams, $storedStateParams) {
   $scope.params = $storedStateParams;
   var HIT = $resource('/api/mturk/HITs/:HITId', {
     HITId: '@HITId',
@@ -55,7 +55,7 @@ app.controller('adminHITsCtrl', function($scope, $localStorage, $resource, $stat
   $scope.hits = HIT.query();
 });
 
-app.controller('adminHITCtrl', function($scope, $localStorage, $flash, $resource, $storedStateParams) {
+app.controller('adminHITCtrl', function($scope, $flash, $resource, $storedStateParams) {
   var HIT = $resource('/api/mturk/HITs/:HITId', {
     HITId: '@HITId',
     aws_account_id: $storedStateParams.aws_account_id,
@@ -175,7 +175,7 @@ app.controller('adminCreateHITCtrl', function($scope, $http, $location, $localSt
   });
 });
 
-app.controller('adminAssignmentEditor', function($scope, $resource, $localStorage, $storedStateParams, $flash) {
+app.controller('adminAssignmentEditor', function($scope, $resource, $storedStateParams, $flash) {
   var Assignment = $resource('/api/mturk/Assignments/:AssignmentId', {
     AssignmentId: '@AssignmentId',
     aws_account_id: $storedStateParams.aws_account_id,

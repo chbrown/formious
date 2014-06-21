@@ -72,8 +72,6 @@ CREATE TABLE stims (
 
   experiment_id integer REFERENCES experiments(id),
   template_id integer REFERENCES templates(id),
-  -- remove this template?
-  -- template text, -- soft reference to templates(name)
   context json,
   view_order integer,
 

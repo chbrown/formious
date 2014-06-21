@@ -16,17 +16,17 @@ fieldset{margin:0 10px 10px 0;border:1px solid #CCC}
 .json{font:9pt monospace;min-height:30px;min-width:400px}
 button{margin:0}
 button.anchor{border-width:0;text-decoration:underline;cursor:pointer;font-size:100%;padding:0}
-body.admin{background-color:#fbfbfb;font-size:80%;overflow-y:scroll}
+body.admin{background-color:#fafafa;font-size:80%;overflow-y:scroll}
 body.admin #flash{position:fixed;left:0;right:0;height:23px;z-index:1000;text-align:center;color:#fff;background-color:rgba(0,0,0,.66);pointer-events:none}
 body.admin #flash img,body.admin #flash span{vertical-align:middle}
 body.admin nav{left:0;right:0;padding:0 5px;font-size:90%;z-index:100}
 body.admin nav a,body.admin nav button,body.admin nav img,body.admin nav select,body.admin nav span{display:inline-block;vertical-align:middle}
-body.admin nav a,body.admin nav button.anchor{padding:2px 6px 3px;border-radius:2px}
+body.admin nav a,body.admin nav button.anchor,body.admin nav span{padding:2px 6px}
 body.admin nav.root{background-color:#4d4d4d}
 body.admin nav.root a,body.admin nav.root button,body.admin nav.root select,body.admin nav.root span{margin:3px 0 0}
-body.admin nav.root a,body.admin nav.root button.anchor{border-radius:2px 2px 0 0;background-color:#cdcdcd}
-body.admin nav.root a.current,body.admin nav.root a:hover,body.admin nav.root button.anchor.current,body.admin nav.root button.anchor:hover{background-color:#fbfbfb}
-body.admin nav.sub{background-color:#fbfbfb;padding-top:2px;padding-bottom:2px;border-bottom:1px solid #BBB}
+body.admin nav.root a,body.admin nav.root button.anchor{border-radius:2px 2px 0 0;background-color:#ccc}
+body.admin nav.root a.current,body.admin nav.root a:hover,body.admin nav.root button.anchor.current,body.admin nav.root button.anchor:hover{background-color:#fafafa}
+body.admin nav.sub{background-color:#fafafa;padding-top:2px;padding-bottom:2px;border-bottom:1px solid #BBB}
 main{margin:10px 0}
 main>a,main>div,main>form,main>h2,main>h3,main>h4,main>p{padding:0 10px}
 main .box{padding:10px;background-color:#fff;border:1px solid #EEE;border-width:1px 0;box-sizing:border-box}
