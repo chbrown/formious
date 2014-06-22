@@ -13,8 +13,12 @@ MISCJS = cookies forms textarea url
 # first % sign is like \w+, while the second is like $0, in regex terms.
 #   	$(VARIABLE:%=static/%)
 
-static/lib.min.js:
-	closure-compiler $(CCFLAGS) --js $(VENDOR:%=static/lib/%.min.js) $(MISCJS:%=static/lib/%.js) > $@
+MIN_SCRIPTS = $(VENDOR:%=static/lib/%.min.js) $(MISCJS:%=static/lib/%.js)
 
-static/lib.max.js:
-	cat $(VENDOR:%=static/lib/%.js) $(MISCJS:%=static/lib/%.js) > $@
+static/lib.min.js: $(MIN_SCRIPTS)
+	closure-compiler $(CCFLAGS) --js $(MIN_SCRIPTS) > $@
+
+MAX_SCRIPTS = $(VENDOR:%=static/lib/%.js) $(MISCJS:%=static/lib/%.js)
+
+static/lib.max.js: $(MAX_SCRIPTS)
+	cat $(MAX_SCRIPTS) > $@

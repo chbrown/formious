@@ -4,7 +4,7 @@
   <title>Admin</title>
   <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
   <link href="/static/site.css" rel="stylesheet" type="text/css" />
-  <script src="/static/lib.max.js"></script>
+  <script src="/static/lib.min.js"></script>
   <script src="/static/lib/angular-plugins.js"></script>
   <script src="/static/local.js"></script>
   <script src="/static/app/module.js"></script>
