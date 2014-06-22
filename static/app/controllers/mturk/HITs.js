@@ -92,14 +92,14 @@ app.controller('adminHITCtrl', function($scope, $flash, $resource, $storedStateP
     var promise = HIT.ExtendHIT(data).$promise.then(function(res) {
       return 'Extended';
     }, summarizeResponse);
-    $flash.addPromise(promise);
+    $flash(promise);
   };
 
   $scope.import = function(ev) {
     var promise = HIT.import({HITId: HITId}).$promise.then(function(res) {
       return res.message || 'Imported';
     }, summarizeResponse);
-    $flash.addPromise(promise);
+    $flash(promise);
   };
 });
 
@@ -150,7 +150,7 @@ app.controller('adminCreateHITCtrl', function($scope, $http, $location, $localSt
         return 'Created';
       }
     }, summarizeResponse);
-    $flash.addPromise(promise);
+    $flash(promise);
   };
 
   // AWS adds four parameters: assignmentId, hitId, workerId, and turkSubmitTo
@@ -196,24 +196,24 @@ app.controller('adminAssignmentEditor', function($scope, $resource, $storedState
   });
 
   $scope.approve = function(assignment) {
-    var promize = Assignment.Approve({AssignmentId: assignment.AssignmentId}).$promise.then(function(res) {
+    var promise = Assignment.Approve({AssignmentId: assignment.AssignmentId}).$promise.then(function(res) {
       return 'Approved';
     }, summarizeResponse);
-    $flash.addPromise(promize);
+    $flash(promise);
   };
 
   $scope.reject = function(assignment) {
-    var promize = Assignment.Reject({AssignmentId: assignment.AssignmentId}).$promise.then(function(res) {
+    var promise = Assignment.Reject({AssignmentId: assignment.AssignmentId}).$promise.then(function(res) {
       return 'Rejected';
     }, summarizeResponse);
-    $flash.addPromise(promize);
+    $flash(promise);
   };
 
   $scope.approve_rejected = function(assignment) {
-    var promize = Assignment.ApproveRejected({AssignmentId: assignment.AssignmentId}).$promise.then(function(res) {
+    var promise = Assignment.ApproveRejected({AssignmentId: assignment.AssignmentId}).$promise.then(function(res) {
       return 'Rejected';
     }, summarizeResponse);
-    $flash.addPromise(promize);
+    $flash(promise);
   };
 
 });

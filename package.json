@@ -24,8 +24,8 @@
     "sv": "*",
     "turk": "0.5.2",
     "underscore": "*",
-    "xmldom": "*",
     "xml2js": "*",
+    "xmldom": "*",
     "xpath": "*"
   },
   "devDependencies": {

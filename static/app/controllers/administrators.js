@@ -7,7 +7,7 @@ app.controller('adminAdministratorsCtrl', function($scope, $flash, Administrator
       $scope.administrators.splice($scope.administrators.indexOf(administrator), 1);
       return 'Deleted';
     }, summarizeResponse);
-    $flash.addPromise(promise);
+    $flash(promise);
   };
 });
 
@@ -23,7 +23,7 @@ app.controller('adminAdministratorCtrl', function($scope, $http, $flash, $window
     var promise = $scope.administrator.$save().then(function(res) {
       return 'Saved';
     }, summarizeResponse);
-    $flash.addPromise(promise);
+    $flash(promise);
   };
 
   $scope.unlinkAWSAccount = function(account) {
@@ -41,6 +41,6 @@ app.controller('adminAdministratorCtrl', function($scope, $http, $flash, $window
     }).then(function() {
       return 'Saved';
     }, summarizeResponse);
-    $flash.addPromise(promise);
+    $flash(promise);
   };
 });

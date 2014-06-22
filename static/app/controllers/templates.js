@@ -8,7 +8,7 @@ app.controller('adminTemplatesCtrl', function($scope, $flash, Template) {
       $scope.templates.splice($scope.templates.indexOf(template), 1);
       return 'Deleted';
     }, summarizeResponse);
-    $flash.addPromise(promise);
+    $flash(promise);
   };
 });
 
@@ -28,7 +28,7 @@ app.controller('adminTemplateCtrl', function($scope, $http, $flash, $stateParams
       $state.go('.', {id: $scope.template.id}, {notify: false});
       return 'Saved';
     }, summarizeResponse);
-    $flash.addPromise(promise);
+    $flash(promise);
   };
 
   $scope.clone = function() {

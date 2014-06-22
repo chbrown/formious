@@ -351,24 +351,6 @@ angular.module('misc-js/angular-plugins', [])
 })
 // services
 .service('$flash', function($rootScope) {
-  // services are singletons. sort of.
-  this.add = function(message, timeout) {
-    $rootScope.$emit('flash', message, timeout);
-  };
-
-  this.addPromise = function(promise) {
-    // immediately attach throbber
-    // var throbber_el = angular.element('<img src="/static/lib/img/throbber-16.gif">');
-    // this.add(throbber_el);
-    // handle success and failure by flashing a message
-    var callback = function(res) {
-      // throbber_el.remove();
-      $rootScope.$emit('flash', res, 3000);
-    };
-    promise.then(callback, callback);
-  };
-})
-.service('$flash', function($rootScope) {
   // basically a $rootScope wrapper
   return function(value, timeout) {
     // value can be a string or a promise

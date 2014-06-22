@@ -33,6 +33,6 @@ app.controller('adminAWSAccountCtrl', function($scope, $http, $flash, $statePara
     var promise = $scope.aws_account.$save().then(function(res) {
       return 'Saved';
     }, summarizeResponse);
-    $flash.addPromise(promise);
+    $flash(promise);
   };
 });

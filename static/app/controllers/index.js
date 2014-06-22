@@ -23,6 +23,6 @@ app.controller('adminResponsesCtrl', function($scope) {
 //   //   var ajax_promise = $http(opts).then(function(res) {
 //   //     return 'Saved';
 //   //   }, summarizeResponse);
-//   //   $flash.addPromise(ajax_promise);
+//   //   $flash(ajax_promise);
 //   // };
 // });

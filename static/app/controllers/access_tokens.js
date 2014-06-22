@@ -8,6 +8,6 @@ app.controller('adminAccessTokensCtrl', function($scope, $flash, AccessToken) {
       $scope.access_tokens.splice(index, 1);
       return 'Deleted';
     }, summarizeResponse);
-    $flash.addPromise(promise);
+    $flash(promise);
   };
 });
