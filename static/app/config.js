@@ -3,6 +3,13 @@
 app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
 
   $stateProvider
+  .state('admin-home', {
+    url: '/admin',
+    controller: function($scope, $state) {
+      // redirect to /admin/experiments
+      $state.go('experiments');
+    }
+  })
   // access_tokens
   .state('access_tokens', {
     url: '/admin/access_tokens',
