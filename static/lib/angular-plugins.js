@@ -349,51 +349,78 @@ angular.module('misc-js/angular-plugins', [])
     }
   };
 })
-// # Services
-.service('$flash', function() {
-  // services are singletons
-
-  // var flashSpan = function(el, text) {
-  //   var span = angular.element('<span>').css('margin', '2px').text(text);
-  //   el.after(span);
-  //   setTimeout(function() {
-  //     span.remove();
-  //   }, 5000);
-  //   return span;
-  // };
-
-  var container = angular.element(document.getElementById('flash'));
-  var check = function() {
-    if (container.children().length === 0) {
-      container.css('display', 'none');
-    }
-  };
-  var add = function(html) {
-    var el = angular.element(html);
-    // .show() ...
-    container.append(el).css('display', '');
-    return el;
-  };
-  var addTemporarily = function(html, timeout) {
-    if (timeout === undefined) timeout = 3000;
-
-    var el = add(html);
-    setTimeout(function() {
-      el.remove();
-      check();
-    }, timeout);
+// services
+.service('$flash', function($rootScope) {
+  // services are singletons. sort of.
+  this.add = function(message, timeout) {
+    $rootScope.$emit('flash', message, timeout);
   };
 
   this.addPromise = function(promise) {
     // immediately attach throbber
-    var throbber_el = angular.element('<img src="/static/lib/img/throbber-16.gif">');
-    add(throbber_el);
+    // var throbber_el = angular.element('<img src="/static/lib/img/throbber-16.gif">');
+    // this.add(throbber_el);
     // handle success and failure by flashing a message
     var callback = function(res) {
-      throbber_el.remove();
-      addTemporarily('<span>' + String(res) + '</span>');
+      // throbber_el.remove();
+      $rootScope.$emit('flash', res, 3000);
     };
     promise.then(callback, callback);
+  };
+})
+.service('$flash', function($rootScope) {
+  // basically a $rootScope wrapper
+  return function(value, timeout) {
+    // value can be a string or a promise
+    // default to a 3 second timeout, but allow permanent flashes
+    if (timeout === undefined) timeout = 3000;
+    $rootScope.$broadcast('flash', value, timeout);
+  };
+})
+.directive('flash', function($timeout, $q) {
+  /**
+  Inject $flash and use like:
+      $flash('OMG it burns!')
+  or
+      $flash(asyncResultPromise)
+  */
+  return {
+    restrict: 'E',
+    template:
+      '<div class="flash" ng-show="messages.length > 0">' +
+        '<span ng-repeat="message in messages track by $index" ng-bind="message"></span>' +
+      '</div>',
+    replace: true,
+    scope: {messages: '&'},
+    link: function(scope, el, attrs) {
+      scope.messages = [];
+
+      scope.add = function(message) {
+        scope.messages.push(message);
+      };
+      scope.remove = function(message) {
+        var index = scope.messages.indexOf(message);
+        scope.messages.splice(index, 1);
+      };
+
+      scope.$on('flash', function(ev, value, timeout) {
+        // var throbber_el = angular.element('<img src="/static/lib/img/throbber-16.gif">');
+        scope.add('...');
+
+        // wrap value with .when() to support both strings and promises of strings
+        $q.when(value).then(function(message) {
+          scope.remove('...');
+          scope.add(message);
+
+          // if timeout is null, for example, leave the message permanently
+          if (timeout) {
+            $timeout(function() {
+              scope.remove(message);
+            }, timeout);
+          }
+        });
+      });
+    }
   };
 })
 // # factories
