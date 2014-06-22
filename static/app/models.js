@@ -1,4 +1,4 @@
-/*jslint browser: true */ /*globals app, p, toMap */
+/*jslint browser: true */ /*globals _, app, p, toMap */
 
 app.service('AccessToken', function($resource) {
   return $resource('/api/access_tokens/:id', {
@@ -65,8 +65,20 @@ app.service('Stim', function($resource) {
 
 app.service('Template', function($resource) {
   // map: {'id': 'name'}
-  return $resource('/api/templates/:id', {
+  var Template = $resource('/api/templates/:id', {
     id: '@id',
+  }, {
+    // query: {method: 'GET', isArray: true, cache: true},
   });
-  // }, {'delete': {method:'DELETE'} });
+
+  Template.findOrCreate = function(name) {
+    // query just return a naked promise?
+    var templates = this.query();
+    return templates.$promise.then(function() {
+      var template = _.findWhere(templates, {name: name});
+      return template ? template : new Template({name: name}).$save();
+    });
+  };
+
+  return Template;
 });

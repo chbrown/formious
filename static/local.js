@@ -67,4 +67,36 @@ var summarizeResponse = function(res) {
   return parts.join('');
 };
 
+var readTabularFile = function(file, callback) {
+  /** `file` should be a native browser File object, as provided by an
+  input[type="file"].files[i], for instance.
+
+  This method will read the file's contents, send it via AJAX to the
+  /api/table endpoint to be parsed as an Excel spreadsheet or CSV, as needed.
+  */
+  var reader = new FileReader();
+  reader.onerror = function(err) {
+    callback(err);
+  };
+  reader.onload = function(ev) {
+    // p('File reader loaded', ev, reader.result);
+    var file_name = file.name;
+    var file_size = file.size;
+    // data is an arraybufferview as basic bytes / chars
+    var data = new Uint8Array(reader.result);
+
+    // send excel data off to the server to parse
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/table');
+    xhr.setRequestHeader('Content-Type', file.type);
+    xhr.setRequestHeader('X-Filename', file.name);
+    xhr.onload = function(ev) {
+      var body = JSON.parse(xhr.responseText);
+      callback(null, body);
+    };
+    xhr.send(data);
+  };
+  reader.readAsArrayBuffer(file);
+};
+
 // Error.stackTraceLimit = 50;

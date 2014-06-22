@@ -1,7 +1,7 @@
-<main ng-controller="adminAdministratorsCtrl">
+<main>
   <h3>Administrators</h3>
 
-  <section>
+  <div ng-controller="adminAdministratorsCtrl" class="box">
     <table class="striped lined padded">
       <thead>
         <tr>
@@ -22,7 +22,9 @@
         </tr>
       </tbody>
     </table>
-  </section>
+  </div>
 
-  <a href="/admin/administrators/new">Create new administrator</a>
+  <p>
+    <a href="/admin/administrators/new">Create new administrator</a>
+  </p>
 </main>

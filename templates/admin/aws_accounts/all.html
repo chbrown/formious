@@ -1,7 +1,7 @@
-<main ng-controller="adminAWSAccountsCtrl">
+<main>
   <h3>AWS Accounts</h3>
 
-  <section>
+  <div ng-controller="adminAWSAccountsCtrl" class="box">
     <table class="striped lined padded">
       <thead>
         <tr>
@@ -24,7 +24,9 @@
         </tr>
       </tbody>
     </table>
-  </section>
+  </div>
 
-  <a href="/admin/aws/new">Create new AWS Account</a>
+  <p>
+    <a href="/admin/aws/new">Create new AWS Account</a>
+  </p>
 </main>

@@ -1,7 +1,7 @@
-<main ng-controller="adminTemplatesCtrl">
+<main>
   <h3>Templates</h3>
 
-  <section>
+  <div ng-controller="adminTemplatesCtrl" class="box">
     <table class="striped lined padded fill">
       <thead>
         <tr>
@@ -24,7 +24,9 @@
         </tr>
       </tbody>
     </table>
-  </section>
+  </div>
 
-  <a href="/admin/templates/new">Create new template</a>
+  <p>
+    <a href="/admin/templates/new">Create new template</a>
+  </p>
 </main>

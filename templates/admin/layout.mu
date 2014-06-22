@@ -4,7 +4,7 @@
   <title>Admin</title>
   <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
   <link href="/static/site.css" rel="stylesheet" type="text/css" />
-  <script src="/static/lib.min.js"></script>
+  <script src="/static/lib.max.js"></script>
   <script src="/static/lib/angular-plugins.js"></script>
   <script src="/static/local.js"></script>
   <script src="/static/app/module.js"></script>
@@ -18,7 +18,7 @@
   <script src="/static/app/config.js"></script>
 </head>
 <body ng-app="app" class="admin">
-  <div id="flash" style="display: none"></div>
+  <flash></flash>
   <nav fixedflow class="root">
     <div style="float: right">
       <a href="/admin/administrators/<% current_user.id %>">me</a>
@@ -33,5 +33,5 @@
     <a href="/admin/experiments">Experiments</a>
     <a href="/admin/templates">Templates</a>
   </nav>
-  <div ui-view></div>
+  <ui-view></ui-view>
 </body>

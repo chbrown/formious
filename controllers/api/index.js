@@ -61,7 +61,6 @@ R.post('/api/table', function(req, res) {
       logger.debug('/api/table: finished reading sv: %d rows, %d columns',
         result.rows.length, result.columns.length);
 
-      // var columns = ;
       res.json(result);
     });
   }

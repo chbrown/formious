@@ -1,7 +1,7 @@
-<main ng-controller="adminExperimentsCtrl">
+<main>
   <h3>Experiments</h3>
 
-  <section>
+  <div ng-controller="adminExperimentsCtrl" class="box">
     <table class="striped lined padded fill">
       <thead>
         <tr>
@@ -33,7 +33,9 @@
         </tr>
       </tbody>
     </table>
-  </section>
+  </div>
 
-  <a href="/admin/experiments/new">Create new experiment</a>
+  <p>
+    <a href="/admin/experiments/new">Create new experiment</a>
+  </p>
 </main>

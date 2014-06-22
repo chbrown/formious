@@ -21,21 +21,13 @@ h1, h2, h3, h4, h5, h6 {
 p {
   margin: 1ex 0;
 }
-section {
-  margin: 10px 0;
-}
-form {
-  // display: inline-block;
-}
-label {
-  span {
-    vertical-align: baseline;
-  }
+label span {
+  vertical-align: baseline;
 }
 label[disabled] {
   .color-gray(50%);
 }
-textarea, input {
+textarea, input, select {
   vertical-align: baseline;
   margin: 0;
   box-sizing: border-box;
@@ -90,7 +82,7 @@ body.admin {
   font-size: 80%; // why is the default so big!?
   overflow-y: scroll;
 
-  #flash {
+  .flash {
     position: fixed;
     left: 0;
     right: 0;
@@ -104,6 +96,7 @@ body.admin {
       vertical-align: middle;
     }
   }
+
   nav {
     left: 0;
     right: 0;
@@ -148,45 +141,39 @@ body.admin {
       border-bottom: 1px solid #BBB;
     }
   }
-
-  // .status span {
-  //   font-weight: bold;
-  //   margin: 10px 10px 0 0;
-  //   &.Submitted { color: #CCC; }
-  //   &.Approved { color: darkgreen; }
-  //   &.Rejected { color: darkred; }
-  // }
 }
 
-main {
+// semantic sections
+section {
   margin: 10px 0;
-
+  // padding: 10px;
+  // background-color: white;
+  // border: 1px solid #EEE;
+  // border-width: 1px 0;
+  // overflow-x: auto;
+  // width: 100%;
+  // &.padded {
+  //   margin: 5px 0;
+  // }
+}
+main {
+  // main should always extend to the left and right edges of the page
+  margin: 10px 0;
   // most immediate children of main should be padded
-  & > div, & > form, & > h2, & > h3, & > h4, & > a, & > p {
-    padding: 0 10px;
+  & > section, & > form, & > p, & > a, & > h1, & > h2, & > h3, .inset {
+    padding-left: 10px;
+    padding-right: 10px;
   }
-  // main usually consists of sections
-  .box {
-    padding: 10px;
-    background-color: white;
-    border: 1px solid #EEE;
-    border-width: 1px 0;
-    // width: 100%;
+}
+  // only a few things should stretch the whole width,
+  // like sections, and tables
+.box {
+  padding-top: 5px;
+  padding-bottom: 5px;
 
-    box-sizing: border-box;
-  }
-  section {
-    // mostly like box, except for no horizontal padding on the table, and let the table handle its own borders
-    padding: 5px 0;
-    background-color: white;
-    border: 1px solid #EEE;
-    border-width: 1px 0;
-    // overflow-x: auto;
-    // width: 100%;
-    // & > table {
-    //   margin: 5px 0;
-    // }
-  }
+  background-color: white;
+  border: 1px solid #EEE;
+  border-width: 1px 0;
 }
 
 table {
@@ -196,7 +183,7 @@ table {
   }
   td, th {
     vertical-align: top;
-    padding-right: 6px;
+    padding-right: 5px;
   }
 }
 table.striped {
@@ -260,6 +247,14 @@ table.responses {
 //   background-color: #DDD;
 //   color: #555;
 //   text-decoration: line-through;
+// }
+
+// .status span {
+//   font-weight: bold;
+//   margin: 10px 10px 0 0;
+//   &.Submitted { color: #CCC; }
+//   &.Approved { color: darkgreen; }
+//   &.Rejected { color: darkred; }
 // }
 
 .hover-flow {

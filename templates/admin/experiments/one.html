@@ -12,7 +12,7 @@
   </nav>
 
   <main>
-    <div class="help">
+    <div class="help inset">
       <p>An experiment is a list of stimuli that will be presented to the participant in sequence.</p>
       <p>Each item in the experiment is known as a "stim", and can be pretty much anything, like a consent form, instructions, or adaptive classification task.</p>
     </div>
@@ -55,17 +55,18 @@
       </form>
     </section>
 
-    <section class="box">
+    <section class="box" ng-show="experiment.id">
       <form class="vform">
-        <label><span>Upload stims</span>
-          <input type="file" id="upload" />
+        <label>Upload stims
+          <input type="file" id="upload">
         </label>
       </form>
     </section>
 
-    <table class="striped grid padded fill">
+    <table class="striped grid padded fill" ng-show="experiment.id">
       <thead>
         <tr>
+          <td></td>
           <td></td>
           <td>template</td>
           <td ng-repeat="parameter in experiment.parameters">
@@ -78,10 +79,10 @@
       <tbody checkbox-sequence>
         <tr ng-repeat="stim in stims" ng-class="{selected: stim.selected}">
           <td style="padding-right: 5px"><input type="checkbox" ng-model="stim.selected"></td>
+          <td><a href="/experiments/{{experiment.id}}/stims/{{stim.id}}">{{stim.id}}</a></td>
           <td class="nowrap">
             <!-- <select ng-model="stim.template_id"
               ng-options="template.id as template.name for template in templates"></select> -->
-
             <a href="/admin/templates/{{stim.template_id}}">
               {{templates | valueWhere:{id: stim.template_id}:'name'}}
             </a>
@@ -108,16 +109,19 @@
         </tr>
       </tbody>
     </table>
-    <p>
+
+    <section>
       <button ng-click="addStim({})">+ empty row</button>
       <button ng-click="deleteSelectedStims()">- delete selection</button>
-    </p>
+    </section>
 
-    <div class="preview" ng-show="show_preview">
+    <section class="preview" ng-show="show_preview">
       <div class="controls"><span>&times;</span>Hide preview</div>
       <div class="content">
         <iframe></iframe>
       </div>
-    </div>
+    </section>
+
   </main>
+
 </div>

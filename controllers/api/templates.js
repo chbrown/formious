@@ -33,7 +33,13 @@ R.post(/^\/api\/templates$/, function(req, res, m) {
 
     var fields = _.pick(data, models.Template.columns);
     models.Template.insert(fields, function(err, template) {
-      if (err) return res.die(err);
+      if (err) {
+        if (err.message && err.message.match(/duplicate key value violates unique constraint/)) {
+          // 303 is a "See other" and SHOULD include a Location header
+          return res.status(303).die('Template already exists');
+        }
+        return res.die(err);
+      }
       res.status(201).json(template);
     });
   });

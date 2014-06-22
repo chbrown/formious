@@ -30,7 +30,7 @@ R.get(/^\/api\/administrators$/, function(req, res, m) {
 /** GET /api/administrators/new
 Generate blank administrator. */
 R.get(/^\/api\/administrators\/new/, function(req, res, m) {
-  req.json({created: new Date()});
+  res.json({created: new Date()});
 });
 
 /** POST /api/administrators
