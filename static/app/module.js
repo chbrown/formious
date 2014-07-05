@@ -1,6 +1,11 @@
 /*jslint browser: true, devel: true */ /*globals _, angular, Url, p, toMap, time, valueWhere */
 
-var app = angular.module('app', ['ngResource', 'ngStorage', 'ui.router', 'misc-js/angular-plugins']);
+var app = angular.module('app', [
+  'ngResource',
+  'ngStorage',
+  'ui.router',
+  'misc-js/angular-plugins',
+]);
 
 app.filter('valueWhere', function() {
   return valueWhere;
