@@ -1,100 +1,100 @@
 CREATE TABLE administrators (
-  id serial PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
 
-  email text UNIQUE NOT NULL,
+  email TEXT UNIQUE NOT NULL,
   -- sha256 hex digest produces 64-character string
-  password text NOT NULL CHECK (length(password) = 64),
+  password TEXT NOT NULL CHECK (LENGTH(password) = 64),
 
-  created timestamp with time zone DEFAULT current_timestamp NOT NULL
+  created TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL
 );
 
 CREATE TABLE participants (
-  id serial PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
 
   -- support normal participants
-  name text,
+  name TEXT,
 
   -- and AWS workers
-  aws_worker_id text,
-  aws_bonus_owed numeric DEFAULT 0,
-  aws_bonus_paid numeric DEFAULT 0,
+  aws_worker_id TEXT,
+  aws_bonus_owed NUMERIC DEFAULT 0,
+  aws_bonus_paid NUMERIC DEFAULT 0,
 
   -- browser details
-  ip_address text,
-  user_agent text,
+  ip_address TEXT,
+  user_agent TEXT,
 
-  created timestamp with time zone DEFAULT current_timestamp NOT NULL
+  created TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL
 );
 
 CREATE TABLE access_tokens (
-  id serial PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
 
-  token text NOT NULL,
-  relation text NOT NULL, -- e.g., 'administrators', 'participants', 'experiments', etc.
-  foreign_id integer NOT NULL, -- maps to the primary key (id) of the relation denoted above
+  token TEXT NOT NULL,
+  relation TEXT NOT NULL, -- e.g., 'administrators', 'participants', 'experiments', etc.
+  foreign_id INTEGER NOT NULL, -- maps to the primary key (id) of the relation denoted above
 
-  expires timestamp with time zone,
-  redacted timestamp with time zone,
-  created timestamp with time zone DEFAULT current_timestamp NOT NULL,
+  expires TIMESTAMP WITH TIME ZONE,
+  redacted TIMESTAMP WITH TIME ZONE,
+  created TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
 
   UNIQUE(token, relation)
 );
 CREATE INDEX access_tokens_token_idx ON access_tokens(token);
 
 CREATE TABLE templates (
-  id serial PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
 
-  name text UNIQUE, -- soft referenced from stims.template
-  html text,
+  name TEXT UNIQUE, -- soft referenced from stims.template
+  html TEXT,
 
-  created timestamp with time zone DEFAULT current_timestamp NOT NULL
+  created TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL
 );
 
 CREATE TABLE experiments (
-  id serial PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
 
-  name text,
-  -- slug text,
-  administrator_id integer REFERENCES administrators(id), -- owner
-  html text, -- to be included on every page, at the top of the <body>
+  name TEXT,
+  -- slug TEXT,
+  administrator_id INTEGER REFERENCES administrators(id), -- owner
+  html TEXT, -- to be included on every page, at the top of the <body>
 
   -- `parameters` should match the keys of each stim's `context` object, or most of them
   -- not really necessary, except to impose an ordering
-  parameters text[] DEFAULT '{}'::text[],
+  parameters TEXT[] DEFAULT '{}'::TEXT[],
 
-  created timestamp with time zone DEFAULT current_timestamp NOT NULL
+  created TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL
 );
 
 -- `stim` refers to a completely specified stimulus,
 -- not just the "type" of stimulus, which is designated by `template`
 CREATE TABLE stims (
-  id serial PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
 
-  experiment_id integer REFERENCES experiments(id),
-  template_id integer REFERENCES templates(id),
-  context json,
-  view_order integer,
+  experiment_id INTEGER REFERENCES experiments(id),
+  template_id INTEGER REFERENCES templates(id),
+  context JSON,
+  view_order INTEGER,
 
-  created timestamp with time zone DEFAULT current_timestamp NOT NULL
+  created TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL
 );
 -- is this index necessary, considering the FK?
 -- CREATE INDEX stims_experiment_id_idx ON stims(experiment_id); -- USING btree
 
 
 CREATE TABLE responses (
-  id serial PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
 
   -- there may be multiple respones per stim, so we don't set a unique on (participant_id, stim_id)
-  participant_id integer REFERENCES participants(id) NOT NULL,
-  stim_id integer REFERENCES stims(id),
-  value json,
+  participant_id INTEGER REFERENCES participants(id) NOT NULL,
+  stim_id INTEGER REFERENCES stims(id),
+  value JSON,
 
   -- having an optional assignment_id allows merging the data on mturk into the local database,
   -- while the unique constraint prevents merging duplicates.
   -- this will be NULL for most responses.
-  assignment_id text UNIQUE,
+  assignment_id TEXT UNIQUE,
 
-  created timestamp with time zone DEFAULT current_timestamp NOT NULL
+  created TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL
 );
 
 -- how to handle segmentations?
@@ -110,24 +110,24 @@ CREATE TABLE responses (
 -- MTurk should be factored out somehow
 
 CREATE TABLE aws_accounts (
-  id serial PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
 
-  name text UNIQUE,
-  access_key_id text NOT NULL, -- accessKeyId
-  secret_access_key text NOT NULL, -- secretAccessKey
+  name TEXT UNIQUE,
+  access_key_id TEXT NOT NULL, -- accessKeyId
+  secret_access_key TEXT NOT NULL, -- secretAccessKey
 
-  created timestamp with time zone DEFAULT current_timestamp NOT NULL
+  created TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL
 );
 
 CREATE TABLE aws_account_administrators (
-  id serial PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
 
-  aws_account_id integer REFERENCES aws_accounts(id) NOT NULL,
-  administrator_id integer REFERENCES administrators(id) NOT NULL,
-  priority integer,
+  aws_account_id INTEGER REFERENCES aws_accounts(id) NOT NULL,
+  administrator_id INTEGER REFERENCES administrators(id) NOT NULL,
+  priority INTEGER,
   -- role ...
 
-  created timestamp with time zone DEFAULT current_timestamp NOT NULL,
+  created TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL,
 
   UNIQUE(aws_account_id, administrator_id) --, role
 );
