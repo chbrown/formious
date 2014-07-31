@@ -82,7 +82,13 @@ R.get(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
 
     // need a better default for missing html
     var template_html = results.template.html;
-    var rendered_html = template_html ? handlebars.compile(template_html)(deep_context) : template_html;
+    var rendered_html = template_html;
+    try {
+      rendered_html = handlebars.compile(template_html)(deep_context);
+    }
+    catch (exc) {
+      logger.error('Error compiling template markup', exc);
+    }
     var ctx = {
       context: context,
       header: results.experiment.html,
