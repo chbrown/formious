@@ -15,6 +15,11 @@ app.service('Administrator', function($resource) {
   // map: {'id': 'email'}
   return $resource('/api/administrators/:id', {
     id: '@id',
+  }, {
+    query: {
+      cache: true,
+      isArray: true,
+    }
   });
 });
 
