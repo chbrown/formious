@@ -52,9 +52,9 @@ R.get(/\/api\/experiments\/(\d+)\/stims\/(\d+)$/, function(req, res, m) {
   });
 });
 
-/** PATCH /api/experiments/:experiment_id/stims/:stim_id
+/** POST /api/experiments/:experiment_id/stims/:stim_id
 Update existing stim */
-R.patch(/\/api\/experiments\/(\d+)\/stims\/(\d+)$/, function(req, res, m) {
+R.post(/\/api\/experiments\/(\d+)\/stims\/(\d+)$/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 

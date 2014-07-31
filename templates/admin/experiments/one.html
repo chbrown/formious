@@ -79,7 +79,7 @@
       <tbody checkbox-sequence>
         <tr ng-repeat="stim in stims" ng-class="{selected: stim.selected}">
           <td style="padding-right: 5px"><input type="checkbox" ng-model="stim.selected"></td>
-          <td><a href="/experiments/{{experiment.id}}/stims/{{stim.id}}">{{stim.id}}</a></td>
+          <td><a href="/admin/experiments/{{experiment.id}}/stims/{{stim.id}}">{{stim.id}}</a></td>
           <td class="nowrap">
             <!-- <select ng-model="stim.template_id"
               ng-options="template.id as template.name for template in templates"></select> -->

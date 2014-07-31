@@ -1,0 +1,31 @@
+<div ng-controller="adminStimCtrl">
+  <main>
+    <section class="box">
+      <form ng-submit="sync($event)">
+        <label>
+          <div><b>Experiment ID</b></div>
+          <select ng-model="stim.experiment_id"
+            ng-options="experiment.id as experiment.name for experiment in experiments"></select>
+        </label>
+
+        <label>
+          <div><b>Template ID</b></div>
+          <select ng-model="stim.template_id"
+            ng-options="template.id as template.name for template in templates"></select>
+        </label>
+
+        <label>
+          <div><b>Context</b></div>
+          <jsonarea ng-model="stim.context" style="width: 600px; height: 200px" ng-keydown="keydown($event)"></jsonarea>
+        </label>
+
+        <label>
+          <div><b>View order</b></div>
+          <input type="number" ng-model="stim.view_order">
+        </label>
+
+        <p><button>Save</button></p>
+      </form>
+    </section>
+  </main>
+</div>

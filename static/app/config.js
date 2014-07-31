@@ -2,6 +2,15 @@
 
 app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
 
+  $urlRouterProvider.otherwise(function(injector, location) {
+    // arguments are not properly injected
+    var unmatched_path = location.path();
+    // console.log('otherwise: $location', location, unmatched_path);
+    if (!unmatched_path.match(/^\/admin/)) {
+      window.location = unmatched_path;
+    }
+  });
+
   $stateProvider
   .state('admin-home', {
     url: '/admin',
@@ -45,6 +54,11 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
   .state('experiments-show', {
     url: '/admin/experiments/:id',
     templateUrl: '/templates/admin/experiments/one.html',
+  })
+  // stims
+  .state('experiment-stims-show', {
+    url: '/admin/experiments/:experiment_id/stims/:id',
+    templateUrl: '/templates/admin/experiments/stims/one.html',
   })
   // mturk
   .state('HITs', {

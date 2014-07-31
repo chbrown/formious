@@ -12,6 +12,7 @@
   <script src="/static/app/controllers/administrators.js"></script>
   <script src="/static/app/controllers/aws_accounts.js"></script>
   <script src="/static/app/controllers/experiments.js"></script>
+  <script src="/static/app/controllers/stims.js"></script>
   <script src="/static/app/controllers/templates.js"></script>
   <script src="/static/app/controllers/mturk/HITs.js"></script>
   <script src="/static/app/models.js"></script>
