@@ -11,43 +11,6 @@ app.filter('valueWhere', function() {
   return valueWhere;
 });
 
-app.directive('nav', function($window, $rootScope) {
-  // the most specific link inside each nav that matches
-  return {
-    restrict: 'E',
-    link: function(scope, element, attrs) {
-      var updateCurrent = function(anchor) {
-        if (scope.current_anchor) {
-          scope.current_anchor.classList.remove('current');
-        }
-        anchor.classList.add('current');
-        scope.current_anchor = anchor;
-      };
-      var refresh = function() {
-        var window_pathname = $window.location.pathname;
-        var anchors = element.find('a');
-        var i, anchor;
-        // try for exact matches first
-        for (i = 0; (anchor = anchors[i]); i++) {
-          if (window_pathname == anchor.pathname) {
-            return updateCurrent(anchor);
-          }
-        }
-        // then for anchors with a prefix of the current url
-        for (i = 0, anchor; (anchor = anchors[i]); i++) {
-          if (window_pathname.indexOf(anchor.pathname) === 0) {
-            return updateCurrent(anchor);
-          }
-        }
-      };
-      $rootScope.$on('$locationChangeSuccess', function(ev, newUrl, oldUrl) {
-        // p('$locationChangeSuccess', ev, newUrl, oldUrl)
-        refresh();
-      });
-    }
-  };
-});
-
 app.directive('administrator', function(Administrator) {
   return {
     restrict: 'E',

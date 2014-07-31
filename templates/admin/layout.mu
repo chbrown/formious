@@ -19,7 +19,7 @@
 </head>
 <body ng-app="app" class="admin">
   <flash></flash>
-  <nav fixedflow class="root">
+  <nav fixedflow activate-current-anchor class="root">
     <div style="float: right">
       <a href="/admin/administrators/<% current_user.id %>">me</a>
       <ajaxform method="POST" action="/admin/logout" style="display: inline">
