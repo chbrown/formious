@@ -1,7 +1,9 @@
-/*jslint browser: true */ /*globals angular */
+/*jslint browser: true */ /*globals angular, Event */
 /** Copyright 2012-2014, Christopher Brown <io@henrian.com>, MIT Licensed
 
 https://raw.github.com/chbrown/misc-js/master/angular-plugins.js
+
+jslint with 'browser: true' really ought to recognize 'Event' as a global type
 
 */
 angular.module('misc-js/angular-plugins', [])
@@ -69,6 +71,57 @@ angular.module('misc-js/angular-plugins', [])
     }
   };
 })
+.directive('activateCurrentAnchor', function($window, $rootScope) {
+  /** This directive is also intended to be used with a <nav> element. It will
+  add the class 'current' to the <a> with the closest matching href. It is
+  similar to calling the following, only smarter / more adaptive.
+
+      document.querySelector('a[href="' + window.location.pathname + '"]').classList.add('current');
+
+  Use like:
+
+      <nav activate-current-anchor>
+        <a href="/users">Users</a>
+        <a href="/products">Products</a>
+        <a href="/orders">Orders</a>
+      </nav>
+  */
+  return {
+    scope: {
+      activateCurrentAnchor: '@'
+    },
+    link: function(scope, element, attrs) {
+      var className = scope.activateCurrentAnchor || 'current';
+      var updateCurrent = function(anchor) {
+        if (scope.current_anchor) {
+          scope.current_anchor.classList.remove(className);
+        }
+        anchor.classList.add(className);
+        scope.current_anchor = anchor;
+      };
+      var refresh = function() {
+        var window_pathname = $window.location.pathname;
+        var anchors = element.find('a');
+        var i, anchor;
+        // try for exact matches first
+        for (i = 0; (anchor = anchors[i]); i++) {
+          if (window_pathname == anchor.pathname) {
+            return updateCurrent(anchor);
+          }
+        }
+        // then for anchors with a prefix of the current url
+        for (i = 0; (anchor = anchors[i]); i++) {
+          if (window_pathname.indexOf(anchor.pathname) === 0) {
+            return updateCurrent(anchor);
+          }
+        }
+      };
+
+      $rootScope.$on('$locationChangeSuccess', refresh); // function(ev, newUrl, oldUrl)
+      refresh();
+    }
+  };
+})
 .directive('jsonTransform', function() {
   /** parser/serializer to edit a JSON object within a textarea or input[type=text] */
   return {
@@ -122,6 +175,7 @@ angular.module('misc-js/angular-plugins', [])
   return {
     restrict: 'A',
     require: '?ngModel',
+    scope: {},
     link: function(scope, el, attrs, ngModel) {
       // enhance textarea (check if it's a textarea)
       var textarea = el[0];
@@ -135,12 +189,16 @@ angular.module('misc-js/angular-plugins', [])
       }
 
       if (ngModel) {
+        // console.log(textarea, 'ngModel', ngModel);
         // I think the built-in ng-model will handle actually setting the value?
         ngModel.$render = function() {
           // handle undefined input value by representing it as the empty string
           textarea.value = (ngModel.$viewValue === undefined || ngModel.$viewValue === null) ? '' : ngModel.$viewValue;
-          // jslint with 'browser: true' really ought to recognize 'Event' as a global type
-          textarea.dispatchEvent(new Event('input'));
+          // jump out of the $digest in case a different ng-model controller is listening
+          setTimeout(function() {
+            // but we need to trigger an 'input' event so that the enhanced Textarea triggers a resize
+            textarea.dispatchEvent(new Event('input'));
+          }, 0);
         };
         el.on('blur keyup change', function() {
           scope.$apply(function() {
@@ -389,8 +447,10 @@ angular.module('misc-js/angular-plugins', [])
         // var throbber_el = angular.element('<img src="/static/lib/img/throbber-16.gif">');
         scope.add('...');
 
-        // wrap value with .when() to support both strings and promises of strings
-        $q.when(value).then(function(message) {
+        // for some reason, .finally() doesn't get the promise's value,
+        // so we have to use .then(a, a)
+        var done = function(message) {
+          // so we recreate
           scope.remove('...');
           scope.add(message);
 
@@ -400,7 +460,9 @@ angular.module('misc-js/angular-plugins', [])
               scope.remove(message);
             }, timeout);
           }
-        });
+        };
+        // wrap value with .when() to support both strings and promises of strings
+        $q.when(value).then(done, done);
       });
     }
   };

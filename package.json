@@ -40,10 +40,6 @@
     "lo-dash": "*",
     "misc-js": "git://github.com/chbrown/misc-js.git",
     "moment": "*",
-    "restangular": {
-      "url": "git://github.com/mgonto/restangular.git",
-      "filter": ["dist/restangular.js", "dist/restangular.min.js"]
-    },
     "ng-storage": "*",
     "underscore": "*"
   },
