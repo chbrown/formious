@@ -57,7 +57,7 @@
     </div>
   </section> -->
 
-  <section class="box" ng-if="bonus_payments">
+  <section class="box">
     <h3>Bonuses</h3>
     <table>
       <thead>
@@ -80,28 +80,28 @@
   </section>
 
   <section class="box" ng-repeat="assignment in assignments">
-    <h3>Assignment: {{assignment.AssignmentId}}</h3>
+    <h3>Assignment: {{assignment.properties.AssignmentId}}</h3>
 
     <div ng-controller="adminAssignmentEditor">
       <div>
         Status:
-        <span class="{{assignment.AssignmentStatus}}">{{assignment.AssignmentStatus}}</span>
-        <span ng-switch="assignment.AssignmentStatus">
+        <span class="{{assignment.properties.AssignmentStatus}}">{{assignment.properties.AssignmentStatus}}</span>
+        <span ng-switch="assignment.properties.AssignmentStatus">
           <span ng-switch-when="Submitted">
-            <button ng-click="approve(assignment, $event)">Approve</button>
-            <button ng-click="reject(assignment, $event)">Reject</button>
+            <button ng-click="approve(assignment.properties.AssignmentId, $event)">Approve</button>
+            <button ng-click="reject(assignment.properties.AssignmentId, $event)">Reject</button>
           </span>
           <span ng-switch-when="Rejected">
-            <button ng-click="approve_rejected(assignment, $event)">Unreject and Approve</button>
+            <button ng-click="approve_rejected(assignment.properties.AssignmentId, $event)">Unreject and Approve</button>
           </span>
         </span>
       </div>
       <div>
         <label>
-          <input value="{{assignment.bonus_owed}}" placeholder="Amount">
+          <input value="{{assignment.participant.bonus_owed}}" placeholder="Amount">
         </label>
         <label>
-          <input value="{{assignment.reason}}" placeholder="Reason">
+          <input value="{{assignment.participant.reason}}" placeholder="Reason">
         </label>
         <button ng-click="GrantBonus">Grant Bonus</button>
       </div>
@@ -109,15 +109,11 @@
 
     <div>
       <table class="keyval">
-        <tr ng-repeat="(key, val) in assignment">
-          <td>{{key}}</td>
-          <td>{{val}}</td>
-        </tr>
-        <tr ng-repeat="answer in assignment.Answers">
-          <td>{{answer.QuestionIdentifier}}</td>
-          <td>{{answer.FreeText}}</td>
-        </tr>
+        <tbody tbody-map="assignment.properties"></tbody>
+        <tbody tbody-map="assignment.answers"></tbody>
+        <tbody tbody-map="assignment.participant" ng-show="assignment.participant"></tbody>
       </table>
+      <div ng-hide="assignment.participant">Could not find participant</div>
     </div>
   </section>
 </main>

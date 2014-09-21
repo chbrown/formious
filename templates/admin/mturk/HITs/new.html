@@ -85,7 +85,7 @@
 
       <label>
         <div><b>External URL</b>
-          <span class="help">The URL of your web form, to be displayed in a frame in the Worker's web browser</span>
+          <span class="help">The URL of your web form, to be displayed in a frame in the Worker's web browser. It can have a querystring; Mechanical Turk parses the url and adds new querystring parameters as needed.</span>
         </div>
         <input type="text" ng-model="$storage.hit.ExternalURL" style="width: 500px">
       </label>

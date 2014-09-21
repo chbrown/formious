@@ -3,10 +3,11 @@ h1,h2,h3,h4,h5,h6{margin:.5ex 0}
 p{margin:1ex 0}
 label span{vertical-align:baseline}
 label[disabled]{color:gray}
-input,select,textarea{vertical-align:baseline;margin:0;box-sizing:border-box}
-input[type=checkbox],input[type=radio]{margin:1px .25ex}
+textarea,input,select{vertical-align:baseline;margin:0;box-sizing:border-box}
+input[type=radio],input[type=checkbox]{margin:1px .25ex}
 fieldset{margin:0 10px 10px 0;border:1px solid #CCC}
-.nowrap,time{white-space:nowrap}
+.nowrap{white-space:nowrap}
+time{white-space:nowrap}
 .code{font:9pt monospace}
 .shadow{box-shadow:0 0 5px rgba(0,0,0,.05)}
 .help{cursor:pointer}
@@ -19,15 +20,16 @@ body.admin{background-color:#fafafa;font-size:80%;overflow-y:scroll}
 body.admin .flash{position:fixed;left:0;right:0;height:23px;z-index:1000;text-align:center;color:#fff;background-color:rgba(0,0,0,.66);pointer-events:none}
 body.admin .flash img,body.admin .flash span{vertical-align:middle}
 body.admin nav{left:0;right:0;padding:0 5px;font-size:90%;z-index:100}
-body.admin nav a,body.admin nav button,body.admin nav img,body.admin nav select,body.admin nav span{display:inline-block;vertical-align:middle}
-body.admin nav a,body.admin nav button.anchor,body.admin nav span{padding:2px 6px}
+body.admin nav span,body.admin nav a,body.admin nav button,body.admin nav img,body.admin nav select{display:inline-block;vertical-align:middle}
+body.admin nav span,body.admin nav a,body.admin nav button.anchor{padding:2px 6px}
 body.admin nav.root{background-color:#4d4d4d}
-body.admin nav.root a,body.admin nav.root button,body.admin nav.root select,body.admin nav.root span{margin:3px 0 0}
+body.admin nav.root span,body.admin nav.root a,body.admin nav.root button,body.admin nav.root select{margin:3px 0 0 0}
 body.admin nav.root a,body.admin nav.root button.anchor{border-radius:2px 2px 0 0;background-color:#ccc}
-body.admin nav.root a.current,body.admin nav.root a:hover,body.admin nav.root button.anchor.current,body.admin nav.root button.anchor:hover{background-color:#fafafa}
+body.admin nav.root a:hover,body.admin nav.root button.anchor:hover,body.admin nav.root a.current,body.admin nav.root button.anchor.current{background-color:#fafafa}
 body.admin nav.sub{background-color:#fafafa;padding-top:2px;padding-bottom:2px;border-bottom:1px solid #BBB}
-main,section{margin:10px 0}
-main .inset,main>a,main>form,main>h1,main>h2,main>h3,main>p,main>section{padding-left:10px;padding-right:10px}
+section{margin:10px 0}
+main{margin:10px 0}
+main>section,main>form,main>p,main>a,main>h1,main>h2,main>h3,main .inset{padding-left:10px;padding-right:10px}
 .box{padding-top:5px;padding-bottom:5px;background-color:#fff;border:1px solid #EEE;border-width:1px 0}
 table{border-collapse:collapse}
 table th{text-align:left}
@@ -46,12 +48,14 @@ table.grid tr td:last-child,table.grid tr th:last-child{border-right:0}
 table.padded tr td:first-child,table.padded tr th:first-child{padding-left:10px}
 table.padded tr td:last-child,table.padded tr th:last-child{padding-right:10px}
 table.keyval td:first-child{font-weight:700}
+table.keyval tbody{border-top:1px solid #CCC}
+table.keyval tbody:first-child{border-top:0}
 table.responses td.context{background-color:#FFF8F8}
 table.responses td.value{background-color:#F8FFF8}
 .hover-flow{word-wrap:break-word;text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
 .hover-flow:hover{white-space:normal;overflow:visible}
 .array .controls{text-align:right}
-.array .add{margin:0;padding:0;background:0 0;border:0;cursor:pointer}
+.array .add{margin:0;padding:0;background:0 0;border:none;cursor:pointer}
 .array .add::before{content:"add "}
 .array .remove{color:#8b0000;cursor:pointer}
 .preview{position:fixed;max-width:50%;top:10px;right:10px;border:1px solid #DDD}

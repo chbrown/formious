@@ -1,5 +1,5 @@
 /*jslint node: true */
-var _ = require('underscore');
+var _ = require('lodash');
 var async = require('async');
 var logger = require('loge');
 var Router = require('regex-router');
@@ -231,33 +231,48 @@ R.get(/^\/api\/mturk\/HITs\/(\w+)\/Assignments(\?|$)/, function(req, res, m) {
     });
 
     db.Select('participants')
+    // db.Select('participants JOIN responses ON responses.participant_id = participants.id')
+    // .add('participants.*', 'MAX(responses.created) - MIN(responses.created) AS duration')
+    // .groupBy('participants.id')
     .whereIn('aws_worker_id', aws_worker_ids)
     .execute(function(err, participants) {
       if (err) return res.die(err);
 
       // merge in the participant info from the local databse query
-      assignments.forEach(function(assignment) {
+      async.map(assignments, function(assignment, callback) {
         // hack! (someone broke my xmlconv root namespace ignorance)
-        var answer_xml = assignment.Answer.replace(/xmlns=("|').+?\1/, '');
-        delete assignment.Answer;
+        // var answer_xml = assignment.Answer.replace(/xmlns=("|').+?\1/, '');
+        xml2js.parseString(assignment.Answer, {explicitArray: false}, function(err, answer_json) {
+          if (err) return callback(err);
 
-        // logger.warn('answer_xml', answer_xml);
-        var answer_json = xmlconv(answer_xml, {convention: 'castle'});
-        // logger.warn('answer_json', answer_json);
-        assignment.Answers = answer_json.QuestionFormAnswers.Answer;
+          var participant = _.findWhere(participants, {aws_worker_id: assignment.WorkerId});
 
-        var participant = _.findWhere(participants, {aws_worker_id: assignment.WorkerId});
-        if (!participant) {
-          logger.info('Could not find participant: %s', assignment.WorkerId);
-        }
+          var answers = _(answer_json.QuestionFormAnswers.Answer).map(function(answer) {
+            return [answer.QuestionIdentifier, answer.FreeText];
+          }).object().value();
 
-        // reduce to key-value pairs so that we can show in both Mu/Handlebars easily
-        assignment.user = _.map(participant, function(value, key) {
-          return {key: key, value: value};
+          // SELECT MAX(created), MIN(created),  FROM responses WHERE responses.participant_id = 288;
+          db.Select('responses')
+          .add('EXTRACT(epoch FROM MAX(created) - MIN(created)) AS duration')
+          .whereEqual({participant_id: participant.id})
+          .execute(function(err, responses) {
+            if (err) return callback(err);
+
+            // console.log(responses[0].duration);
+
+            participant.duration = responses[0].duration.toFixed(0) + ' seconds';
+
+            callback(null, {
+              properties: _.omit(assignment, ['Answer']),
+              participant: participant,
+              answers: answers,
+            });
+          })
         });
+      }, function(err, assignments) {
+        if (err) return res.die(err);
+        res.ngjson(assignments);
       });
-
-      res.ngjson(assignments);
     });
   });
 });

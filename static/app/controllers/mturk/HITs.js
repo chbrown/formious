@@ -195,22 +195,22 @@ app.controller('adminAssignmentEditor', function($scope, $resource, $storedState
     },
   });
 
-  $scope.approve = function(assignment) {
-    var promise = Assignment.Approve({AssignmentId: assignment.AssignmentId}).$promise.then(function(res) {
+  $scope.approve = function(assignment_id) {
+    var promise = Assignment.Approve({AssignmentId: assignment_id}).$promise.then(function(res) {
       return 'Approved';
     }, summarizeResponse);
     $flash(promise);
   };
 
-  $scope.reject = function(assignment) {
-    var promise = Assignment.Reject({AssignmentId: assignment.AssignmentId}).$promise.then(function(res) {
+  $scope.reject = function(assignment_id) {
+    var promise = Assignment.Reject({AssignmentId: assignment_id}).$promise.then(function(res) {
       return 'Rejected';
     }, summarizeResponse);
     $flash(promise);
   };
 
-  $scope.approve_rejected = function(assignment) {
-    var promise = Assignment.ApproveRejected({AssignmentId: assignment.AssignmentId}).$promise.then(function(res) {
+  $scope.approve_rejected = function(assignment_id) {
+    var promise = Assignment.ApproveRejected({AssignmentId: assignment_id}).$promise.then(function(res) {
       return 'Rejected';
     }, summarizeResponse);
     $flash(promise);

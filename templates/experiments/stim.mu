@@ -5,6 +5,7 @@
   <title>Experimental Interface</title>
   <script src="/static/lib/jquery.min.js"></script>
   <script>
+    /*jslint browser: true */ /*globals $ */
     var formious = {};
     formious.add = function(response) {
       return $.ajax({

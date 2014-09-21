@@ -7,6 +7,20 @@ var app = angular.module('app', [
   'misc-js/angular-plugins',
 ]);
 
+
+app.directive('tbodyMap', function() {
+  return {
+    restrict: 'A',
+    template: '<tr ng-repeat="(key, val) in object">\
+                 <td ng-bind="key"></td><td ng-bind="val"></td>\
+               </tr>',
+    // replace: true,
+    scope: {
+      object: '=tbodyMap',
+    },
+  };
+});
+
 app.filter('valueWhere', function() {
   return valueWhere;
 });
