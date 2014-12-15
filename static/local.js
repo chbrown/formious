@@ -54,7 +54,6 @@ var valueWhere = function(list, predicate, prop) {
 };
 
 var summarizeResponse = function(res) {
-  // p('summarizeResponse', res);
   var parts = [];
   if (res.status != 200) {
     parts.push('Error ');
@@ -63,7 +62,6 @@ var summarizeResponse = function(res) {
   if (res.data) {
     parts.push(': ' + res.data.toString());
   }
-  // p('summarizeResponse ->', parts.join(''));
   return parts.join('');
 };
 
