@@ -1,7 +1,7 @@
 /*jslint node: true */
 var _ = require('underscore');
-var db = require('../../lib/db');
-var models = require('../../lib/models');
+var db = require('../../db');
+var models = require('../../models');
 var Router = require('regex-router');
 var url = require('url');
 

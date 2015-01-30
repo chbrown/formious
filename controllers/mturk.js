@@ -1,5 +1,5 @@
 /*jslint node: true */
-var models = require('../lib/models');
+var models = require('../models');
 var amulet = require('amulet');
 var Router = require('regex-router');
 

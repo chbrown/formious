@@ -17,20 +17,22 @@
     "lodash": "*",
     "loge": "*",
     "moment": "git://github.com/timrwood/moment.git#develop",
-    "optimist": "*",
     "regex-router": "*",
     "send": "*",
-    "sqlcmd": "*",
+    "sqlcmd-pg": "~0.2.3",
+    "sqlorm": "*",
     "streaming": "*",
     "sv": "*",
     "turk": "0.5.2",
     "underscore": "*",
+    "util-enhanced": "*",
     "xml2js": "*",
     "xmldom": "*",
-    "xpath": "*"
+    "xpath": "*",
+    "yargs": "*"
   },
   "devDependencies": {
-    "tap": "*"
+    "mocha": "*"
   },
   "staticPattern": "static/lib/{file}",
   "staticDependencies": {
@@ -44,10 +46,7 @@
     "ng-storage": "*",
     "underscore": "*"
   },
-  "config": {
-    "host": "127.0.0.1",
-    "port": 1451,
-    "database": "formious",
-    "salt": "rNxROdgCbAkBI2WvZJtH"
+  "bin": {
+    "formious": "bin/formious.js"
   }
 }

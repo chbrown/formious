@@ -5,7 +5,7 @@ var Router = require('regex-router');
 
 var roots = {
   static: path.join(__dirname, '..', 'static'),
-  templates: path.join(__dirname, '..', 'templates'),
+  ng: path.join(__dirname, '..', 'ng'),
 };
 
 var R = new Router(function(req, res) {
@@ -27,8 +27,8 @@ R.get(/^\/static\/([^?]+)(\?|$)/, function(req, res, m) {
   serve(req, res, roots.static, m[1]);
 });
 
-R.get(/^\/templates\/([^?]+)(\?|$)/, function(req, res, m) {
-  serve(req, res, roots.templates, m[1]);
+R.get(/^\/ng\/([^?]+)(\?|$)/, function(req, res, m) {
+  serve(req, res, roots.ng, m[1]);
 });
 
 R.get('/favicon.ico', function(req, res) {

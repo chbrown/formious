@@ -6,9 +6,9 @@ var amulet = require('amulet');
 var Router = require('regex-router');
 
 var logger = require('loge');
-var models = require('../../lib/models');
+var models = require('../../models');
 var hash = require('../../lib/hash');
-var db = require('../../lib/db');
+var db = require('../../db');
 
 
 // /api/administrators/*

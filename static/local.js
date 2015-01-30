@@ -46,13 +46,6 @@ var toMap = function(array, key, value) {
   return map;
 };
 
-var valueWhere = function(list, predicate, prop) {
-  var match = _.findWhere(list, predicate);
-  if (match) {
-    return match[prop];
-  }
-};
-
 var summarizeResponse = function(res) {
   var parts = [];
   if (res.status != 200) {

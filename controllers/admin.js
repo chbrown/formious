@@ -2,9 +2,10 @@
 var _ = require('underscore');
 var amulet = require('amulet');
 var Router = require('regex-router');
+var Cookies = require('cookies');
 
 var logger = require('loge');
-var models = require('../lib/models');
+var models = require('../models');
 
 // router & controllers requiring authentication
 var R = new Router(function(req, res) {
@@ -16,16 +17,18 @@ var R = new Router(function(req, res) {
 /** POST /admin/logout
 Purge administrator_token cookie, and redirect */
 R.post(/^\/admin\/logout/, function(req, res) {
-  logger.debug('Deleting administrator_token cookie: %s', req.cookies.get('administrator_token'));
+  var cookies = new Cookies(req, res);
 
-  req.cookies.del('administrator_token');
+  logger.debug('Deleting administrator_token cookie: %s', cookies.get('administrator_token'));
+  cookies.del('administrator_token');
   res.redirect('/admin');
 });
 
 module.exports = function(req, res) {
   // handle auth and forward. this is the checkpoint for all admin-level
   // requests, and should send all non administrators to the login page.
-  var token = req.cookies.get('administrator_token');
+  var cookies = new Cookies(req, res);
+  var token = cookies.get('administrator_token');
   models.Administrator.fromToken(token, function(err, administrator) {
     if (err) {
       logger.error('Administrator not authenticated:', err);

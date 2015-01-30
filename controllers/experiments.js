@@ -9,9 +9,9 @@ var Router = require('regex-router');
 var sv = require('sv');
 var url = require('url');
 
-var db = require('../lib/db');
+var db = require('../db');
 var flat = require('../lib/flat');
-var models = require('../lib/models');
+var models = require('../models');
 
 var R = new Router(function(req, res) {
   res.status(404).die('No resource at: ' + req.url);
@@ -208,7 +208,7 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
           stim_id: response.stim_id,
           created: response.created,
         };
-        // merge those static values with the dynamic context and value hashes
+        // merge those static values with the dynamic context and value objects
         _.extend(row, response.context, response.value);
 
         stringifier.write(row);

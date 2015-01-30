@@ -4,9 +4,11 @@ var url = require('url');
 var querystring = require('querystring');
 var amulet = require('amulet');
 var Router = require('regex-router');
+var Cookies = require('cookies');
+var moment = require('moment');
 
 var logger = require('loge');
-var models = require('../lib/models');
+var models = require('../models');
 
 var renderLogin = function(ctx, res) {
   // helper, since we serve the login page from GET as well as failed login POSTs
@@ -42,7 +44,13 @@ R.post(/^\/login$/, function(req, res) {
         }
 
         logger.info('Authenticated successfully. Token = %s', token);
-        req.cookies.set('administrator_token', token);
+
+        var cookies = new Cookies(req, res);
+        cookies.set('administrator_token', token, {
+          path: '/',
+          expires: moment().add(1, 'month').toDate(),
+        });
+
         res.redirect('/admin');
       });
     }, 500);

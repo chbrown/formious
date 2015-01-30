@@ -1,8 +1,8 @@
 /*jslint node: true */
 var _ = require('underscore');
 var Router = require('regex-router');
-var db = require('../../lib/db');
-var models = require('../../lib/models');
+var db = require('../../db');
+var models = require('../../models');
 
 var R = new Router(function(req, res) {
   res.status(404).die('No resource at: ' + req.url);

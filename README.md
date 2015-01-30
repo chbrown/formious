@@ -38,7 +38,37 @@ Debugging angular closures, this helps:
 
     scope = angular.element($('[ng-controller]')).scope()
 
+## Controllers
+
+All modules in `/controllers/**/*.js` should, for the most part, define only a single export:
+
+```javascript
+module.exports = function(req, res) {
+  ...
+}
+```
+
+E.g., `controllers/fancy.js` might look like this
+
+```javascript
+module.exports = function(req, res) {
+  /** handle any requests for /fancy/*
+
+  req is an http-enhanced version of the http.IncomingMessage object
+  res is an http-enhanced version of the http.ServerResponse object
+
+  Additionally:
+
+  * req.url will be the full url ("/fancy/index", not just "/index")
+  */
+  ...
+  res.end();
+};
+```
+
+And, heck, while we're making arbitrary rules, let's say that this export should go at the bottom.
+
 
 ## License
 
-Copyright © 2011–2014 Christopher Brown. [MIT Licensed](LICENSE).
+Copyright 2011–2015 Christopher Brown. [MIT Licensed](http://opensource.org/licenses/MIT).

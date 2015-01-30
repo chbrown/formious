@@ -1,10 +1,11 @@
 /*jslint node: true */
 var logger = require('loge');
 var Router = require('regex-router');
+var Cookies = require('cookies');
 var streaming = require('streaming');
 var sv = require('sv');
 var _ = require('underscore');
-var models = require('../../lib/models');
+var models = require('../../models');
 
 var excel = require('../../lib/excel');
 
@@ -68,7 +69,8 @@ R.post('/api/table', function(req, res) {
 
 module.exports = function(req, res) {
   // require administrator privileges
-  var token = req.cookies.get('administrator_token');
+  var cookies = new Cookies(req, res);
+  var token = cookies.get('administrator_token');
   models.Administrator.fromToken(token, function(err, administrator) {
     if (err) {
       res.status(401).die('Authorization failed; you must login first.');

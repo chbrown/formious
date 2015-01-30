@@ -1,9 +1,5 @@
 /*jslint browser: true, devel: true */ /*globals _, angular, app, Url, p, summarizeResponse */
 
-app.controller('adminTableCtrl', function($scope) {
-  $scope.table = window.table;
-});
-
 app.controller('adminResponsesCtrl', function($scope) {
   $scope.responses = window.responses;
 
