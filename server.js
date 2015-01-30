@@ -1,7 +1,8 @@
 /*jslint node: true */
+var path = require('path');
+var send = require('send');
 var http = require('http-enhanced');
 var logger = require('loge');
-var path = require('path');
 
 // amulet.set(), as opposed amulet.create(), will set the defaults on the module singleton
 var amulet = require('amulet').set({
@@ -22,6 +23,19 @@ var amulet = require('amulet').set({
 });
 
 var controllers = require('./controllers');
+
+http.ServerResponse.prototype.send = function(req, dir, subpath) {
+  var root = path.join(__dirname, dir);
+  var res = this;
+  send(req, subpath, {root: root})
+  .on('error', function(err) {
+    res.status(err.status || 500).die('send error: ' + err.message);
+  })
+  .on('directory', function() {
+    res.status(404).die('No resource at: ' + req.url);
+  })
+  .pipe(res);
+};
 
 var server = module.exports = http.createServer(function(req, res) {
   logger.debug('%s %s', req.method, req.url);

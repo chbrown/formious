@@ -25,7 +25,7 @@ label span {
   vertical-align: baseline;
 }
 label[disabled] {
-  .color-gray(50%);
+  .color-gray(40%);
 }
 textarea, input, select {
   vertical-align: baseline;
@@ -100,45 +100,57 @@ body.admin {
   nav {
     left: 0;
     right: 0;
+
     padding: 0 5px;
-    font-size: 90%;
+    // font-size: 90%;
+
+    &[fixedflow] {
+      z-index: 100;
+      background-color: #333;
+    }
+
     // for some reason elements with opacity < 1.0 float to the top,
     // but a non-zero z-index here fixes that
-    z-index: 100;
+    // z-index: 100;
+
 
     // shared
     span, a, button, img, select {
       display: inline-block;
       vertical-align: middle;
+      margin: 3px 0 0 0;
     }
     span, a, button.anchor {
       padding: 2px 6px;
       // border-radius: 2px;
     }
+    // a, button.anchor {
+    //   border-radius: 2px 2px 0 0;
+    //   .background-gray(80%);
+    //   &:hover, &.current {
+    //     .background-gray(98%); // same as body.admin background
+    //   }
+    // }
+
 
     // hierarchical
-    &.root {
-      // background is especially dark for the root nav
-      .background-gray(30%);
-
-      span, a, button, select {
-        margin: 3px 0 0 0;
-      }
-
-      a, button.anchor {
-        border-radius: 2px 2px 0 0;
-        .background-gray(80%);
-        &:hover, &.current {
-          .background-gray(98%); // same as body.admin background
-        }
-      }
-    }
     &.sub {
       .background-gray(98%);
       padding-top: 2px;
       padding-bottom: 2px;
 
       border-bottom: 1px solid #BBB;
+    }
+
+    .tab {
+      display: inline-block;
+      padding: 2px 6px;
+      margin: 3px 0 0 0;
+      background-color: #BBB;
+      border-radius: 2px 2px 0 0;
+      &:hover, &.current {
+        background-color: #FEFEFE;
+      }
     }
   }
 }

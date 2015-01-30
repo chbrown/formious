@@ -75,85 +75,90 @@ app.service('Cache', function($q, $localStorage) {
 });
 
 app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
-
-  $urlRouterProvider.otherwise(function(injector, location) {
-    // arguments are not properly injected
-    var unmatched_path = location.path();
-    // console.log('otherwise: $location', location, unmatched_path);
-    if (!unmatched_path.match(/^\/admin/)) {
-      window.location = unmatched_path;
-    }
+  $urlRouterProvider.otherwise(function($injector, $location) {
+    var url = $location.url();
+    console.log('otherwise: $location.url() = %s', url);
+    // window.location = url;
+    // if (url.match(/^\/api/)) {
+    //   // TODO: is there a better way to leave ui-router control than with window.location ?
+    //   window.location = url;
+    // }
+    // return '/annotate';
+    // if (!unmatched_path.match(/^\/admin/)) {}
   });
 
   $stateProvider
-  .state('admin-home', {
+  .state('admin', {
     url: '/admin',
-    controller: function($scope, $state) {
-      // redirect to /admin/experiments
-      $state.go('experiments');
-    }
+    templateUrl: '/ng/admin/layout.html',
+    abstract: true,
   })
   // access_tokens
-  .state('access_tokens', {
-    url: '/admin/access_tokens',
+  .state('admin.accessTokensTable', {
+    url: '/access_tokens',
     templateUrl: '/ng/admin/access_tokens/all.html',
   })
-  .state('access_tokens-show', {
-    url: '/admin/access_tokens/:id',
+  .state('admin.accessTokenEdit', {
+    url: '/access_tokens/:id',
     templateUrl: '/ng/admin/access_tokens/one.html',
   })
   // administrators
-  .state('administrators', {
-    url: '/admin/administrators',
+  .state('admin.administratorsTable', {
+    url: '/administrators',
     templateUrl: '/ng/admin/administrators/all.html',
   })
-  .state('administrators-show', {
-    url: '/admin/administrators/:id',
+  .state('admin.administratorEdit', {
+    url: '/administrators/:id',
     templateUrl: '/ng/admin/administrators/one.html',
   })
   // aws_accounts
-  .state('aws_accounts', {
-    url: '/admin/aws_accounts',
+  .state('admin.awsAccountsTable', {
+    url: '/aws_accounts',
     templateUrl: '/ng/admin/aws_accounts/all.html',
   })
-  .state('aws_accounts-show', {
-    url: '/admin/aws_accounts/:id',
+  .state('admin.awsAccountEdit', {
+    url: '/aws_accounts/:id',
     templateUrl: '/ng/admin/aws_accounts/one.html',
   })
   // experiments
-  .state('experiments', {
-    url: '/admin/experiments',
+  .state('admin.experimentsTable', {
+    url: '/experiments',
     templateUrl: '/ng/admin/experiments/all.html',
   })
-  .state('experiments-show', {
-    url: '/admin/experiments/:id',
+  .state('admin.experimentEdit', {
+    url: '/experiments/:id',
     templateUrl: '/ng/admin/experiments/one.html',
   })
   // stims
-  .state('experiment-stims-show', {
-    url: '/admin/experiments/:experiment_id/stims/:id',
+  .state('admin.experiments.Stim', {
+    url: '/experiments/:experiment_id/stims/:id',
     templateUrl: '/ng/admin/experiments/stims/one.html',
   })
   // mturk
-  .state('HITs', {
-    url: '/admin/mturk/HITs?aws_account_id&host',
+  .state('admin.mturk', {
+    url: '/mturk',
+    templateUrl: '/ng/admin/mturk/layout.html',
+    abstract: true,
+  })
+  .state('admin.mturk.hitsTable', {
+    url: '/HITs?aws_account_id&host',
     templateUrl: '/ng/admin/mturk/HITs/all.html',
   })
-  .state('HITs-new', {
-    url: '/admin/mturk/HITs/new?aws_account_id&host',
+  .state('admin.mturk.hitCreate', {
+    url: '/HITs/new?aws_account_id&host',
     templateUrl: '/ng/admin/mturk/HITs/new.html',
   })
-  .state('HITs-show', {
-    url: '/admin/mturk/HITs/:HITId?aws_account_id&host',
+  .state('admin.mturk.hitEdit', {
+    url: '/HITs/:HITId?aws_account_id&host',
     templateUrl: '/ng/admin/mturk/HITs/one.html',
   })
   // templates
-  .state('templates', {
-    url: '/admin/templates',
+  .state('admin.templatesTable', {
+    url: '/templates',
     templateUrl: '/ng/admin/templates/all.html',
   })
-  .state('templates-show', {
-    url: '/admin/templates/:id',
+  .state('admin.templateEdit', {
+    url: '/templates/:id',
     templateUrl: '/ng/admin/templates/one.html',
   });
 

@@ -1,0 +1,14 @@
+<nav fixedflow>
+  <a ui-sref="admin.awsAccountsTable" class="tab">AWS Accounts</a>
+  <a ui-sref="admin.mturk.hitsTable" class="tab">MTurk</a>
+  <a ui-sref="admin.administratorsTable" class="tab">Administrators</a>
+  <a ui-sref="admin.experimentsTable" class="tab">Experiments</a>
+  <a ui-sref="admin.templatesTable" class="tab">Templates</a>
+  <div style="float: right">
+    <a ui-sref="administratorEdit({id: 'me'})" class="tab">me</a>
+    <ajaxform method="POST" action="/admin/logout" style="display: inline">
+      <button class="anchor">Logout</button>
+    </ajaxform>
+  </div>
+</nav>
+<ui-view></ui-view>

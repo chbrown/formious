@@ -7,11 +7,8 @@ var Cookies = require('cookies');
 var logger = require('loge');
 var models = require('../models');
 
-// router & controllers requiring authentication
 var R = new Router(function(req, res) {
-  // GET /admin -> redirect to /admin/experiments
-  // res.redirect('/admin/experiments');
-  amulet.stream(['admin/layout.mu'], req.ctx).pipe(res);
+  res.send(req, 'ng', 'layout.html');
 });
 
 /** POST /admin/logout
@@ -24,6 +21,7 @@ R.post(/^\/admin\/logout/, function(req, res) {
   res.redirect('/admin');
 });
 
+// router & controllers requiring authentication
 module.exports = function(req, res) {
   // handle auth and forward. this is the checkpoint for all admin-level
   // requests, and should send all non administrators to the login page.

@@ -1,4 +1,4 @@
-/*jslint browser: true */ /*globals _, angular, app, p, Url, summarizeResponse */
+/*jslint browser: true */ /*globals _, angular, app, Url, summarizeResponse */
 
 app.service('$storedStateParams', function($state, $localStorage, $rootScope) {
   // bring in localStorage backing and automatic re-routing to reflect params changes
