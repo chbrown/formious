@@ -90,6 +90,15 @@ var DOMLib = {};
     };
   };
   DOMLib.El = function(tagName, attributes, childNodes) {
+    /** El(tagName, attributes, childNodes)
+    overloaded as El(tagName, childNodes)
+
+    Create a new DOM Element with the given tag, attributes, and childNodes.
+    If childNodes are not already DOM Node objects, each item in childNodes
+    will be stringified and inserted as a text Node.
+
+    If childNodes is a NodeList or something other than an Array, this will break.
+    */
     if (childNodes === undefined) {
       if (Array.isArray(attributes)) {
         // overload as El(tagName, childNodes)

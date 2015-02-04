@@ -67,6 +67,7 @@ angular.module('misc-js/angular-plugins', [])
       var height = getComputedStyle(el[0]).height;
       var placeholder = angular.element('<div>');
       placeholder.css('height', height);
+      placeholder.addClass('fixedflow-placeholder');
       el.after(placeholder);
     }
   };

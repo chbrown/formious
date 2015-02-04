@@ -210,7 +210,7 @@ var Form = (function() {
   };
 
 
-  var Form = function(container, opts) {
+  var Form = function(container) {
     this.container = container;
   };
   Form.prototype.getFormData = function() {
