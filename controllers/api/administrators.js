@@ -7,7 +7,6 @@ var Router = require('regex-router');
 
 var logger = require('loge');
 var models = require('../../models');
-var hash = require('../../lib/hash');
 var db = require('../../db');
 
 
@@ -41,10 +40,8 @@ R.post(/^\/api\/administrators$/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    models.Administrator.insert({
-      email: data.email,
-      password: hash.sha256(data.password),
-    }, function(err, administrator) {
+    // .add is like .insert, but hashes the password.
+    models.Administrator.add(data.email, data.password, function(err, administrator) {
       if (err) return res.die(err);
       res.status(201).json(administrator);
     });
@@ -69,17 +66,9 @@ R.post(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    // var fields = _.pick(data, models.Administrator.columns);
-    var fields = {email: data.email};
-    // empty-string password means: don't change the password
-    if (data.password) {
-      fields.password = hash.sha256(data.password);
-    }
-
-    db.Update('administrators')
-    .setEqual(fields)
-    .whereEqual({id: m[1]})
-    .execute(function(err, rows) {
+    var administrator = new models.Administrator({id: m[1]});
+    // update is like db.Update('administrators') but hashes the password if it is not ''
+    administrator.update(data.email, data.password, function(err, administrator) {
       if (err) return res.die(err);
       res.status(204).end(); // 204 No Content
     });

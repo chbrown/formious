@@ -17,6 +17,29 @@ function sha256(string) {
 var Administrator = sqlorm.createModel(db, 'administrators',
   ['email', 'password']);
 
+Administrator.add = function(email, password, callback) {
+  this.insert({
+    email: email,
+    password: sha256(password),
+  }, callback);
+};
+
+Administrator.prototype.update = function(email, password, callback) {
+  var query = db.Update('administrators')
+  .setEqual({email: email})
+  .whereEqual({id: this.id})
+  .returning('*');
+
+  // empty-string password means: don't change the password
+  if (password) {
+    query = query.setEqual({password: sha256(password)});
+  }
+
+  query.execute(function(err, rows) {
+    callback(err, err ? null : rows[0]);
+  });
+};
+
 Administrator.authenticate = function(email, password, callback) {
   // callback signature: function(Error | null, token | null)
   // logger.debug('Authenticating where email = %s', email);
@@ -36,15 +59,16 @@ Administrator.authenticate = function(email, password, callback) {
   });
 };
 
-Administrator.fromToken = function(token, callback) {
-  /** Get administrator object from token.
+/** Get administrator object from token.
 
-  callback signature: function(err, user || null)
-  */
+callback signature: function(err, user || null)
+*/
+Administrator.fromToken = function(token, callback) {
+  var self = this;
   if (!token) {
     token = '';
   }
-  db.Select('access_tokens')
+  self.db.Select('access_tokens')
   .where('token = ?', token)
   .where('relation = ?', 'administrators')
   .where('(expires IS NULL OR expires > NOW())')
@@ -52,7 +76,7 @@ Administrator.fromToken = function(token, callback) {
     if (err) return callback(err);
     if (rows.length === 0) return callback(new Error('No access token matched.'));
 
-    db.Select('administrators')
+    self.db.Select('administrators')
     .add('id', 'email')
     .limit(1)
     .where('id = ?', rows[0].foreign_id)
