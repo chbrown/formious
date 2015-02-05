@@ -71,8 +71,16 @@ And, heck, while we're making arbitrary rules, let's say that this export should
 
 ## Deployment
 
+Initial:
+
     docker run -d --name db -p 127.0.0.1:15432:5432 -v /var/docker/db:/var/lib/postgresql/data postgres:9.3
-    docker run -d --name formious --link db:db -p 1451:80 chbrown/formious
+    docker run -d --name formious --link db:db -p 127.0.0.1:1451:80 chbrown/formious
+
+Updating:
+
+    docker pull chbrown/formious && \
+      docker rm -f formious && \
+      docker run -d --name formious --link db:db -p 127.0.0.1:1451:80 chbrown/formious
 
 
 ## License
