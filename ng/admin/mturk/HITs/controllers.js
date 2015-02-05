@@ -38,16 +38,17 @@ app.service('$storedStateParams', function($state, $localStorage, $rootScope) {
   return params;
 });
 
-app.controller('adminMTurkNavCtrl', function($scope, $storedStateParams, AWSAccount) {
+app.controller('admin.mturk', function($scope, $storedStateParams, AWSAccount) {
   $scope.params = $storedStateParams;
 
   $scope.aws_accounts = AWSAccount.query();
   $scope.hosts = [{name: 'deploy'}, {name: 'sandbox'}, {name: 'local'}];
 });
 
-app.controller('adminHITsCtrl', function($scope, $resource, $stateParams, $storedStateParams) {
+app.controller('admin.mturk.hits.table', function($scope, $resource, $stateParams, $storedStateParams) {
   $scope.params = $storedStateParams;
-  var HIT = $resource('/api/mturk/HITs/:HITId', {
+
+  var HIT = $resource('/api/mturk/hits/:HITId', {
     HITId: '@HITId',
     aws_account_id: $scope.params.aws_account_id,
     host: $scope.params.host,
@@ -55,7 +56,7 @@ app.controller('adminHITsCtrl', function($scope, $resource, $stateParams, $store
   $scope.hits = HIT.query();
 });
 
-app.controller('adminHITCtrl', function($scope, $flash, $resource, $storedStateParams) {
+app.controller('admin.mturk.hits.edit', function($scope, $flash, $resource, $storedStateParams) {
   var HIT = $resource('/api/mturk/HITs/:HITId', {
     HITId: '@HITId',
     aws_account_id: $storedStateParams.aws_account_id,
@@ -104,7 +105,7 @@ app.controller('adminHITCtrl', function($scope, $flash, $resource, $storedStateP
 });
 
 
-app.controller('adminCreateHITCtrl', function($scope, $http, $location, $localStorage, $flash, $storedStateParams) {
+app.controller('admin.mturk.hits.new', function($scope, $http, $location, $localStorage, $flash, $storedStateParams) {
   // defaults:
   $scope.$storage = $localStorage.$default({
     hit: {

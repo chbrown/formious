@@ -89,11 +89,11 @@ R.post(/^\/api\/mturk\/GrantBonus/, function(req, res, m) {
         if (err) return res.die(err);
 
         db.Update('participants')
-        .set({
+        .setEqual({
           bonus_owed: participant.bonus_owed - amount,
           bonus_paid: participant.bonus_paid + amount,
         })
-        .where('id = ?', participant.id)
+        .whereEqual({id: participant.id})
         .execute(function(err, rows) {
           if (err) return res.die(err);
 
@@ -104,9 +104,9 @@ R.post(/^\/api\/mturk\/GrantBonus/, function(req, res, m) {
   });
 });
 
-/** GET /api/mturk/HITs
+/** GET /api/mturk/hits
 List all active HITs */
-R.get(/^\/api\/mturk\/HITs(\?|$)/, function(req, res) {
+R.get(/^\/api\/mturk\/hits(\?|$)/, function(req, res) {
   req.turk.SearchHITs({SortDirection: 'Descending', PageSize: 100}, function(err, result) {
     if (err) return res.die(err);
 
@@ -117,7 +117,7 @@ R.get(/^\/api\/mturk\/HITs(\?|$)/, function(req, res) {
   });
 });
 
-/** POST /api/mturk/HITs
+/** POST /api/mturk/hits
 
 POST payload fields:
   Reward: Number (required)
@@ -129,7 +129,7 @@ POST payload fields:
   ... others ...
 
 Create a new HIT */
-R.post(/^\/api\/mturk\/HITs(\?|$)/, function(req, res) {
+R.post(/^\/api\/mturk\/hits(\?|$)/, function(req, res) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
@@ -161,16 +161,16 @@ R.post(/^\/api\/mturk\/HITs(\?|$)/, function(req, res) {
       //     "HITTypeId":"1BBB6B0FE7967122FD0243AEXAMPLE"
       //   }
       // }
-      var url = '/admin/mturk/HITs/' + result.HIT.HITId;
+      var url = '/admin/mturk/hits/' + result.HIT.HITId;
       res.status(201).setHeader('Location', url);
       res.json(result);
     });
   });
 });
 
-/** POST /api/mturk/HITs/:HITId/ExtendHIT
+/** POST /api/mturk/hits/:HITId/ExtendHIT
 Extend a HIT by the specified increment */
-R.post(/^\/api\/mturk\/HITs\/(\w+)\/ExtendHIT(\?|$)/, function(req, res) {
+R.post(/^\/api\/mturk\/hits\/(\w+)\/ExtendHIT(\?|$)/, function(req, res) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
@@ -191,27 +191,27 @@ R.post(/^\/api\/mturk\/HITs\/(\w+)\/ExtendHIT(\?|$)/, function(req, res) {
 
 });
 
-/** GET /api/mturk/HITs/:HITId
+/** GET /api/mturk/hits/:HITId
 Show single HIT. */
-R.get(/^\/api\/mturk\/HITs\/(\w+)(\?|$)/, function(req, res, m) {
+R.get(/^\/api\/mturk\/hits\/(\w+)(\?|$)/, function(req, res, m) {
   req.turk.GetHIT({HITId:  m[1]}, function(err, result) {
     if (err) return res.die(err);
     res.json(result.HIT);
   });
 });
 
-/** GET /api/mturk/HITs/:HITId/BonusPayments
+/** GET /api/mturk/hits/:HITId/BonusPayments
 Show the bonus payments associated with a single HIT. */
-R.get(/^\/api\/mturk\/HITs\/(\w+)\/BonusPayments(\?|$)/, function(req, res, m) {
+R.get(/^\/api\/mturk\/hits\/(\w+)\/BonusPayments(\?|$)/, function(req, res, m) {
   req.turk.GetBonusPayments({HITId: m[1], PageSize: 100}, function(err, result) {
     if (err) return res.die(err);
     res.ngjson(result.GetBonusPaymentsResult.BonusPayment || []);
   });
 });
 
-/** GET /api/mturk/HITs/:HITId/Assignments
+/** GET /api/mturk/hits/:HITId/Assignments
 Show the assignments submitted for a single HIT. */
-R.get(/^\/api\/mturk\/HITs\/(\w+)\/Assignments(\?|$)/, function(req, res, m) {
+R.get(/^\/api\/mturk\/hits\/(\w+)\/Assignments(\?|$)/, function(req, res, m) {
   var hit_params = {HITId: m[1], PageSize: 100};
   var assignments_params = _.extend({
     SortProperty: 'SubmitTime',
@@ -267,7 +267,7 @@ R.get(/^\/api\/mturk\/HITs\/(\w+)\/Assignments(\?|$)/, function(req, res, m) {
               participant: participant,
               answers: answers,
             });
-          })
+          });
         });
       }, function(err, assignments) {
         if (err) return res.die(err);
@@ -277,11 +277,11 @@ R.get(/^\/api\/mturk\/HITs\/(\w+)\/Assignments(\?|$)/, function(req, res, m) {
   });
 });
 
-/** POST /api/mturk/HITs/:HITId/import
+/** POST /api/mturk/hits/:HITId/import
 
 Import the assignment data for this HIT into the local database.
 */
-R.post(/^\/api\/mturk\/HITs\/(\w+)\/import/, function(req, res, m) {
+R.post(/^\/api\/mturk\/hits\/(\w+)\/import/, function(req, res, m) {
   var HITId = m[1];
 
   var hit_params = {

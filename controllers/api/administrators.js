@@ -28,12 +28,14 @@ R.get(/^\/api\/administrators$/, function(req, res, m) {
 });
 
 /** GET /api/administrators/new
+
 Generate blank administrator. */
 R.get(/^\/api\/administrators\/new/, function(req, res, m) {
   res.json({created: new Date()});
 });
 
 /** POST /api/administrators
+
 Create new administrator. */
 R.post(/^\/api\/administrators$/, function(req, res, m) {
   req.readData(function(err, data) {
@@ -50,6 +52,7 @@ R.post(/^\/api\/administrators$/, function(req, res, m) {
 });
 
 /** GET /api/administrators/:id
+
 Show existing administrator. */
 R.get(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
   models.Administrator.one({id: m[1]}, function(err, administrator) {
@@ -60,6 +63,7 @@ R.get(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
 });
 
 /** POST /api/administrators/:id
+
 Update existing administrator. */
 R.post(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
   req.readData(function(err, data) {
@@ -73,8 +77,8 @@ R.post(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
     }
 
     db.Update('administrators')
-    .set(fields)
-    .where('id = ?', m[1])
+    .setEqual(fields)
+    .whereEqual({id: m[1]})
     .execute(function(err, rows) {
       if (err) return res.die(err);
       res.status(204).end(); // 204 No Content
@@ -83,6 +87,7 @@ R.post(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
 });
 
 /** DELETE /api/administrators/:administrator_id
+
 Delete single administrator */
 R.delete(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
   models.Administrator.delete({id: m[1]}, function(err) {
@@ -94,6 +99,7 @@ R.delete(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
 // Administrator-AWS Account many2many relationship
 
 /** GET /api/administrators/:administrator_id/aws_accounts
+
 List administrator-AWS accounts linked to this administrator */
 R.get(/^\/api\/administrators\/(\d+)\/aws_accounts$/, function(req, res, m) {
   db.Select('aws_account_administrators, aws_accounts')
@@ -107,6 +113,7 @@ R.get(/^\/api\/administrators\/(\d+)\/aws_accounts$/, function(req, res, m) {
 });
 
 /** POST /api/administrators/:administrator_id/aws_accounts/:aws_account_id
+
 Create administrator-AWS account link */
 R.post(/^\/api\/administrators\/(\d+)\/aws_accounts\/(\d+)$/, function(req, res, m) {
   req.readData(function(err, data) {
@@ -125,6 +132,7 @@ R.post(/^\/api\/administrators\/(\d+)\/aws_accounts\/(\d+)$/, function(req, res,
 });
 
 /** DELETE /api/administrators/:administrator_id/aws_accounts/:aws_account_id
+
 Delete administrator-AWS account link */
 R.delete(/^\/api\/administrators\/(\d+)\/aws_accounts\/(\d+)$/, function(req, res, m) {
   db.Delete('aws_account_administrators')

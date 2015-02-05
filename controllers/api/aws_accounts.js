@@ -57,8 +57,8 @@ R.post(/^\/api\/aws_accounts\/(\d+)/, function(req, res, m) {
     var fields = _.pick(data, models.AWSAccount.columns);
 
     db.Update('aws_accounts')
-    .set(fields)
-    .where('id = ?', m[1])
+    .setEqual(fields)
+    .whereEqual({id: m[1]})
     .execute(function(err, rows) {
       if (err) return res.die(err);
       res.status(204).end(); // 204 No Content

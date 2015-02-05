@@ -16,7 +16,7 @@
     "jszip": "*",
     "lodash": "*",
     "loge": "*",
-    "moment": "git://github.com/timrwood/moment.git#develop",
+    "moment": "*",
     "regex-router": "*",
     "send": "*",
     "sqlcmd-pg": "~0.2.3",

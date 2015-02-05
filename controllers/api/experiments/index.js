@@ -43,7 +43,7 @@ R.post(/^\/api\/experiments$/, function(req, res, m) {
 Generate blank experiment. */
 R.get(/^\/api\/experiments\/new$/, function(req, res, m) {
   res.json({
-    administrator_id: req.ctx.current_user.id,
+    administrator_id: req.administrator.id,
     html: '',
     parameters: [],
   });
@@ -67,8 +67,8 @@ R.post(/^\/api\/experiments\/(\d+)/, function(req, res, m) {
     var fields = _.pick(data, models.Experiment.columns);
 
     db.Update('experiments')
-    .set(fields)
-    .where('id = ?', m[1])
+    .setEqual(fields)
+    .whereEqual({id: m[1]})
     .execute(function(err, rows) {
       if (err) return res.die(err);
 

@@ -1,6 +1,6 @@
 /*jslint browser: true, devel: true */ /*globals _, angular, app, p, Url, summarizeResponse */
 
-app.controller('adminAWSAccountsCtrl', function($scope, AWSAccount) {
+app.controller('admin.aws_accounts.table', function($scope, AWSAccount) {
   $scope.aws_accounts = AWSAccount.query();
   $scope.delete = function(aws_account) {
     aws_account.$delete(function() {
@@ -9,7 +9,7 @@ app.controller('adminAWSAccountsCtrl', function($scope, AWSAccount) {
   };
 });
 
-app.controller('adminAWSAccountCtrl', function($scope, $http, $flash, $stateParams, AWSAccount) {
+app.controller('admin.aws_accounts.edit', function($scope, $http, $flash, $stateParams, AWSAccount) {
   $scope.hosts = [{name: 'deploy'}, {name: 'sandbox'}];
   $scope.aws_account = AWSAccount.get($stateParams, function() {
     if ($scope.aws_account.id && $scope.aws_account.id != 'new') {
@@ -35,4 +35,6 @@ app.controller('adminAWSAccountCtrl', function($scope, $http, $flash, $statePara
     }, summarizeResponse);
     $flash(promise);
   };
+
+  $scope.$on('save', $scope.sync);
 });

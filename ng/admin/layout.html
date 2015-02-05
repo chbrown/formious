@@ -1,13 +1,13 @@
 <nav fixedflow>
-  <a ui-sref="admin.awsAccountsTable" class="tab">AWS Accounts</a>
-  <a ui-sref="admin.mturk.hitsTable" class="tab">MTurk</a>
-  <a ui-sref="admin.administratorsTable" class="tab">Administrators</a>
-  <a ui-sref="admin.experimentsTable" class="tab">Experiments</a>
-  <a ui-sref="admin.templatesTable" class="tab">Templates</a>
+  <a ui-sref="admin.aws_accounts.table" ui-sref-active="current" class="tab">AWS Accounts</a>
+  <a ui-sref="admin.mturk.hits.table" ui-sref-active="current" class="tab">MTurk</a>
+  <a ui-sref="admin.administrators.table" ui-sref-active="current" class="tab">Administrators</a>
+  <a ui-sref="admin.experiments.table" ui-sref-active="current" class="tab">Experiments</a>
+  <a ui-sref="admin.templates.table" ui-sref-active="current" class="tab">Templates</a>
   <div style="float: right">
-    <a ui-sref="administratorEdit({id: 'me'})" class="tab">me</a>
+    <a ui-sref="admin.administrators.edit({id: 'me'})" ui-sref-active="current" class="tab">me</a>
     <ajaxform method="POST" action="/admin/logout" style="display: inline">
-      <button class="anchor">Logout</button>
+      <button class="anchor tab">Logout</button>
     </ajaxform>
   </div>
 </nav>

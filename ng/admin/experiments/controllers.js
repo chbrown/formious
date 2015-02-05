@@ -1,6 +1,6 @@
 /*jslint browser: true, devel: true */ /*globals _, angular, app, p, Url, summarizeResponse */
 
-app.controller('adminExperimentsCtrl', function($scope, $flash, $state, $location, Experiment, Administrator) {
+app.controller('admin.experiments.table', function($scope, $flash, $state, $location, Experiment, Administrator) {
   $scope.experiments = Experiment.query();
   $scope.administrators = Administrator.query();
 
@@ -24,7 +24,7 @@ app.controller('adminExperimentsCtrl', function($scope, $flash, $state, $locatio
   };
 });
 
-app.controller('adminExperimentCtrl', function($scope, $flash, $http, $state, $localStorage, $q,
+app.controller('admin.experiments.edit', function($scope, $flash, $http, $state, $localStorage, $q,
     Experiment, Template, Administrator, AWSAccount, Stim) {
   $scope.$storage = $localStorage.$default({expand_experiment_html: false});
 
@@ -34,14 +34,6 @@ app.controller('adminExperimentCtrl', function($scope, $flash, $http, $state, $l
   $scope.templates = Template.query();
   $scope.stims = Stim.query({experiment_id: $state.params.id});
 
-  $scope.keydown = function(ev) {
-    if (ev.which == 83 && ev.metaKey) {
-      // command+S
-      ev.preventDefault();
-      $scope.sync(ev);
-    }
-  };
-
   $scope.sync = function() {
     var promise = $scope.experiment.$save(function() {
       $state.go('.', {id: $scope.experiment.id}, {notify: false});
@@ -50,6 +42,9 @@ app.controller('adminExperimentCtrl', function($scope, $flash, $http, $state, $l
     }, summarizeResponse);
     $flash(promise);
   };
+
+  // the 'save' event is broadcast on rootScope when command+S is pressed
+  $scope.$on('save', $scope.sync);
 
   $scope.deleteStim = function(stim) {
     stim.$delete(function() {
@@ -149,4 +144,3 @@ app.controller('adminExperimentCtrl', function($scope, $flash, $http, $state, $l
 
   });
 });
-

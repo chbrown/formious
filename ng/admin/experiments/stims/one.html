@@ -1,4 +1,4 @@
-<div ng-controller="adminStimCtrl">
+<div>
   <main>
     <section class="box">
       <form ng-submit="sync($event)">
@@ -16,7 +16,7 @@
 
         <label>
           <div><b>Context</b></div>
-          <jsonarea ng-model="stim.context" style="width: 600px; height: 200px" ng-keydown="keydown($event)"></jsonarea>
+          <jsonarea ng-model="stim.context" style="width: 600px; height: 200px"></jsonarea>
         </label>
 
         <label>

@@ -10,13 +10,6 @@ var moment = require('moment');
 var logger = require('loge');
 var models = require('../models');
 
-var renderLogin = function(ctx, res) {
-  // helper, since we serve the login page from GET as well as failed login POSTs
-  // ctx may have fields like: email, password, message
-  res.status(401); // HTTP 401 Unauthorized
-  amulet.stream(['layout.mu', 'login.mu'], ctx).pipe(res);
-};
-
 // router & actions for logging in
 var R = new Router(function(req, res) {
   res.status(404).die('No resource at: ' + req.url);
@@ -26,7 +19,9 @@ var R = new Router(function(req, res) {
 show login page for this user */
 R.get(/^\/login\/?$/, function(req, res, m) {
   var urlObj = url.parse(req.url, true);
-  renderLogin(urlObj.query, res);
+  res.status(401); // HTTP 401 Unauthorized
+  // urlObj.query may have fields like: email, password, message
+  amulet.stream(['layout.mu', 'login.mu'], urlObj.query).pipe(res);
 });
 
 /** POST /login
@@ -40,7 +35,9 @@ R.post(/^\/login$/, function(req, res) {
       models.Administrator.authenticate(fields.email, fields.password, function(err, token) {
         if (err) {
           fields.message = err.toString();
-          return renderLogin(fields, res);
+          // we serve the login page from GET as well as failed login POSTs
+          res.status(401);
+          return amulet.stream(['layout.mu', 'login.mu'], fields).pipe(res);
         }
 
         logger.info('Authenticated successfully. Token = %s', token);

@@ -1,6 +1,6 @@
 /*jslint browser: true, devel: true */ /*globals _, angular, app, p, Url, summarizeResponse */
 
-app.controller('adminTemplatesCtrl', function($scope, $flash, Template) {
+app.controller('admin.templates.table', function($scope, $flash, Template) {
   $scope.templates = Template.query();
   $scope.delete = function(template) {
     // is this really the best way?
@@ -12,24 +12,19 @@ app.controller('adminTemplatesCtrl', function($scope, $flash, Template) {
   };
 });
 
-app.controller('adminTemplateCtrl', function($scope, $http, $flash, $stateParams, $state, $location, Template) {
+app.controller('admin.templates.edit', function($scope, $http, $flash, $stateParams, $state, $location, Template) {
   $scope.template = Template.get($stateParams);
-
-  $scope.keydown = function(ev) {
-    if (ev.which == 83 && ev.metaKey) {
-      // command+S
-      ev.preventDefault();
-      $scope.sync(ev);
-    }
-  };
 
   $scope.sync = function(ev) {
     var promise = $scope.template.$save().then(function(res) {
       $state.go('.', {id: $scope.template.id}, {notify: false});
-      return 'Saved';
+      return 'Saved template';
     }, summarizeResponse);
     $flash(promise);
   };
+
+  // the 'save' event is broadcast on rootScope when command+S is pressed
+  $scope.$on('save', $scope.sync);
 
   $scope.clone = function() {
     $state.go('.', {id: 'new'}, {notify: false});
@@ -41,7 +36,6 @@ app.controller('adminTemplateCtrl', function($scope, $http, $flash, $stateParams
 });
 
 // scope = angular.element($('[ng-controller]')).scope()
-
 
 // /** POST /api/templates/:id/clone
 // Create new template with properties of original, and go to it. */

@@ -61,7 +61,7 @@ R.post(/\/api\/experiments\/(\d+)\/stims\/(\d+)$/, function(req, res, m) {
     var fields = _.pick(data, models.Stim.columns);
 
     db.Update('stims')
-    .set(fields)
+    .setEqual(fields)
     .whereEqual({experiment_id: m[1], id: m[2]})
     .execute(function(err, rows) {
       if (err) return res.die(err);

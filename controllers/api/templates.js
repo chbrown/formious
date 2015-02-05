@@ -22,7 +22,7 @@ R.get(/^\/api\/templates$/, function(req, res, m) {
 /** GET /api/templates/new
 Generate blank template. */
 R.get(/^\/api\/templates\/new$/, function(req, res, m) {
-  res.json({html: ''});
+  res.json({html: '', created: new Date()});
 });
 
 /** POST /api/templates
@@ -63,8 +63,8 @@ R.post(/^\/api\/templates\/(\d+)/, function(req, res, m) {
     var fields = _.pick(data, models.Template.columns);
 
     db.Update('templates')
-    .set(fields)
-    .where('id = ?', m[1])
+    .setEqual(fields)
+    .whereEqual({id: m[1]})
     .execute(function(err, rows) {
       if (err) return res.die(err);
       res.status(204).end(); // 204 No Content

@@ -78,7 +78,6 @@ module.exports = function(req, res) {
     else {
       // authentication succeeded!
       req.administrator = administrator;
-      req.ctx = {current_user: administrator};
       R.route(req, res);
     }
   });

@@ -36,7 +36,6 @@ module.exports = function(req, res) {
       // alright, they're in. go wild.
       // attach administrator object to the request payload
       req.administrator = administrator;
-      req.ctx = {current_user: administrator};
       R.route(req, res);
     }
   });

@@ -78,7 +78,7 @@ button.anchor {
 }
 
 body.admin {
-  .background-gray(98%);
+  background-color: #FBFBFB;
   font-size: 80%; // why is the default so big!?
   overflow-y: scroll;
 
@@ -86,23 +86,26 @@ body.admin {
     position: fixed;
     left: 0;
     right: 0;
-    height: 23px;
+
+    padding: 2px;
+    height: 22px;
+    box-sizing: border-box;
+
     z-index: 1000; // only needs to be greater than the nav's z-index
     text-align: center;
     color: white;
     background-color: rgba(0, 0, 0, 66%);
     pointer-events: none; // allows click through to elements underneath
-    img, span {
-      vertical-align: middle;
-    }
   }
 
   nav {
     left: 0;
     right: 0;
 
-    padding: 0 5px;
-    // font-size: 90%;
+    // box-sizing must be border-box to get correct fixedflow-placeholder heights
+    box-sizing: border-box;
+
+    padding: 0 3px;
 
     &[fixedflow] {
       z-index: 100;
@@ -113,43 +116,27 @@ body.admin {
     // but a non-zero z-index here fixes that
     // z-index: 100;
 
-
     // shared
-    span, a, button, img, select {
-      display: inline-block;
-      vertical-align: middle;
-      margin: 3px 0 0 0;
-    }
-    span, a, button.anchor {
+    a, button.anchor {
       padding: 2px 6px;
-      // border-radius: 2px;
+      vertical-align: middle;
     }
-    // a, button.anchor {
-    //   border-radius: 2px 2px 0 0;
-    //   .background-gray(80%);
-    //   &:hover, &.current {
-    //     .background-gray(98%); // same as body.admin background
-    //   }
-    // }
 
-
-    // hierarchical
     &.sub {
-      .background-gray(98%);
-      padding-top: 2px;
-      padding-bottom: 2px;
-
+      // should this be position: fixed too?
+      padding: 3px;
+      background-color: #FBFBFB;
       border-bottom: 1px solid #BBB;
     }
 
     .tab {
       display: inline-block;
-      padding: 2px 6px;
+      // padding: 2px 6px;
       margin: 3px 0 0 0;
       background-color: #BBB;
       border-radius: 2px 2px 0 0;
       &:hover, &.current {
-        background-color: #FEFEFE;
+        background-color: #FBFBFB;
       }
     }
   }
@@ -157,28 +144,27 @@ body.admin {
 
 // semantic sections
 section {
-  margin: 10px 0;
-  // padding: 10px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
   // background-color: white;
   // border: 1px solid #EEE;
   // border-width: 1px 0;
   // overflow-x: auto;
   // width: 100%;
-  // &.padded {
-  //   margin: 5px 0;
-  // }
 }
-main {
-  // main should always extend to the left and right edges of the page
-  margin: 10px 0;
-  // most immediate children of main should be padded
-  & > section, & > form, & > p, & > a, & > h1, & > h2, & > h3, .inset {
-    padding-left: 10px;
-    padding-right: 10px;
-  }
+.vpad {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
-  // only a few things should stretch the whole width,
-  // like sections, and tables
+.hpad {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+// only a few things should stretch the whole width,
+// like sections, and tables
 .box {
   padding-top: 5px;
   padding-bottom: 5px;
@@ -186,6 +172,12 @@ main {
   background-color: white;
   border: 1px solid #EEE;
   border-width: 1px 0;
+}
+
+form .block {
+  display: block;
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 table {
@@ -219,7 +211,7 @@ table.fill {
 }
 table.lined {
   tbody td {
-    border-top: 1px solid #FAFAFA;
+    border-top: 1px solid #EEE;
   }
 }
 table.grid {

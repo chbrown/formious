@@ -1,6 +1,6 @@
 /*jslint browser: true, devel: true */ /*globals _, angular, app, Url, p, summarizeResponse */
 
-app.controller('adminAccessTokensCtrl', function($scope, $flash, AccessToken) {
+app.controller('admin.access_tokens.table', function($scope, $flash, AccessToken) {
   $scope.access_tokens = AccessToken.query();
 
   $scope.delete = function(index) {

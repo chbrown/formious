@@ -1,6 +1,6 @@
 /*jslint browser: true, devel: true */ /*globals _, app, Url, summarizeResponse */
 
-app.controller('adminAdministratorsCtrl', function($scope, $flash, Administrator) {
+app.controller('admin.administrators.table', function($scope, $flash, Administrator) {
   $scope.administrators = Administrator.query();
   $scope.delete = function(administrator) {
     var promise = administrator.$delete().then(function() {
@@ -11,7 +11,7 @@ app.controller('adminAdministratorsCtrl', function($scope, $flash, Administrator
   };
 });
 
-app.controller('adminAdministratorCtrl', function($scope, $http, $flash, $window, $stateParams,
+app.controller('admin.administrators.edit', function($scope, $http, $flash, $window, $stateParams,
     Administrator, AWSAccount, AWSAccountAdministrator) {
   $scope.administrator = Administrator.get($stateParams);
 
@@ -25,6 +25,8 @@ app.controller('adminAdministratorCtrl', function($scope, $http, $flash, $window
     }, summarizeResponse);
     $flash(promise);
   };
+
+  $scope.$on('save', $scope.sync);
 
   $scope.unlinkAWSAccount = function(account) {
     account.$delete(function() {

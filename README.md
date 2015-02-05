@@ -69,6 +69,16 @@ module.exports = function(req, res) {
 And, heck, while we're making arbitrary rules, let's say that this export should go at the bottom.
 
 
+## Deployment
+
+
+docker run –name my_postgres -d -v /var/docker/pwd/volumes/data:/var/lib/postgresql/data postgres
+
+
+    docker run -d --name db -p 127.0.0.1:5432:5432 -v /var/db:/var/lib/postgresql/data postgres:9.3
+    docker run -d --name app --link db:db -p 1451:80 chbrown/typing-evaluation
+
+
 ## License
 
 Copyright 2011–2015 Christopher Brown. [MIT Licensed](http://opensource.org/licenses/MIT).
