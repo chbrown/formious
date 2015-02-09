@@ -1,4 +1,4 @@
-/*jslint browser: true */ /*globals _, app, p, toMap */
+/*jslint browser: true */ /*globals _, app, p */
 
 app.service('AccessToken', function($resource) {
   return $resource('/api/access_tokens/:id', {

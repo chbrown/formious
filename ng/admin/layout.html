@@ -1,11 +1,21 @@
 <nav fixedflow>
-  <a ui-sref="admin.aws_accounts.table" ui-sref-active="current" class="tab">AWS Accounts</a>
-  <a ui-sref="admin.mturk.hits.table" ui-sref-active="current" class="tab">MTurk</a>
-  <a ui-sref="admin.administrators.table" ui-sref-active="current" class="tab">Administrators</a>
-  <a ui-sref="admin.experiments.table" ui-sref-active="current" class="tab">Experiments</a>
-  <a ui-sref="admin.templates.table" ui-sref-active="current" class="tab">Templates</a>
+  <span ui-sref="admin.aws_accounts" ui-sref-active="current" class="tab">
+    <a ui-sref="admin.aws_accounts.table">AWS Accounts</a>
+  </span>
+  <span ui-sref="admin.mturk.hits" ui-sref-active="current" class="tab">
+    <a ui-sref="admin.mturk.hits.table">MTurk</a>
+  </span>
+  <span ui-sref="admin.administrators" ui-sref-active="current" class="tab">
+    <a ui-sref="admin.administrators.table">Administrators</a>
+  </span>
+  <span ui-sref="admin.experiments" ui-sref-active="current" class="tab">
+    <a ui-sref="admin.experiments.table">Experiments</a>
+  </span>
+  <span ui-sref="admin.templates" ui-sref-active="current" class="tab">
+    <a ui-sref="admin.templates.table">Templates</a>
+  </span>
   <div style="float: right">
-    <a ui-sref="admin.administrators.edit({id: 'me'})" ui-sref-active="current" class="tab">me</a>
+    <!-- <a ui-sref="admin.administrators.edit({id: 'me'})" ui-sref-active="current" class="tab">me</a> -->
     <ajaxform method="POST" action="/admin/logout" style="display: inline">
       <button class="anchor tab">Logout</button>
     </ajaxform>

@@ -3,19 +3,30 @@ var _ = require('lodash');
 var async = require('async');
 var logger = require('loge');
 var Router = require('regex-router');
+var moment = require('moment');
 var sv = require('sv');
 var turk = require('turk');
 var util = require('util');
 var url = require('url');
-var xml2js = require('xml2js');
+// var xml2js = require('xml2js');
 
-var lib = require('../../lib');
 var db = require('../../db');
 var models = require('../../models');
 
 var R = new Router(function(req, res) {
   res.status(404).die('No resource at: ' + req.url);
 });
+
+function durationStringToSeconds(s) {
+  // takes a string like "5h" and returns 5*60*60, the number of seconds in five hours
+  var matches = s.match(/\d+\w/g);
+  var duration = moment.duration(0);
+  matches.forEach(function(match) {
+    var parts = match.match(/(\d+)(\w)/);
+    duration.add(parseInt(parts[1], 10), parts[2]);
+  });
+  return duration.asSeconds();
+}
 
 /** POST /api/mturk/GetAccountBalance
 Get the account balance payload for the account & host specified in the querystring */
@@ -140,9 +151,9 @@ R.post(/^\/api\/mturk\/hits(\?|$)/, function(req, res) {
       Reward: new turk.models.Price(parseFloat(data.Reward)),
       Keywords: data.Keywords,
       Question: new turk.models.ExternalQuestion(data.ExternalURL, parseInt(data.FrameHeight, 10)),
-      AssignmentDurationInSeconds: lib.durationStringToSeconds(data.AssignmentDuration || 0),
-      LifetimeInSeconds: lib.durationStringToSeconds(data.Lifetime || 0),
-      AutoApprovalDelayInSeconds: lib.durationStringToSeconds(data.AutoApprovalDelay || 0),
+      AssignmentDurationInSeconds: durationStringToSeconds(data.AssignmentDuration || 0),
+      LifetimeInSeconds: durationStringToSeconds(data.Lifetime || 0),
+      AutoApprovalDelayInSeconds: durationStringToSeconds(data.AutoApprovalDelay || 0),
     };
     var extra = _.omit(data, Object.keys(params));
     _.extend(params, extra);
@@ -179,7 +190,7 @@ R.post(/^\/api\/mturk\/hits\/(\w+)\/ExtendHIT(\?|$)/, function(req, res) {
       params.MaxAssignmentsIncrement = parseInt(data.MaxAssignmentsIncrement, 10);
     }
     if (data.ExpirationIncrement) {
-      params.ExpirationIncrementInSeconds = lib.durationStringToSeconds(data.ExpirationIncrement || 0);
+      params.ExpirationIncrementInSeconds = durationStringToSeconds(data.ExpirationIncrement || 0);
     }
 
     logger.debug('ExtendHIT data: %j', params);

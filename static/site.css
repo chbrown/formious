@@ -18,12 +18,18 @@ button{margin:0}
 button.anchor{border-width:0;text-decoration:underline;cursor:pointer;font-size:100%;padding:0}
 body.admin{background-color:#FBFBFB;font-size:80%;overflow-y:scroll}
 body.admin .flash{position:fixed;left:0;right:0;padding:2px;height:22px;box-sizing:border-box;z-index:1000;text-align:center;color:#fff;background-color:rgba(0,0,0,.66);pointer-events:none}
-body.admin nav{left:0;right:0;box-sizing:border-box;padding:0 3px}
+body.admin nav{left:0;right:0;box-sizing:border-box}
 body.admin nav[fixedflow]{z-index:100;background-color:#333}
-body.admin nav a,body.admin nav button.anchor{padding:2px 6px;vertical-align:middle}
-body.admin nav.sub{padding:3px;background-color:#FBFBFB;border-bottom:1px solid #BBB}
-body.admin nav .tab{display:inline-block;margin:3px 0 0 0;background-color:#BBB;border-radius:2px 2px 0 0}
-body.admin nav .tab.current,body.admin nav .tab:hover{background-color:#FBFBFB}
+body.admin nav.sub{background-color:#FBFBFB;border-bottom:1px solid #BBB}
+body.admin nav.sub .tab{margin-bottom:-1px;background-color:#BBB;border-color:#BBB}
+body.admin nav.sub .tab.current,body.admin nav.sub .tab:hover{border-color:#BBB;background-color:#FBFBFB}
+body.admin nav .control{display:inline-block;padding:2px 6px;margin:1px 0}
+body.admin nav .control:first-child{margin-left:3px}
+body.admin nav .control:last-child{margin-right:3px}
+body.admin nav .tab{display:inline-block;padding:2px 6px;margin:1px 0;padding:1px 5px 2px;margin:3px 0 0 0;border-style:solid;border-radius:3px 3px 0 0;border-width:1px 1px 0 1px;background-color:#BBB;border-color:#BBB}
+body.admin nav .tab:first-child{margin-left:3px}
+body.admin nav .tab:last-child{margin-right:3px}
+body.admin nav .tab.current,body.admin nav .tab:hover{border-color:#FBFBFB;background-color:#FBFBFB}
 section{margin-top:5px;margin-bottom:5px;padding-top:5px;padding-bottom:5px}
 .vpad{padding-top:10px;padding-bottom:10px}
 .hpad{padding-left:10px;padding-right:10px}

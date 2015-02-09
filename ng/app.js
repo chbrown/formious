@@ -1,4 +1,4 @@
-/*jslint browser: true */ /*globals _, angular, Url, p, toMap, time */
+/*jslint browser: true */ /*globals _, angular, Url */
 
 var app = angular.module('app', [
   'ngResource',
@@ -6,6 +6,18 @@ var app = angular.module('app', [
   'ui.router',
   'misc-js/angular-plugins',
 ]);
+
+var summarizeResponse = function(res) {
+  var parts = [];
+  if (res.status != 200) {
+    parts.push('Error ');
+  }
+  parts.push(res.status);
+  if (res.data) {
+    parts.push(': ' + res.data.toString());
+  }
+  return parts.join('');
+};
 
 app.directive('tbodyMap', function() {
   return {
@@ -28,21 +40,6 @@ app.filter('valueWhere', function() {
     }
   };
 });
-
-// app.directive('administrator', function(Administrator) {
-//   return {
-//     restrict: 'E',
-//     template: '<span ng-bind="administrator.email"></span>',
-//     scope: {
-//       id: '=',
-//     },
-//     link: function(scope, el, attrs) {
-//       var administrators = Administrator.query(function() {
-//         scope.administrator = _.findWhere(administrators, {id: scope.id});
-//       });
-//     }
-//   };
-// });
 
 app.service('Cache', function($q, $localStorage) {
   var cache = $localStorage.$default({cache: {}}).cache;
@@ -121,6 +118,79 @@ app.directive('jsonarea', function() {
         }
       };
     }
+  };
+});
+
+/** readBinaryFile(file: File, callback: (error: Error, data?: Uint8Array))
+
+File: a native browser File object, as provided by an input[type="file"]'s
+files[i] property.
+*/
+function readBinaryFile(file, callback) {
+  var reader = new FileReader();
+  reader.onerror = function(error) {
+    callback(error);
+  };
+  reader.onload = function(event) {
+    var data = new Uint8Array(reader.result);
+    // data is an arraybufferview as basic bytes / chars
+    callback(null, data);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+/** parseTabularFile(file: File, callback: (error: Error, table?: object[]))
+
+File: a native browser File object, as provided by an input[type="file"]'s
+files[i] property.
+
+This method will read the file's contents, send it via AJAX to the
+/util/parseTable endpoint to be parsed as an Excel spreadsheet or CSV, as needed.
+*/
+function parseTabularFile(file, callback) {
+  var file_name = file.name;
+  var file_size = file.size;
+  readBinaryFile(file, function(error, data) {
+    if (error) return callback(error);
+
+    // send excel data off to the server to parse
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/util/parse-table');
+    xhr.setRequestHeader('Content-Type', file.type);
+    xhr.setRequestHeader('X-Filename', file.name);
+    xhr.onerror = function(error) {
+      callback(error);
+    };
+    xhr.onload = function(event) {
+      if (xhr.status >= 300) {
+        var error = new Error(xhr.responseText);
+        return callback(error);
+      }
+
+      var body = xhr.responseText;
+      var content_type = xhr.getResponseHeader('content-type');
+      if (content_type.match(/application\/json/)) {
+        body = JSON.parse(body);
+      }
+      callback(null, body);
+    };
+    xhr.send(data);
+  });
+}
+
+/** parseTabularFile(file) => Promise<Error,object[]>
+
+Wrap the non-Angular parseTabularFile function as a injectable that returns
+a promise.
+*/
+app.factory('parseTabularFile', function($q) {
+  return function(file) {
+    return $q(function(resolve, reject) {
+      parseTabularFile(file, function(err, data) {
+        // split out typical async callback into reject/resolve calls:
+        return err ? reject(err) : resolve(data);
+      });
+    });
   };
 });
 

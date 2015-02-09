@@ -219,45 +219,4 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
   });
 });
 
-// TODO: fix segmentation
-//   starting at given index or 0, of the next available segment.
-//   GET /experiments/:experiment_id
-//   ?segment=:segment&index=:index
-// segmentation:
-// if (stimlist.segmented && ctx.segment === undefined) {
-//   // url.format ignores .query if there is also .search, and url.parse gives us both (unfortunately)
-//   var new_urlObj = {pathname: urlObj.pathname, query: urlObj.query};
-
-//   // find next available segment
-//   var segments_available = _.difference(stimlist.segments, stimlist.segments_claimed);
-//   if (segments_available.length === 0) {
-//     // simple warning, in case we're keeping track:
-//     logger.warn('No more unclaimed segments for stimlist, "%s"', stimlist._id);
-//   }
-
-//   // if there are any unclaimed segments, or if this is a MT preview:
-//   if (segments_available.length === 0 || preview_mode) {
-//     var random_index = Math.random()*stimlist.segments.length | 0;
-//     var random_segment = stimlist.segments[random_index];
-//     logger.info('Assigning stimlist randomly: "%s"', random_segment);
-
-//     new_urlObj.query.segment = random_segment;
-//     res.redirect(url.format(new_urlObj));
-//   }
-//   else {
-//     var next_segment = segments_available[0];
-//     stimlist.update({$push: {segments_claimed: next_segment}}, function(err) {
-//       if (err) return res.die('Could not claim segment: ' + err);
-
-//       new_urlObj.query.segment = next_segment;
-//       res.redirect(url.format(new_urlObj));
-//     });
-//   }
-// }
-// if (stimlist.segmented) {
-//   states = states.filter(function(state) {
-//     return state.segment == ctx.segment;
-//   });
-// }
-
 module.exports = R.route.bind(R);

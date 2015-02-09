@@ -101,41 +101,56 @@ body.admin {
   nav {
     left: 0;
     right: 0;
-
     // box-sizing must be border-box to get correct fixedflow-placeholder heights
     box-sizing: border-box;
 
-    padding: 0 3px;
-
     &[fixedflow] {
+      // for some reason elements with opacity < 1.0 float on top of fixed elements,
+      // but a non-zero z-index here fixes that
       z-index: 100;
       background-color: #333;
     }
 
-    // for some reason elements with opacity < 1.0 float to the top,
-    // but a non-zero z-index here fixes that
-    // z-index: 100;
-
-    // shared
-    a, button.anchor {
-      padding: 2px 6px;
-      vertical-align: middle;
-    }
-
     &.sub {
-      // should this be position: fixed too?
-      padding: 3px;
       background-color: #FBFBFB;
       border-bottom: 1px solid #BBB;
+      .tab {
+        margin-bottom: -1px; // hack, sort of
+        background-color: #BBB;
+        border-color: #BBB;
+        // border-bottom: 0;
+        &:hover, &.current {
+          border-color: #BBB;
+          background-color: #FBFBFB;
+        }
+      }
+    }
+
+    .control {
+      display: inline-block;
+      padding: 2px 6px;
+      margin: 1px 0;
+      &:first-child {
+        margin-left: 3px;
+      }
+      &:last-child {
+        margin-right: 3px;
+      }
     }
 
     .tab {
-      display: inline-block;
-      // padding: 2px 6px;
+      // spacing / sizing:
+      .control;
+      padding: 1px 5px 2px;
       margin: 3px 0 0 0;
+      border-style: solid;
+      border-radius: 3px 3px 0 0;
+      border-width: 1px 1px 0 1px;
+      // coloring:
       background-color: #BBB;
-      border-radius: 2px 2px 0 0;
+      border-color: #BBB;
       &:hover, &.current {
+        border-color: #FBFBFB;
         background-color: #FBFBFB;
       }
     }
@@ -148,9 +163,6 @@ section {
   margin-bottom: 5px;
   padding-top: 5px;
   padding-bottom: 5px;
-  // background-color: white;
-  // border: 1px solid #EEE;
-  // border-width: 1px 0;
   // overflow-x: auto;
   // width: 100%;
 }
@@ -170,6 +182,7 @@ section {
   padding-bottom: 5px;
 
   background-color: white;
+  // light gray border on top and bottom only
   border: 1px solid #EEE;
   border-width: 1px 0;
 }

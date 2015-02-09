@@ -25,7 +25,7 @@ app.controller('admin.experiments.table', function($scope, $flash, $state, $loca
 });
 
 app.controller('admin.experiments.edit', function($scope, $flash, $http, $state, $localStorage, $q,
-    Experiment, Template, Administrator, AWSAccount, Stim) {
+    Experiment, Template, Administrator, AWSAccount, Stim, parseTabularFile) {
   $scope.$storage = $localStorage.$default({expand_experiment_html: false});
 
   $scope.experiment = Experiment.get($state.params);
@@ -78,30 +78,21 @@ app.controller('admin.experiments.edit', function($scope, $flash, $http, $state,
   // generate link to hit creation page
   $scope.site_url = Url.parse(window.location).merge({path: '/'}).toString();
 
-  // p('Template--', Template.findOrCreate);
-  // window.Template = Template;
-
-  var addStimData = function(columns, rows) {
-    /**
-      columns: Array[String]
-      rows: Array[Object]
-    */
-    // update the parameters first
-    var parameters = _.difference(columns, 'template');
-    $scope.experiment.parameters = _.union($scope.experiment.parameters, parameters);
-
+  /** addStimData(contexts: any[])
+  */
+  var addStimData = function(contexts) {
     var max_view_order = Math.max.apply(Math, _.pluck($scope.stims, 'view_order'));
     var view_order = Math.max(max_view_order, 0) + 1;
 
     // and then add the stims to the table
-    var stim_promises = rows.map(function(row, i) {
+    var stim_promises = contexts.map(function(context, i) {
       // stim has properties like: context, template_id, view_order
       // handle templates that cannot be found simply by creating new ones
       // compute this outside because the promises are not guaranteed to execute in order
-      return Template.findOrCreate(row.template).then(function(template) {
+      return Template.findOrCreate(context.template).then(function(template) {
         return new Stim({
           experiment_id: $scope.experiment.id,
-          context: row,
+          context: context,
           view_order: view_order + i,
           template_id: template.id,
         }).$save();
@@ -114,13 +105,20 @@ app.controller('admin.experiments.edit', function($scope, $flash, $http, $state,
     });
   };
 
-  // hack: wish angular.js would just wrap onchange events without the model requirement
-  var upload_el = document.querySelector('#upload');
-  angular.element(upload_el).on('change', function(ev) {
-    var input = ev.target;
+  $scope.$watchCollection('stims', function(newVal, oldVal) {
+    // whenever stims change, we may need to update the experiment parameters
+    var parameters_object = {};
+    $scope.stims.forEach(function(stim) {
+      for (var key in stim.context) {
+        parameters_object[key] = 1;
+      }
+    });
+    delete parameters_object.template;
+    var parameters = _.keys(parameters_object);
+    $scope.experiment.parameters = _.union($scope.experiment.parameters, parameters);
+  });
 
-    var file = input.files[0];
-    p('parseUpload:', file);
+  $scope.upload = function(file) {
     // sample file = {
     //   lastModifiedDate: Tue Mar 04 2014 15:57:25 GMT-0600 (CST)
     //   name: "asch-stims.xlsx"
@@ -128,19 +126,12 @@ app.controller('admin.experiments.edit', function($scope, $flash, $http, $state,
     //   type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     //   webkitRelativePath: ""
     // }
-
-    // readTabularFile is defined in local.js
-    readTabularFile(file, function(err, data) {
-      if (err) {
-        $flash(file.name);
-        // $rootScope.$emit('flash', 'Error uploading file: ' + file.name);
-        // return $flash.add();
-      }
-
-      $scope.$apply(function() {
-        addStimData(data.columns, data.rows);
-      });
+    var promise = parseTabularFile(file).then(function(data) {
+      addStimData(data);
+      return 'Added ' + data.length + ' stims.';
+    }, function(err) {
+      return 'Error uploading file "' + file.name + '": ' + err.toString();
     });
-
-  });
+    $flash(promise);
+  };
 });
