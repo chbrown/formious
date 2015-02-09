@@ -12,7 +12,7 @@ var R = new Router(function(req, res) {
 list all of an experiment's stims */
 R.get(/\/api\/experiments\/(\d+)\/stims$/, function(req, res, m) {
   db.Select('stims')
-  .where('experiment_id = ?', m[1])
+  .whereEqual({experiment_id: m[1]})
   .orderBy('view_order')
   .execute(function(err, stims) {
     if (err) return res.die(err);
@@ -27,11 +27,18 @@ R.post(/\/api\/experiments\/(\d+)\/stims$/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, models.Stim.columns);
-    fields.experiment_id = m[1];
-    models.Stim.insert(fields, function(err, stim) {
+    db.Insert('stims')
+    .set({
+      experiment_id: m[1],
+      template_id: data.template_id,
+      context: data.context,
+      view_order: data.view_order,
+    })
+    .returning('*')
+    .execute(function(err, stims) {
       if (err) return res.die(err);
-      res.status(201).json(stim);
+
+      res.status(201).json(stims[0]);
     });
   });
 });
@@ -63,6 +70,7 @@ R.post(/\/api\/experiments\/(\d+)\/stims\/(\d+)$/, function(req, res, m) {
     db.Update('stims')
     .setEqual(fields)
     .whereEqual({experiment_id: m[1], id: m[2]})
+    .returning('*')
     .execute(function(err, rows) {
       if (err) return res.die(err);
       // 204 No content
