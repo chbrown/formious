@@ -41446,7 +41446,7 @@ jslint with 'browser: true' really ought to recognize 'Event' as a global type
 */
 angular.module('misc-js/angular-plugins', [])
 // # Filters
-.filter('trust', function($sce) {
+.filter('trustHtml', function($sce) {
   /** ng-bind-html="something.html | trust" lets us easily trust something as html
 
   Here's how you could  completely disable SCE:
@@ -41458,6 +41458,11 @@ angular.module('misc-js/angular-plugins', [])
   */
   return function(string) {
     return $sce.trustAsHtml(string);
+  };
+})
+.filter('trustResourceUrl', function($sce) {
+  return function(string) {
+    return $sce.trustAsResourceUrl(string);
   };
 })
 // # Directives
@@ -41843,6 +41848,45 @@ angular.module('misc-js/angular-plugins', [])
     replace: true,
     scope: {
       mapObject: '=',
+    }
+  };
+})
+.directive('onUpload', function($parse) {
+  /** AngularJS documentation for the input directive:
+
+  > Note: Not every feature offered is available for all input types.
+  > Specifically, data binding and event handling via ng-model is
+  > unsupported for input[file].
+
+  So we have this little shim to fill in for that.
+
+  Use like:
+
+      <input type="file" on-upload="file = $file">
+
+  Or:
+
+      <input type="file" on-upload="handle($files)" multiple>
+
+  */
+  return {
+    restrict: 'A',
+    compile: function(el, attrs) {
+      var fn = $parse(attrs.onUpload);
+      return function(scope, element, attr) {
+        el.on('change', function(event) {
+          scope.$apply(function() {
+            var context = {$event: event};
+            if (attrs.multiple) {
+              context.$files = event.target.files;
+            }
+            else {
+              context.$file = event.target.files[0];
+            }
+            fn(scope, context);
+          });
+        });
+      };
     }
   };
 })
