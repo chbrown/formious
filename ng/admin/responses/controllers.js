@@ -12,13 +12,3 @@ app.controller('adminResponsesCtrl', function($scope) {
   $scope.context_keys = Object.keys(contexts);
   $scope.value_keys = Object.keys(values);
 });
-
-// app.controller('adminStimsCtrl', function($scope, $q, Stim) {
-//   p('adminStimsCtrl', $scope);
-//   // $scope.syncStim = function(stim, ev) {
-//   //   var ajax_promise = $http(opts).then(function(res) {
-//   //     return 'Saved';
-//   //   }, summarizeResponse);
-//   //   $flash(ajax_promise);
-//   // };
-// });
