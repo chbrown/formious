@@ -12,6 +12,6 @@ R.any(/^\/admin/, require('./admin'));
 R.any(/^\/api/, require('./api'));
 R.any(/^\/login/, require('./login'));
 R.any(/^\/mturk/, require('./mturk'));
+R.any(/^\/util/, require('./util'));
 
 module.exports = R.route.bind(R);
-
