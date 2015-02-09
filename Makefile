@@ -8,7 +8,7 @@ static/lib/%.min.js: | static/lib/%.js
 	ng-annotate -a $| | closure-compiler --language_in ECMASCRIPT5 --warning_level QUIET > $@
 
 SCRIPTS = jquery angular angular-resource angular-ui-router ngStorage \
-	angular-plugins lodash cookies forms textarea url
+	lodash cookies forms textarea url
 # Variable substitution in Make; the following finds all whitespace-separated
 # words in $(VARIABLE), and returns each word with static/ in front of it. The
 # first % sign is like \w+, while the second is like $0, in regex terms.
