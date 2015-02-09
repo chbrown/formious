@@ -27,8 +27,8 @@
     "underscore": "*",
     "util-enhanced": "*",
     "xml2js": "*",
-    "xmldom": "*",
-    "xpath": "*",
+    "xmldom": "0.1.19",
+    "xpath": "0.0.9",
     "yargs": "*"
   },
   "devDependencies": {
