@@ -1,7 +1,4 @@
-/*jslint node: true */
-var _ = require('underscore');
 var url = require('url');
-var querystring = require('querystring');
 var amulet = require('amulet');
 var Router = require('regex-router');
 var Cookies = require('cookies');
@@ -17,7 +14,7 @@ var R = new Router(function(req, res) {
 
 /** GET /login
 show login page for this user */
-R.get(/^\/login\/?$/, function(req, res, m) {
+R.get(/^\/login\/?$/, function(req, res) {
   var urlObj = url.parse(req.url, true);
   res.status(401); // HTTP 401 Unauthorized
   // urlObj.query may have fields like: email, password, message

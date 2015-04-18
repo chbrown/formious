@@ -1,13 +1,6 @@
-/*jslint node: true */
-var logger = require('loge');
 var Router = require('regex-router');
 var Cookies = require('cookies');
-var streaming = require('streaming');
-var sv = require('sv');
-var _ = require('underscore');
 var models = require('../../models');
-
-var excel = require('../../lib/excel');
 
 var R = new Router(function(req, res) {
   res.status(404).die('No resource at: ' + req.url);

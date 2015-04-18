@@ -1,6 +1,4 @@
-/*jslint node: true */
 var models = require('../models');
-var amulet = require('amulet');
 var Router = require('regex-router');
 
 var R = new Router(function(req, res) {
@@ -8,7 +6,7 @@ var R = new Router(function(req, res) {
 });
 
 // POST /mturk/externalSubmit
-R.any(/^\/mturk\/externalSubmit/, function(req, res, m) {
+R.any(/^\/mturk\/externalSubmit/, function(req, res) {
   // readData uses the querystring for GET data
   req.readData(function(err, data) {
     var aws_worker_id = data.workerId || 'WORKER_ID_NOT_AVAILABLE';

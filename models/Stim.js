@@ -1,4 +1,3 @@
-/*jslint node: true */
 var sqlorm = require('sqlorm');
 var db = require('../db');
 

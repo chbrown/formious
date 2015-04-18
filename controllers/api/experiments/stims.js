@@ -1,5 +1,4 @@
-/*jslint node: true */
-var _ = require('underscore');
+var _ = require('lodash');
 var Router = require('regex-router');
 var db = require('../../../db');
 var models = require('../../../models');

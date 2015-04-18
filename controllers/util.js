@@ -1,9 +1,7 @@
-/*jslint node: true */
-var logger = require('loge');
 var Router = require('regex-router');
 var streaming = require('streaming');
 var sv = require('sv');
-var _ = require('underscore');
+var _ = require('lodash');
 
 var excel = require('../lib/excel');
 

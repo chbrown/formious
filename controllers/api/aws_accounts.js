@@ -1,5 +1,4 @@
-/*jslint node: true */
-var _ = require('underscore');
+var _ = require('lodash');
 var Router = require('regex-router');
 var db = require('../../db');
 var models = require('../../models');
@@ -10,7 +9,7 @@ var R = new Router(function(req, res) {
 
 /** GET /api/aws_accounts
 List all AWS accounts. */
-R.get(/^\/api\/aws_accounts$/, function(req, res, m) {
+R.get(/^\/api\/aws_accounts$/, function(req, res) {
   db.Select('aws_accounts')
   .orderBy('id ASC')
   .execute(function(err, aws_accounts) {
@@ -21,13 +20,13 @@ R.get(/^\/api\/aws_accounts$/, function(req, res, m) {
 
 /** GET /api/aws_accounts/new
 Generate blank AWS account. */
-R.get(/^\/api\/aws_accounts\/new$/, function(req, res, m) {
+R.get(/^\/api\/aws_accounts\/new$/, function(req, res) {
   res.json({});
 });
 
 /** POST /api/aws_accounts
 Create new AWS account. */
-R.post(/^\/api\/aws_accounts$/, function(req, res, m) {
+R.post(/^\/api\/aws_accounts$/, function(req, res) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
@@ -59,7 +58,7 @@ R.post(/^\/api\/aws_accounts\/(\d+)/, function(req, res, m) {
     db.Update('aws_accounts')
     .setEqual(fields)
     .whereEqual({id: m[1]})
-    .execute(function(err, rows) {
+    .execute(function(err) {
       if (err) return res.die(err);
       res.status(204).end(); // 204 No Content
     });

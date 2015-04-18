@@ -1,10 +1,6 @@
-/*jslint node: true */
 var sqlorm = require('sqlorm');
 
 var db = require('../db');
-
-var AccessToken = sqlorm.createModel(db, 'access_tokens',
-  ['token', 'relation', 'foreign_id', 'expires', 'redacted', 'created']);
 
 var AWSAccount = sqlorm.createModel(db, 'aws_accounts',
   ['name', 'access_key_id', 'secret_access_key']);

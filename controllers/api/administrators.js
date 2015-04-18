@@ -1,11 +1,6 @@
-/*jslint node: true */
-var _ = require('underscore');
-var async = require('async');
-var sv = require('sv');
-var amulet = require('amulet');
+var _ = require('lodash');
 var Router = require('regex-router');
 
-var logger = require('loge');
 var models = require('../../models');
 var db = require('../../db');
 
@@ -17,7 +12,7 @@ var R = new Router(function(req, res) {
 
 /** GET /api/administrators
 List all administrators. */
-R.get(/^\/api\/administrators$/, function(req, res, m) {
+R.get(/^\/api\/administrators$/, function(req, res) {
   db.Select('administrators')
   .orderBy('created DESC')
   .execute(function(err, administrators) {
@@ -29,14 +24,14 @@ R.get(/^\/api\/administrators$/, function(req, res, m) {
 /** GET /api/administrators/new
 
 Generate blank administrator. */
-R.get(/^\/api\/administrators\/new/, function(req, res, m) {
+R.get(/^\/api\/administrators\/new/, function(req, res) {
   res.json({created: new Date()});
 });
 
 /** POST /api/administrators
 
 Create new administrator. */
-R.post(/^\/api\/administrators$/, function(req, res, m) {
+R.post(/^\/api\/administrators$/, function(req, res) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
@@ -68,7 +63,7 @@ R.post(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
 
     var administrator = new models.Administrator({id: m[1]});
     // update is like db.Update('administrators') but hashes the password if it is not ''
-    administrator.update(data.email, data.password, function(err, administrator) {
+    administrator.update(data.email, data.password, function(err) {
       if (err) return res.die(err);
       res.status(204).end(); // 204 No Content
     });

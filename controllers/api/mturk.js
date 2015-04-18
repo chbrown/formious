@@ -1,14 +1,11 @@
-/*jslint node: true */
 var _ = require('lodash');
 var async = require('async');
 var logger = require('loge');
 var Router = require('regex-router');
 var moment = require('moment');
-var sv = require('sv');
 var turk = require('turk');
 var util = require('util');
 var url = require('url');
-// var xml2js = require('xml2js');
 
 var db = require('../../db');
 var models = require('../../models');

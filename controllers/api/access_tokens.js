@@ -1,9 +1,7 @@
-/*jslint node: true */
-var _ = require('underscore');
+var _ = require('lodash');
 var db = require('../../db');
 var models = require('../../models');
 var Router = require('regex-router');
-var url = require('url');
 
 var R = new Router(function(req, res) {
   res.status(404).die('No resource at: ' + req.url);
@@ -11,7 +9,7 @@ var R = new Router(function(req, res) {
 
 /** GET /api/access_tokens
 List all access tokens. */
-R.get(/^\/api\/access_tokens$/, function(req, res, m) {
+R.get(/^\/api\/access_tokens$/, function(req, res) {
   db.Select('access_tokens')
   .orderBy('id ASC')
   .execute(function(err, access_tokens) {
@@ -22,13 +20,13 @@ R.get(/^\/api\/access_tokens$/, function(req, res, m) {
 
 /** GET /api/access_tokens/new
 Generate blank access token. */
-R.get(/^\/api\/access_tokens\/new$/, function(req, res, m) {
+R.get(/^\/api\/access_tokens\/new$/, function(req, res) {
   res.json({});
 });
 
 /** POST /api/access_tokens
 Create new access token. */
-R.post(/^\/api\/access_tokens$/, function(req, res, m) {
+R.post(/^\/api\/access_tokens$/, function(req, res) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
@@ -84,7 +82,7 @@ Example data:
   length: 10
 
 Generate or find existing access token, and return it. */
-R.post(/^\/api\/access_tokens\/generate(\?|$)/, function(req, res, m) {
+R.post(/^\/api\/access_tokens\/generate(\?|$)/, function(req, res) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 

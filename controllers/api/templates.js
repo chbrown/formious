@@ -1,5 +1,4 @@
-/*jslint node: true */
-var _ = require('underscore');
+var _ = require('lodash');
 var Router = require('regex-router');
 var db = require('../../db');
 var models = require('../../models');
@@ -10,7 +9,7 @@ var R = new Router(function(req, res) {
 
 /** GET /api/templates
 List all templates. */
-R.get(/^\/api\/templates$/, function(req, res, m) {
+R.get(/^\/api\/templates$/, function(req, res) {
   db.Select('templates')
   .orderBy('id ASC')
   .execute(function(err, templates) {
@@ -21,13 +20,13 @@ R.get(/^\/api\/templates$/, function(req, res, m) {
 
 /** GET /api/templates/new
 Generate blank template. */
-R.get(/^\/api\/templates\/new$/, function(req, res, m) {
+R.get(/^\/api\/templates\/new$/, function(req, res) {
   res.json({html: '', created: new Date()});
 });
 
 /** POST /api/templates
 Create new template. */
-R.post(/^\/api\/templates$/, function(req, res, m) {
+R.post(/^\/api\/templates$/, function(req, res) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 

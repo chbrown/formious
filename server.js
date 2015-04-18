@@ -1,11 +1,10 @@
-/*jslint node: true */
 var path = require('path');
 var send = require('send');
 var http = require('http-enhanced');
 var logger = require('loge');
 
 // amulet.set(), as opposed amulet.create(), will set the defaults on the module singleton
-var amulet = require('amulet').set({
+require('amulet').set({
   root: path.join(__dirname, 'templates'),
   // minify: true,
   open: '<%',

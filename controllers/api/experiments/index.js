@@ -1,5 +1,4 @@
-/*jslint node: true */
-var _ = require('underscore');
+var _ = require('lodash');
 var Router = require('regex-router');
 var db = require('../../../db');
 var models = require('../../../models');
@@ -12,7 +11,7 @@ R.any(/^\/api\/experiments\/(\d+)\/stims/, require('./stims'));
 
 /** GET /api/experiments
 list all experiments */
-R.get(/^\/api\/experiments$/, function(req, res, m) {
+R.get(/^\/api\/experiments$/, function(req, res) {
   db.Select([
     'experiments',
     'LEFT OUTER JOIN (SELECT experiment_id, COUNT(responses.id) FROM responses JOIN stims ON stims.id = responses.stim_id GROUP BY experiment_id) AS responses ON responses.experiment_id = experiments.id',
@@ -27,7 +26,7 @@ R.get(/^\/api\/experiments$/, function(req, res, m) {
 
 /** POST /api/experiments
 Create new experiment. */
-R.post(/^\/api\/experiments$/, function(req, res, m) {
+R.post(/^\/api\/experiments$/, function(req, res) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
@@ -41,7 +40,7 @@ R.post(/^\/api\/experiments$/, function(req, res, m) {
 
 /** GET /api/experiments/new
 Generate blank experiment. */
-R.get(/^\/api\/experiments\/new$/, function(req, res, m) {
+R.get(/^\/api\/experiments\/new$/, function(req, res) {
   res.json({
     administrator_id: req.administrator.id,
     html: '',

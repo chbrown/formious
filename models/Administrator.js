@@ -1,4 +1,3 @@
-/*jslint node: true */
 var crypto = require('crypto');
 var sqlorm = require('sqlorm');
 var db = require('../db');
