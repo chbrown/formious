@@ -55,7 +55,7 @@ CREATE TABLE experiments (
 
   name TEXT,
   -- slug TEXT,
-  administrator_id INTEGER REFERENCES administrators(id), -- owner
+  administrator_id INTEGER REFERENCES administrators(id) ON DELETE CASCADE NOT NULL , -- owner
   html TEXT, -- to be included on every page, at the top of the <body>
 
   -- `parameters` should match the keys of each stim's `context` object, or most of them
@@ -70,8 +70,8 @@ CREATE TABLE experiments (
 CREATE TABLE stims (
   id SERIAL PRIMARY KEY,
 
-  experiment_id INTEGER REFERENCES experiments(id),
-  template_id INTEGER REFERENCES templates(id),
+  experiment_id INTEGER REFERENCES experiments(id) ON DELETE CASCADE NOT NULL,
+  template_id INTEGER REFERENCES templates(id) ON DELETE CASCADE NOT NULL,
   context JSON,
   view_order INTEGER,
 
@@ -85,8 +85,8 @@ CREATE TABLE responses (
   id SERIAL PRIMARY KEY,
 
   -- there may be multiple respones per stim, so we don't set a unique on (participant_id, stim_id)
-  participant_id INTEGER REFERENCES participants(id) NOT NULL,
-  stim_id INTEGER REFERENCES stims(id),
+  participant_id INTEGER REFERENCES participants(id) ON DELETE CASCADE NOT NULL,
+  stim_id INTEGER REFERENCES stims(id) ON DELETE CASCADE NOT NULL,
   value JSON,
 
   -- having an optional assignment_id allows merging the data on mturk into the local database,
@@ -122,8 +122,8 @@ CREATE TABLE aws_accounts (
 CREATE TABLE aws_account_administrators (
   id SERIAL PRIMARY KEY,
 
-  aws_account_id INTEGER REFERENCES aws_accounts(id) NOT NULL,
-  administrator_id INTEGER REFERENCES administrators(id) NOT NULL,
+  aws_account_id INTEGER REFERENCES aws_accounts(id) ON DELETE CASCADE NOT NULL,
+  administrator_id INTEGER REFERENCES administrators(id) ON DELETE CASCADE NOT NULL,
   priority INTEGER,
   -- role ...
 
