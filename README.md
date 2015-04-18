@@ -5,9 +5,6 @@ Formious is a [node.js](http://nodejs.org/) experiment server. It fills a niche 
 In particular, it was originally built to interface with [Amazon Mechanical Turk](https://requester.mturk.com/). In addition to serving as the backend for External Questions, it also provides an alternate interface to parts of the AWS MT interface available via the [API](http://aws.amazon.com/mturk/).
 
 
-http://enron.me/
-
-
 ## Installation
 
     git clone https://github.com/chbrown/formious.git
