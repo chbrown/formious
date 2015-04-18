@@ -5,17 +5,17 @@ var yargs = require('yargs')
   .describe({
     hostname: 'hostname to listen on',
     port: 'port to listen on',
-
     help: 'print this help message',
     verbose: 'print extra output',
     version: 'print version',
   })
+  .example("node_restarter 'bin/formious --port 1451 -v'")
   .boolean(['help', 'verbose', 'version'])
   .alias({verbose: 'v'})
   .default({
     hostname: process.env.HOSTNAME || '127.0.0.1',
     port: parseInt(process.env.PORT) || 80,
-    verbose: process.env.DEBUG,
+    verbose: process.env.DEBUG !== undefined,
   });
 
 var argv = yargs.argv;
