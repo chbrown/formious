@@ -49,8 +49,3 @@ var server = module.exports = http.createServer(function(req, res) {
   var address = server.address();
   logger.info('server listening on http://%s:%d', address.address, address.port);
 });
-
-if (require.main === module) {
-  server.listen(parseInt(process.env.PORT) || 80, process.env.HOSTNAME);
-  logger.level = process.env.DEBUG ? 'debug' : 'info';
-}
