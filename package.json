@@ -11,7 +11,8 @@
     "formious": "bin/formious"
   },
   "scripts": {
-    "start": "node bin/formious"
+    "start": "node bin/formious",
+    "test": "mocha --recursive test"
   },
   "dependencies": {
     "amulet": "*",
@@ -30,7 +31,6 @@
     "streaming": "*",
     "sv": "*",
     "turk": "0.5.2",
-    "underscore": "*",
     "util-enhanced": "*",
     "xml2js": "*",
     "xmldom": "0.1.19",
@@ -46,10 +46,9 @@
     "angular-ui-router": "*",
     "jquery": "*",
     "jquery-tablesorter": "*",
-    "lo-dash": "*",
+    "lodash": "*",
     "misc-js": "git://github.com/chbrown/misc-js.git",
     "moment": "*",
-    "ng-storage": "*",
-    "underscore": "*"
+    "ng-storage": "*"
   }
 }
