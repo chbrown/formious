@@ -9,7 +9,7 @@ fieldset{margin:0 10px 10px 0;border:1px solid #CCC}
 .nowrap{white-space:nowrap}
 time{white-space:nowrap}
 .code{font:9pt monospace}
-.shadow{box-shadow:0 0 5px rgba(0,0,0,.05)}
+.shadow{box-shadow:0 0 5px rgba(0,0,0,.1)}
 .help{cursor:pointer}
 .ng-invalid{box-shadow:0 0 10px #c80000}
 .unlimited{max-height:none!important;max-width:none!important}

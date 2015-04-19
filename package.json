@@ -15,7 +15,6 @@
     "test": "mocha --recursive test"
   },
   "dependencies": {
-    "amulet": "*",
     "async": "*",
     "cookies": "git://github.com/chbrown/cookies.git",
     "handlebars": "*",
@@ -40,15 +39,30 @@
   "devDependencies": {
     "mocha": "*"
   },
-  "staticPattern": "static/lib/{file}",
+  "staticPattern": "ui/lib/{file}",
   "staticDependencies": {
-    "angular": "*",
+    "angular": {
+      "filter": [
+        "angular.js",
+        "angular.min.js",
+        "angular-resource.js",
+        "angular-resource.min.js"
+      ]
+    },
     "angular-ui-router": "*",
     "jquery": "*",
-    "jquery-tablesorter": "*",
     "lodash": "*",
-    "misc-js": "git://github.com/chbrown/misc-js.git",
-    "moment": "*",
+    "misc-js": {
+      "url": "git://github.com/chbrown/misc-js.git",
+      "filter": [
+        "angular-plugins.js",
+        "checkbox-sequence.js",
+        "cookies.js",
+        "forms.js",
+        "textarea.js",
+        "url.js"
+      ]
+    },
     "ng-storage": "*"
   }
 }

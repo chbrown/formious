@@ -23,7 +23,7 @@ R.any(/^\/mturk\/externalSubmit/, function(req, res) {
     }, {
       stim_id: stim_id,
       value: data,
-    }, function(err, responses) {
+    }, function(err) {
       if (err) return res.die(err);
 
       res.text('Your responses have been submitted and saved.');

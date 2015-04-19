@@ -1,5 +1,6 @@
 var _ = require('lodash');
-var amulet = require('amulet');
+var fs = require('fs');
+var path = require('path');
 var async = require('async');
 var handlebars = require('handlebars');
 var logger = require('loge');
@@ -10,6 +11,21 @@ var url = require('url');
 var db = require('../db');
 var flat = require('../lib/flat');
 var models = require('../models');
+
+var _cached_stim_template; // a Handlebars template function
+function getStimTemplate(callback) {
+  if (_cached_stim_template) {
+    callback(null, _cached_stim_template);
+  }
+  else {
+    var stim_template_filepath = path.join(__dirname, '..', 'ui', 'stim.html');
+    fs.readFile(stim_template_filepath, {encoding: 'utf8'}, function(err, stim_template) {
+      if (err) return callback(err);
+      _cached_stim_template = handlebars.compile(stim_template);
+      callback(null, _cached_stim_template);
+    });
+  }
+}
 
 var R = new Router(function(req, res) {
   res.status(404).die('No resource at: ' + req.url);
@@ -87,13 +103,17 @@ R.get(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
     catch (exc) {
       logger.error('Error compiling template markup', exc);
     }
-    var ctx = {
-      context: context,
-      header: results.experiment.html,
-      html: rendered_html,
-    };
 
-    amulet.stream(['experiments/stim.mu'], ctx).pipe(res);
+    getStimTemplate(function(err, stim_template) {
+      if (err) return res.die(err);
+
+      var stim_html = stim_template({
+        context: JSON.stringify(context).replace(/<\//g, '<\\/'),
+        header: results.experiment.html,
+        html: rendered_html,
+      });
+      res.html(stim_html);
+    });
   });
 });
 
@@ -133,8 +153,6 @@ R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
           res.end();
         }
         else {
-          // ['admin/layout.mu', 'admin/experiments/stims/all.mu'];
-          // res.json({message: 'Inserted response.'});
           res.redirect(redirect_to);
         }
       });
@@ -212,7 +230,6 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
         stringifier.write(row);
       });
       stringifier.end();
-      // amulet.stream(['responses/all.mu'], results).pipe(res);
     });
   });
 });
