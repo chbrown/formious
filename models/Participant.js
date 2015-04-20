@@ -1,4 +1,4 @@
-var sqlorm = require('sqlorm');
+var sqlorm = require('./sqlorm');
 var db = require('../db');
 
 var Participant = sqlorm.createModel(db, 'participants',
@@ -23,16 +23,15 @@ Participant.addResponse = function(participant, response, callback) {
       if (err.message && !err.message.match(/Could not find match/)) {
         return callback(err);
       }
-      db.Insert('participants')
-      .set(participant)
-      .execute(function(err, rows) {
-        response.participant_id = rows[0].id;
-        db.Insert('responses').set(response).execute(callback);
+
+      Participant.insert(participant, function(err, participant) {
+        response.participant_id = participant.id;
+        db.Insert('responses').set(response).returning('*').execute(callback);
       });
     }
     else {
       response.participant_id = existing_participant.id;
-      db.Insert('responses').set(response).execute(callback);
+      db.Insert('responses').set(response).returning('*').execute(callback);
     }
   });
 };

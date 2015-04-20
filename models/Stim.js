@@ -1,4 +1,4 @@
-var sqlorm = require('sqlorm');
+var sqlorm = require('./sqlorm');
 var db = require('../db');
 
 var Stim = exports.Stim = sqlorm.createModel(db, 'stims',

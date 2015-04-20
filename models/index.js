@@ -1,5 +1,4 @@
-var sqlorm = require('sqlorm');
-
+var sqlorm = require('./sqlorm');
 var db = require('../db');
 
 var AWSAccount = sqlorm.createModel(db, 'aws_accounts',

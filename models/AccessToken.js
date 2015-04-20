@@ -1,6 +1,7 @@
-var sqlorm = require('sqlorm');
-var util = require('util-enhanced');
+var sqlorm = require('./sqlorm');
 var db = require('../db');
+
+var util = require('util-enhanced');
 
 function randomString(length) {
   var store = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';

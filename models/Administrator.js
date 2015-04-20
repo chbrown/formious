@@ -1,6 +1,7 @@
-var crypto = require('crypto');
-var sqlorm = require('sqlorm');
+var sqlorm = require('./sqlorm');
 var db = require('../db');
+
+var crypto = require('crypto');
 
 var AccessToken = require('./AccessToken');
 
