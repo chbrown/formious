@@ -42,7 +42,7 @@ app.controller('admin.mturk', function($scope, $storedStateParams, AWSAccount) {
   $scope.params = $storedStateParams;
 
   $scope.aws_accounts = AWSAccount.query();
-  $scope.hosts = [{name: 'deploy'}, {name: 'sandbox'}, {name: 'local'}];
+  $scope.environments = [{name: 'production'}, {name: 'sandbox'}, {name: 'local'}];
 });
 
 app.controller('admin.mturk.hits.table', function($scope, $resource, $stateParams, $storedStateParams) {
@@ -51,7 +51,7 @@ app.controller('admin.mturk.hits.table', function($scope, $resource, $stateParam
   var HIT = $resource('/api/mturk/hits/:HITId', {
     HITId: '@HITId',
     aws_account_id: $scope.params.aws_account_id,
-    host: $scope.params.host,
+    environment: $scope.params.environment,
   });
   $scope.hits = HIT.query();
 });
@@ -60,7 +60,7 @@ app.controller('admin.mturk.hits.edit', function($scope, $flash, $resource, $sto
   var HIT = $resource('/api/mturk/HITs/:HITId', {
     HITId: '@HITId',
     aws_account_id: $storedStateParams.aws_account_id,
-    host: $storedStateParams.host,
+    environment: $storedStateParams.environment,
   }, {
     bonus_payments: {
       method: 'GET',
@@ -87,16 +87,15 @@ app.controller('admin.mturk.hits.edit', function($scope, $flash, $resource, $sto
   $scope.bonus_payments = HIT.bonus_payments({HITId: HITId});
   $scope.assignments = HIT.assignments({HITId: HITId});
 
-  $scope.ExtendHIT = function(ev) {
+  $scope.ExtendHIT = function() {
     var data = _.extend({HITId: HITId}, $scope.extension);
-    // console.log('ExtendHIT data', data, $scope.hit);
-    var promise = HIT.ExtendHIT(data).$promise.then(function(res) {
+    var promise = HIT.ExtendHIT(data).$promise.then(function() {
       return 'Extended';
     }, summarizeResponse);
     $flash(promise);
   };
 
-  $scope.import = function(ev) {
+  $scope.import = function() {
     var promise = HIT.import({HITId: HITId}).$promise.then(function(res) {
       return res.message || 'Imported';
     }, summarizeResponse);
@@ -105,7 +104,7 @@ app.controller('admin.mturk.hits.edit', function($scope, $flash, $resource, $sto
 });
 
 
-app.controller('admin.mturk.hits.new', function($scope, $http, $location, $localStorage, $flash, $storedStateParams) {
+app.controller('admin.mturk.hits.new', function($scope, $http, $state, $location, $localStorage, $flash, $storedStateParams) {
   // defaults:
   $scope.$storage = $localStorage.$default({
     hit: {
@@ -125,18 +124,16 @@ app.controller('admin.mturk.hits.new', function($scope, $http, $location, $local
 
   // experiment/show may send over ExternalURL and Title query params
   // fixme: the way we grab the variables off here before the state redirects is kind of a hack
-  var query = $location.search();
-  _.extend($scope.$storage.hit, _.omit(query, 'aws_account_id', 'host'));
+  _.extend($scope.$storage.hit, _.omit($state.params, 'aws_account_id', 'environment'));
 
-  $scope.sync = function(ev) {
+  $scope.sync = function() {
     var data = _.extend({}, $scope.$storage.hit, $scope.$storage.extra);
-    // console.log('sync data', data);
     var promise = $http({
       method: 'POST',
       url: '/api/mturk/HITs',
       params: {
         aws_account_id: $storedStateParams.aws_account_id,
-        host: $storedStateParams.host,
+        environment: $storedStateParams.environment,
       },
       data: data,
     }).then(function(res) {
@@ -156,7 +153,7 @@ app.controller('admin.mturk.hits.new', function($scope, $http, $location, $local
 
   // AWS adds four parameters: assignmentId, hitId, workerId, and turkSubmitTo
   //   turkSubmitTo is the host, not the full path
-  $scope.$watch('$storage.hit.ExternalURL', function(newVal, oldVal) {
+  $scope.$watch('$storage.hit.ExternalURL', function(newVal) {
     if (newVal !== '') {
       var url = Url.parse(newVal);
       _.extend(url.query, {
@@ -180,7 +177,7 @@ app.controller('adminAssignmentEditor', function($scope, $resource, $storedState
   var Assignment = $resource('/api/mturk/Assignments/:AssignmentId', {
     AssignmentId: '@AssignmentId',
     aws_account_id: $storedStateParams.aws_account_id,
-    host: $storedStateParams.host,
+    environment: $storedStateParams.environment,
   }, {
     Approve: {
       method: 'POST',
@@ -197,21 +194,21 @@ app.controller('adminAssignmentEditor', function($scope, $resource, $storedState
   });
 
   $scope.approve = function(assignment_id) {
-    var promise = Assignment.Approve({AssignmentId: assignment_id}).$promise.then(function(res) {
+    var promise = Assignment.Approve({AssignmentId: assignment_id}).$promise.then(function() {
       return 'Approved';
     }, summarizeResponse);
     $flash(promise);
   };
 
   $scope.reject = function(assignment_id) {
-    var promise = Assignment.Reject({AssignmentId: assignment_id}).$promise.then(function(res) {
+    var promise = Assignment.Reject({AssignmentId: assignment_id}).$promise.then(function() {
       return 'Rejected';
     }, summarizeResponse);
     $flash(promise);
   };
 
   $scope.approve_rejected = function(assignment_id) {
-    var promise = Assignment.ApproveRejected({AssignmentId: assignment_id}).$promise.then(function(res) {
+    var promise = Assignment.ApproveRejected({AssignmentId: assignment_id}).$promise.then(function() {
       return 'Rejected';
     }, summarizeResponse);
     $flash(promise);

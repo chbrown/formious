@@ -1,5 +1,9 @@
 #!/usr/bin/env node
+var path = require('path');
 var logger = require('loge');
+
+var db = require('../db');
+var server = require('../server');
 
 var yargs = require('yargs')
   .describe({
@@ -25,9 +29,17 @@ if (argv.help) {
   yargs.showHelp();
 }
 else if (argv.version) {
-  console.log(require('./package').version);
+  console.log(require('../package').version);
 }
 else {
-  var server = require('../server');
-  server.listen(argv.port, argv.hostname);
+  db.createDatabaseIfNotExists(function(err) {
+    if (err) throw err;
+
+    var migrations_dirpath = path.join(__dirname, '..', 'migrations');
+    db.executePatches('_migrations', migrations_dirpath, function(err) {
+      if (err) throw err;
+
+      server.listen(argv.port, argv.hostname);
+    });
+  });
 }

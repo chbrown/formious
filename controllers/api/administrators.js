@@ -62,7 +62,7 @@ R.post(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
     if (err) return res.die(err);
 
     var administrator = new models.Administrator({id: m[1]});
-    // update is like db.Update('administrators') but hashes the password if it is not ''
+    // Administrator#update is like db.Update('administrators') but hashes the password if it is not ''
     administrator.update(data.email, data.password, function(err) {
       if (err) return res.die(err);
       res.status(204).end(); // 204 No Content

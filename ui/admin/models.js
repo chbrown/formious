@@ -25,7 +25,6 @@ app.service('Administrator', function($resource) {
 
 app.service('AWSAccount', function($resource) {
   // map: {'id': 'name'}
-  // this.hosts = [{name: 'deploy'}, {name: 'sandbox'}];
   return $resource('/api/aws_accounts/:id', {
     id: '@id',
   });

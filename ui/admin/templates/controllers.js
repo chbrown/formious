@@ -1,4 +1,4 @@
-/*jslint browser: true, devel: true */ /*globals _, angular, app, p, Url, summarizeResponse */
+/*jslint browser: true, devel: true */ /*globals app, summarizeResponse */
 
 app.controller('admin.templates.table', function($scope, $flash, Template) {
   $scope.templates = Template.query();
@@ -15,8 +15,8 @@ app.controller('admin.templates.table', function($scope, $flash, Template) {
 app.controller('admin.templates.edit', function($scope, $http, $flash, $stateParams, $state, $location, Template) {
   $scope.template = Template.get($stateParams);
 
-  $scope.sync = function(ev) {
-    var promise = $scope.template.$save().then(function(res) {
+  $scope.sync = function() {
+    var promise = $scope.template.$save().then(function() {
       $state.go('.', {id: $scope.template.id}, {notify: false});
       return 'Saved template';
     }, summarizeResponse);
@@ -34,25 +34,3 @@ app.controller('admin.templates.edit', function($scope, $http, $flash, $statePar
     });
   };
 });
-
-// scope = angular.element($('[ng-controller]')).scope()
-
-// /** POST /api/templates/:id/clone
-// Create new template with properties of original, and go to it. */
-// R.post(/^\/api\/templates\/(\d+)\/clone$/, function(req, res, m) {
-//   models.Template.one({id: m[1]}, function(err, template) {
-//     if (err) return res.die(err);
-
-//     db.Insert('templates')
-//     .set({
-//       name: template.name + ' copy',
-//       html: template.html,
-//     })
-//     .execute(function(err, rows) {
-//       if (err) return res.die(err);
-
-//       // redirect so that we aren't sitting with the previous template's id in the url
-//       res.redirect('/admin/templates/' + rows[0].id);
-//     });
-//   });
-// });

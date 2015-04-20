@@ -1,12 +1,12 @@
 <nav class="sub">
   <!-- ng-options must use toString() since params.aws_account_id will always be a string -->
-  <select ng-model="params.aws_account_id"
+  <select class="control" ng-model="params.aws_account_id"
     ng-options="aws_account.id.toString() as aws_account.name for aws_account in aws_accounts">
     <option value="">-- AWS Account --</option>
   </select>
-  <select ng-model="params.host"
-    ng-options="host.name as host.name for host in hosts">
-    <option value="">-- Host --</option>
+  <select class="control" ng-model="params.environment"
+    ng-options="environment.name as environment.name for environment in environments">
+    <option value="">-- Environment --</option>
   </select>
 
   <span style="float: right">

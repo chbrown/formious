@@ -55,10 +55,7 @@ R.post(/^\/api\/access_tokens\/(\d+)/, function(req, res, m) {
 
     var fields = _.pick(data, models.AccessToken.columns);
 
-    db.Update('access_tokens')
-    .setEqual(fields)
-    .whereEqual({id: m[1]})
-    .execute(function(err, rows) {
+    models.AccessToken.update(fields, {id: m[1]}, function(err) {
       if (err) return res.die(err);
       res.status(204).end(); // 204 No Content
     });

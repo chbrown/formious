@@ -26,18 +26,15 @@ R.post(/\/api\/experiments\/(\d+)\/stims$/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    db.Insert('stims')
-    .set({
+    models.Stim.insert({
       experiment_id: m[1],
       template_id: data.template_id,
       context: data.context,
       view_order: data.view_order,
-    })
-    .returning('*')
-    .execute(function(err, stims) {
+    }, function(err, stim) {
       if (err) return res.die(err);
 
-      res.status(201).json(stims[0]);
+      res.status(201).json(stim);
     });
   });
 });
@@ -65,12 +62,7 @@ R.post(/\/api\/experiments\/(\d+)\/stims\/(\d+)$/, function(req, res, m) {
     if (err) return res.die(err);
 
     var fields = _.pick(data, models.Stim.columns);
-
-    db.Update('stims')
-    .setEqual(fields)
-    .whereEqual({experiment_id: m[1], id: m[2]})
-    .returning('*')
-    .execute(function(err, rows) {
+    models.Stim.update(fields, {experiment_id: m[1], id: m[2]}, function(err) {
       if (err) return res.die(err);
       // 204 No content
       res.status(204).end();
@@ -81,12 +73,9 @@ R.post(/\/api\/experiments\/(\d+)\/stims\/(\d+)$/, function(req, res, m) {
 /** DELETE /api/experiments/:experiment_id/stims/:stim_id
 Delete stim */
 R.delete(/\/api\/experiments\/(\d+)\/stims\/(\d+)$/, function(req, res, m) {
-  // will fail if this stim has any responses
-  var stim_id = m[1];
   models.Stim.delete({experiment_id: m[1], id: m[2]}, function(err) {
     if (err) return res.die(err);
-    // 204 No content
-    res.status(204).end();
+    res.status(204).end(); // 204 No content
   });
 });
 

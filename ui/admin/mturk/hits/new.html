@@ -109,7 +109,10 @@
   </h3>
 </section>
 
-<section class="box" ng-if="$storage.preview_iframe && preview_url">
-  <iframe src="{{preview_url}}"
-    scrolling="auto" width="100%" frameborder="0" align="center" height="{{$storage.hit.FrameHeight}}"></iframe>
-</section>
+<div ng-if="$storage.preview_iframe && preview_url">
+  <pre class="hpad">{{preview_url}}</pre>
+  <section class="box">
+    <iframe src="{{preview_url}}" scrolling="auto" frameborder="0" align="center"
+      width="100%" height="{{$storage.hit.FrameHeight}}"></iframe>
+  </section>
+</div>

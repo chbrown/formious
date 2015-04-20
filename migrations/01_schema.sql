@@ -44,7 +44,7 @@ CREATE INDEX access_tokens_token_idx ON access_tokens(token);
 CREATE TABLE templates (
   id SERIAL PRIMARY KEY,
 
-  name TEXT UNIQUE, -- soft referenced from stims.template
+  name TEXT UNIQUE NOT NULL,
   html TEXT,
 
   created TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL
@@ -73,7 +73,7 @@ CREATE TABLE stims (
   experiment_id INTEGER REFERENCES experiments(id) ON DELETE CASCADE NOT NULL,
   template_id INTEGER REFERENCES templates(id) ON DELETE CASCADE NOT NULL,
   context JSON,
-  view_order INTEGER,
+  view_order REAL DEFAULT 0 NOT NULL,
 
   created TIMESTAMP WITH TIME ZONE DEFAULT current_timestamp NOT NULL
 );

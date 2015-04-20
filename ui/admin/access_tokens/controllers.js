@@ -1,4 +1,4 @@
-/*jslint browser: true, devel: true */ /*globals _, angular, app, Url, p, summarizeResponse */
+/*jslint browser: true */ /*globals app, summarizeResponse */
 
 app.controller('admin.access_tokens.table', function($scope, $flash, AccessToken) {
   $scope.access_tokens = AccessToken.query();

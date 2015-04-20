@@ -180,7 +180,7 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
   var experiment_id = m[1];
 
   var urlObj = url.parse(req.url, true);
-  models.AccessToken.check(urlObj.query.token, 'experiments', experiment_id, function(err, access_token) {
+  models.AccessToken.check(urlObj.query.token, 'experiments', experiment_id, function(err) {
     if (err) return res.die(err);
 
     // authorization granted

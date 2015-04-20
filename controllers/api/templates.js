@@ -60,11 +60,7 @@ R.post(/^\/api\/templates\/(\d+)/, function(req, res, m) {
     if (err) return res.die(err);
 
     var fields = _.pick(data, models.Template.columns);
-
-    db.Update('templates')
-    .setEqual(fields)
-    .whereEqual({id: m[1]})
-    .execute(function(err, rows) {
+    models.Template.update(fields, {id: m[1]}, function(err) {
       if (err) return res.die(err);
       res.status(204).end(); // 204 No Content
     });

@@ -5,8 +5,17 @@ var R = new Router(function(req, res) {
   res.status(404).die('No resource at: ' + req.url);
 });
 
-// POST /mturk/externalSubmit
-R.any(/^\/mturk\/externalSubmit/, function(req, res) {
+/**
+POST /mturk/externalSubmit
+
+This is a testing filler for the MTurk production / sandbox final POST, which
+will point to https://www.mturk.com/mturk/externalSubmit for production HITs,
+or https://workersandbox.mturk.com/mturk/externalSubmit for sandbox HITs. The
+MTurk ExternalQuestion format automatically adds a `?turkSubmitTo` querystring
+parameter to the given URL, but if that's missing, it'll be evaluated as the
+empty string, and so missing final post backs will hit this endpoint.
+*/
+R.post(/^\/mturk\/externalSubmit/, function(req, res) {
   // readData uses the querystring for GET data
   req.readData(function(err, data) {
     var aws_worker_id = data.workerId || 'WORKER_ID_NOT_AVAILABLE';
@@ -30,34 +39,5 @@ R.any(/^\/mturk\/externalSubmit/, function(req, res) {
     });
   });
 });
-
-// R.post(/^\/addbonus$/, function(req, res, m) {
-//   var default_bonus = 0.25;
-//   var max_bonus = 0.25;
-//   // var unpaid_minimum = 49;
-//   new formidable.IncomingForm().parse(req, function(err, fields, files) {
-//     var workerId = fields.workerId || req.user_id;
-//     models.User.one({id: workerId}, function(err, user) {
-//       if (err) return res.die('User query error: ' + err);
-//       if (!user) return res.die('No user "' + workerId + '" found.');
-
-//       var amount = Math.min(parseFloat(fields.amount || default_bonus), max_bonus);
-//       var previous_bonus_owed = user.bonus_owed;
-
-//       user.bonus_owed = previous_bonus_owed + amount;
-//       user.save(function(err) {
-//         if (err) {
-//           logger.error(err);
-//           res.json({success: false, message: 'Error assigning bonus: ' + err.toString(), amount: amount});
-//         }
-//         else {
-//           logger.info('User bonus_owed increased from ' + previous_bonus_owed +
-//             ' by ' + amount + ' to ' + (previous_bonus_owed + amount) + '.');
-//           res.json({success: true, message: 'Bonus awarded: $' + amount, amount: amount});
-//         }
-//       });
-//     });
-//   });
-// });
 
 module.exports = R.route.bind(R);

@@ -1,4 +1,4 @@
-/*jslint browser: true */ /*globals _, angular, cookies */
+/*jslint browser: true */ /*globals _, Url, angular, cookies, CheckboxSequence */
 
 var app = angular.module('app', [
   'ngResource',
@@ -6,6 +6,33 @@ var app = angular.module('app', [
   'ui.router',
   'misc-js/angular-plugins',
 ]);
+
+app.directive('uiSrefActiveAny', function($state) {
+  return {
+    restrict: 'A',
+    scope: {
+      uiSrefActiveAny: '=',
+    },
+    link: function(scope, el) {
+      var activeClasses = scope.uiSrefActiveAny;
+      function updateSrefActiveAny() {
+        // console.error('updateSrefActiveAny', activeClasses);
+        for (var key in activeClasses) {
+          var match = $state.includes(activeClasses[key]);
+          // console.error('$state.includes(%s) = %s', activeClasses[key], match);
+          el.toggleClass(key, match);
+          // if (match) {
+          //   el.addClass(key);
+          // }
+          // else {
+          //   el.removeClass(key);
+          // }
+        }
+      }
+      scope.$on('$stateChangeSuccess', updateSrefActiveAny);
+    }
+  };
+});
 
 var summarizeResponse = function(res) {
   var parts = [];
@@ -18,6 +45,18 @@ var summarizeResponse = function(res) {
   }
   return parts.join('');
 };
+
+/**
+Quick Angular.js wrapper for checkbox-sequence.js
+*/
+app.directive('checkboxSequence', function() {
+  return {
+    restrict: 'A',
+    link: function(scope, el) {
+      scope.checkbox_sequence = new CheckboxSequence(el[0]);
+    }
+  };
+});
 
 app.directive('tbodyMap', function() {
   return {
@@ -32,12 +71,75 @@ app.directive('tbodyMap', function() {
   };
 });
 
+app.filter('where', function() {
+  return function(list, predicate) {
+    return _.where(list, predicate);
+  };
+});
+
 app.filter('valueWhere', function() {
   return function(list, predicate, prop) {
     var match = _.findWhere(list, predicate);
     if (match) {
       return match[prop];
     }
+  };
+});
+
+/**
+interface XHROptions {
+  method: string;
+  url: string;
+  params: any;
+  data?: any;
+}
+
+interface XMLResponse {
+  config: XHROptions;
+  data: Document;
+  status: number;
+  statusText: string;
+}
+
+xhr(options: XHROptions, callback: (error: Error, response?: XMLResponse) => void) { ... }
+
+The 'Content-Type' header of the outgoing request will be set to
+'application/json', and options.data will be serialized with JSON.stringify().
+*/
+function xhrXML(options,  callback) {
+  var url = new Url({path: options.url, query: options.params}).toString();
+  var xhr = new XMLHttpRequest();
+  xhr.open(options.method, url);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.onerror = function(error) {
+    callback(error);
+  };
+  xhr.onload = function() {
+    if (xhr.status >= 300) {
+      var error = new Error(xhr.responseText);
+      return callback(error);
+    }
+    // a 'Content-Type: text/xml' header in the response will prompt
+    // XMLHttpRequest to automatically parse it into a Document instance.
+    // we return a `response` object that's much like Angular's own $http
+    // response object, except that we use that document as the `data` field.
+    callback(null, {
+      config: options,
+      data: xhr.responseXML,
+      status: xhr.status,
+      statusText: xhr.statusText,
+    });
+  };
+  xhr.send(JSON.stringify(options.data));
+}
+
+app.factory('$xml', function($q) {
+  return function(options) {
+    return $q(function(resolve, reject) {
+      xhrXML(options, function(err, response) {
+        return err ? reject(err) : resolve(response);
+      });
+    });
   };
 });
 
@@ -131,7 +233,7 @@ function readBinaryFile(file, callback) {
   reader.onerror = function(error) {
     callback(error);
   };
-  reader.onload = function(event) {
+  reader.onload = function() {
     var data = new Uint8Array(reader.result);
     // data is an arraybufferview as basic bytes / chars
     callback(null, data);
@@ -159,7 +261,7 @@ function parseTabularFile(file, callback) {
     xhr.onerror = function(error) {
       callback(error);
     };
-    xhr.onload = function(event) {
+    xhr.onload = function() {
       if (xhr.status >= 300) {
         var error = new Error(xhr.responseText);
         return callback(error);
@@ -342,17 +444,17 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     abstract: true,
   })
   .state('admin.mturk.hits.table', {
-    url: '/?aws_account_id&host',
+    url: '/?aws_account_id&environment',
     templateUrl: '/ui/admin/mturk/hits/all.html',
     controller: 'admin.mturk.hits.table',
   })
   .state('admin.mturk.hits.new', {
-    url: '/new?aws_account_id&host',
+    url: '/new?aws_account_id&environment&Title&ExternalURL',
     templateUrl: '/ui/admin/mturk/hits/new.html',
     controller: 'admin.mturk.hits.new',
   })
   .state('admin.mturk.hits.edit', {
-    url: '/:HITId?aws_account_id&host',
+    url: '/:HITId?aws_account_id&environment',
     templateUrl: '/ui/admin/mturk/hits/one.html',
     controller: 'admin.mturk.hits.edit',
   })

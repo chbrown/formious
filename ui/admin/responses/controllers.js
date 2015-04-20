@@ -1,4 +1,4 @@
-/*jslint browser: true, devel: true */ /*globals _, angular, app, Url, p, summarizeResponse */
+/*jslint browser: true, devel: true */ /*globals _, app */
 
 app.controller('adminResponsesCtrl', function($scope) {
   $scope.responses = window.responses;

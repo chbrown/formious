@@ -1,4 +1,4 @@
-/*jslint browser: true, devel: true */ /*globals _, angular, app, p, Url, summarizeResponse */
+/*jslint browser: true, devel: true */ /*globals _, app, Url, summarizeResponse */
 
 app.controller('admin.experiments.table', function($scope, $flash, $state, $location, Experiment, Administrator) {
   $scope.experiments = Experiment.query();
@@ -59,9 +59,24 @@ app.controller('admin.experiments.edit', function($scope, $flash, $http, $state,
     }).map(function(stim) {
       return stim.$delete();
     });
-    $q.all(promises).then(function() {
+    var promise = $q.all(promises).then(function() {
       $scope.stims = Stim.query({experiment_id: $scope.experiment.id});
+      return 'Deleted ' + promises.length + ' stims';
     });
+    $flash(promise);
+  };
+
+  $scope.updateSelectedStims = function(props) {
+    var promises = $scope.stims.filter(function(stim) {
+      return stim.selected;
+    }).map(function(stim) {
+      _.extend(stim, props);
+      return stim.$save();
+    });
+    var promise = $q.all(promises).then(function() {
+      return 'Updated ' + promises.length + ' stims';
+    });
+    $flash(promise);
   };
 
   $scope.responses = function(ev) {
@@ -84,8 +99,11 @@ app.controller('admin.experiments.edit', function($scope, $flash, $http, $state,
     var max_view_order = Math.max.apply(Math, _.pluck($scope.stims, 'view_order'));
     var view_order = Math.max(max_view_order, 0) + 1;
 
+    var default_context = {template_id: $scope.selected_template_id};
+
     // and then add the stims to the table
     var stim_promises = contexts.map(function(context, i) {
+      context = _.extend({}, default_context, context);
       // stim has properties like: context, template_id, view_order
       // handle templates that cannot be found simply by creating new ones
       // compute this outside because the promises are not guaranteed to execute in order
@@ -99,13 +117,14 @@ app.controller('admin.experiments.edit', function($scope, $flash, $http, $state,
       });
     });
 
-    $q.all(stim_promises).then(function(stims) {
+    return $q.all(stim_promises).then(function(stims) {
       // = Stim.query({experiment_id: $scope.experiment.id});
       $scope.stims = $scope.stims.concat(stims);
+      return 'Added ' + stim_promises.length + ' stims';
     });
   };
 
-  $scope.$watchCollection('stims', function(newVal, oldVal) {
+  $scope.$watchCollection('stims', function() {
     // whenever stims change, we may need to update the experiment parameters
     var parameters_object = {};
     $scope.stims.forEach(function(stim) {
@@ -118,17 +137,34 @@ app.controller('admin.experiments.edit', function($scope, $flash, $http, $state,
     $scope.experiment.parameters = _.union($scope.experiment.parameters, parameters);
   });
 
-  $scope.upload = function(file) {
-    // sample file = {
-    //   lastModifiedDate: Tue Mar 04 2014 15:57:25 GMT-0600 (CST)
-    //   name: "asch-stims.xlsx"
-    //   size: 34307
-    //   type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    //   webkitRelativePath: ""
-    // }
+  /**
+  Import stims from a file.
+
+  Sample Excel (xlsx) spreadsheet:
+
+      {
+        lastModifiedDate: Tue Mar 04 2014 15:57:25 GMT-0600 (CST),
+        name: "asch-stims.xlsx",
+        size: 34307,
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        webkitRelativePath: ""
+      }
+
+  Sample JSON:
+
+      {
+        lastModified: 1429379237000,
+        lastModifiedDate: Sat Apr 18 2015 12:47:17 GMT-0500 (CDT),
+        name: "questions-sample-100.json",
+        size: 33125,
+        type: "application/json",
+        webkitRelativePath: ""
+      }
+
+  */
+  $scope.importFile = function(file) {
     var promise = parseTabularFile(file).then(function(data) {
-      addStimData(data);
-      return 'Added ' + data.length + ' stims.';
+      return addStimData(data);
     }, function(err) {
       return 'Error uploading file "' + file.name + '": ' + err.toString();
     });

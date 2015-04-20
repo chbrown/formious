@@ -1,4 +1,4 @@
-/*jslint browser: true, devel: true */ /*globals _, app, Url, summarizeResponse */
+/*jslint browser: true */ /*globals app, summarizeResponse */
 
 app.controller('admin.administrators.table', function($scope, $flash, Administrator) {
   $scope.administrators = Administrator.query();
@@ -20,7 +20,7 @@ app.controller('admin.administrators.edit', function($scope, $http, $flash, $win
   $scope.administrator_aws_accounts = AWSAccountAdministrator.query({administrator_id: administrator_id});
 
   $scope.sync = function() {
-    var promise = $scope.administrator.$save().then(function(res) {
+    var promise = $scope.administrator.$save().then(function() {
       return 'Saved';
     }, summarizeResponse);
     $flash(promise);

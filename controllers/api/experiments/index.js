@@ -64,15 +64,8 @@ R.post(/^\/api\/experiments\/(\d+)/, function(req, res, m) {
     if (err) return res.die(err);
 
     var fields = _.pick(data, models.Experiment.columns);
-
-    db.Update('experiments')
-    .setEqual(fields)
-    .whereEqual({id: m[1]})
-    .execute(function(err, rows) {
+    models.Experiment.update(fields, {id: m[1]}, function(err) {
       if (err) return res.die(err);
-
-      // var experiment = rows[1];
-      // res.json(_.extend(experiment, fields));
       res.status(204).end(); // 204 No Content
     });
   });
@@ -87,22 +80,5 @@ R.delete(/^\/api\/experiments\/(\d+)$/, function(req, res, m) {
   });
 });
 
-// non-REST:
-
-// /** POST /api/experiments/:id/clone
-// Create new experiment with properties of original (but not stims) */
-// R.post(/^\/api\/experiments\/(\d+)\/clone$/, function(req, res, m) {
-//   models.Experiment.one({id: m[1]}, function(err, experiment) {
-//     if (err) return res.die(err);
-
-//     var fields = _.pick(experiment, models.Experiment.columns);
-//     fields.name += ' copy';
-
-//     models.Experiment.insert(fields, function(err, experiment) {
-//       if (err) return res.die(err);
-//       res.status(201).json(experiment);
-//     });
-//   });
-// });
 
 module.exports = R.route.bind(R);

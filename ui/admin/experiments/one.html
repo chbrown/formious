@@ -2,9 +2,8 @@
   <span class="control">Experiment: <b>{{experiment.name}}</b></span>
 
   <div class="control" style="float: right">
-    <a href="/admin/mturk/HITs/new?Title={{experiment.name}}&ExternalURL={{site_url}}experiments/{{experiment.id}}">Prepare HIT</a>
-
-    <a href="/experiments/{{experiment.id}}">Public</a>
+    <a ui-sref="admin.mturk.hits.new({Title: experiment.name, ExternalURL: site_url + 'experiments/' + experiment.id})">Prepare HIT</a>
+    <a href="/experiments/{{experiment.id}}" target="_blank">Public</a>
     <a href="#" ng-click="responses($event)">Responses</a>
   </div>
 </nav>
@@ -56,8 +55,14 @@
 
 <section class="box hpad" ng-show="experiment.id">
   <form class="vform">
-    <label>Upload stims
-      <input type="file" on-upload="upload($file)">
+    <label>
+      <span>Import stims from file</span>
+      <input type="file" on-upload="importFile($file)">
+    </label>
+    <label>
+      <span>Default template</span>
+      <select ng-model="selected_template_id"
+        ng-options="template.id as template.name for template in templates"></select>
     </label>
   </form>
 </section>
@@ -77,7 +82,9 @@
   </thead>
   <tbody checkbox-sequence>
     <tr ng-repeat="stim in stims" ng-class="{selected: stim.selected}">
-      <td style="padding-right: 5px"><input type="checkbox" ng-model="stim.selected"></td>
+      <td style="padding-right: 5px">
+        <input type="checkbox" ng-model="stim.selected">
+      </td>
       <td><a href="/admin/experiments/{{experiment.id}}/stims/{{stim.id}}">{{stim.id}}</a></td>
       <td class="nowrap">
         <!-- <select ng-model="stim.template_id"
@@ -100,8 +107,7 @@
         <span ng-bind="stim.view_order"></span>
       </td>
       <td class="nowrap">
-        <!-- <button ng-click="previewStim(stim)">Preview</button> -->
-        <a href="/experiments/{{experiment.id}}/stims/{{stim.id}}?workerId=testing">Public</a>
+        <a href="/experiments/{{experiment.id}}/stims/{{stim.id}}?workerId=testing" target="_blank">Public</a>
         <button ng-click="syncStim(stim, $event)">Save</button>
         <button ng-click="deleteStim(stim, $event)">Delete</button>
       </td>
@@ -111,12 +117,19 @@
 
 <section class="hpad">
   <button ng-click="addStim({})">+ empty row</button>
-  <button ng-click="deleteSelectedStims()">- delete selection</button>
 </section>
 
+<!-- <button ng-click="previewStim(stim)">Preview</button> -->
 <!-- <section class="preview" ng-show="show_preview">
   <div class="controls"><span>&times;</span>Hide preview</div>
   <div class="content">
     <iframe></iframe>
   </div>
 </section> -->
+
+<nav fixedflow class="sub" style="bottom: 0; border-top: 1px solid #BBB; padding: 5px; background-color: #EEE;">
+  <button ng-click="deleteSelectedStims()" class="control">Delete selection ({{(stims | filter:{selected: true}).length}})</button>
+  <button ng-click="updateSelectedStims({template_id: selected_template_id})" class="control">Set selection template ({{(stims | filter:{selected: true}).length}})</button>
+  <select ng-model="selected_template_id"
+    ng-options="template.id as template.name for template in templates"></select>
+</nav>

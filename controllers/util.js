@@ -13,6 +13,10 @@ var R = new Router(function(req, res) {
 
 Create a function closure around an Array of unique keys, which takes an Array
 of values and returns an object mapping the keys in values in the given order.
+
+For example:
+
+    zipKeysFn(['name', 'age])(['Chris', 25]) => {name: 'Chris', age: 25}
 */
 function zipKeysFn(keys) {
   return function(values) {
@@ -45,7 +49,7 @@ R.post('/util/parse-table', function(req, res) {
   }
   else {
     // prepare transforms
-    var parser = new sv.Parser();
+    var parser = (content_type == 'application/json') ? new streaming.json.Parser() : new sv.Parser();
     var stringifier = new streaming.json.ArrayStringifier();
     // set headers
     res.setHeader('content-type', 'application/json');
