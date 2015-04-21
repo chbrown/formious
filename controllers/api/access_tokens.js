@@ -92,13 +92,13 @@ R.post(/^\/api\/access_tokens\/generate(\?|$)/, function(req, res) {
     var length = parseInt(data.length || 10, null);
 
     // try to use an existing access token
-    //   AccessToken.findOrCreate(relation, foreign_id, opts, callback)
     models.AccessToken.findOrCreate(relation, foreign_id, {length: length}, function(err, access_token) {
       if (err) return res.die(err);
 
       var url = ['', relation, foreign_id].join('/') + '?token=' + access_token.token;
+      res.status(201);
       // setHeader is not chainable
-      res.status(201).setHeader('Location', url);
+      res.setHeader('Location', url);
       res.json(access_token);
     });
 
