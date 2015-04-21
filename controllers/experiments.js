@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
 var async = require('async');
@@ -6,7 +7,6 @@ var logger = require('loge');
 var Router = require('regex-router');
 var sv = require('sv');
 var url = require('url');
-var util = require('util-enhanced');
 
 var db = require('../db');
 var flat = require('../lib/flat');
@@ -88,7 +88,7 @@ R.get(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
 
     // context: the current state to render the template with
     // urlObj.query will usually have the fields: assignmentId, hitId, turkSubmitTo, workerId
-    var context = util.extend(results.stim.context, urlObj.query, {
+    var context = _.extend(results.stim.context, urlObj.query, {
       experiment_id: experiment_id,
       stim_id: stim_id,
     });
@@ -225,7 +225,7 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
           created: response.created,
         };
         // merge those static values with the dynamic context and value objects
-        util.extend(row, response.context, response.value);
+        _.extend(row, response.context, response.value);
 
         stringifier.write(row);
       });
