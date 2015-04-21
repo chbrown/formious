@@ -9,7 +9,6 @@ var sv = require('sv');
 var url = require('url');
 
 var db = require('../db');
-var flat = require('../lib/flat');
 var models = require('../models');
 
 var _cached_stim_template; // a Handlebars template function
@@ -88,17 +87,16 @@ R.get(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
 
     // context: the current state to render the template with
     // urlObj.query will usually have the fields: assignmentId, hitId, turkSubmitTo, workerId
-    var context = _.extend(results.stim.context, urlObj.query, {
+    var context = _.extend(results.stim.context || {}, urlObj.query, {
       experiment_id: experiment_id,
       stim_id: stim_id,
     });
-    var deep_context = flat.unflatten(context);
 
     // need a better default for missing html
     var template_html = results.template.html;
     var rendered_html = template_html;
     try {
-      rendered_html = handlebars.compile(template_html)(deep_context);
+      rendered_html = handlebars.compile(template_html)(context);
     }
     catch (exc) {
       logger.error('Error compiling template markup', exc);
