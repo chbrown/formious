@@ -11,3 +11,7 @@ app.controller('admin.access_tokens.table', function($scope, $flash, AccessToken
     $flash(promise);
   };
 });
+
+app.controller('admin.access_tokens.edit', function($scope, $state, $flash, AccessToken) {
+  $scope.access_token = AccessToken.get({id: $state.params.access_token_id});
+});

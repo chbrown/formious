@@ -1,22 +1,24 @@
-<h3>Access Tokens</h3>
+<section class="hpad">
+  <h3>Access Tokens</h3>
+</section>
 
-<div class="box">
+<section class="box">
   <table class="striped lined padded fill">
     <thead>
       <tr>
         <th>ID</th>
-        <th>token</th>
-        <th>relation / foreign id</th>
-        <th>expires</th>
-        <th>redacted</th>
-        <th>created</th>
+        <th>Token</th>
+        <th>Relation / Foreign ID</th>
+        <th>Expires</th>
+        <th>Redacted</th>
+        <th>Created</th>
         <th></th>
       </tr>
     </thead>
     <tbody>
       <tr ng-repeat="access_token in access_tokens">
         <td title="{{access_token.id}}">
-          <a href="/admin/access_tokens/{{access_token.id}}">{{access_token.id}}</a>
+          <a ui-sref="admin.access_tokens.edit({access_token_id: access_token.id})">{{access_token.id}}</a>
         </td>
         <td>{{access_token.token}}</td>
         <td>
@@ -31,4 +33,4 @@
       </tr>
     </tbody>
   </table>
-</div>
+</section>

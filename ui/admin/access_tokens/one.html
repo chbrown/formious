@@ -1,0 +1,35 @@
+<form ng-submit="sync($event)" class="hpad">
+  <label class="block">
+    <div><b>Token</b></div>
+    <input type="text" ng-model="access_token.token" style="width: 100%;">
+  </label>
+
+  <label class="block">
+    <div><b>Relation</b></div>
+    <input type="text" ng-model="access_token.relation" style="width: 100%;">
+  </label>
+
+  <label class="block">
+    <div><b>Foreign ID</b></div>
+    <input type="text" ng-model="access_token.foreign_id" style="width: 100%;">
+  </label>
+
+  <label class="block">
+    <div><b>Expires</b></div>
+    <time>{{access_token.expires | date:"yyyy-MM-dd"}}</time>
+  </label>
+
+  <label class="block">
+    <div><b>Redacted</b></div>
+    <time>{{access_token.redacted | date:"yyyy-MM-dd"}}</time>
+  </label>
+
+  <label class="block">
+    <div><b>Created</b></div>
+    <time>{{access_token.created | date:"yyyy-MM-dd"}}</time>
+  </label>
+
+  <div class="block">
+    <button>Save</button>
+  </div>
+</form>
