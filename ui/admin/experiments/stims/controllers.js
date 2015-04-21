@@ -18,8 +18,8 @@ app.controller('admin.experiments.edit.stims', function($scope, $localStorage, $
       return stim.$delete();
     });
     var promise = $q.all(promises).then(function() {
-      $scope.stims = Stim.query({experiment_id: $scope.experiment.id});
-      return 'Deleted ' + promises.length + ' stims';
+      $scope.stims = $scope.stims.filter(function(stim) { return !stim.selected; });
+      return 'Deleted ' + promises.length + ' stim(s)';
     });
     $flash(promise);
   };
@@ -32,7 +32,7 @@ app.controller('admin.experiments.edit.stims', function($scope, $localStorage, $
       return stim.$save();
     });
     var promise = $q.all(promises).then(function() {
-      return 'Updated ' + promises.length + ' stims';
+      return 'Updated ' + promises.length + ' stim(s)';
     });
     $flash(promise);
   };
@@ -43,7 +43,7 @@ app.controller('admin.experiments.edit.stims', function($scope, $localStorage, $
     var max_view_order = Math.max.apply(Math, _.pluck($scope.stims, 'view_order'));
     var view_order = Math.max(max_view_order, 0) + 1;
 
-    var default_context = {template_id: $scope.selected_template_id};
+    var default_context = {template_id: $scope.$storage.default_template_id};
 
     // and then add the stims to the table
     var stim_promises = contexts.map(function(context, i) {
@@ -51,7 +51,7 @@ app.controller('admin.experiments.edit.stims', function($scope, $localStorage, $
       // stim has properties like: context, template_id, view_order
       // handle templates that cannot be found simply by creating new ones
       // compute this outside because the promises are not guaranteed to execute in order
-      return Template.findOrCreate(context.template).then(function(template) {
+      return Template.findOrCreate(context).then(function(template) {
         return new Stim({
           experiment_id: $scope.experiment.id,
           context: context,
@@ -65,7 +65,7 @@ app.controller('admin.experiments.edit.stims', function($scope, $localStorage, $
       // = Stim.query({experiment_id: $scope.experiment.id});
       $scope.stims = $scope.stims.concat(stims);
       return 'Added ' + stim_promises.length + ' stims';
-    });
+    }, summarizeResponse);
   };
 
   $scope.$watchCollection('stims', function() {

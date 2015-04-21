@@ -15,7 +15,7 @@
     <tbody>
       <tr ng-repeat="template in templates">
         <td title="{{template.id}}">
-          <a href="/admin/templates/{{template.id}}">{{template.name}}</a>
+          <a ui-sref="admin.templates.edit({id: template.id})">{{template.name}}</a>
         </td>
         <td><code>{{template.html.slice(0, 100)}}</code></td>
         <td><time>{{template.created | date:"yyyy-MM-dd"}}</time></td>

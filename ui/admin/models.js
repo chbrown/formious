@@ -67,7 +67,7 @@ app.service('Stim', function($resource) {
   return Stim;
 });
 
-app.service('Template', function($resource) {
+app.service('Template', function($resource, $q) {
   // map: {'id': 'name'}
   var Template = $resource('/api/templates/:id', {
     id: '@id',
@@ -75,12 +75,25 @@ app.service('Template', function($resource) {
     // query: {method: 'GET', isArray: true, cache: true},
   });
 
-  Template.findOrCreate = function(name) {
-    // query just return a naked promise?
-    var templates = this.query();
-    return templates.$promise.then(function() {
-      var template = _.findWhere(templates, {name: name});
-      return template ? template : new Template({name: name}).$save();
+  /**
+  If `context` has a template_id field, return an initialized (but not
+  saturated) Template with `template_id` as the `id`. Otherwise fetch all the
+  templates and find one where `name` == `context.template`; otherwise, create
+  a new Template with {name: `context.template`} and return it.
+  */
+  Template.findOrCreate = function(context) {
+    return $q(function(resolve, reject) {
+      if (context.template_id !== undefined) {
+        resolve(new Template({id: context.template_id}));
+      }
+      else {
+        // presumably, context.template is the desired Template's name
+        var templates = Template.query();
+        templates.$promise.then(function() {
+          var template = _.findWhere(templates, {name: context.template});
+          return template ? template : new Template({name: name}).$save();
+        }).then(resolve, reject);
+      }
     });
   };
 

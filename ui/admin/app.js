@@ -356,7 +356,7 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
   // access_tokens
   .state('admin.access_tokens', {
     url: '/access_tokens',
-    templateUrl: '/ui/admin/access_tokens/all.html',
+    templateUrl: '/ui/admin/access_tokens/layout.html',
     abstract: true,
   })
   .state('admin.access_tokens.table', {
@@ -365,9 +365,9 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     controller: 'admin.access_tokens.table',
   })
   .state('admin.access_tokens.edit', {
-    url: '/:id',
+    url: '/:access_token_id',
     templateUrl: '/ui/admin/access_tokens/one.html',
-    // controller: 'admin.access_tokens.edit',
+    controller: 'admin.access_tokens.edit',
   })
   // administrators
   .state('admin.administrators', {

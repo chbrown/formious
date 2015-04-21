@@ -43,7 +43,7 @@
     </thead>
     <tbody>
       <tr ng-repeat="aws_account in administrator_aws_accounts">
-        <td><a href="/admin/aws/{{aws_account.id}}">{{aws_account.name}}</a></td>
+        <td><a ui-sref="admin.aws_accounts.edit({id: aws_account.id})">{{aws_account.name}}</a></td>
         <td>{{aws_account.access_key_id}}</td>
         <td>{{aws_account.priority}}</td>
         <td><time>{{aws_account.created | date:"yyyy-MM-dd"}}</time></td>
@@ -56,7 +56,7 @@
   <p>
     <select ng-model="new_account.aws_account_id"
       ng-options="aws_account.id as aws_account.name for aws_account in aws_accounts"></select>
-    <input ng-model="new_account.priority" type="number">
+    <input ng-model="new_account.priority" type="number" placeholder="priority">
     <button ng-click="linkAWSAccount(new_account)">Add account</button>
   </p>
 </section>

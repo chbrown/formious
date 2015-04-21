@@ -16,17 +16,20 @@
     </thead>
     <tbody>
       <tr ng-repeat="experiment in experiments">
-        <td title="{{experiment.id}}">
-          <a href="/admin/experiments/{{experiment.id}}">{{experiment.name}}</a>
+        <td>
+          <a ui-sref="admin.experiments.edit.stims({experiment_id: experiment.id})">{{experiment.name}}</a>
         </td>
         <td><time>{{experiment.created | date:"yyyy-MM-dd"}}</time></td>
-        <td><administrator id="experiment.administrator_id"></administrator></td>
+        <td>
+          <a ui-sref="admin.administrators.edit({id: experiment.administrator_id})">
+            {{administrators | valueWhere:{id: experiment.administrator_id}:'email'}}
+          </a>
         <td>
           <a href="#" ng-click="responses(experiment, $event)">Responses</a>
           ({{experiment.count || 0}})
         </td>
         <td class="nowrap">
-          <a href="/experiments/{{experiment.id}}">Public</a>
+          <a href="/experiments/{{experiment.id}}" target="_blank">Public</a>
         </td>
         <td>
           <button ng-click="delete(experiment)">Delete</button>
