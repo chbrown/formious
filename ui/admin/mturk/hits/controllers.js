@@ -1,4 +1,4 @@
-/*jslint browser: true */ /*globals _, angular, app, Url, summarizeResponse */
+/*jslint browser: true */ /*globals _, angular, app, Url, moment, summarizeResponse */
 
 app.service('$storedStateParams', function($state, $localStorage, $rootScope) {
   // bring in localStorage backing and automatic re-routing to reflect params changes
@@ -103,50 +103,88 @@ app.controller('admin.mturk.hits.edit', function($scope, $flash, $resource, $sto
   };
 });
 
+function durationStringToSeconds(s) {
+  // takes a string like "5h" and returns 5*60*60, the number of seconds in five hours
+  var matches = s.match(/\d+\w/g);
+  var duration = moment.duration(0);
+  matches.forEach(function(match) {
+    var parts = match.match(/(\d+)(\w)/);
+    duration.add(parseInt(parts[1], 10), parts[2]);
+  });
+  return duration.asSeconds();
+}
 
-app.controller('admin.mturk.hits.new', function($scope, $http, $state, $location, $localStorage, $flash, $storedStateParams) {
-  // defaults:
+function createExternalQuestionString(ExternalURL, FrameHeight) {
+  var xmlns = 'http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2006-07-14/ExternalQuestion.xsd';
+  // var report = document.implementation.createDocument(null, "report", null);
+  var doc = document.implementation.createDocument(xmlns, 'ExternalQuestion');
+  var ExternalURL_el = doc.documentElement.appendChild(doc.createElement('ExternalURL'));
+  ExternalURL_el.textContent = ExternalURL;
+  var FrameHeight_el = doc.documentElement.appendChild(doc.createElement('FrameHeight'));
+  FrameHeight_el.textContent = FrameHeight;
+  return new XMLSerializer().serializeToString(doc);
+}
+
+app.controller('admin.mturk.hits.new', function($scope, $http, $state, $location, $localStorage, $flash, $xml) {
   $scope.$storage = $localStorage.$default({
-    hit: {
-      // Title: 'Exciting task!',
-      // Description: 'Look at some cool pictures and answer a lot of really easy questions.',
-      // Keywords: 'linguistic,verbal,words,meaning,research',
-      MaxAssignments: '20',
-      Reward: '0.05',
-      Keywords: 'research,science',
-      AssignmentDuration: '2h',
-      Lifetime: '12h',
-      AutoApprovalDelay: '24h',
-      FrameHeight: '550',
-    },
+    Title: $state.params.Title || 'Exciting task!',
+    // Description: 'Look at some cool pictures and answer a lot of really easy questions.',
+    MaxAssignments: 20,
+    Reward: 0.05,
+    Keywords: 'research,science',
+    AssignmentDuration: '2h',
+    Lifetime: '12h',
+    AutoApprovalDelay: '48h',
+    // experiment/show may send over ExternalURL and Title query params
+    ExternalURL: $state.params.ExternalURL || '/experiments/MISSING',
+    FrameHeight: 550,
     preview_iframe: false,
   });
 
-  // experiment/show may send over ExternalURL and Title query params
-  // fixme: the way we grab the variables off here before the state redirects is kind of a hack
-  _.extend($scope.$storage.hit, _.omit($state.params, 'aws_account_id', 'environment'));
-
   $scope.sync = function() {
-    var data = _.extend({}, $scope.$storage.hit, $scope.$storage.extra);
-    var promise = $http({
+    var Question = createExternalQuestionString($scope.$storage.ExternalURL, $scope.$storage.FrameHeight);
+    var data = {
+      Operation: 'CreateHIT',
+      Title: $scope.$storage.Title,
+      Description: $scope.$storage.Description,
+      MaxAssignments: $scope.$storage.MaxAssignments,
+      Reward: {
+        Amount: $scope.$storage.Reward,
+        CurrencyCode: 'USD',
+      },
+      Keywords: $scope.$storage.Keywords,
+      Question: Question,
+      AssignmentDurationInSeconds: durationStringToSeconds($scope.$storage.AssignmentDuration),
+      LifetimeInSeconds: durationStringToSeconds($scope.$storage.Lifetime),
+      AutoApprovalDelayInSeconds: durationStringToSeconds($scope.$storage.AutoApprovalDelay),
+    };
+    _.extend(data, $scope.$storage.extra);
+    var promise = $xml({
       method: 'POST',
-      url: '/api/mturk/HITs',
+      url: '/api/mturk',
       params: {
-        aws_account_id: $storedStateParams.aws_account_id,
-        environment: $storedStateParams.environment,
+        aws_account_id: $state.params.aws_account_id,
+        environment: $state.params.environment,
       },
       data: data,
     }).then(function(res) {
-      var headers = res.headers();
-      if (headers.location) {
-        setTimeout(function() {
-          window.location = headers.location;
-        }, 3000);
-        return 'Created, navigating to HIT page in 3 seconds.';
-      }
-      else {
-        return 'Created';
-      }
+      /**
+      res.data is a Document instance; a successful response looks like:
+
+      <?xml version="1.0"?>
+      <CreateHITResponse>
+        <OperationRequest><RequestId>3fb91ca0-8df3-b65b-6cc4-b84205e11e5c</RequestId></OperationRequest>
+        <HIT>
+          <Request><IsValid>True</IsValid></Request>
+          <HITId>3WV80UW08Y4VD8LBFL8W0CY4E4CW55</HITId>
+          <HITTypeId>3I47MBBHDSXH4CD71VX6NB5EWOFB6N</HITTypeId>
+        </HIT>
+      </CreateHITResponse>
+      */
+      var HITId = res.data.querySelector('HITId').textContent;
+      var HITTypeId = res.data.querySelector('HITTypeId').textContent;
+      $state.go('admin.mturk.hits.edit', {HITId: HITId});
+      return 'Created HIT: ' + HITId;
     }, summarizeResponse);
     $flash(promise);
   };
