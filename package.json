@@ -1,8 +1,11 @@
 {
   "name": "formious",
   "description": "Experimental experience server",
-  "keywords" : ["forms", "surveys"],
-  "version": "0.1.5",
+  "keywords": [
+    "forms",
+    "surveys"
+  ],
+  "version": "0.1.6",
   "homepage": "https://github.com/chbrown/formious",
   "repository": "git://github.com/chbrown/formious.git",
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
