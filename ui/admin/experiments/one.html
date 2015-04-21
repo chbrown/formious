@@ -14,7 +14,7 @@
 </section>
 
 <section class="box hpad">
-  <form ng-submit="sync($event)">
+  <form ng-submit="syncExperiment($event)">
     <label class="block">
       <div><b>Experiment name</b></div>
       <input type="text" ng-model="experiment.name" style="width: 200px">
@@ -53,83 +53,8 @@
   </form>
 </section>
 
-<section class="box hpad" ng-show="experiment.id">
-  <form class="vform">
-    <label>
-      <span>Import stims from file</span>
-      <input type="file" on-upload="importFile($file)">
-    </label>
-    <label>
-      <span>Default template</span>
-      <select ng-model="selected_template_id"
-        ng-options="template.id as template.name for template in templates"></select>
-    </label>
-  </form>
-</section>
-
-<table class="striped grid padded fill" ng-show="experiment.id">
-  <thead>
-    <tr>
-      <td></td>
-      <td></td>
-      <td>template</td>
-      <td ng-repeat="parameter in experiment.parameters">
-        {{parameter}}
-      </td>
-      <td>order</td>
-      <td></td>
-    </tr>
-  </thead>
-  <tbody checkbox-sequence>
-    <tr ng-repeat="stim in stims" ng-class="{selected: stim.selected}">
-      <td style="padding-right: 5px">
-        <input type="checkbox" ng-model="stim.selected">
-      </td>
-      <td><a href="/admin/experiments/{{experiment.id}}/stims/{{stim.id}}">{{stim.id}}</a></td>
-      <td class="nowrap">
-        <!-- <select ng-model="stim.template_id"
-          ng-options="template.id as template.name for template in templates"></select> -->
-        <a href="/admin/templates/{{stim.template_id}}">
-          {{templates | valueWhere:{id: stim.template_id}:'name'}}
-        </a>
-      </td>
-      <!-- <td ng-repeat="parameter in experiment.parameters">
-        <input ng-model="stim.context[parameter]" />
-      </td> -->
-      <!-- <td>
-        <textarea enhance json-transform ng-model="stim.context" class="json"></textarea>
-      </td> -->
-      <td ng-repeat="parameter in experiment.parameters">
-        <span ng-bind="stim.context[parameter]"></span>
-      </td>
-      <td>
-        <!-- <input ng-model="stim.view_order" type="number" style="width: 50px"> -->
-        <span ng-bind="stim.view_order"></span>
-      </td>
-      <td class="nowrap">
-        <a href="/experiments/{{experiment.id}}/stims/{{stim.id}}?workerId=testing" target="_blank">Public</a>
-        <button ng-click="syncStim(stim, $event)">Save</button>
-        <button ng-click="deleteStim(stim, $event)">Delete</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-<section class="hpad">
-  <button ng-click="addStim({})">+ empty row</button>
-</section>
-
-<!-- <button ng-click="previewStim(stim)">Preview</button> -->
-<!-- <section class="preview" ng-show="show_preview">
-  <div class="controls"><span>&times;</span>Hide preview</div>
-  <div class="content">
-    <iframe></iframe>
-  </div>
-</section> -->
-
-<nav fixedflow class="sub" style="bottom: 0; border-top: 1px solid #BBB; padding: 5px; background-color: #EEE;">
-  <button ng-click="deleteSelectedStims()" class="control">Delete selection ({{(stims | filter:{selected: true}).length}})</button>
-  <button ng-click="updateSelectedStims({template_id: selected_template_id})" class="control">Set selection template ({{(stims | filter:{selected: true}).length}})</button>
-  <select ng-model="selected_template_id"
-    ng-options="template.id as template.name for template in templates"></select>
-</nav>
+<ui-view>
+  <section class="hpad">
+    <a ui-sref="admin.experiments.edit.stims" ng-show="experiment.id">Show stims</a>
+  </section>
+</ui-view>

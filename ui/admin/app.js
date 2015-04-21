@@ -16,17 +16,9 @@ app.directive('uiSrefActiveAny', function($state) {
     link: function(scope, el) {
       var activeClasses = scope.uiSrefActiveAny;
       function updateSrefActiveAny() {
-        // console.error('updateSrefActiveAny', activeClasses);
         for (var key in activeClasses) {
           var match = $state.includes(activeClasses[key]);
-          // console.error('$state.includes(%s) = %s', activeClasses[key], match);
           el.toggleClass(key, match);
-          // if (match) {
-          //   el.addClass(key);
-          // }
-          // else {
-          //   el.removeClass(key);
-          // }
         }
       }
       scope.$on('$stateChangeSuccess', updateSrefActiveAny);
@@ -421,15 +413,20 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     controller: 'admin.experiments.table',
   })
   .state('admin.experiments.edit', {
-    url: '/:id',
+    url: '/:experiment_id',
     templateUrl: '/ui/admin/experiments/one.html',
     controller: 'admin.experiments.edit',
   })
-  // stims
-  .state('admin.experiments.stims.edit', {
-    url: '/:experiment_id/stims/:id',
+  // experiments/stims
+  .state('admin.experiments.edit.stims', {
+    url: '/stims',
+    templateUrl: '/ui/admin/experiments/stims/all.html',
+    controller: 'admin.experiments.edit.stims',
+  })
+  .state('admin.experiments.edit.stims.edit', {
+    url: '/:stim_id',
     templateUrl: '/ui/admin/experiments/stims/one.html',
-    controller: 'stimEditCtrl',
+    controller: 'admin.experiments.edit.stims.edit',
   })
   // mturk
   .state('admin.mturk', {

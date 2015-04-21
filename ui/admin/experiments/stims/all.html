@@ -1,0 +1,57 @@
+<section class="box hpad">
+  <form class="vform">
+    <label class="block">
+      <div><b>Default template</b></div>
+      <select ng-model="$storage.default_template_id"
+        ng-options="template.id as template.name for template in templates"></select>
+    </label>
+    <label class="block">
+      <div><b>Import stims from file</b></div>
+      <input type="file" on-upload="importFile($file)">
+    </label>
+  </form>
+</section>
+
+<table class="striped grid padded fill">
+  <thead>
+    <tr>
+      <td></td>
+      <td></td>
+      <td>template</td>
+      <td ng-repeat="parameter in experiment.parameters">
+        {{parameter}}
+      </td>
+      <td>order</td>
+      <td></td>
+    </tr>
+  </thead>
+  <tbody checkbox-sequence>
+    <tr ng-repeat="stim in stims" ng-class="{selected: stim.selected}">
+      <td style="padding-right: 5px">
+        <input type="checkbox" ng-model="stim.selected">
+      </td>
+      <td><a ui-sref="admin.experiments.edit.stims.edit({stim_id: stim.id})">{{stim.id}}</a></td>
+      <td class="nowrap">
+        <a ui-sref="admin.templates.edit({id: stim.template_id})">
+          {{templates | valueWhere:{id: stim.template_id}:'name'}}
+        </a>
+      </td>
+      <td ng-repeat="parameter in experiment.parameters">
+        <span ng-bind="stim.context[parameter]"></span>
+      </td>
+      <td>{{stim.view_order}}</td>
+      <td class="nowrap">
+        <a href="/experiments/{{experiment.id}}/stims/{{stim.id}}?workerId=testing" target="_blank">Public</a>
+        <button ng-click="syncStim(stim, $event)">Save</button>
+        <button ng-click="deleteStim(stim, $event)">Delete</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<nav fixedflow style="bottom: 0; border-top: 1px solid #BBB; padding: 5px; background-color: #EEE;">
+  <ui-view>
+    <button ng-click="deleteSelectedStims()" class="control">Delete selection ({{(stims | filter:{selected: true}).length}})</button>
+    <a ui-sref="admin.experiments.edit.stims.edit({stim_id: 'new'})">Add empty stim</a>
+  </ui-view>
+</nav>

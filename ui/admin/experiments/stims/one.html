@@ -1,31 +1,23 @@
-<div>
-  <main>
-    <section class="box">
-      <form ng-submit="sync($event)">
-        <label>
-          <div><b>Experiment ID</b></div>
-          <select ng-model="stim.experiment_id"
-            ng-options="experiment.id as experiment.name for experiment in experiments"></select>
-        </label>
+<form ng-submit="syncStim($event)">
+  <div style="display: inline-block; min-width: 200px; vertical-align: top;">
+    <label>
+      <div><b>Template</b></div>
+      <select ng-model="stim.template_id"
+        ng-options="template.id as template.name for template in templates"></select>
+    </label>
 
-        <label>
-          <div><b>Template ID</b></div>
-          <select ng-model="stim.template_id"
-            ng-options="template.id as template.name for template in templates"></select>
-        </label>
+    <label>
+      <div><b>View order</b></div>
+      <input type="number" ng-model="stim.view_order" step="any">
+    </label>
 
-        <label>
-          <div><b>Context</b></div>
-          <jsonarea ng-model="stim.context" style="width: 600px; height: 200px"></jsonarea>
-        </label>
+    <p><button>Save</button></p>
+  </div>
 
-        <label>
-          <div><b>View order</b></div>
-          <input type="number" ng-model="stim.view_order">
-        </label>
-
-        <p><button>Save</button></p>
-      </form>
-    </section>
-  </main>
-</div>
+  <div style="display: inline-block; vertical-align: top;">
+    <label>
+      <div><b>Context</b></div>
+      <jsonarea ng-model="stim.context" style="width: 600px; height: 100px; font: 8pt monospace;"></jsonarea>
+    </label>
+  </div>
+</form>

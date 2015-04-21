@@ -1,4 +1,4 @@
-/*jslint browser: true, devel: true */ /*globals app, summarizeResponse */
+/*jslint browser: true */ /*globals app, summarizeResponse */
 
 app.controller('admin.templates.table', function($scope, $flash, Template) {
   $scope.templates = Template.query();
