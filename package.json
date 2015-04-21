@@ -65,6 +65,7 @@
         "url.js"
       ]
     },
+    "moment": "*",
     "ng-storage": "*"
   }
 }
