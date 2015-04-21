@@ -7,66 +7,13 @@ In particular, it was originally built to interface with [Amazon Mechanical Turk
 
 ## Installation
 
-    git clone https://github.com/chbrown/formious.git
-    cd formious
-    npm install
-
-
-## Initialization
-
-    dropdb formious; createdb formious; psql formious -f schema.sql
-
-
-## Suggested Configuration
-
-* Use [supervisord](http://supervisord.org/) to monitor and restart the process if it dies.
-
-`/etc/supervisor.d/formious` (e.g.):
-
-    [program:formious]
-    directory=/www/formious
-    command=node server.js
-    user=chbrown
-
-
-## Development
-
-Debugging angular closures, this helps:
-
-    scope = angular.element($('[ng-controller]')).scope()
-
-## Controllers
-
-All modules in `/controllers/**/*.js` should, for the most part, define only a single export:
-
-```javascript
-module.exports = function(req, res) {
-  ...
-}
-```
-
-E.g., `controllers/fancy.js` might look like this
-
-```javascript
-module.exports = function(req, res) {
-  /** handle any requests for /fancy/*
-
-  req is an http-enhanced version of the http.IncomingMessage object
-  res is an http-enhanced version of the http.ServerResponse object
-
-  Additionally:
-
-  * req.url will be the full url ("/fancy/index", not just "/index")
-  */
-  ...
-  res.end();
-};
-```
-
-And, heck, while we're making arbitrary rules, let's say that this export should go at the bottom.
+    npm install -g formious
+    formious
 
 
 ## Deployment
+
+New docker images are automatically built on Docker Hub: [`chbrown/formious`](https://registry.hub.docker.com/u/chbrown/formious/)
 
 Initial:
 
