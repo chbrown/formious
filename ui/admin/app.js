@@ -1,4 +1,4 @@
-/*jslint browser: true */ /*globals _, Url, angular, cookies, CheckboxSequence */
+/*jslint browser: true */ /*globals _, Url, angular, cookies, CheckboxSequence, log, mercury */
 
 var app = angular.module('app', [
   'ngResource',
@@ -6,6 +6,18 @@ var app = angular.module('app', [
   'ui.router',
   'misc-js/angular-plugins',
 ]);
+
+var summarizeResponse = function(res) {
+  var parts = [];
+  if (res.status != 200) {
+    parts.push('Error ');
+  }
+  parts.push(res.status);
+  if (res.data) {
+    parts.push(': ' + res.data.toString());
+  }
+  return parts.join('');
+};
 
 app.directive('uiSrefActiveAny', function($state) {
   return {
@@ -26,18 +38,6 @@ app.directive('uiSrefActiveAny', function($state) {
   };
 });
 
-var summarizeResponse = function(res) {
-  var parts = [];
-  if (res.status != 200) {
-    parts.push('Error ');
-  }
-  parts.push(res.status);
-  if (res.data) {
-    parts.push(': ' + res.data.toString());
-  }
-  return parts.join('');
-};
-
 /**
 Quick Angular.js wrapper for checkbox-sequence.js
 */
@@ -50,16 +50,22 @@ app.directive('checkboxSequence', function() {
   };
 });
 
-app.directive('tbodyMap', function() {
+app.directive('object', function() {
   return {
     restrict: 'A',
-    template: '<tr ng-repeat="(key, val) in object">' +
-                '<td ng-bind="key"></td><td ng-bind="val"></td>' +
-              '</tr>',
-    // replace: true,
     scope: {
-      object: '=tbodyMap',
+      object: '=',
     },
+    link: function(scope, el) {
+      var object = angular.copy(scope.object);
+      var state = mercury.state({
+        object: mercury.value(object),
+      });
+
+      mercury.app(el[0], state, function(state) {
+        return renderObject(state.object);
+      });
+    }
   };
 });
 
@@ -75,6 +81,12 @@ app.filter('valueWhere', function() {
     if (match) {
       return match[prop];
     }
+  };
+});
+
+app.filter('keys', function() {
+  return function(object) {
+    return Object.keys(object);
   };
 });
 
@@ -430,10 +442,15 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
   })
   // mturk
   .state('admin.mturk', {
-    url: '/mturk',
+    url: '/mturk/:environment/:aws_account_id',
     templateUrl: '/ui/admin/mturk/layout.html',
     controller: 'admin.mturk',
     abstract: true,
+  })
+  .state('admin.mturk.dashboard', {
+    url: '/dashboard',
+    templateUrl: '/ui/admin/mturk/dashboard.html',
+    controller: 'admin.mturk.dashboard',
   })
   .state('admin.mturk.hits', {
     url: '/hits',
@@ -441,19 +458,30 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     abstract: true,
   })
   .state('admin.mturk.hits.table', {
-    url: '/?aws_account_id&environment',
+    url: '/',
     templateUrl: '/ui/admin/mturk/hits/all.html',
     controller: 'admin.mturk.hits.table',
   })
   .state('admin.mturk.hits.new', {
-    url: '/new?aws_account_id&environment&Title&ExternalURL',
+    url: '/new?Title&ExternalURL',
     templateUrl: '/ui/admin/mturk/hits/new.html',
     controller: 'admin.mturk.hits.new',
   })
   .state('admin.mturk.hits.edit', {
-    url: '/:HITId?aws_account_id&environment',
+    url: '/:HITId',
     templateUrl: '/ui/admin/mturk/hits/one.html',
     controller: 'admin.mturk.hits.edit',
+  })
+  // responses
+  .state('admin.responses', {
+    url: '/responses',
+    template: '<ui-view></ui-view>',
+    abstract: true,
+  })
+  .state('admin.responses.table', {
+    url: '/',
+    templateUrl: '/ui/admin/responses/all.html',
+    controller: 'admin.responses.table',
   })
   // templates
   .state('admin.templates', {

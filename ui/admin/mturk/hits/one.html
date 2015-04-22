@@ -1,118 +1,114 @@
-<main ng-controller="adminHITCtrl">
+<section class="hpad">
   <h3>HIT: {{hit.Title}}</h3>
+</section>
 
-  <section class="box">
-    <table class="keyval">
-      <tr ng-repeat="(key, val) in hit">
-        <td>{{key}}</td>
-        <td>{{val}}</td>
-      </tr>
-    </table>
-  </section>
+<section class="box hpad">
+  <table class="keyval">
+    <tr ng-repeat="(key, val) in hit">
+      <td>{{key}}</td><td>{{val}}</td>
+    </tr>
+  </table>
+</section>
 
-  <section class="box">
-    <h3>ExtendHIT</h3>
-    <span class="help">Extend the duration of this HIT or add assignments to it.</span>
-    <form ng-submit="ExtendHIT($event)">
-      <label>
-        <div><b>Max Assignments Increment</b>
-          <span class="help">
-            The number of assignments by which to increment the MaxAssignments parameter of the HIT.
-          </span>
-        </div>
-        <input type="text" ng-model="extension.MaxAssignmentsIncrement">
-      </label>
-      <label>
-        <div><b>Expiration Increment (e.g., 24h)</b>
-          <span class="help">The amount of time, in seconds, by which to extend the expiration date. If the HIT has not yet expired, this amount is added to the HIT's expiration date. If the HIT has expired, the new expiration date is the current time plus this value.</span>
-        </div>
-        <input type="text" ng-model="extension.ExpirationIncrement">
-      </label>
-      <p><button>ExtendHIT</button></p>
-    </form>
-  </section>
-
-  <section class="box">
-    <h3>Import</h3>
-    <span class="help">Import data that was submitted to Mechanical Turk directly into the local database.<br>
-      Because each Assignment has a unique identifier (the AssignmentsId field), duplicate imports will be ignored.</span>
-    <p>
-      <!-- <form method="POST" action="{{hit.HITId + '/import'}}"></form> -->
-      <form ng-submit="import($event)">
-        <p><button>Import</button></p>
-      </form>
-    </p>
-  </section>
-
-  <!-- <section class="box">
-    <h3>Export</h3>
-    <div>
-      <a href="{{hit.HITId}}.csv">HIT_{{hit.HITId}}.csv</a>
-      &middot; <a href="{{hit.HITId}}.csv?view">View</a>
-    </div>
-    <div>
-      <a href="{{hit.HITId}}.tsv">HIT_{{hit.HITId}}.tsv</a>
-      &middot; <a href="{{hit.HITId}}.tsv?view">View</a>
-    </div>
-  </section> -->
-
-  <section class="box">
-    <h3>Bonuses</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>WorkerId</th>
-          <th>BonusAmount</th>
-          <th>Reason</th>
-          <th>GrantTime</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr ng-repeat="bonus_payment in bonus_payments">
-          <td>{{bonus_payment.WorkerId}}</td>
-          <td>{{bonus_payment.BonusAmount.FormattedPrice}}</td>
-          <td>{{bonus_payment.Reason}}</td>
-          <td>{{bonus_payment.GrantTime}}</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-
-  <section class="box" ng-repeat="assignment in assignments">
-    <h3>Assignment: {{assignment.properties.AssignmentId}}</h3>
-
-    <div ng-controller="adminAssignmentEditor">
-      <div>
-        Status:
-        <span class="{{assignment.properties.AssignmentStatus}}">{{assignment.properties.AssignmentStatus}}</span>
-        <span ng-switch="assignment.properties.AssignmentStatus">
-          <span ng-switch-when="Submitted">
-            <button ng-click="approve(assignment.properties.AssignmentId, $event)">Approve</button>
-            <button ng-click="reject(assignment.properties.AssignmentId, $event)">Reject</button>
-          </span>
-          <span ng-switch-when="Rejected">
-            <button ng-click="approve_rejected(assignment.properties.AssignmentId, $event)">Unreject and Approve</button>
-          </span>
+<section class="box hpad">
+  <h3>ExtendHIT</h3>
+  <span class="help">Extend the duration of this HIT or add assignments to it.</span>
+  <form ng-submit="ExtendHIT($event)">
+    <label>
+      <div><b>Max Assignments Increment</b>
+        <span class="help">
+          The number of assignments by which to increment the MaxAssignments parameter of the HIT.
         </span>
       </div>
-      <div>
-        <label>
-          <input value="{{assignment.participant.bonus_owed}}" placeholder="Amount">
-        </label>
-        <label>
-          <input value="{{assignment.participant.reason}}" placeholder="Reason">
-        </label>
-        <button ng-click="GrantBonus">Grant Bonus</button>
+      <input type="text" ng-model="extension.MaxAssignmentsIncrement">
+    </label>
+    <label>
+      <div><b>Expiration Increment (e.g., 24h)</b>
+        <span class="help">The amount of time, in seconds, by which to extend the expiration date. If the HIT has not yet expired, this amount is added to the HIT's expiration date. If the HIT has expired, the new expiration date is the current time plus this value.</span>
       </div>
-    </div>
+      <input type="text" ng-model="extension.ExpirationIncrement">
+    </label>
+    <p><button>ExtendHIT</button></p>
+  </form>
+</section>
 
+<section class="box hpad">
+  <h3>Import</h3>
+  <span class="help">Import data that was submitted to Mechanical Turk directly into the local database.<br>
+    Because each Assignment has a unique identifier (the AssignmentId field), duplicate imports will be ignored.</span>
+  <p>
+    <!-- <form method="POST" action="{{hit.HITId + '/import'}}"></form> -->
+    <form ng-submit="import($event)">
+      <p><button>Import</button></p>
+    </form>
+  </p>
+</section>
+
+<!-- <section class="box hpad">
+  <h3>Export</h3>
+  <div>
+    <a href="{{hit.HITId}}.csv">HIT_{{hit.HITId}}.csv</a>
+    &middot; <a href="{{hit.HITId}}.csv?view">View</a>
+  </div>
+  <div>
+    <a href="{{hit.HITId}}.tsv">HIT_{{hit.HITId}}.tsv</a>
+    &middot; <a href="{{hit.HITId}}.tsv?view">View</a>
+  </div>
+</section> -->
+
+<section class="box hpad">
+  <h3>Bonuses</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>WorkerId</th>
+        <th>BonusAmount</th>
+        <th>Reason</th>
+        <th>GrantTime</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="bonus_payment in bonus_payments">
+        <td>{{bonus_payment.WorkerId}}</td>
+        <td>{{bonus_payment.BonusAmount.FormattedPrice}}</td>
+        <td>{{bonus_payment.Reason}}</td>
+        <td>{{bonus_payment.GrantTime}}</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="hpad">
+  <h3>Assignments</h3>
+  <label>
+    Show <input ng-model="$storage.assignments_limit" type="number"> out of {{assignments.length}}
+  </label>
+  <label>
+    <input ng-model="$storage.assignments_show_times" type="checkbox"> <b>Show times</b>
+  </label>
+  <label>
+    <input ng-model="$storage.assignments_show_bonus" type="checkbox"> <b>Show bonus</b>
+  </label>
+  <label>
+    <input ng-model="$storage.assignments_show_answer" type="checkbox"> <b>Show answer</b>
+  </label>
+  <label>
+    <input ng-model="$storage.assignments_show_block" type="checkbox"> <b>Show 'Block worker'</b>
+  </label>
+  <label>
     <div>
-      <table class="keyval">
-        <tbody tbody-map="assignment.properties"></tbody>
-        <tbody tbody-map="assignment.answers"></tbody>
-        <tbody tbody-map="assignment.participant" ng-show="assignment.participant"></tbody>
-      </table>
-      <div ng-hide="assignment.participant">Could not find participant</div>
+      <b>Responses Summarizer</b>
+      <span class="help">A Javascript function from an Array of responses to a serializable object summarizing the responses.</span>
     </div>
-  </section>
-</main>
+    <div class="code">function(responses) {</div>
+    <div class="code" style="margin-left: 1em">
+      <textarea enhance ng-model="$storage.responses_summarizer"
+        class="code" style="width: 100%; min-height: 100px"></textarea>
+    </div>
+    <div class="code">}</div>
+  </label>
+</section>
+
+<section class="box" ng-repeat="assignment in assignments | limitTo:$storage.assignments_limit">
+  <div assignment="assignment"></div>
+</section>

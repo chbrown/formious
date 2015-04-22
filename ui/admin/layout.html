@@ -3,7 +3,7 @@
     <a ui-sref="admin.aws_accounts.table">AWS Accounts</a>
   </span>
   <span ui-sref-active-any="{current: 'admin.mturk.hits'}" class="tab">
-    <a ui-sref="admin.mturk.hits.table">MTurk</a>
+    <a ui-sref="admin.mturk.hits.table({environment: null, aws_account_id: null})">MTurk</a>
   </span>
   <span ui-sref-active-any="{current: 'admin.administrators'}" class="tab">
     <a ui-sref="admin.administrators.table">Administrators</a>
@@ -13,6 +13,9 @@
   </span>
   <span ui-sref-active-any="{current: 'admin.templates'}" class="tab">
     <a ui-sref="admin.templates.table">Templates</a>
+  </span>
+  <span ui-sref-active-any="{current: 'admin.responses'}" class="tab">
+    <a ui-sref="admin.responses.table">Responses</a>
   </span>
   <div style="float: right">
     <!-- <a ui-sref="admin.administrators.edit({id: 'me'})" ui-sref-active="current" class="tab">me</a> -->

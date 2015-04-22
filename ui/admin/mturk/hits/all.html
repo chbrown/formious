@@ -7,7 +7,7 @@
 </section>
 <section ng-repeat="hit in hits" class="box hpad">
   <h3>
-    <a href="/admin/mturk/hits/{{hit.HITId}}">{{hit.Title}}</a>
+    <a ui-sref="admin.mturk.hits.edit({HITId: hit.HITId})">{{hit.Title}}</a>
   </h3>
   <table class="keyval">
     <tr ng-repeat="(key, val) in hit">

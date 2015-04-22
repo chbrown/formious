@@ -1,0 +1,61 @@
+<div class="hpad">
+  <h3>Assignment: {{assignment.AssignmentId}}</h3>
+  <h4>WorkerId: {{assignment.WorkerId}}</h4>
+</div>
+
+<section class="hpad" ng-if="$storage.assignments_show_times">
+  <table class="keyval">
+    <tr><td>AutoApprovalTime</td><td>{{assignment.AutoApprovalTime}}</td></tr>
+    <tr><td>AcceptTime</td><td>{{assignment.AcceptTime}}</td></tr>
+    <tr><td>SubmitTime</td><td>{{assignment.SubmitTime}}</td></tr>
+    <tr><td>ApprovalTime</td><td>{{assignment.ApprovalTime}}</td></tr>
+  </table>
+</section>
+
+<section class="hpad">
+  <div>
+    <b>Status:</b>
+    <span class="{{assignment.AssignmentStatus}}">{{assignment.AssignmentStatus}}</span>
+  </div>
+  <span ng-show="assignment.AssignmentStatus == 'Submitted'">
+    <button ng-click="setStatus('Approve')">Approve</button>
+    <button ng-click="setStatus('Reject')">Reject</button>
+  </span>
+  <span ng-show="assignment.AssignmentStatus == 'Rejected'">
+    <button ng-click="setStatus('ApproveRejected')">Unreject and Approve</button>
+  </span>
+  <span ng-show="assignment.AssignmentStatus == 'Submitted' || assignment.AssignmentStatus == 'Rejected'">
+    <input ng-model="RequesterFeedback" placeholder="Requester Feedback">
+    <span class="help">1024 character max</span>
+  </span>
+</section>
+
+<section class="hpad" ng-if="$storage.assignments_show_bonus">
+  <b>Bonus:</b>
+  <label>
+    <input ng-model="bonus.bonus_owed" placeholder="Amount">
+  </label>
+  <label>
+    <input ng-model="bonus.reason" placeholder="Reason">
+  </label>
+  <button ng-click="grantBonus()">Grant Bonus</button>
+</section>
+
+<section class="hpad" ng-if="$storage.assignments_show_block">
+  <button ng-click="blockWorker(blockWorkerReason)">Block Worker</button>
+  <input ng-model="blockWorkerReason" placeholder="Reason">
+</section>
+
+<div class="hpad" ng-if="$storage.assignments_show_answer">
+  <h4>Assignment Answer</h4>
+  <table class="keyval">
+    <tr ng-repeat="(key, val) in assignment.Answer">
+      <td ng-bind="key"></td><td ng-bind="val"></td>
+    </tr>
+  </table>
+</div>
+
+<section class="hpad">
+  <h4>Responses</h4>
+  <div ng-if="responses" object="responses"></div>
+</section>
