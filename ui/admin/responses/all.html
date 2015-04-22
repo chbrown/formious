@@ -1,40 +1,41 @@
-<main>
+<section class="hpad">
   <h3>Responses</h3>
+  <p>Showing {{responses.length}} out of {{responses[0].count}}</p>
+</section>
 
-  <div ng-controller="adminResponsesCtrl" class="box">
-    <table class="striped grid padded fill responses">
-      <thead>
-        <tr>
-          <td>response_id</td>
-          <td>participant_id</td>
-          <td>participant_name</td>
-          <td>experiment_id</td>
-          <td>stim_id</td>
-          <td ng-repeat="key in context_keys" class="context">
-            {{key}}
-          </td>
-          <td ng-repeat="key in value_keys" class="value">
-            {{key}}
-          </td>
-          <td>created</td>
-        </tr>
-      </thead>
-      <tbody>
-        <tr ng-repeat="response in responses">
-          <td>{{response.id}}</td>
-          <td>{{response.participant_id}}</td>
-          <td>{{response.name || response.aws_worker_id}}</td>
-          <td>{{response.experiment_id}}</td>
-          <td>{{response.stim_id}}</td>
-          <td ng-repeat="key in context_keys" class="context">
-            {{response.context[key]}}
-          </td>
-          <td ng-repeat="key in value_keys" class="value">
-            {{response.value[key]}}
-          </td>
-          <td><time>{{response.created | date:"yyyy-MM-dd"}}</time></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</main>
+<section class="box">
+  <table class="striped lined padded fill">
+    <thead>
+      <tr>
+        <th>Response ID</th>
+        <th>Stim ID</th>
+        <th>Experiment ID</th>
+        <th>Participant ID</th>
+        <th>AWS Worker ID</th>
+        <th ng-repeat="key in context_keys" class="context">
+          context.{{key}}
+        </th>
+        <th ng-repeat="key in value_keys" class="value">
+          value.{{key}}
+        </th>
+        <th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="response in responses">
+        <td>{{response.id}}</td>
+        <td>{{response.stim_id}}</td>
+        <td>{{response.experiment_id}}</td>
+        <td>{{response.participant_id}}</td>
+        <td>{{response.aws_worker_id}}</td>
+        <td ng-repeat="key in context_keys" class="context">
+          {{response.context[key]}}
+        </td>
+        <td ng-repeat="key in value_keys" class="value">
+          {{response.value[key]}}
+        </td>
+        <td><time>{{response.created | date:"yyyy-MM-dd"}}</time></td>
+      </tr>
+    </tbody>
+  </table>
+</section>

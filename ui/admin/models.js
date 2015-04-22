@@ -57,6 +57,12 @@ app.service('Participant', function($resource) {
   });
 });
 
+app.service('Response', function($resource) {
+  return $resource('/api/responses/:id', {
+    id: '@id',
+  });
+});
+
 app.service('Stim', function($resource) {
   // map: {'id': 'name'}
   var Stim = $resource('/api/experiments/:experiment_id/stims/:id', {

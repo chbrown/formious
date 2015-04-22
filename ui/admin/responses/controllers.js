@@ -1,14 +1,9 @@
 /*jslint browser: true */ /*globals _, app */
 
-app.controller('adminResponsesCtrl', function($scope) {
-  $scope.responses = window.responses;
-
-  var contexts = {};
-  var values = {};
-  $scope.responses.forEach(function(response) {
-    _.extend(contexts, response.context);
-    _.extend(values, response.value);
+app.controller('admin.responses.table', function($scope, Response) {
+  $scope.value_keys = [];
+  $scope.responses = Response.query({}, function() {
+    $scope.context_keys = _.chain($scope.responses).pluck('context').map(_.keys).flatten().uniq().without('$$hashKey').value();
+    $scope.value_keys = _.chain($scope.responses).pluck('value').map(_.keys).flatten().uniq().without('$$hashKey').value();
   });
-  $scope.context_keys = Object.keys(contexts);
-  $scope.value_keys = Object.keys(values);
 });
