@@ -173,7 +173,9 @@ R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
 });
 
 /** GET /experiments/:experiment_id/responses?token=ABCDEF12345
-Requires authorization! Show only the responses that reference this Experiment. */
+
+Requires authorization, but only by access token.
+Show only the responses that reference this Experiment. */
 R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
   var experiment_id = m[1];
 
@@ -181,40 +183,21 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
   models.AccessToken.check(urlObj.query.token, 'experiments', experiment_id, function(err) {
     if (err) return res.die(err);
 
-    // authorization granted
-    async.auto({
-      experiment: function(callback) {
-        models.Experiment.one({id: experiment_id}, callback);
-      },
-      responses: function(callback) {
-        var from_clause = [
-          'responses',
-          'INNER JOIN stims ON stims.id = responses.stim_id',
-          'INNER JOIN participants ON participants.id = responses.participant_id',
-        ].join(' ');
+    // yay, authorization granted
 
-        db.Select(from_clause)
-        .add('responses.*', 'stims.context', 'stims.experiment_id', 'participants.name', 'participants.aws_worker_id')
-        .where('stims.experiment_id = ?', experiment_id)
-        .orderBy('responses.id DESC')
-        .execute(callback);
-      },
-    }, function(err, results) {
+    db.Select('responses, participants, stims')
+    .where('participants.id = responses.participant_id')
+    .where('stims.id = responses.stim_id')
+    .add('responses.*', 'stims.context', 'stims.experiment_id', 'participants.name', 'participants.aws_worker_id')
+    .whereEqual({experiment_id: experiment_id})
+    .orderBy('responses.id DESC')
+    .execute(function(err, responses) {
       if (err) return res.die(err);
-      // results.experiment.name
 
-      // var stringifier = new Tabulator({peek: 100});
-      // res.setHeader('Content-Type', 'text/html');
-      // res.write('<style>' +
-      //   'body { font-size: 80%; } ' +
-      //   'table { border-collapse: collapse; } ' +
-      //   'table td { border: 1px solid #ccc; } ' +
-      // '</style>');
-      var stringifier = new sv.Stringifier({peek: 100});
-      // res.setHeader('Content-Type', 'text/csv');
-      stringifier.pipe(res);
-      results.responses.forEach(function(response) {
-        var row = {
+      var writer = req.createWriter();
+      writer.pipe(res);
+      responses.forEach(function(response) {
+        var response_object = {
           response_id: response.id,
           participant_id: response.participant_id,
           participant_name: response.name || response.aws_worker_id,
@@ -222,12 +205,12 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
           stim_id: response.stim_id,
           created: response.created,
         };
-        // merge those static values with the dynamic context and value objects
-        _.extend(row, response.context, response.value);
-
-        stringifier.write(row);
+        // merge those static values with the dynamic context and value objects,
+        // using _.defaults so that further-left arguments have priority
+        var row = _.defaults(response.value, response_object, response.context);
+        writer.write(row);
       });
-      stringifier.end();
+      writer.end();
     });
   });
 });
