@@ -25,7 +25,23 @@ app.controller('admin.aws_accounts.edit', function($scope, $http, $xml, $flash, 
             Operation: 'GetAccountBalance',
           }
         }).then(function(res) {
-          // res.data is a Document instance
+          /** res.data is a Document instance; a successful response looks like this:
+
+              <?xml version="1.0"?>
+              <GetAccountBalanceResponse>
+                <OperationRequest>
+                  <RequestId>2d3fc952-8df3-b65b-6cc4-68ac6892b71a</RequestId>
+                </OperationRequest>
+                <GetAccountBalanceResult>
+                  <Request><IsValid>True</IsValid></Request>
+                  <AvailableBalance>
+                    <Amount>239.410</Amount>
+                    <CurrencyCode>USD</CurrencyCode>
+                    <FormattedPrice>$239.41</FormattedPrice>
+                  </AvailableBalance>
+                </GetAccountBalanceResult>
+              </GetAccountBalanceResponse>
+          */
           environment.account_balance = res.data.querySelector('FormattedPrice').textContent;
         });
       });
