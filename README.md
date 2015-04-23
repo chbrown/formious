@@ -27,6 +27,14 @@ Updating:
       docker run -d --name formious -h formious --link db:db -p 127.0.0.1:1451:80 --restart always chbrown/formious
 
 
+### Development
+
+Sync with the remote server's database:
+
+    dropdb formious; createdb formious
+    ssh -C semantics 'pg_dump -h localhost -p 15432 -U postgres formious' | psql formious
+
+
 ## License
 
 Copyright 2011–2015 Christopher Brown. [MIT Licensed](http://opensource.org/licenses/MIT).
