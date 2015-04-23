@@ -29,7 +29,7 @@ Updating:
 
 ### Development
 
-Sync with the remote server's database:
+Pull the remote server's database into a local database:
 
     dropdb formious; createdb formious
     ssh -C semantics 'pg_dump -h localhost -p 15432 -U postgres formious' | psql formious

@@ -31,4 +31,17 @@ R.get(/^\/ui\/([^?]+)(\?|$)/, function(req, res, m) {
     .pipe(res);
 });
 
+R.get('/info', function(req, res) {
+  var package_json = require('../package.json');
+  var info = {
+    name: package_json.name,
+    version: package_json.version,
+    description: package_json.description,
+    homepage: package_json.homepage,
+    author: package_json.author,
+    license: package_json.license,
+  };
+  res.json(info);
+});
+
 module.exports = R.route.bind(R);
