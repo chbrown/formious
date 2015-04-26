@@ -10,7 +10,6 @@ http.ServerResponse.prototype.die = function(error) {
   return this.text(message);
 };
 
-var stream = require('stream');
 var streaming = require('streaming');
 var url = require('url');
 var sv = require('sv');
@@ -30,7 +29,10 @@ http.IncomingMessage.prototype.createWriter = function() {
   var accept = urlObj.query.accept || this.headers.accept || 'application/json; boundary=LF';
   // set empty content_type and no-op stream
   var content_type = null;
-  var writable_stream = new stream.PassThrough();
+  // set default to streaming.json.Stringifier() so that we don't trip up on
+  // "TypeError: Invalid non-string/buffer chunk" errors when trying to write
+  // an object to the default writer
+  var writable_stream = new streaming.json.Stringifier();
   // now check that header against the accept values we support
   if (accept.match(/application\/json;\s*boundary=(NL|LF|EOL)/)) {
     content_type = 'application/json; boundary=LF';
@@ -51,7 +53,7 @@ http.IncomingMessage.prototype.createWriter = function() {
   else {
     // new streaming.Sink({objectMode: true});
     // res.status(406).error(error, req.headers);
-    logger.info('Cannot format response to Accept value: %j', accept);
+    logger.info('Cannot find writer for Accept value: %j; using default', accept);
   }
   // hijack the pipe function so that we can call setHeader on whatever we're piping to.
   writable_stream._pipe = writable_stream.pipe;
