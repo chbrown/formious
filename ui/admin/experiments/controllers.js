@@ -25,7 +25,7 @@ app.controller('admin.experiments.table', function($scope, $flash, $state, $loca
 });
 
 app.controller('admin.experiments.edit', function($scope, $flash, $state, $localStorage,
-    Experiment, Template, Administrator, AWSAccount) {
+    Experiment, Template, Administrator) {
   $scope.$storage = $localStorage.$default({expand_experiment_html: false});
 
   $scope.experiment = Experiment.get({id: $state.params.experiment_id});
@@ -43,7 +43,7 @@ app.controller('admin.experiments.edit', function($scope, $flash, $state, $local
   };
 
   // the 'save' event is broadcast on rootScope when command+S is pressed
-  // $scope.$on('save', $scope.syncExperiment);
+  $scope.$on('save', $scope.syncExperiment);
 
   $scope.responses = function(ev) {
     ev.preventDefault();
