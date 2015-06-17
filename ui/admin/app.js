@@ -179,7 +179,7 @@ app.service('Cache', function($q, $localStorage) {
 
 app.directive('jsonarea', function() {
   // mostly from github.com/chbrown/rfc6902 [gh-pages]
-  // <jsonarea ng-model="stim.context" style="width: 600px; height: 200px"></jsonarea>
+  // <jsonarea ng-model="block.context" style="width: 600px; height: 200px"></jsonarea>
   return {
     restrict: 'E',
     template: '<div>' +
@@ -429,16 +429,16 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     templateUrl: '/ui/admin/experiments/one.html',
     controller: 'admin.experiments.edit',
   })
-  // experiments/stims
-  .state('admin.experiments.edit.stims', {
-    url: '/stims',
-    templateUrl: '/ui/admin/experiments/stims/all.html',
-    controller: 'admin.experiments.edit.stims',
+  // experiments/blocks
+  .state('admin.experiments.edit.blocks', {
+    url: '/blocks',
+    templateUrl: '/ui/admin/experiments/blocks/all.html',
+    controller: 'admin.experiments.edit.blocks',
   })
-  .state('admin.experiments.edit.stims.edit', {
-    url: '/:stim_id',
-    templateUrl: '/ui/admin/experiments/stims/one.html',
-    controller: 'admin.experiments.edit.stims.edit',
+  .state('admin.experiments.edit.blocks.edit', {
+    url: '/:block_id',
+    templateUrl: '/ui/admin/experiments/blocks/one.html',
+    controller: 'admin.experiments.edit.blocks.edit',
   })
   // mturk
   .state('admin.mturk', {

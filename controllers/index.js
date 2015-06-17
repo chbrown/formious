@@ -31,7 +31,7 @@ R.get(/^\/ui\/([^?]+)(\?|$)/, function(req, res, m) {
     .pipe(res);
 });
 
-R.get('/info', function(req, res) {
+R.get(/^\/info$/, function(req, res) {
   var package_json = require('../package.json');
   var info = {
     name: package_json.name,

@@ -16,9 +16,9 @@ R.get(/^\/api\/responses(\?|$)/, function(req, res) {
   // set a maximum limit at 1000, but default it to 250
   var limit = Math.min(urlObj.query.limit || 250, 1000);
 
-  var select = db.Select('responses, participants, stims')
+  var select = db.Select('responses, participants, blocks')
   .where('participants.id = responses.participant_id')
-  .where('stims.id = responses.stim_id')
+  .where('blocks.id = responses.block_id')
   .add([
     '*',
     // 'id' and 'created' from the other tables conflict with responses

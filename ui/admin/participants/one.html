@@ -19,7 +19,7 @@
     <thead>
       <tr>
         <th>Submitted</th>
-        <th>Stimlist</th>
+        <th>Blocklist</th>
         <th></th>
       </tr>
     </thead>
@@ -28,7 +28,7 @@
       {{#user.responses}}
         <tr>
           <td>{{datetimefmt(submitted)}}</td>
-          <td>{{stimlist}}</td>
+          <td>{{blocklist}}</td>
           <td style="max-width: 600px"><div class="hover-flow">{{{JSON.stringify(others)}}}</div></td>
         </tr>
       {{/}}

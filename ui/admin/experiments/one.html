@@ -10,7 +10,7 @@
 
 <section class="help hpad">
   An experiment is a list of stimuli that will be presented to the participant in sequence.
-  Each item in the experiment is known as a "stim", and can be pretty much anything, like a consent form, instructions, or adaptive classification task.
+  Each item in the experiment is known as a "block", and can be pretty much anything, like a consent form, instructions,adaptive classification task, or group of other blocks.
 </section>
 
 <section class="box hpad">
@@ -55,6 +55,6 @@
 
 <ui-view>
   <section class="hpad">
-    <a ui-sref="admin.experiments.edit.stims" ng-show="experiment.id">Show stims</a>
+    <a ui-sref="admin.experiments.edit.blocks" ng-show="experiment.id">Show blocks</a>
   </section>
 </ui-view>

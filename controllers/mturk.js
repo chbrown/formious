@@ -21,16 +21,16 @@ R.post(/^\/mturk\/externalSubmit/, function(req, res) {
     var aws_worker_id = data.workerId || 'WORKER_ID_NOT_AVAILABLE';
     delete data.workerId;
 
-    // potentially null stim_id
-    var stim_id = data.stim_id || null;
-    delete data.stim_id;
+    // potentially null block_id
+    var block_id = data.block_id || null;
+    delete data.block_id;
 
     models.Participant.addResponse({
       aws_worker_id: aws_worker_id,
       ip_address: req.headers['x-real-ip'] || req.client.remoteAddress,
       user_agent: req.headers['user-agent'],
     }, {
-      stim_id: stim_id,
+      block_id: block_id,
       value: data,
     }, function(err) {
       if (err) return res.die(err);

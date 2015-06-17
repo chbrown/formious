@@ -29,7 +29,7 @@ function parseAnswer(answer_escaped) {
       <?xml version="1.0" encoding="UTF-8" standalone="no"?>
       <QuestionFormAnswers xmlns="http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2005-10-01/QuestionFormAnswers.xsd">
         <Answer>
-          <QuestionIdentifier>stim_id</QuestionIdentifier>
+          <QuestionIdentifier>block_id</QuestionIdentifier>
           <FreeText>1038</FreeText>
         </Answer>
         <Answer>
@@ -49,7 +49,7 @@ function parseAnswer(answer_escaped) {
   Returns a plain object like:
 
       {
-        stim_id: "1038",
+        block_id: "1038",
         feedback_guess_percentage: "20",
         feedback_confident_percentage: "20",
         feedback_general: "I would love to see the answers between questions.",

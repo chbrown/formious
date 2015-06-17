@@ -1,14 +1,14 @@
-<form ng-submit="syncStim($event)">
+<form ng-submit="syncBlock($event)">
   <div style="display: inline-block; min-width: 200px; vertical-align: top;">
     <label>
       <div><b>Template</b></div>
-      <select ng-model="stim.template_id"
+      <select ng-model="block.template_id"
         ng-options="template.id as template.name for template in templates"></select>
     </label>
 
     <label>
       <div><b>View order</b></div>
-      <input type="number" ng-model="stim.view_order" step="any">
+      <input type="number" ng-model="block.view_order" step="any">
     </label>
 
     <p><button>Save</button></p>
@@ -17,7 +17,7 @@
   <div style="display: inline-block; vertical-align: top;">
     <label>
       <div><b>Context</b></div>
-      <jsonarea ng-model="stim.context" style="width: 600px; height: 100px; font: 8pt monospace;"></jsonarea>
+      <jsonarea ng-model="block.context" style="width: 600px; height: 100px; font: 8pt monospace;"></jsonarea>
     </label>
   </div>
 </form>

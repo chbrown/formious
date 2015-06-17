@@ -5,23 +5,22 @@ var async = require('async');
 var handlebars = require('handlebars');
 var logger = require('loge');
 var Router = require('regex-router');
-var sv = require('sv');
 var url = require('url');
 
 var db = require('../db');
 var models = require('../models');
 
-var _cached_stim_template; // a Handlebars template function
-function getStimTemplate(callback) {
-  if (_cached_stim_template) {
-    callback(null, _cached_stim_template);
+var _cached_block_template; // a Handlebars template function
+function getBlockTemplate(callback) {
+  if (_cached_block_template) {
+    callback(null, _cached_block_template);
   }
   else {
-    var stim_template_filepath = path.join(__dirname, '..', 'ui', 'stim.html');
-    fs.readFile(stim_template_filepath, {encoding: 'utf8'}, function(err, stim_template) {
+    var block_template_filepath = path.join(__dirname, '..', 'ui', 'block.html');
+    fs.readFile(block_template_filepath, {encoding: 'utf8'}, function(err, block_template) {
       if (err) return callback(err);
-      _cached_stim_template = handlebars.compile(stim_template);
-      callback(null, _cached_stim_template);
+      _cached_block_template = handlebars.compile(block_template);
+      callback(null, _cached_block_template);
     });
   }
 }
@@ -40,56 +39,56 @@ var R = new Router(function(req, res) {
 */
 
 /** GET /experiments/:experiment_id
-Redirect to first stim of experiment
+Redirect to first block of experiment
 */
 R.get(/^\/experiments\/(\d+)(\?|$)/, function(req, res, m) {
   var experiment_id = m[1];
 
-  db.Select('stims')
+  db.Select('blocks')
   .where('experiment_id = ?', experiment_id)
   .orderBy('view_order')
   .limit(1)
-  .execute(function(err, stims) {
+  .execute(function(err, blocks) {
     if (err) return res.die(err);
-    if (stims.length === 0) return res.die('No available stims');
+    if (blocks.length === 0) return res.die('No available blocks');
 
     var urlObj = url.parse(req.url, true);
-    urlObj.pathname = '/experiments/' + experiment_id + '/stims/' + stims[0].id;
-    var stim_url = url.format(urlObj);
+    urlObj.pathname = '/experiments/' + experiment_id + '/blocks/' + blocks[0].id;
+    var block_url = url.format(urlObj);
 
-    res.redirect(stim_url);
+    res.redirect(block_url);
   });
 });
 
-/** GET /experiments/:experiment_id/stims/:stim_id
-Render stim as html
+/** GET /experiments/:experiment_id/blocks/:block_id
+Render block as html
 */
-R.get(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
+R.get(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, function(req, res, m) {
   var experiment_id = m[1];
-  var stim_id = m[2];
+  var block_id = m[2];
 
   async.auto({
     experiment: function(callback) {
       models.Experiment.one({id: experiment_id}, callback);
     },
-    stim: function(callback) {
-      models.Stim.one({id: stim_id}, callback);
+    block: function(callback) {
+      models.Block.one({id: block_id}, callback);
     },
-    template: ['stim', function(callback, results) {
-      models.Template.one({id: results.stim.template_id}, callback);
+    template: ['block', function(callback, results) {
+      models.Template.one({id: results.block.template_id}, callback);
     }],
   }, function(err, results) {
     if (err) return res.die(err);
 
-    // stim_globals is given to all stims, in case they want the values.
+    // block_globals is given to all blocks, in case they want the values.
     // it's mostly metadata, compared to the states.
     var urlObj = url.parse(req.url, true);
 
     // context: the current state to render the template with
     // urlObj.query will usually have the fields: assignmentId, hitId, turkSubmitTo, workerId
-    var context = _.extend(results.stim.context || {}, urlObj.query, {
+    var context = _.extend(results.block.context || {}, urlObj.query, {
       experiment_id: experiment_id,
-      stim_id: stim_id,
+      block_id: block_id,
     });
 
     // need a better default for missing html
@@ -102,25 +101,25 @@ R.get(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
       logger.error('Error compiling template markup', exc);
     }
 
-    getStimTemplate(function(err, stim_template) {
+    getBlockTemplate(function(err, block_template) {
       if (err) return res.die(err);
 
-      var stim_html = stim_template({
+      var block_html = block_template({
         context: JSON.stringify(context).replace(/<\//g, '<\\/'),
         header: results.experiment.html,
         html: rendered_html,
       });
-      res.html(stim_html);
+      res.html(block_html);
     });
   });
 });
 
-/** POST /experiments/:experiment_id/stims/:stim_id
+/** POST /experiments/:experiment_id/blocks/:block_id
 Save response
 */
-R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
+R.post(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, function(req, res, m) {
   var experiment_id = m[1];
-  var stim_id = m[2];
+  var block_id = m[2];
   var urlObj = url.parse(req.url, true);
 
   req.readData(function(err, data) {
@@ -132,16 +131,16 @@ R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
     var ready = function(err) {
       if (err) return res.die(err);
 
-      models.Stim.nextStimId(experiment_id, stim_id, function(err, next_stim_id) {
+      models.Block.nextBlockId(experiment_id, block_id, function(err, next_block_id) {
         if (err) return res.die(err);
 
         // http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ExternalQuestionArticle.html
         // sadly, this redirect_to doesn't work. Hopefully the user will have a proper
-        // POST-to-MT form in their last stim
+        // POST-to-MT form in their last block
         var redirect_to = urlObj.query.turkSubmitTo + '/mturk/externalSubmit?assignmentId=' + urlObj.query.assignmentId;
-        if (next_stim_id) {
+        if (next_block_id) {
           // only change the path part of the url
-          urlObj.pathname = '/experiments/' + experiment_id + '/stims/' + next_stim_id;
+          urlObj.pathname = '/experiments/' + experiment_id + '/blocks/' + next_block_id;
           redirect_to = url.format(urlObj);
         }
 
@@ -162,7 +161,7 @@ R.post(/^\/experiments\/(\d+)\/stims\/(\d+)(\?|$)/, function(req, res, m) {
         ip_address: req.headers['x-real-ip'] || req.client.remoteAddress,
         user_agent: req.headers['user-agent'],
       }, {
-        stim_id: stim_id,
+        block_id: block_id,
         value: data,
       }, ready);
     }
@@ -185,10 +184,10 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
 
     // yay, authorization granted
 
-    db.Select('responses, participants, stims')
+    db.Select('responses, participants, blocks')
     .where('participants.id = responses.participant_id')
-    .where('stims.id = responses.stim_id')
-    .add('responses.*', 'stims.context', 'stims.experiment_id', 'participants.name', 'participants.aws_worker_id')
+    .where('blocks.id = responses.block_id')
+    .add('responses.*', 'blocks.context', 'blocks.experiment_id', 'participants.name', 'participants.aws_worker_id')
     .whereEqual({experiment_id: experiment_id})
     .orderBy('responses.id DESC')
     .execute(function(err, responses) {
@@ -202,7 +201,7 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
           participant_id: response.participant_id,
           participant_name: response.name || response.aws_worker_id,
           experiment_id: response.experiment_id,
-          stim_id: response.stim_id,
+          block_id: response.block_id,
           created: response.created,
         };
         // merge those static values with the dynamic context and value objects,

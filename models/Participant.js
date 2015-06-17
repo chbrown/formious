@@ -11,7 +11,7 @@ Participant.addResponse = function(participant, response, callback) {
     user_agent: String, // optional
   }
   response: {
-    stim_id: Number, // optional
+    block_id: Number, // optional
     value: Object, // optional
     assignment_id: String, // optional
   }

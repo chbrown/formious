@@ -17,7 +17,7 @@
     <tbody>
       <tr ng-repeat="experiment in experiments">
         <td>
-          <a ui-sref="admin.experiments.edit.stims({experiment_id: experiment.id})">{{experiment.name}}</a>
+          <a ui-sref="admin.experiments.edit.blocks({experiment_id: experiment.id})">{{experiment.name}}</a>
         </td>
         <td><time>{{experiment.created | date:"yyyy-MM-dd"}}</time></td>
         <td>

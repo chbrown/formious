@@ -1,58 +1,59 @@
 /*jslint browser: true */ /*globals _, app, summarizeResponse */
 
-app.controller('admin.experiments.edit.stims', function($scope, $localStorage, $state, $flash, $q, Template, Stim, parseTabularFile) {
+app.controller('admin.experiments.edit.blocks', function($scope, $localStorage, $state, $flash, $q,
+  Template, Block, parseTabularFile) {
   $scope.$storage = $localStorage;
-  $scope.stims = Stim.query({experiment_id: $state.params.experiment_id});
+  $scope.blocks = Block.query({experiment_id: $state.params.experiment_id});
   $scope.templates = Template.query();
 
-  $scope.deleteStim = function(stim) {
-    stim.$delete(function() {
-      $scope.stims.splice($scope.stims.indexOf(stim), 1);
+  $scope.deleteBlock = function(block) {
+    block.$delete(function() {
+      $scope.blocks.splice($scope.blocks.indexOf(block), 1);
     });
   };
 
-  $scope.deleteSelectedStims = function() {
-    var promises = $scope.stims.filter(function(stim) {
-      return stim.selected;
-    }).map(function(stim) {
-      return stim.$delete();
+  $scope.deleteSelectedBlocks = function() {
+    var promises = $scope.blocks.filter(function(block) {
+      return block.selected;
+    }).map(function(block) {
+      return block.$delete();
     });
     var promise = $q.all(promises).then(function() {
-      $scope.stims = $scope.stims.filter(function(stim) { return !stim.selected; });
-      return 'Deleted ' + promises.length + ' stim(s)';
+      $scope.blocks = $scope.blocks.filter(function(block) { return !block.selected; });
+      return 'Deleted ' + promises.length + ' block(s)';
     });
     $flash(promise);
   };
 
-  $scope.updateSelectedStims = function(props) {
-    var promises = $scope.stims.filter(function(stim) {
-      return stim.selected;
-    }).map(function(stim) {
-      _.extend(stim, props);
-      return stim.$save();
+  $scope.updateSelectedBlocks = function(props) {
+    var promises = $scope.blocks.filter(function(block) {
+      return block.selected;
+    }).map(function(block) {
+      _.extend(block, props);
+      return block.$save();
     });
     var promise = $q.all(promises).then(function() {
-      return 'Updated ' + promises.length + ' stim(s)';
+      return 'Updated ' + promises.length + ' block(s)';
     });
     $flash(promise);
   };
 
-  /** addStimData(contexts: any[])
+  /** addBlockData(contexts: any[])
   */
-  var addStimData = function(contexts) {
-    var max_view_order = Math.max.apply(Math, _.pluck($scope.stims, 'view_order'));
+  var addBlockData = function(contexts) {
+    var max_view_order = Math.max.apply(Math, _.pluck($scope.blocks, 'view_order'));
     var view_order = Math.max(max_view_order, 0) + 1;
 
     var default_context = {template_id: $scope.$storage.default_template_id};
 
-    // and then add the stims to the table
-    var stim_promises = contexts.map(function(context, i) {
+    // and then add the blocks to the table
+    var block_promises = contexts.map(function(context, i) {
       context = _.extend({}, default_context, context);
-      // stim has properties like: context, template_id, view_order
+      // block has properties like: context, template_id, view_order
       // handle templates that cannot be found simply by creating new ones
       // compute this outside because the promises are not guaranteed to execute in order
       return Template.findOrCreate(context).then(function(template) {
-        return new Stim({
+        return new Block({
           experiment_id: $scope.experiment.id,
           context: context,
           view_order: view_order + i,
@@ -61,18 +62,18 @@ app.controller('admin.experiments.edit.stims', function($scope, $localStorage, $
       });
     });
 
-    return $q.all(stim_promises).then(function(stims) {
-      // = Stim.query({experiment_id: $scope.experiment.id});
-      $scope.stims = $scope.stims.concat(stims);
-      return 'Added ' + stim_promises.length + ' stims';
+    return $q.all(block_promises).then(function(blocks) {
+      // = Block.query({experiment_id: $scope.experiment.id});
+      $scope.blocks = $scope.blocks.concat(blocks);
+      return 'Added ' + block_promises.length + ' blocks';
     }, summarizeResponse);
   };
 
-  $scope.$watchCollection('stims', function() {
-    // whenever stims change, we may need to update the experiment parameters
+  $scope.$watchCollection('blocks', function() {
+    // whenever blocks change, we may need to update the experiment parameters
     var parameters_object = {};
-    $scope.stims.forEach(function(stim) {
-      for (var key in stim.context) {
+    $scope.blocks.forEach(function(block) {
+      for (var key in block.context) {
         parameters_object[key] = 1;
       }
     });
@@ -82,13 +83,13 @@ app.controller('admin.experiments.edit.stims', function($scope, $localStorage, $
   });
 
   /**
-  Import stims from a file.
+  Import blocks from a file.
 
   Sample Excel (xlsx) spreadsheet:
 
       {
         lastModifiedDate: Tue Mar 04 2014 15:57:25 GMT-0600 (CST),
-        name: "asch-stims.xlsx",
+        name: "asch-blocks.xlsx",
         size: 34307,
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         webkitRelativePath: ""
@@ -108,7 +109,7 @@ app.controller('admin.experiments.edit.stims', function($scope, $localStorage, $
   */
   $scope.importFile = function(file) {
     var promise = parseTabularFile(file).then(function(data) {
-      return addStimData(data);
+      return addBlockData(data);
     }, function(err) {
       return 'Error uploading file "' + file.name + '": ' + err.toString();
     });
@@ -116,27 +117,27 @@ app.controller('admin.experiments.edit.stims', function($scope, $localStorage, $
   };
 });
 
-app.controller('admin.experiments.edit.stims.edit', function($scope, $localStorage, $state, $flash, Template, Stim) {
+app.controller('admin.experiments.edit.blocks.edit', function($scope, $localStorage, $state, $flash, Template, Block) {
   $scope.$storage = $localStorage;
-  $scope.stim = Stim.get({
+  $scope.block = Block.get({
     experiment_id: $state.params.experiment_id,
-    id: $state.params.stim_id,
+    id: $state.params.block_id,
   }, function() {
     // set template_id to the default if it's not set
-    _.defaults($scope.stim, {template_id: $localStorage.default_template_id});
+    _.defaults($scope.block, {template_id: $localStorage.default_template_id});
   });
   $scope.templates = Template.query();
 
   // the 'save' event is broadcast on rootScope when command+S is pressed
   // not sure why it doesn't work here.
-  $scope.$on('save', $scope.syncStim);
+  $scope.$on('save', $scope.syncBlock);
 
-  $scope.syncStim = function() {
-    var promise = $scope.stim.$save(function() {
+  $scope.syncBlock = function() {
+    var promise = $scope.block.$save(function() {
       $state.go('^');
-      // $state.go('.', {id: $scope.stim.id}, {notify: false});
+      // $state.go('.', {id: $scope.block.id}, {notify: false});
     }).then(function() {
-      return 'Saved stim';
+      return 'Saved block';
     }, summarizeResponse);
     $flash(promise);
   };

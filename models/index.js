@@ -11,7 +11,7 @@ var Template = sqlorm.createModel(db, 'templates',
   ['name', 'html']);
 
 var Response = sqlorm.createModel(db, 'responses',
-  ['participant_id', 'stim_id', 'value', 'assignment_id']);
+  ['participant_id', 'block_id', 'value', 'assignment_id']);
 
 module.exports = {
   AccessToken: require('./AccessToken'),
@@ -20,6 +20,6 @@ module.exports = {
   Experiment: Experiment,
   Participant: require('./Participant'),
   Response: Response,
-  Stim: require('./Stim'),
+  Block: require('./Block'),
   Template: Template,
 };

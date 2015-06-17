@@ -6,7 +6,7 @@
         ng-options="template.id as template.name for template in templates"></select>
     </label>
     <label class="block">
-      <div><b>Import stims from file</b></div>
+      <div><b>Import blocks from file</b></div>
       <input type="file" on-upload="importFile($file)">
     </label>
   </form>
@@ -26,23 +26,23 @@
     </tr>
   </thead>
   <tbody checkbox-sequence>
-    <tr ng-repeat="stim in stims" ng-class="{selected: stim.selected}">
+    <tr ng-repeat="block in blocks" ng-class="{selected: block.selected}">
       <td style="padding-right: 5px">
-        <input type="checkbox" ng-model="stim.selected">
+        <input type="checkbox" ng-model="block.selected">
       </td>
-      <td><a ui-sref="admin.experiments.edit.stims.edit({stim_id: stim.id})">{{stim.id}}</a></td>
+      <td><a ui-sref="admin.experiments.edit.blocks.edit({block_id: block.id})">{{block.id}}</a></td>
       <td class="nowrap">
-        <a ui-sref="admin.templates.edit({id: stim.template_id})">
-          {{templates | valueWhere:{id: stim.template_id}:'name'}}
+        <a ui-sref="admin.templates.edit({id: block.template_id})">
+          {{templates | valueWhere:{id: block.template_id}:'name'}}
         </a>
       </td>
       <td ng-repeat="parameter in experiment.parameters">
-        <span ng-bind="stim.context[parameter]"></span>
+        <span ng-bind="block.context[parameter]"></span>
       </td>
-      <td>{{stim.view_order}}</td>
+      <td>{{block.view_order}}</td>
       <td class="nowrap">
-        <a href="/experiments/{{experiment.id}}/stims/{{stim.id}}?workerId=testing" target="_blank">Public</a>
-        <button ng-click="deleteStim(stim, $event)">Delete</button>
+        <a href="/experiments/{{experiment.id}}/blocks/{{block.id}}?workerId=testing" target="_blank">Public</a>
+        <button ng-click="deleteBlock(block, $event)">Delete</button>
       </td>
     </tr>
   </tbody>
@@ -50,7 +50,7 @@
 
 <nav fixedflow style="bottom: 0; border-top: 1px solid #BBB; padding: 5px; background-color: #EEE;">
   <ui-view>
-    <button ng-click="deleteSelectedStims()" class="control">Delete selection ({{(stims | filter:{selected: true}).length}})</button>
-    <a ui-sref="admin.experiments.edit.stims.edit({stim_id: 'new'})">Add empty stim</a>
+    <button ng-click="deleteSelectedBlocks()" class="control">Delete selection ({{(blocks | filter:{selected: true}).length}})</button>
+    <a ui-sref="admin.experiments.edit.blocks.edit({block_id: 'new'})">Add empty block</a>
   </ui-view>
 </nav>

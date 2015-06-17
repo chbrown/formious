@@ -7,14 +7,14 @@ var R = new Router(function(req, res) {
   res.status(404).die('No resource at: ' + req.url);
 });
 
-R.any(/^\/api\/experiments\/(\d+)\/stims/, require('./stims'));
+R.any(/^\/api\/experiments\/(\d+)\/blocks/, require('./blocks'));
 
 /** GET /api/experiments
 list all experiments */
 R.get(/^\/api\/experiments$/, function(req, res) {
   db.Select([
     'experiments',
-    'LEFT OUTER JOIN (SELECT experiment_id, COUNT(responses.id) FROM responses JOIN stims ON stims.id = responses.stim_id GROUP BY experiment_id) AS responses ON responses.experiment_id = experiments.id',
+    'LEFT OUTER JOIN (SELECT experiment_id, COUNT(responses.id) FROM responses JOIN blocks ON blocks.id = responses.block_id GROUP BY experiment_id) AS responses ON responses.experiment_id = experiments.id',
   ].join(' '))
   .orderBy('created DESC')
   .execute(function(err, experiments) {

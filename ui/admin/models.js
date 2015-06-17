@@ -63,14 +63,13 @@ app.service('Response', function($resource) {
   });
 });
 
-app.service('Stim', function($resource) {
-  // map: {'id': 'name'}
-  var Stim = $resource('/api/experiments/:experiment_id/stims/:id', {
+app.service('Block', function($resource) {
+  var Block = $resource('/api/experiments/:experiment_id/blocks/:id', {
     experiment_id: '@experiment_id',
     id: '@id',
   });
 
-  return Stim;
+  return Block;
 });
 
 app.service('Template', function($resource, $q) {
