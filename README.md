@@ -37,4 +37,4 @@ Pull the remote server's database into a local database:
 
 ## License
 
-Copyright 2011–2015 Christopher Brown. [MIT Licensed](http://opensource.org/licenses/MIT).
+Copyright 2011–2015 Christopher Brown. [MIT Licensed](http://chbrown.github.io/licenses/MIT/#2011-2015).
