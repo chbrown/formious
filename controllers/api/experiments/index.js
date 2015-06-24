@@ -44,7 +44,6 @@ R.get(/^\/api\/experiments\/new$/, function(req, res) {
   res.json({
     administrator_id: req.administrator.id,
     html: '',
-    parameters: [],
   });
 });
 

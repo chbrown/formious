@@ -5,7 +5,7 @@ var AWSAccount = sqlorm.createModel(db, 'aws_accounts',
   ['name', 'access_key_id', 'secret_access_key']);
 
 var Experiment = sqlorm.createModel(db, 'experiments',
-  ['name', 'administrator_id', 'html', 'parameters']);
+  ['name', 'administrator_id', 'html']);
 
 var Template = sqlorm.createModel(db, 'templates',
   ['name', 'html']);
