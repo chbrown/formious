@@ -1,0 +1,45 @@
+<table class="striped grid padded fill blocks">
+  <thead>
+    <tr>
+      <td></td>
+      <td>block_id</td>
+      <td>template/block params</td>
+      <td ng-repeat="parameter in parameters">
+        {{parameter}}
+      </td>
+      <td>order</td>
+      <td></td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="block in blocks track by $index" ng-class="{container: !block.template_id}">
+      <td style="padding-right: 5px">
+        <input type="checkbox" ng-model="block.selected">
+      </td>
+      <td><a ui-sref="admin.experiments.edit.blocks.edit({block_id: block.id})">{{block.id}}</a></td>
+      <!-- swap (template_id, context) / (randomize, children) -->
+      <!-- stim-type blocks -->
+      <td ng-if="block.template_id">
+        <a-template class="nowrap" template-id="{{block.template_id}}"></a-template>
+      </td>
+      <td ng-if="block.template_id" ng-repeat="parameter in parameters">
+        <span ng-bind="block.context[parameter]"></span>
+      </td>
+      <!-- container-type blocks -->
+      <td ng-if="!block.template_id" colspan="{{parameters.length + 1}}" style="padding: 0">
+        <div>
+          Block:
+          <span ng-if="block.randomize">randomize</span> <span ng-if="!block.randomize">in order</span>
+          <button ng-click="$emit('collapseBlock', block)">Collapse</button>
+        </div>
+        <div blocks="block.children"></div>
+      </td>
+      <!-- the rest are common to both types of blocks -->
+      <td>{{block.view_order}}</td>
+      <td class="nowrap">
+        <a href="/experiments/{{experiment.id}}/blocks/{{block.id}}?workerId=testing" target="_blank">Public</a>
+        <button ng-click="$emit('deleteBlock', block)">Delete</button>
+      </td>
+    </tr>
+  </tbody>
+</table>

@@ -2,12 +2,10 @@ var path = require('path');
 var send = require('send');
 var Router = require('regex-router');
 
-var R = new Router(function(req, res) {
-  res.status(404).die('No resource at: ' + req.url);
-});
+var R = new Router();
 
 R.get(/^\/(admin|$)/, function(req, res) {
-  req.url = '/ui/admin.html';
+  req.url = '/ui/index.html';
   R.route(req, res);
 });
 

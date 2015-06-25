@@ -1,13 +1,92 @@
-/*jslint browser: true */ /*globals _, Url, angular, cookies, CheckboxSequence, log, mercury */
+/*jslint browser: true, esnext: true */
 
-var app = angular.module('app', [
+import _ from 'lodash';
+import h from 'virtual-dom/h';
+import {Url} from 'urlobject';
+
+// angular.js libraries:
+import angular from 'angular';
+import 'angular-resource';
+import 'angular-ui-router';
+import 'ngstorage';
+// angular modules
+import 'flow-copy';
+import 'checkbox-sequence';
+import 'textarea';
+
+// for the misc-js-plugins module below. TODO: factor out
+import './misc-js-plugins';
+
+export var app = angular.module('app', [
   'ngResource',
   'ngStorage',
   'ui.router',
-  'misc-js/angular-plugins',
+  'misc-js-plugins', // TODO: factor this out
+  'flow-copy', // exposes an EA 'fixedflow' directive
+  'checkbox-sequence', // exposes an A 'checkbox-sequence' directive
+  'textarea',
 ]);
 
-var summarizeResponse = function(res) {
+function renderObject(object) {
+  if (object === undefined) {
+    return h('i.undefined', 'undefined');
+  }
+  else if (object === null) {
+    return h('b.null', 'null');
+  }
+  else if (Array.isArray(object)) {
+    // check for tabular arrays (all of the items are objects with the same keys)
+    var items_are_objects = object.every(function(value) {
+      return (value !== null) && (value !== undefined) && (typeof value === 'object');
+    });
+    if (object.length > 0 && items_are_objects) {
+      // now check that all the keys are the same
+      var columns = Object.keys(object[0]);
+      var items_have_indentical_keys = object.slice(1).every(function(value) {
+        return _.isEqual(Object.keys(value), columns);
+      });
+      if (items_have_indentical_keys) {
+        var thead_children = h('tr', columns.map(function(column) {
+          return h('th', column);
+        }));
+        var tbody_children = object.map(function(value) {
+          var cells = columns.map(function(column) {
+            return h('td', renderObject(value[column]));
+          });
+          return h('tr', cells);
+        });
+        return h('div.table', [
+          h('table', [
+            h('thead', thead_children),
+            h('tbody', tbody_children),
+          ])
+        ]);
+      }
+    }
+    // otherwise, it's an array of arbitrary objects
+    var array_children = object.map(function(value) {
+      return renderObject(value);
+    });
+    return h('div.array', array_children);
+  }
+  else if (typeof object === 'object') {
+    var object_children = _.map(object, function(value, key) {
+      return h('tr', [
+        h('td', key), h('td', renderObject(value))
+      ]);
+    });
+    return h('div.object', h('table.keyval', object_children));
+  }
+  else if (typeof object === 'number') {
+    return h('b.number', object.toString());
+  }
+  else if (typeof object === 'boolean') {
+    return h('b.boolean', object.toString());
+  }
+  return h('span.string', object.toString());
+}
+
+function summarizeResponse(res) {
   var parts = [];
   if (res.status != 200) {
     parts.push('Error ');
@@ -17,7 +96,7 @@ var summarizeResponse = function(res) {
     parts.push(': ' + res.data.toString());
   }
   return parts.join('');
-};
+}
 
 app.directive('uiSrefActiveAny', function($state) {
   return {
@@ -38,18 +117,6 @@ app.directive('uiSrefActiveAny', function($state) {
   };
 });
 
-/**
-Quick Angular.js wrapper for checkbox-sequence.js
-*/
-app.directive('checkboxSequence', function() {
-  return {
-    restrict: 'A',
-    link: function(scope, el) {
-      scope.checkbox_sequence = new CheckboxSequence(el[0]);
-    }
-  };
-});
-
 app.directive('object', function() {
   return {
     restrict: 'A',
@@ -57,14 +124,19 @@ app.directive('object', function() {
       object: '=',
     },
     link: function(scope, el) {
-      var object = angular.copy(scope.object);
-      var state = mercury.state({
-        object: mercury.value(object),
+      // var state = mercury.state({
+      //   object: mercury.value(object),
+      // });
+      scope.$watch('object', function(newVal) {
+        var object = angular.copy(newVal);
+
+        throw new Error('[object] directive not yet implemented');
+        // renderObject(object);
       });
 
-      mercury.app(el[0], state, function(state) {
-        return renderObject(state.object);
-      });
+      // mercury.app(el[0], state, function(state) {
+      //   return renderObject(state.object);
+      // });
     }
   };
 });
@@ -522,5 +594,78 @@ app.controller('admin', function($scope, $flash, $state, $http) {
     cookies.del('administrator_token', {path: '/'});
     $flash('Deleted administrator token');
     $state.go('.', {}, {reload: true});
+  };
+});
+
+/**
+From http://stackoverflow.com/a/18609594/424651, with formatting fixes.
+*/
+app.factory('RecursionHelper', function($compile) {
+  return {
+    /**
+     * Manually compiles the element, fixing the recursion loop.
+     * @param element
+     * @param [link] A post-link function, or an object with function(s) registered via pre and post properties.
+     * @returns An object containing the linking functions.
+     */
+    compile: function(element, link) {
+      // Normalize the link parameter
+      if (angular.isFunction(link)) {
+        link = { post: link };
+      }
+
+      // Break the recursion loop by removing the contents
+      var contents = element.contents().remove();
+      var compiledContents;
+      return {
+        pre: (link && link.pre) ? link.pre : null,
+        /**
+         * Compiles and re-adds the contents
+         */
+        post: function(scope, element) {
+          // Compile the contents
+          if (!compiledContents) {
+            compiledContents = $compile(contents);
+          }
+          // Re-add the compiled contents to the element
+          compiledContents(scope, function(clone) {
+            element.append(clone);
+          });
+
+          // Call the post-linking function, if any
+          if (link && link.post) {
+            link.post.apply(null, arguments);
+          }
+        }
+      };
+    }
+  };
+});
+
+app.directive('selectTemplate', function(Template) {
+  return {
+    restrict: 'E',
+    scope: {
+      model: '=',
+    },
+    template: '<select ng-model="model" ng-options="template.id as template.name for template in templates"></select>',
+    replace: true,
+    link: function(scope) {
+      scope.templates = Template.query();
+    }
+  };
+});
+
+app.directive('aTemplate', function(Template) {
+  return {
+    restrict: 'E',
+    scope: {
+      id: '@templateId',
+    },
+    template: '<a ui-sref="admin.templates.edit({id: template.id})">{{template.name}}</a>',
+    replace: true,
+    link: function(scope) {
+      scope.template = Template.get({id: scope.id});
+    }
   };
 });

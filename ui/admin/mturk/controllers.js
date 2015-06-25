@@ -1,18 +1,8 @@
-/*jslint browser: true */ /*globals _, angular, app, Url, moment, summarizeResponse */
-
-app.factory('$turk', function($xml, $stateParams) {
-  return function(data) {
-    return $xml({
-      method: 'POST',
-      url: '/api/mturk',
-      params: {
-        aws_account_id: $stateParams.aws_account_id,
-        environment: $stateParams.environment,
-      },
-      data: data,
-    });
-  };
-});
+/*jslint browser: true, esnext: true */
+import _ from 'lodash';
+import moment from 'moment';
+import {app} from '../app';
+import {Url} from 'urlobject';
 
 function nodesToJSON(nodes) {
   var pairs = _.map(nodes, function(node) {
@@ -86,7 +76,21 @@ function createExternalQuestionString(ExternalURL, FrameHeight) {
   return new XMLSerializer().serializeToString(doc);
 }
 
-app.controller('admin.mturk', function($scope, $state, AWSAccount) {
+app
+.factory('$turk', function($xml, $stateParams) {
+  return function(data) {
+    return $xml({
+      method: 'POST',
+      url: '/api/mturk',
+      params: {
+        aws_account_id: $stateParams.aws_account_id,
+        environment: $stateParams.environment,
+      },
+      data: data,
+    });
+  };
+})
+.controller('admin.mturk', function($scope, $state, AWSAccount) {
   // environments
   $scope.environment = $state.params.environment;
   $scope.environments = [{name: 'production'}, {name: 'sandbox'}, {name: 'local'}];
@@ -97,9 +101,8 @@ app.controller('admin.mturk', function($scope, $state, AWSAccount) {
   $scope.$watchGroup(['environment', 'aws_account_id'], function() {
     $state.go('.', {environment: $scope.environment, aws_account_id: $scope.aws_account_id});
   });
-});
-
-app.controller('admin.mturk.hits.table', function($scope, $state, $turk) {
+})
+.controller('admin.mturk.hits.table', function($scope, $state, $turk) {
   $turk({
     Operation: 'SearchHITs',
     SortDirection: 'Descending',
@@ -109,10 +112,9 @@ app.controller('admin.mturk.hits.table', function($scope, $state, $turk) {
     $scope.hits = _.map(res.data.querySelectorAll('HIT'), function(HIT) {
       return nodesToJSON(HIT.children);
     });
-  }, summarizeResponse);
-});
-
-app.controller('admin.mturk.hits.new', function($scope, $http, $state, $location, $localStorage, $flash, $turk) {
+  });
+})
+.controller('admin.mturk.hits.new', function($scope, $http, $state, $location, $localStorage, $flash, $turk) {
   $scope.$storage = $localStorage.$default({
     Title: $state.params.Title || 'Exciting task!',
     // Description: 'Look at some cool pictures and answer a lot of really easy questions.',
@@ -164,7 +166,7 @@ app.controller('admin.mturk.hits.new', function($scope, $http, $state, $location
       // var HITTypeId = res.data.querySelector('HITTypeId').textContent;
       $state.go('admin.mturk.hits.edit', {HITId: HITId});
       return 'Created HIT: ' + HITId;
-    }, summarizeResponse);
+    });
     $flash(promise);
   };
 
@@ -188,9 +190,8 @@ app.controller('admin.mturk.hits.new', function($scope, $http, $state, $location
       $scope.preview_url = '';
     }
   });
-});
-
-app.controller('admin.mturk.hits.edit', function($scope, $localStorage, $state, $flash, $turk) {
+})
+.controller('admin.mturk.hits.edit', function($scope, $localStorage, $state, $flash, $turk) {
   $scope.$storage = $localStorage.$default({
     assignments_limit: 10,
     responses_summarizer: 'return responses;',
@@ -202,7 +203,7 @@ app.controller('admin.mturk.hits.edit', function($scope, $localStorage, $state, 
     // res.data is a Document instance, with GetHITResponse as its root element
     var HIT = res.data.querySelector('HIT');
     $scope.hit = nodesToJSON(HIT.children);
-  }, summarizeResponse);
+  });
 
   $turk({
     Operation: 'GetAssignmentsForHIT',
@@ -217,7 +218,7 @@ app.controller('admin.mturk.hits.edit', function($scope, $localStorage, $state, 
       assignment_json.Answer = parseAnswer(assignment_json.Answer);
       return assignment_json;
     });
-  }, summarizeResponse);
+  });
 
   // participant.duration = responses[0].duration.toFixed(0) + ' seconds';
 
@@ -248,19 +249,18 @@ app.controller('admin.mturk.hits.edit', function($scope, $localStorage, $state, 
     var data = _.extend({HITId: HITId}, $scope.extension);
     var promise = HIT.ExtendHIT(data).$promise.then(function() {
       return 'Extended';
-    }, summarizeResponse);
+    });
     $flash(promise);
   };
 
   $scope.import = function() {
     var promise = HIT.import({HITId: HITId}).$promise.then(function(res) {
       return res.message || 'Imported';
-    }, summarizeResponse);
+    });
     $flash(promise);
   };
-});
-
-app.directive('assignment', function($state, $localStorage, $turk, $flash, Response) {
+})
+.directive('assignment', function($state, $localStorage, $turk, $flash, Response) {
   return {
     restrict: 'A',
     templateUrl: '/ui/admin/mturk/assignment.html',
@@ -289,7 +289,7 @@ app.directive('assignment', function($state, $localStorage, $turk, $flash, Respo
           var xml = new XMLSerializer().serializeToString(res.data);
           console.log('BlockWorker response', xml);
           return xml;
-        }, summarizeResponse);
+        });
         $flash(promise);
       };
 
@@ -311,14 +311,13 @@ app.directive('assignment', function($state, $localStorage, $turk, $flash, Respo
           //   scope.assignment =
           //   return 'Updated Assignment';
           // });
-        }, summarizeResponse);
+        });
         $flash(promise);
       };
     }
   };
-});
-
-app.controller('admin.mturk.dashboard', function($scope, $localStorage, $state, $flash, $turk) {
+})
+.controller('admin.mturk.dashboard', function($scope, $localStorage, $state, $flash, $turk) {
   // $scope.$storage = $localStorage.$default({
   //   assignments_limit: 10,
   //   responses_summarizer: 'return responses;',
@@ -332,6 +331,6 @@ app.controller('admin.mturk.dashboard', function($scope, $localStorage, $state, 
       // res.data is a Document instance.
       var xml = new XMLSerializer().serializeToString(res.data);
       console.log(xml);
-    }, summarizeResponse);
+    });
   };
 });

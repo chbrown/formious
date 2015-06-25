@@ -1,9 +1,19 @@
 <form ng-submit="syncBlock($event)">
   <div style="display: inline-block; min-width: 200px; vertical-align: top;">
     <label>
+      <div><b>Parent Block ID</b></div>
+      <input type="number" ng-model="block.parent_block_id" disabled>
+    </label>
+
+    <label>
+      <div>
+        <input type="checkbox" ng-model="block.randomize"> <b>Randomize</b>
+      </div>
+    </label>
+
+    <label>
       <div><b>Template</b></div>
-      <select ng-model="block.template_id"
-        ng-options="template.id as template.name for template in templates"></select>
+      <select-template model="block.template_id"></select-template>
     </label>
 
     <label>

@@ -1,3 +1,76 @@
+// --- general resets ---
+body {
+  margin: 0;
+}
+table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  th, td {
+    font-size: 100%;
+    text-align: left;
+  }
+}
+// ----------------------
+// --- generic compact ---
+h1, h2, h3, h4, h5, h6 {
+  margin: 1ex 0;
+}
+div, span, section, nav, main, textarea, input, button {
+  box-sizing: border-box;
+}
+section {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+.vpad {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.hpad {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+// -----------------------
+// --- generic tables ---
+table {
+  &.fill {
+    width: 100%;
+  }
+  &.padded {
+    & > thead > tr > th, & > tbody > tr > td {
+      &:first-child { padding-left: 10px; }
+      &:last-child { padding-right: 10px; }
+    }
+  }
+  &.grid {
+    td, th {
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    tr td, tr th {
+      &:first-child { border-left: 0; }
+      &:last-child { border-right: 0; }
+    }
+  }
+  &.lined {
+    tbody td {
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+  }
+  &.striped {
+    tbody {
+      tr:nth-child(odd) {
+        background-color: rgba(255, 255, 255, 0.5);
+      }
+      tr:nth-child(even) {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+    }
+  }
+}
+// ----------------------
+
 // I wish I could just return a color from a function.
 // Too complicated for LESS, though, I guess.
 .border-gray(@gray) {
@@ -12,12 +85,16 @@
 
 
 body {
-  margin: 0;
   font-family: "Lucida Grande", Arial, sans-serif;
+  // display: flex;
+  // align-content: stretch;
 }
-h1, h2, h3, h4, h5, h6 {
-  margin: 0.5ex 0;
-}
+// main {
+//   display: inline-block;
+// }
+// section {
+//   flex-grow: 1;
+// }
 p {
   margin: 1ex 0;
 }
@@ -30,7 +107,6 @@ label[disabled] {
 textarea, input, select {
   vertical-align: baseline;
   margin: 0;
-  box-sizing: border-box;
 }
 input[type="radio"], input[type="checkbox"] {
   margin: 1px .25ex;
@@ -66,6 +142,7 @@ time {
   min-height: 30px;
   min-width: 400px
 }
+
 button {
   margin: 0;
 }
@@ -105,6 +182,7 @@ body.admin {
     box-sizing: border-box;
 
     &[fixedflow] {
+      position: fixed;
       // for some reason elements with opacity < 1.0 float on top of fixed elements,
       // but a non-zero z-index here fixes that
       z-index: 100;
@@ -157,29 +235,11 @@ body.admin {
   }
 }
 
-// semantic sections
-section {
-  margin-top: 5px;
-  margin-bottom: 5px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  // overflow-x: auto;
-  // width: 100%;
-}
-.vpad {
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-.hpad {
-  padding-left: 10px;
-  padding-right: 10px;
-}
-
 // only a few things should stretch the whole width,
 // like sections, and tables
 .box {
-  padding-top: 5px;
-  padding-bottom: 5px;
+  // padding-top: 5px;
+  // padding-bottom: 5px;
 
   background-color: white;
   // light gray border on top and bottom only
@@ -196,56 +256,8 @@ form {
 }
 
 table {
-  border-collapse: collapse;
-  th {
-    text-align: left;
-  }
   td, th {
     vertical-align: top;
-    padding-right: 5px;
-  }
-}
-table.striped {
-  thead tr {
-    background-color: white;
-  }
-  tbody {
-    tr:nth-child(odd) {
-      background-color: #FCFCFC;
-    }
-    tr:nth-child(even) {
-      background-color: #FEFEFE;
-    }
-  }
-  tfoot tr {
-    background-color: #FAFAFA;
-  }
-}
-table.fill {
-  width: 100%;
-}
-table.lined {
-  tbody td {
-    border-top: 1px solid #EEE;
-  }
-}
-table.grid {
-  font-size: 90%;
-  thead {
-    font-weight: bold;
-  }
-  td, th {
-    border: 1px solid #EEE;
-  }
-  tr td, tr th {
-    &:first-child { border-left: 0; }
-    &:last-child { border-right: 0; }
-  }
-}
-table.padded {
-  tr td, tr th {
-    &:first-child { padding-left: 10px; }
-    &:last-child { padding-right: 10px; }
   }
 }
 table.keyval {
@@ -259,6 +271,7 @@ table.keyval {
     }
   }
 }
+
 table.responses {
   td.context {
     background-color: #FFF8F8;
@@ -267,20 +280,6 @@ table.responses {
     background-color: #F8FFF8;
   }
 }
-
-// .record.delete {
-//   background-color: #DDD;
-//   color: #555;
-//   text-decoration: line-through;
-// }
-
-// .status span {
-//   font-weight: bold;
-//   margin: 10px 10px 0 0;
-//   &.Submitted { color: #CCC; }
-//   &.Approved { color: darkgreen; }
-//   &.Rejected { color: darkred; }
-// }
 
 .hover-flow {
   word-wrap: break-word; // normal | break-word | inherit
@@ -334,22 +333,5 @@ table.responses {
     &:hover {
       background-color: #DDD;
     }
-  }
-}
-
-.focus {
-  box-shadow: 0 0 6px rgba(81, 203, 238, 1);
-  // border: 1px solid rgba(81, 203, 238, 1);
-}
-
-.flag {
-  position: absolute;
-  background-color: black;
-  border-radius: 3px;
-  padding: 2px 6px;
-  color: white;
-  .triangle {
-    position: absolute;
-    border: 6px solid transparent;
   }
 }

@@ -1,6 +1,9 @@
-/*jslint browser: true */ /*globals _, app */
+/*jslint browser: true, esnext: true */
+import {app} from './app';
+import _ from 'lodash';
 
-app.service('AccessToken', function($resource) {
+app
+.service('AccessToken', function($resource) {
   return $resource('/api/access_tokens/:id', {
     id: '@id',
   }, {
@@ -9,9 +12,8 @@ app.service('AccessToken', function($resource) {
       url: '/api/access_tokens/generate',
     }
   });
-});
-
-app.service('Administrator', function($resource) {
+})
+.service('Administrator', function($resource) {
   // map: {'id': 'email'}
   return $resource('/api/administrators/:id', {
     id: '@id',
@@ -21,23 +23,20 @@ app.service('Administrator', function($resource) {
       isArray: true,
     }
   });
-});
-
-app.service('AWSAccount', function($resource) {
+})
+.service('AWSAccount', function($resource) {
   // map: {'id': 'name'}
   return $resource('/api/aws_accounts/:id', {
     id: '@id',
   });
-});
-
-app.service('AWSAccountAdministrator', function($resource) {
+})
+.service('AWSAccountAdministrator', function($resource) {
   return $resource('/api/administrators/:administrator_id/aws_accounts/:aws_account_id', {
     administrator_id: '@administrator_id',
     aws_account_id: '@aws_account_id',
   });
-});
-
-app.service('Experiment', function($resource, AccessToken) {
+})
+.service('Experiment', function($resource, AccessToken) {
   var Experiment = $resource('/api/experiments/:id', {
     id: '@id',
   });
@@ -49,30 +48,51 @@ app.service('Experiment', function($resource, AccessToken) {
     });
   };
   return Experiment;
-});
-
-app.service('Participant', function($resource) {
+})
+.service('Participant', function($resource) {
   return $resource('/api/participants/:id', {
     id: '@id',
   });
-});
-
-app.service('Response', function($resource) {
+})
+.service('Response', function($resource) {
   return $resource('/api/responses/:id', {
     id: '@id',
   });
-});
-
-app.service('Block', function($resource) {
+})
+.service('Block', function($resource) {
   var Block = $resource('/api/experiments/:experiment_id/blocks/:id', {
     experiment_id: '@experiment_id',
     id: '@id',
   });
 
-  return Block;
-});
+  /**
+  Reconstruct block tree from flat list of blocks in an experiment.
+  */
+  Block.queryTree = function(params) {
+    var all_blocks = Block.query(params);
+    return all_blocks.$promise.then(function(all_blocks) {
+      var block_hash = _.object(all_blocks.map(function(block) {
+        block.children = [];
+        return [block.id, block];
+      }));
+      var root_blocks = [];
+      all_blocks.forEach(function(block) {
+        if (block.parent_block_id) {
+          // block_hash and root blocks contents are linked by reference, so order doesn't matter here
+          block_hash[block.parent_block_id].children.push(block);
+        }
+        else {
+          // blocks with no parent_block_id are added to the root list
+          root_blocks.push(block);
+        }
+      });
+      return root_blocks;
+    });
+  };
 
-app.service('Template', function($resource, $q) {
+  return Block;
+})
+.service('Template', function($resource, $q) {
   // map: {'id': 'name'}
   var Template = $resource('/api/templates/:id', {
     id: '@id',

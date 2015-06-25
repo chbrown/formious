@@ -16,7 +16,7 @@ function getBlockTemplate(callback) {
     callback(null, _cached_block_template);
   }
   else {
-    var block_template_filepath = path.join(__dirname, '..', 'ui', 'block.html');
+    var block_template_filepath = path.join(__dirname, '..', 'public', 'block.html');
     fs.readFile(block_template_filepath, {encoding: 'utf8'}, function(err, block_template) {
       if (err) return callback(err);
       _cached_block_template = handlebars.compile(block_template);
@@ -121,17 +121,22 @@ R.post(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, function(req, res, m) {
   var experiment_id = m[1];
   var block_id = m[2];
   var urlObj = url.parse(req.url, true);
+  var aws_worker_id = urlObj.query.workerId || 'WORKER_ID_NOT_AVAILABLE';
 
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var aws_worker_id = urlObj.query.workerId || 'WORKER_ID_NOT_AVAILABLE';
-    // logger.debug('Inserting response', {aws_worker_id: aws_worker_id, data: data});
-
-    var ready = function(err) {
+    models.Participant.addResponse({
+      aws_worker_id: aws_worker_id,
+      ip_address: req.headers['x-real-ip'] || req.client.remoteAddress,
+      user_agent: req.headers['user-agent'],
+    }, {
+      block_id: block_id,
+      value: data,
+    }, function(err, participant /*, responses*/) {
       if (err) return res.die(err);
 
-      models.Block.nextBlockId(experiment_id, block_id, function(err, next_block_id) {
+      models.Block.nextBlockId(experiment_id, participant.id, function(err, next_block_id) {
         if (err) return res.die(err);
 
         // http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ExternalQuestionArticle.html
@@ -153,21 +158,8 @@ R.post(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, function(req, res, m) {
           res.redirect(redirect_to);
         }
       });
-    };
 
-    if (data) {
-      models.Participant.addResponse({
-        aws_worker_id: aws_worker_id,
-        ip_address: req.headers['x-real-ip'] || req.client.remoteAddress,
-        user_agent: req.headers['user-agent'],
-      }, {
-        block_id: block_id,
-        value: data,
-      }, ready);
-    }
-    else {
-      ready();
-    }
+    });
   });
 });
 

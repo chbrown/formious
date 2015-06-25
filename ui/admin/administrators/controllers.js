@@ -1,17 +1,18 @@
-/*jslint browser: true */ /*globals app, summarizeResponse */
+/*jslint esnext: true */
+import {app} from '../app';
 
-app.controller('admin.administrators.table', function($scope, $flash, Administrator) {
+app
+.controller('admin.administrators.table', function($scope, $flash, Administrator) {
   $scope.administrators = Administrator.query();
   $scope.delete = function(administrator) {
     var promise = administrator.$delete().then(function() {
       $scope.administrators.splice($scope.administrators.indexOf(administrator), 1);
       return 'Deleted';
-    }, summarizeResponse);
+    });
     $flash(promise);
   };
-});
-
-app.controller('admin.administrators.edit', function($scope, $http, $flash, $window, $stateParams,
+})
+.controller('admin.administrators.edit', function($scope, $http, $flash, $window, $stateParams,
     Administrator, AWSAccount, AWSAccountAdministrator) {
   $scope.administrator = Administrator.get($stateParams);
 
@@ -22,7 +23,7 @@ app.controller('admin.administrators.edit', function($scope, $http, $flash, $win
   $scope.sync = function() {
     var promise = $scope.administrator.$save().then(function() {
       return 'Saved';
-    }, summarizeResponse);
+    });
     $flash(promise);
   };
 
@@ -42,7 +43,7 @@ app.controller('admin.administrators.edit', function($scope, $http, $flash, $win
       $scope.administrator_aws_accounts = AWSAccountAdministrator.query({administrator_id: administrator_id});
     }).then(function() {
       return 'Saved';
-    }, summarizeResponse);
+    });
     $flash(promise);
   };
 });

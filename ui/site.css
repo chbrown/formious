@@ -1,9 +1,25 @@
-body{margin:0;font-family:"Lucida Grande",Arial,sans-serif}
-h1,h2,h3,h4,h5,h6{margin:.5ex 0}
+body{margin:0}
+table{border-spacing:0;border-collapse:collapse}
+table td,table th{font-size:100%;text-align:left}
+h1,h2,h3,h4,h5,h6{margin:1ex 0}
+button,div,input,main,nav,section,span,textarea{box-sizing:border-box}
+section{margin-top:5px;margin-bottom:5px;padding-top:5px;padding-bottom:5px}
+.vpad{padding-top:10px;padding-bottom:10px}
+.hpad{padding-left:10px;padding-right:10px}
+table.fill{width:100%}
+table.padded>tbody>tr>td:first-child,table.padded>thead>tr>th:first-child{padding-left:10px}
+table.padded>tbody>tr>td:last-child,table.padded>thead>tr>th:last-child{padding-right:10px}
+table.grid td,table.grid th{border:1px solid rgba(0,0,0,.1)}
+table.grid tr td:first-child,table.grid tr th:first-child{border-left:0}
+table.grid tr td:last-child,table.grid tr th:last-child{border-right:0}
+table.lined tbody td{border-top:1px solid rgba(0,0,0,.1)}
+table.striped tbody tr:nth-child(odd){background-color:rgba(255,255,255,.5)}
+table.striped tbody tr:nth-child(even){background-color:rgba(0,0,0,.05)}
+body{font-family:"Lucida Grande",Arial,sans-serif}
 p{margin:1ex 0}
 label span{vertical-align:baseline}
 label[disabled]{color:#666}
-input,select,textarea{vertical-align:baseline;margin:0;box-sizing:border-box}
+input,select,textarea{vertical-align:baseline;margin:0}
 input[type=radio],input[type=checkbox]{margin:1px .25ex}
 fieldset{margin:0 10px 10px 0;border:1px solid #CCC}
 .nowrap{white-space:nowrap}
@@ -19,7 +35,7 @@ button.anchor{border-width:0;text-decoration:underline;cursor:pointer;font-size:
 body.admin{background-color:#FBFBFB;font-size:80%;overflow-y:scroll}
 body.admin .flash{position:fixed;left:0;right:0;padding:2px;height:22px;box-sizing:border-box;z-index:1000;text-align:center;color:#fff;background-color:rgba(0,0,0,.66);pointer-events:none}
 body.admin nav{left:0;right:0;box-sizing:border-box}
-body.admin nav[fixedflow]{z-index:100;background-color:#333}
+body.admin nav[fixedflow]{position:fixed;z-index:100;background-color:#333}
 body.admin nav.sub{background-color:#FBFBFB;border-bottom:1px solid #BBB}
 body.admin nav.sub .tab{margin-bottom:-1px;background-color:#BBB;border-color:#BBB}
 body.admin nav.sub .tab.current,body.admin nav.sub .tab:hover{border-color:#BBB;background-color:#FBFBFB}
@@ -30,27 +46,9 @@ body.admin nav .tab{display:inline-block;padding:2px 6px;margin:1px 0;padding:1p
 body.admin nav .tab:first-child{margin-left:3px}
 body.admin nav .tab:last-child{margin-right:3px}
 body.admin nav .tab.current,body.admin nav .tab:hover{border-color:#FBFBFB;background-color:#FBFBFB}
-section{margin-top:5px;margin-bottom:5px;padding-top:5px;padding-bottom:5px}
-.vpad{padding-top:10px;padding-bottom:10px}
-.hpad{padding-left:10px;padding-right:10px}
-.box{padding-top:5px;padding-bottom:5px;background-color:#fff;border:1px solid #EEE;border-width:1px 0}
+.box{background-color:#fff;border:1px solid #EEE;border-width:1px 0}
 form .block{display:block;margin-top:5px;margin-bottom:5px}
-table{border-collapse:collapse}
-table th{text-align:left}
-table td,table th{vertical-align:top;padding-right:5px}
-table.striped thead tr{background-color:#fff}
-table.striped tbody tr:nth-child(odd){background-color:#FCFCFC}
-table.striped tbody tr:nth-child(even){background-color:#FEFEFE}
-table.striped tfoot tr{background-color:#FAFAFA}
-table.fill{width:100%}
-table.lined tbody td{border-top:1px solid #EEE}
-table.grid{font-size:90%}
-table.grid thead{font-weight:700}
-table.grid td,table.grid th{border:1px solid #EEE}
-table.grid tr td:first-child,table.grid tr th:first-child{border-left:0}
-table.grid tr td:last-child,table.grid tr th:last-child{border-right:0}
-table.padded tr td:first-child,table.padded tr th:first-child{padding-left:10px}
-table.padded tr td:last-child,table.padded tr th:last-child{padding-right:10px}
+table td,table th{vertical-align:top}
 table.keyval td:first-child{font-weight:700}
 table.keyval tbody{border-top:1px solid #CCC}
 table.keyval tbody:first-child{border-top:0}
@@ -67,6 +65,3 @@ table.responses td.value{background-color:#F8FFF8}
 .preview .controls{padding:10px;background-color:#EEE;cursor:pointer}
 .preview .controls span{float:right}
 .preview .controls:hover{background-color:#DDD}
-.focus{box-shadow:0 0 6px #51cbee}
-.flag{position:absolute;background-color:#000;border-radius:3px;padding:2px 6px;color:#fff}
-.flag .triangle{position:absolute;border:6px solid transparent}

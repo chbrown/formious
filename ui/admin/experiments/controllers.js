@@ -1,6 +1,9 @@
-/*jslint browser: true */ /*globals _, app, Url, summarizeResponse */
+/*jslint browser: true, esnext: true */
+import {app} from '../app';
+import {Url} from 'urlobject';
 
-app.controller('admin.experiments.table', function($scope, $flash, $state, $location, Experiment, Administrator) {
+app
+.controller('admin.experiments.table', function($scope, $flash, $state, $location, Experiment, Administrator) {
   $scope.experiments = Experiment.query();
   $scope.administrators = Administrator.query();
 
@@ -8,7 +11,7 @@ app.controller('admin.experiments.table', function($scope, $flash, $state, $loca
     var promise = experiment.$delete().then(function() {
       $scope.experiments.splice($scope.experiments.indexOf(experiment), 1);
       return 'Deleted';
-    }, summarizeResponse);
+    });
     $flash(promise);
   };
 
@@ -19,12 +22,11 @@ app.controller('admin.experiments.table', function($scope, $flash, $state, $loca
       // leave the realm of ui-router:
       window.location = url;
       return 'Generated';
-    }, summarizeResponse);
+    });
     $flash(promise);
   };
-});
-
-app.controller('admin.experiments.edit', function($scope, $flash, $state, $localStorage,
+})
+.controller('admin.experiments.edit', function($scope, $flash, $state, $localStorage,
     Experiment, Template, Administrator) {
   $scope.$storage = $localStorage.$default({expand_experiment_html: false});
 
@@ -38,7 +40,7 @@ app.controller('admin.experiments.edit', function($scope, $flash, $state, $local
       $state.go('.', {id: $scope.experiment.id}, {notify: false});
     }).then(function() {
       return 'Saved experiment';
-    }, summarizeResponse);
+    });
     $flash(promise);
   };
 
@@ -52,7 +54,7 @@ app.controller('admin.experiments.edit', function($scope, $flash, $state, $local
       // leave the realm of ui-router:
       window.location = url;
       return 'Generated';
-    }, summarizeResponse);
+    });
     $flash(promise);
   };
 

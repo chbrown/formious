@@ -1,25 +1,26 @@
-/*jslint browser: true */ /*globals app, summarizeResponse */
+/*jslint esnext: true */
+import {app} from '../app';
 
-app.controller('admin.templates.table', function($scope, $flash, Template) {
+app
+.controller('admin.templates.table', function($scope, $flash, Template) {
   $scope.templates = Template.query();
   $scope.delete = function(template) {
     // is this really the best way?
     var promise = template.$delete().then(function() {
       $scope.templates.splice($scope.templates.indexOf(template), 1);
       return 'Deleted';
-    }, summarizeResponse);
+    });
     $flash(promise);
   };
-});
-
-app.controller('admin.templates.edit', function($scope, $http, $flash, $stateParams, $state, $location, Template) {
+})
+.controller('admin.templates.edit', function($scope, $http, $flash, $stateParams, $state, $location, Template) {
   $scope.template = Template.get($stateParams);
 
   $scope.sync = function() {
     var promise = $scope.template.$save().then(function() {
       $state.go('.', {id: $scope.template.id}, {notify: false});
       return 'Saved template';
-    }, summarizeResponse);
+    });
     $flash(promise);
   };
 

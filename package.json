@@ -18,54 +18,46 @@
     "test": "mocha --recursive test"
   },
   "dependencies": {
+    "angular": "*",
+    "angular-resource": "*",
+    "angular-ui-router": "*",
     "async": "*",
-    "cookies": "git://github.com/chbrown/cookies.git",
+    "checkbox-sequence": "*",
+    "cookiemonster": "*",
+    "cookies": "chbrown/cookies",
+    "flow-copy": "*",
     "handlebars": "*",
     "http-enhanced": "*",
     "jszip": "*",
     "lodash": "*",
     "loge": "*",
     "moment": "*",
+    "ngstorage": "gsklee/ngStorage",
     "regex-router": "*",
     "send": "*",
     "sqlcmd-pg": "*",
     "sqlorm": "~0.2.5",
     "streaming": "*",
     "sv": "*",
+    "textarea": "*",
     "turk": "~0.6.0",
+    "urlobject": "*",
     "util-enhanced": "*",
+    "virtual-dom": "*",
     "xmldom": "0.1.19",
     "xpath": "0.0.9",
     "yargs": "*"
   },
   "devDependencies": {
-    "mocha": "*"
+    "babelify": "*",
+    "browserify": "*",
+    "clean-css": "*",
+    "less": "*",
+    "mocha": "*",
+    "watchify": "*"
   },
-  "staticPattern": "ui/lib/{file}",
+  "staticPattern": "public/{file}",
   "staticDependencies": {
-    "angular": {
-      "filter": [
-        "angular.js",
-        "angular.min.js",
-        "angular-resource.js",
-        "angular-resource.min.js"
-      ]
-    },
-    "angular-ui-router": "*",
-    "jquery": "*",
-    "lodash": "*",
-    "misc-js": {
-      "url": "git://github.com/chbrown/misc-js.git",
-      "filter": [
-        "angular-plugins.js",
-        "checkbox-sequence.js",
-        "cookies.js",
-        "forms.js",
-        "textarea.js",
-        "url.js"
-      ]
-    },
-    "moment": "*",
-    "ng-storage": "*"
+    "jquery": "*"
   }
 }
