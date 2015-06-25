@@ -49,6 +49,7 @@ Show existing template. */
 R.get(/^\/api\/templates\/(\d+)$/, function(req, res, m) {
   models.Template.one({id: m[1]}, function(err, template) {
     if (err) return res.die(err);
+    res.setHeader('Cache-Control', 'max-age=5');
     res.json(template);
   });
 });
