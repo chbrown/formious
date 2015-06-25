@@ -51248,7 +51248,7 @@ _app.app.controller('admin.experiments.table', function ($scope, $flash, $state,
 
   $scope.syncExperiment = function () {
     var promise = $scope.experiment.$save(function () {
-      $state.go('.', { id: $scope.experiment.id }, { notify: false });
+      $state.go('.', { experiment_id: $scope.experiment.id }, { notify: false });
     }).then(function () {
       return 'Saved experiment';
     });
