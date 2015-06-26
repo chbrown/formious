@@ -1,4 +1,3 @@
-var sqlorm = require('./sqlorm');
 var db = require('../db');
 
 var util = require('util-enhanced');
@@ -12,8 +11,9 @@ function randomString(length) {
   return result;
 }
 
-var AccessToken = sqlorm.createModel(db, 'access_tokens',
-  ['token', 'relation', 'foreign_id', 'expires', 'redacted', 'created']);
+// ['token', 'relation', 'foreign_id', 'expires', 'redacted', 'created']
+
+function AccessToken() { }
 AccessToken.check = function(token, relation, foreign_id, callback) {
   var select = db.Select('access_tokens')
   .whereEqual({token: token, relation: relation})
@@ -43,17 +43,16 @@ callback: function(err, access_token_object: Object)
 AccessToken.findOrCreate = function(relation, foreign_id, options, callback) {
   options = util.extend({length: 40, expires: null}, options);
 
-  db.Select('access_tokens')
+  db.SelectOne('access_tokens')
   .whereEqual({relation: relation, foreign_id: foreign_id})
   .where('(expires IS NULL OR expires > NOW())')
   .where('redacted IS NULL')
-  .limit(1)
-  .execute(function(err, rows) {
+  .execute(function(err, access_token) {
     if (err) return callback(err);
 
     // use existing token
-    if (rows.length > 0) {
-      return callback(null, rows[0]);
+    if (access_token) {
+      return callback(null, access_token);
     }
 
     var token = randomString(options.length);

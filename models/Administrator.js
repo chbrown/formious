@@ -1,8 +1,6 @@
-var sqlorm = require('./sqlorm');
-var db = require('../db');
-
 var crypto = require('crypto');
 
+var db = require('../db');
 var AccessToken = require('./AccessToken');
 
 var salt = 'rNxROdgCbAkBI2WvZJtH';
@@ -14,14 +12,18 @@ function sha256(string) {
   return shasum.digest('hex');
 }
 
-var Administrator = sqlorm.createModel(db, 'administrators',
-  ['email', 'password']);
+function Administrator() { }
 
 Administrator.add = function(email, password, callback) {
-  this.insert({
+  db.Insert('administrators')
+  .set({
     email: email,
     password: sha256(password),
-  }, callback);
+  })
+  .returning('*')
+  .execute(function(err, rows) {
+    callback(err, rows ? rows[0] : undefined);
+  });
 };
 
 Administrator.prototype.update = function(email, password, callback) {
@@ -40,14 +42,16 @@ Administrator.prototype.update = function(email, password, callback) {
   });
 };
 
+/**
+callback signature: function(Error | null, token | null)
+*/
 Administrator.authenticate = function(email, password, callback) {
-  // callback signature: function(Error | null, token | null)
-  // logger.debug('Authenticating where email = %s', email);
-
-  this.one({
+  db.SelectOne('administrators')
+  .whereEqual({
     email: email,
     password: sha256(password),
-  }, function(err, administrator) {
+  })
+  .execute(function(err, administrator) {
     if (err) return callback(err);
 
     AccessToken.findOrCreate('administrators', administrator.id, {length: 40}, function(err, access_token) {
@@ -64,11 +68,10 @@ Administrator.authenticate = function(email, password, callback) {
 callback signature: function(err, user || null)
 */
 Administrator.fromToken = function(token, callback) {
-  var self = this;
   if (!token) {
     token = '';
   }
-  self.db.Select('access_tokens')
+  db.Select('access_tokens')
   .where('token = ?', token)
   .where('relation = ?', 'administrators')
   .where('(expires IS NULL OR expires > NOW())')
@@ -76,17 +79,16 @@ Administrator.fromToken = function(token, callback) {
     if (err) return callback(err);
     if (rows.length === 0) return callback(new Error('No access token matched.'));
 
-    self.db.Select('administrators')
+    db.SelectOne('administrators')
     .add('id', 'email')
-    .limit(1)
     .where('id = ?', rows[0].foreign_id)
-    .execute(function(err, rows) {
+    .execute(function(err, administrator) {
       if (err) return callback(err);
-      if (rows.length === 0) {
+      if (!administrator) {
         var message = 'Could not find administrator for token.';
         return callback(new Error(message));
       }
-      callback(null, new Administrator(rows[0]));
+      callback(null, administrator);
     });
   });
 };

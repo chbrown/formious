@@ -1,11 +1,11 @@
-var sqlorm = require('./sqlorm');
 var db = require('../db');
 
-var Participant = sqlorm.createModel(db, 'participants',
-  ['name', 'aws_worker_id', 'aws_bonus_owed', 'aws_bonus_paid', 'ip_address', 'user_agent']);
+function Participant() { }
 
 Participant.findOrCreate = function(participant, callback) {
-  Participant.one({aws_worker_id: participant.aws_worker_id}, function(err, existing_participant) {
+  db.SelectOne('participants')
+  .whereEqual({aws_worker_id: participant.aws_worker_id})
+  .execute(function(err, existing_participant) {
     if (err) {
       if (err.message && !err.message.match(/Could not find match/)) {
         callback(err);

@@ -5,9 +5,7 @@ var _ = require('lodash');
 
 var excel = require('../lib/excel');
 
-var R = new Router(function(req, res) {
-  res.status(404).die('No resource at: ' + req.url);
-});
+var R = new Router();
 
 /** zipKeysFn(keys: string[]) => (values: any[]) => {[index: string]: any}
 
@@ -28,7 +26,7 @@ function zipKeysFn(keys) {
 /** POST /util/parse-table
 
 Parse csv-like input flexibly and write out json to response */
-R.post('/util/parse-table', function(req, res) {
+R.post(/\/util\/parse-table/, function(req, res) {
   var content_type = req.headers['content-type'];
   if (content_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
     req.readToEnd(function(err, data) {

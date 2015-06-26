@@ -3,9 +3,9 @@ var db = require('../../db');
 var models = require('../../models');
 var Router = require('regex-router');
 
-var R = new Router(function(req, res) {
-  res.status(404).die('No resource at: ' + req.url);
-});
+var R = new Router();
+
+var access_tokens_columns = ['token', 'relation', 'foreign_id', 'expires', 'redacted', 'created'];
 
 /** GET /api/access_tokens
 List all access tokens. */
@@ -30,10 +30,14 @@ R.post(/^\/api\/access_tokens$/, function(req, res) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, models.AccessToken.columns);
-    models.AccessToken.insert(fields, function(err, access_token) {
+    var fields = _.pick(data, access_tokens_columns);
+
+    db.Insert('access_tokens')
+    .set(fields)
+    .returning('*')
+    .execute(function(err, rows) {
       if (err) return res.die(err);
-      res.status(201).json(access_token);
+      res.status(201).json(rows[0]);
     });
   });
 });
@@ -41,8 +45,11 @@ R.post(/^\/api\/access_tokens$/, function(req, res) {
 /** GET /api/access_tokens/:id
 Show existing access token. */
 R.get(/^\/api\/access_tokens\/(\d+)$/, function(req, res, m) {
-  models.AccessToken.one({id: m[1]}, function(err, access_token) {
+  db.SelectOne('access_tokens')
+  .whereEqual({id: m[1]})
+  .execute(function(err, access_token) {
     if (err) return res.die(err);
+
     res.json(access_token);
   });
 });
@@ -53,9 +60,12 @@ R.post(/^\/api\/access_tokens\/(\d+)/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, models.AccessToken.columns);
+    var fields = _.pick(data, access_tokens_columns);
 
-    models.AccessToken.update(fields, {id: m[1]}, function(err) {
+    db.Update('access_tokens')
+    .setEqual(fields)
+    .whereEqual({id: m[1]})
+    .execute(function(err) {
       if (err) return res.die(err);
       res.status(204).end(); // 204 No Content
     });
@@ -65,7 +75,9 @@ R.post(/^\/api\/access_tokens\/(\d+)/, function(req, res, m) {
 /** DELETE /api/access_tokens/:id
 Delete existing access token. */
 R.delete(/^\/api\/access_tokens\/(\d+)$/, function(req, res, m) {
-  models.AccessToken.delete({id: m[1]}, function(err) {
+  db.Delete('access_tokens')
+  .whereEqual({id: m[1]})
+  .execute(function(err) {
     if (err) return res.die(err);
     res.status(204).end();
   });

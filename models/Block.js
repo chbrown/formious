@@ -1,5 +1,4 @@
 var _ = require('lodash');
-var sqlorm = require('./sqlorm');
 var db = require('../db');
 
 function firstLeaf(tree) {
@@ -9,8 +8,9 @@ function firstLeaf(tree) {
   return tree;
 }
 
-var Block = sqlorm.createModel(db, 'blocks',
-  ['experiment_id', 'parent_block_id', 'randomize', 'template_id', 'context', 'view_order', 'created']);
+function Block() {
+
+}
 
 Block.shapeTree = function(all_blocks) {
   var block_hash = _.object(all_blocks.map(function(block) {
@@ -47,9 +47,7 @@ Block.nextBlockId = function(experiment_id, participant_id, callback) {
   db.Select('blocks')
   .where('experiment_id = ?', experiment_id)
   .where('id NOT IN (SELECT block_id FROM responses WHERE participant_id = ?)', participant_id)
-  // .where('view_order > ?', block.view_order)
   .orderBy('view_order ASC')
-  // .limit(1)
   .execute(function(err, blocks) {
     if (err) return callback(err);
 

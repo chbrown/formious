@@ -1,11 +1,10 @@
 var _ = require('lodash');
 var Router = require('regex-router');
 var db = require('../../db');
-var models = require('../../models');
 
-var R = new Router(function(req, res) {
-  res.status(404).die('No resource at: ' + req.url);
-});
+var R = new Router();
+
+var template_columns = ['name', 'html'];
 
 /** GET /api/templates
 List all templates. */
@@ -30,8 +29,12 @@ R.post(/^\/api\/templates$/, function(req, res) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, models.Template.columns);
-    models.Template.insert(fields, function(err, template) {
+    var fields = _.pick(data, template_columns);
+
+    db.Insert('templates')
+    .set(fields)
+    .returning('*')
+    .execute(function(err, rows) {
       if (err) {
         if (err.message && err.message.match(/duplicate key value violates unique constraint/)) {
           // 303 is a "See other" and SHOULD include a Location header
@@ -39,7 +42,7 @@ R.post(/^\/api\/templates$/, function(req, res) {
         }
         return res.die(err);
       }
-      res.status(201).json(template);
+      res.status(201).json(rows[0]);
     });
   });
 });
@@ -47,7 +50,9 @@ R.post(/^\/api\/templates$/, function(req, res) {
 /** GET /api/templates/:id
 Show existing template. */
 R.get(/^\/api\/templates\/(\d+)$/, function(req, res, m) {
-  models.Template.one({id: m[1]}, function(err, template) {
+  db.SelectOne('templates')
+  .whereEqual({id: m[1]})
+  .execute(function(err, template) {
     if (err) return res.die(err);
     res.setHeader('Cache-Control', 'max-age=5');
     res.json(template);
@@ -60,8 +65,12 @@ R.post(/^\/api\/templates\/(\d+)/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, models.Template.columns);
-    models.Template.update(fields, {id: m[1]}, function(err) {
+    var fields = _.pick(data, template_columns);
+
+    db.Update('templates')
+    .setEqual(fields)
+    .whereEqual({id: m[1]})
+    .execute(function(err) {
       if (err) return res.die(err);
       res.status(204).end(); // 204 No Content
     });
@@ -71,7 +80,9 @@ R.post(/^\/api\/templates\/(\d+)/, function(req, res, m) {
 /** DELETE /api/templates/:id
 Delete existing template. */
 R.delete(/^\/api\/templates\/(\d+)$/, function(req, res, m) {
-  models.Template.delete({id: m[1]}, function(err) {
+  db.Delete('templates')
+  .whereEqual({id: m[1]})
+  .execute(function(err) {
     if (err) return res.die(err);
     res.status(204).end();
   });

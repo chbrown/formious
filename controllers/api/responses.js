@@ -1,11 +1,8 @@
 var Router = require('regex-router');
 var db = require('../../db');
-var models = require('../../models');
 var url = require('url');
 
-var R = new Router(function(req, res) {
-  res.status(404).die('No resource at: ' + req.url);
-});
+var R = new Router();
 
 /**
 GET /api/responses
@@ -46,7 +43,9 @@ R.get(/^\/api\/responses(\?|$)/, function(req, res) {
 GET /api/responses/:id
 */
 R.get(/^\/api\/responses\/(\d+)$/, function(req, res, m) {
-  models.Response.one({id: m[1]}, function(err, response) {
+  db.SelectOne('responses')
+  .whereEqual({id: m[1]})
+  .execute(function(err, response) {
     if (err) return res.die(err);
     res.json(response);
   });

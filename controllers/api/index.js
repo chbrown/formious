@@ -2,9 +2,7 @@ var Router = require('regex-router');
 var Cookies = require('cookies');
 var models = require('../../models');
 
-var R = new Router(function(req, res) {
-  res.status(404).die('No resource at: ' + req.url);
-});
+var R = new Router();
 
 R.any(/^\/api\/access_tokens/, require('./access_tokens'));
 R.any(/^\/api\/administrators/, require('./administrators'));

@@ -36,7 +36,6 @@
     "regex-router": "*",
     "send": "*",
     "sqlcmd-pg": "*",
-    "sqlorm": "~0.2.5",
     "streaming": "*",
     "sv": "*",
     "textarea": "*",

@@ -4,11 +4,7 @@ var Router = require('regex-router');
 var models = require('../../models');
 var db = require('../../db');
 
-
-// /api/administrators/*
-var R = new Router(function(req, res) {
-  res.status(404).die('No resource at: ' + req.url);
-});
+var R = new Router();
 
 /** GET /api/administrators
 List all administrators. */
@@ -47,7 +43,9 @@ R.post(/^\/api\/administrators$/, function(req, res) {
 
 Show existing administrator. */
 R.get(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
-  models.Administrator.one({id: m[1]}, function(err, administrator) {
+  db.SelectOne('administrators')
+  .whereEqual({id: m[1]})
+  .execute(function(err, administrator) {
     if (err) return res.die(err);
     administrator = _.omit(administrator, 'password');
     res.json(administrator);
@@ -74,7 +72,9 @@ R.post(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
 
 Delete single administrator */
 R.delete(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
-  models.Administrator.delete({id: m[1]}, function(err) {
+  db.Delete('administrators')
+  .whereEqual({id: m[1]})
+  .execute(function(err) {
     if (err) return res.die(err);
     res.status(204).end();
   });

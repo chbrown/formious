@@ -1,11 +1,10 @@
 var _ = require('lodash');
 var Router = require('regex-router');
 var db = require('../../../db');
-var models = require('../../../models');
 
-var R = new Router(function(req, res) {
-  res.status(404).die('No resource at: ' + req.url);
-});
+var R = new Router();
+
+var experiments_columns = ['name', 'administrator_id', 'html'];
 
 R.any(/^\/api\/experiments\/(\d+)\/blocks/, require('./blocks'));
 
@@ -30,10 +29,14 @@ R.post(/^\/api\/experiments$/, function(req, res) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, models.Experiment.columns);
-    models.Experiment.insert(fields, function(err, experiment) {
+    var fields = _.pick(data, experiments_columns);
+
+    db.Insert('experiments')
+    .set(fields)
+    .returning('*')
+    .execute(function(err, rows) {
       if (err) return res.die(err);
-      res.status(201).json(experiment);
+      res.status(201).json(rows[0]);
     });
   });
 });
@@ -50,7 +53,9 @@ R.get(/^\/api\/experiments\/new$/, function(req, res) {
 /** GET /api/experiments/:id
 Show existing experiment. */
 R.get(/^\/api\/experiments\/(\d+)$/, function(req, res, m) {
-  models.Experiment.one({id: m[1]}, function(err, experiment) {
+  db.SelectOne('experiments')
+  .whereEqual({id: m[1]})
+  .execute(function(err, experiment) {
     if (err) return res.die(err);
     res.json(experiment);
   });
@@ -62,8 +67,12 @@ R.post(/^\/api\/experiments\/(\d+)/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, models.Experiment.columns);
-    models.Experiment.update(fields, {id: m[1]}, function(err) {
+    var fields = _.pick(data, experiments_columns);
+
+    db.Update('experiments')
+    .setEqual(fields)
+    .whereEqual({id: m[1]})
+    .execute(function(err) {
       if (err) return res.die(err);
       res.status(204).end(); // 204 No Content
     });
@@ -73,11 +82,12 @@ R.post(/^\/api\/experiments\/(\d+)/, function(req, res, m) {
 /** DELETE /api/experiments/:id
 Delete experiment */
 R.delete(/^\/api\/experiments\/(\d+)$/, function(req, res, m) {
-  models.Experiment.delete({id: m[1]}, function(err) {
+  db.Delete('experiments')
+  .whereEqual({id: m[1]})
+  .execute(function(err) {
     if (err) return res.die(err);
     res.status(204).end();
   });
 });
-
 
 module.exports = R.route.bind(R);

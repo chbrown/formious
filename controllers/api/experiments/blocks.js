@@ -1,11 +1,10 @@
 var _ = require('lodash');
 var Router = require('regex-router');
 var db = require('../../../db');
-var models = require('../../../models');
 
-var R = new Router(function(req, res) {
-  res.status(404).die('No resource at: ' + req.url);
-});
+var R = new Router();
+
+var blocks_columns = ['experiment_id', 'parent_block_id', 'randomize', 'template_id', 'context', 'view_order', 'created'];
 
 /** GET /api/experiments/:experiment_id/blocks
 list all of an experiment's blocks */
@@ -26,15 +25,20 @@ R.post(/\/api\/experiments\/(\d+)\/blocks$/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    models.Block.insert({
+    var fields = {
       experiment_id: m[1],
       template_id: data.template_id,
       context: data.context,
       view_order: data.view_order,
-    }, function(err, block) {
+    };
+
+    db.Insert('blocks')
+    .set(fields)
+    .returning('*')
+    .execute(function(err, rows) {
       if (err) return res.die(err);
 
-      res.status(201).json(block);
+      res.status(201).json(rows[0]);
     });
   });
 });
@@ -49,7 +53,9 @@ R.get(/\/api\/experiments\/(\d+)\/blocks\/new$/, function(req, res, m) {
 /** GET /api/experiments/:experiment_id/blocks/:block_id
 Show block details */
 R.get(/\/api\/experiments\/(\d+)\/blocks\/(\d+)$/, function(req, res, m) {
-  models.Block.one({experiment_id: m[1], id: m[2]}, function(err, block) {
+  db.SelectOne('blocks')
+  .whereEqual({experiment_id: m[1], id: m[2]})
+  .execute(function(err, block) {
     if (err) return res.die(err);
     res.json(block);
   });
@@ -62,8 +68,12 @@ R.post(/\/api\/experiments\/(\d+)\/blocks\/(\d+)$/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, models.Block.columns);
-    models.Block.update(fields, {experiment_id: m[1], id: m[2]}, function(err) {
+    var fields = _.pick(data, blocks_columns);
+
+    db.Update('blocks')
+    .setEqual(fields)
+    .whereEqual({experiment_id: m[1], id: m[2]})
+    .execute(function(err) {
       if (err) return res.die(err);
       // 204 No content
       res.status(204).end();
@@ -75,7 +85,9 @@ R.post(/\/api\/experiments\/(\d+)\/blocks\/(\d+)$/, function(req, res, m) {
 Delete block
 */
 R.delete(/\/api\/experiments\/(\d+)\/blocks\/(\d+)$/, function(req, res, m) {
-  models.Block.delete({experiment_id: m[1], id: m[2]}, function(err) {
+  db.Delete('blocks')
+  .whereEqual({experiment_id: m[1], id: m[2]})
+  .execute(function(err) {
     if (err) return res.die(err);
     res.status(204).end(); // 204 No content
   });

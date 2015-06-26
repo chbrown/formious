@@ -1,25 +1,6 @@
-var sqlorm = require('./sqlorm');
-var db = require('../db');
-
-var AWSAccount = sqlorm.createModel(db, 'aws_accounts',
-  ['name', 'access_key_id', 'secret_access_key']);
-
-var Experiment = sqlorm.createModel(db, 'experiments',
-  ['name', 'administrator_id', 'html']);
-
-var Template = sqlorm.createModel(db, 'templates',
-  ['name', 'html']);
-
-var Response = sqlorm.createModel(db, 'responses',
-  ['participant_id', 'block_id', 'value', 'assignment_id']);
-
 module.exports = {
   AccessToken: require('./AccessToken'),
   Administrator: require('./Administrator'),
-  AWSAccount: AWSAccount,
-  Experiment: Experiment,
   Participant: require('./Participant'),
-  Response: Response,
   Block: require('./Block'),
-  Template: Template,
 };

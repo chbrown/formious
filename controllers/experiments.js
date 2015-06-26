@@ -25,9 +25,7 @@ function getBlockTemplate(callback) {
   }
 }
 
-var R = new Router(function(req, res) {
-  res.status(404).die('No resource at: ' + req.url);
-});
+var R = new Router();
 
 /** the Amazon Mechanical Turk frame will give us the following variables:
 
@@ -44,16 +42,15 @@ Redirect to first block of experiment
 R.get(/^\/experiments\/(\d+)(\?|$)/, function(req, res, m) {
   var experiment_id = m[1];
 
-  db.Select('blocks')
+  db.SelectOne('blocks')
   .where('experiment_id = ?', experiment_id)
-  .orderBy('view_order')
-  .limit(1)
-  .execute(function(err, blocks) {
+  .orderBy('view_order ASC')
+  .execute(function(err, block) {
     if (err) return res.die(err);
-    if (blocks.length === 0) return res.die('No available blocks');
+    if (!block) return res.die('No available blocks');
 
     var urlObj = url.parse(req.url, true);
-    urlObj.pathname = '/experiments/' + experiment_id + '/blocks/' + blocks[0].id;
+    urlObj.pathname = '/experiments/' + experiment_id + '/blocks/' + block.id;
     var block_url = url.format(urlObj);
 
     res.redirect(block_url);
@@ -69,13 +66,13 @@ R.get(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, function(req, res, m) {
 
   async.auto({
     experiment: function(callback) {
-      models.Experiment.one({id: experiment_id}, callback);
+      db.SelectOne('experiments').whereEqual({id: experiment_id}).execute(callback);
     },
     block: function(callback) {
-      models.Block.one({id: block_id}, callback);
+      db.SelectOne('blocks').whereEqual({id: block_id}).execute(callback);
     },
     template: ['block', function(callback, results) {
-      models.Template.one({id: results.block.template_id}, callback);
+      db.SelectOne('templates').whereEqual({id: results.block.template_id}).execute(callback);
     }],
   }, function(err, results) {
     if (err) return res.die(err);

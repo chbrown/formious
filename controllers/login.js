@@ -6,9 +6,7 @@ var logger = require('loge');
 var models = require('../models');
 
 // router & actions for logging in
-var R = new Router(function(req, res) {
-  res.status(404).die('No resource at: ' + req.url);
-});
+var R = new Router();
 
 /** POST /login
 Try to login as user with email and password */
