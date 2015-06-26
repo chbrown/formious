@@ -7,16 +7,20 @@
       <td ng-repeat="parameter in parameters">
         {{parameter}}
       </td>
-      <td>order</td>
+      <td>view_order</td>
       <td></td>
     </tr>
   </thead>
   <tbody>
-    <tr ng-repeat="block in blocks track by $index" ng-class="{container: !block.template_id}">
+    <tr ng-repeat="block in blocks | orderBy:'view_order'"
+      ng-class="{container: !block.template_id}">
       <td style="padding-right: 5px">
         <input type="checkbox" ng-model="block.selected">
       </td>
-      <td><a ui-sref="admin.experiments.edit.blocks.edit({block_id: block.id})">{{block.id}}</a></td>
+      <td>
+        <a ui-sref="admin.experiments.edit.blocks.edit({block_id: block.id})" ng-if="block.id">{{block.id}}</a>
+        <span ng-if="!block.id">unsaved</span>
+      </td>
       <!-- swap (template_id, context) / (randomize, children) -->
       <!-- stim-type blocks -->
       <td ng-if="block.template_id">

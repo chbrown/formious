@@ -13,17 +13,14 @@
 </section>
 
 <section class="box vpad">
-  <div blocks="blocks" checkbox-sequence style="font-size: 90%"></div>
+  <div blocks="root.children" checkbox-sequence style="font-size: 90%"></div>
 </section>
 
 <nav fixedflow style="bottom: 0; border-top: 1px solid #BBB; padding: 5px; background-color: #EEE;">
   <ui-view>
-    <button ng-click="deleteSelectedBlocks()" class="control">
-      Delete selection ({{(blocks | filter:{selected: true}).length}})
-    </button>
-    <button ng-click="groupSelectedBlocks()" class="control">
-      Group selection ({{(blocks | filter:{selected: true}).length}})
-    </button>
+    <button ng-click="deleteSelectedBlocks()" class="control">Delete selection</button>
+    <button ng-click="groupSelectedBlocks()" class="control">Group selection</button>
+    <button ng-click="saveTree()" class="control">Save tree</button>
     <a ui-sref="admin.experiments.edit.blocks.edit({block_id: 'new'})">Add empty block</a>
   </ui-view>
 </nav>

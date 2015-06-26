@@ -1,10 +1,13 @@
 var _ = require('lodash');
+var async = require('async');
+var logger = require('loge');
 var Router = require('regex-router');
 var db = require('../../../db');
 
 var R = new Router();
 
-var blocks_columns = ['experiment_id', 'parent_block_id', 'randomize', 'template_id', 'context', 'view_order', 'created'];
+var blocks_columns = ['id', 'experiment_id', 'template_id', 'context',
+  'view_order', 'created', 'randomize', 'parent_block_id'];
 
 /** GET /api/experiments/:experiment_id/blocks
 list all of an experiment's blocks */
@@ -90,6 +93,117 @@ R.delete(/\/api\/experiments\/(\d+)\/blocks\/(\d+)$/, function(req, res, m) {
   .execute(function(err) {
     if (err) return res.die(err);
     res.status(204).end(); // 204 No content
+  });
+});
+
+/**
+GET /api/experiments/:experiment_id/blocks/tree
+
+Special non-REST method to get all blocks and sort them into a tree.
+*/
+R.get(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
+  var experiment_id = m[1];
+  db.Select('blocks')
+  .whereEqual({experiment_id: experiment_id})
+  .orderBy('view_order')
+  .execute(function(err, blocks) {
+    if (err) return res.die(err);
+    var block_hash = _.object(blocks.map(function(block) {
+      block.children = [];
+      return [block.id, block];
+    }));
+    var root_blocks = [];
+    blocks.forEach(function(block) {
+      if (block.parent_block_id) {
+        // block_hash and root blocks contents are linked by reference, so order doesn't matter here
+        block_hash[block.parent_block_id].children.push(block);
+      }
+      else {
+        // blocks with no parent_block_id are added to the root list
+        root_blocks.push(block);
+      }
+    });
+    res.json(root_blocks);
+  });
+});
+
+// depth-first recursion helper
+function recurseEach(nodes, fn) {
+  nodes.forEach(function(node) {
+    fn(node);
+    recurseEach(node.children, fn);
+  });
+}
+
+/**
+PUT /api/experiments/:experiment_id/blocks/tree
+
+Special non-REST method to store a tree structure of blocks and in a tree structure.
+*/
+R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
+  var experiment_id = m[1];
+  req.readData(function(err, root_blocks) {
+    if (err) return res.die(err);
+
+    // 1. instantiate the missing blocks so that they have id's we can use when flattening
+    var new_blocks = [];
+    recurseEach(root_blocks, function(block) {
+      if (block.id === undefined) {
+        new_blocks.push(block);
+      }
+    });
+    async.each(new_blocks, function(block, callback) {
+      var fields = _.pick(block, blocks_columns);
+
+      db.Insert('blocks')
+      .set(fields)
+      .returning('*')
+      .execute(function(err, rows) {
+        if (err) return callback(err);
+        // update by reference
+        _.assign(block, rows[0]);
+        callback();
+      });
+    }, function(err) {
+      if (err) return res.die(err);
+      // okay, all blocks should have .id fields now
+      recurseEach(root_blocks, function(block) {
+        block.children.forEach(function(child_block) {
+          child_block.parent_block_id = block.id;
+        });
+      });
+      // now the tree structure is defined on each block, and the 'children' links are no longer needed.
+      // 2. flatten the root_blocks-based tree into a flat Array of blocks
+      var all_blocks = [];
+      recurseEach(root_blocks, function(block) {
+        all_blocks.push(block);
+      });
+      var all_blocks_ids = all_blocks.map(function(block) { return block.id; });
+
+      logger.info('Updating %d blocks', all_blocks.length);
+
+      // 3. brute-force update them all
+      async.each(all_blocks, function(block, callback) {
+        var fields = _.pick(block, blocks_columns);
+
+        db.Update('blocks')
+        .setEqual(fields)
+        .whereEqual({id: block.id})
+        .execute(callback);
+      }, function(err) {
+        if (err) return res.die(err);
+
+        // delete all other blocks
+        db.Delete('blocks')
+        .whereEqual({experiment_id: experiment_id})
+        .where('NOT (id = ANY(?::integer[]))', all_blocks_ids)
+        .execute(function(err) {
+          if (err) return res.die(err);
+
+          res.json({message: 'Successfully updated block tree'});
+        });
+      });
+    });
   });
 });
 

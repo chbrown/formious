@@ -48,6 +48,7 @@
     "yargs": "*"
   },
   "devDependencies": {
+    "babel": "*",
     "babelify": "*",
     "browserify": "*",
     "clean-css": "*",
