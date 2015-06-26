@@ -13,26 +13,37 @@ In particular, it was originally built to interface with [Amazon Mechanical Turk
 
 ## Deployment
 
-New docker images are automatically built on Docker Hub: [`chbrown/formious`](https://registry.hub.docker.com/u/chbrown/formious/)
+We'll deploy to a Digital Ocean droplet.
 
-Initial:
+    DIGITALOCEAN_ACCESS_TOKEN=6c4a0280d36dc219n0t4ctua11ymydigital0ceant0k3n9186729fe910b157bb
+    docker-machine create -d digitalocean --digitalocean-region nyc3 --digitalocean-size 1gb formious
 
-    docker run -d --name db -p 127.0.0.1:15432:5432 -v /var/docker/db:/var/lib/postgresql/data postgres:9.4
-    docker run -d --name formious -h formious --link db:db -p 127.0.0.1:1451:80 --restart always chbrown/formious
+The `formious` application requires a PostgreSQL database.
 
-Updating:
+    docker run -d --name db -p 127.0.0.1:15432:5432 \
+      -v /var/docker/db:/var/lib/postgresql/data postgres:9.4
 
-    docker pull chbrown/formious && \
-      docker rm -f formious && \
-      docker run -d --name formious -h formious --link db:db -p 127.0.0.1:1451:80 --restart always chbrown/formious
+* the `-v` argument stores the data on the host machine so that we don't lose all our data if we accidentally remove or update the postgres container.
+* the `-p` argument opens the database for access directly from the host machine, which makes backing up the data easier. E.g., if on Ubuntu, run `apt-get install postgresql-client` to get the appropriate tools, then run `pg_dump -h localhost -p 15432 -U postgres formious` to dump the database to `stdout`.
 
+We'll use the handy [`jwilder/nginx-proxy`](https://github.com/jwilder/nginx-proxy) container to back-proxy HTTP(S) requests to the formious app.
 
-### Development
+    docker run -d -v /var/run/docker.sock:/tmp/docker.sock \
+       -p 80:80 -p 443:443 --name nginx jwilder/nginx-proxy
 
-Pull the remote server's database into a local database:
+This repo is automatically built as a docker container on Docker Hub at [`chbrown/formious`](https://registry.hub.docker.com/u/chbrown/formious/).
 
-    dropdb formious; createdb formious
-    ssh -C semantics 'pg_dump -h localhost -p 15432 -U postgres formious' | psql formious
+    docker run -d -e VIRTUAL_HOST=formious.com --link db:db \
+      --restart always --name app chbrown/formious
+
+* The `-e VIRTUAL_HOST=formious.com` argument tells nginx-proxy to forward `formious.com` requests to this container. You would use a different hostname here, since I own `formious.com`.
+* The `--link db:db` exposes to the database container, named `db`, to the formious application, under the alias `db`.
+
+To update, pull the latest image and remove the running container:
+
+    docker pull chbrown/formious && docker rm -f formious
+
+Then enter the same `docker run` command as before.
 
 
 ## License
