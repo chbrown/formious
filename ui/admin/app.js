@@ -507,11 +507,11 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     templateUrl: '/ui/admin/experiments/blocks/all.html',
     controller: 'admin.experiments.edit.blocks',
   })
-  .state('admin.experiments.edit.blocks.edit', {
-    url: '/:block_id',
-    templateUrl: '/ui/admin/experiments/blocks/one.html',
-    controller: 'admin.experiments.edit.blocks.edit',
-  })
+  // .state('admin.experiments.edit.block', {
+  //   url: '/blocks/:block_id',
+  //   templateUrl: '/ui/admin/experiments/blocks/one.html',
+  //   controller: 'admin.experiments.edit.block',
+  // })
   // mturk
   .state('admin.mturk', {
     url: '/mturk/:environment/:aws_account_id',

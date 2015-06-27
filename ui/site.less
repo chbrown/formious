@@ -86,15 +86,7 @@ table {
 
 body {
   font-family: "Lucida Grande", Arial, sans-serif;
-  // display: flex;
-  // align-content: stretch;
 }
-// main {
-//   display: inline-block;
-// }
-// section {
-//   flex-grow: 1;
-// }
 p {
   margin: 1ex 0;
 }
@@ -141,6 +133,11 @@ time {
   font: 9pt monospace;
   min-height: 30px;
   min-width: 400px
+}
+a[ng-click] {
+  color: #00E;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 button {
@@ -238,9 +235,6 @@ body.admin {
 // only a few things should stretch the whole width,
 // like sections, and tables
 .box {
-  // padding-top: 5px;
-  // padding-bottom: 5px;
-
   background-color: white;
   // light gray border on top and bottom only
   border: 1px solid #EEE;
@@ -290,48 +284,5 @@ table.responses {
   &:hover {
     white-space: normal;
     overflow: visible;
-  }
-}
-
-.array {
-  .controls {
-    text-align: right;
-  }
-  .add {
-    margin: 0;
-    padding: 0;
-    background: none;
-    border: none;
-    cursor: pointer;
-  }
-  .add::before {
-    content: "add ";
-  }
-  .remove {
-    color: darkred;
-    cursor: pointer;
-  }
-}
-
-.preview {
-  position: fixed;
-  max-width: 50%;
-  top: 10px;
-  right: 10px;
-  border: 1px solid #DDD;
-  .content {
-    padding: 10px;
-    background-color: white;
-  }
-  .controls {
-    padding: 10px;
-    background-color: #EEE;
-    cursor: pointer;
-    span {
-      float: right;
-    }
-    &:hover {
-      background-color: #DDD;
-    }
   }
 }

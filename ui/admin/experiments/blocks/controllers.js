@@ -44,17 +44,6 @@ function pluralize(singular, array) {
   return singular + 's';
 }
 
-/**
-iterable should be a generator or similar
-*/
-function collect(iterable) {
-  var array = [];
-  for (let item of iterable) {
-    array.push(item);
-  }
-  return array;
-}
-
 app
 .controller('admin.experiments.edit.blocks', function($scope, $q, $http, $localStorage, $state, $flash,
   Template, Block, parseTabularFile) {
@@ -94,7 +83,7 @@ app
   Move the selected blocks into a new block of their own.
   */
   $scope.groupSelectedBlocks = function() {
-    var selected_blocks = collect(Node.recursiveSearch(root.children, block => block.selected));
+    var selected_blocks = Array.from(Node.recursiveSearch(root.children, block => block.selected));
     if (selected_blocks.length === 0) {
       throw new Error('Cannot group empty selection');
     }
@@ -131,32 +120,14 @@ app
     root = $scope.root = transformFunction(root);
   };
 
-  /** addBlockData(contexts: any[])
-  */
-  var addBlockData = (contexts) => {
+  $scope.addEmptyBlock = () => {
     var view_order = getNextViewOrder();
-    var default_template_id = $scope.$storage.default_template_id;
-
-    // and then add the blocks to the table
-    var block_promises = contexts.map(function(context, i) {
-      context = _.extend({}, {template_id: default_template_id, children: []}, context);
-      // block has properties like: context, template_id, view_order
-      // handle templates that cannot be found simply by creating new ones
-      // compute this outside because the promises are not guaranteed to execute in order
-      return Template.findOrCreate(context).then(template => {
-        return new Block({
-          experiment_id: $scope.experiment.id,
-          context: context,
-          view_order: view_order + i,
-          template_id: template.id,
-        }).$save();
-      });
-    });
-
-    return $q.all(block_promises).then(blocks => {
-      // = Block.query({experiment_id: $scope.experiment.id});
-      root.children = root.children.concat(blocks);
-      return `Added ${block_promises.length} blocks`;
+    root.children = root.children.concat({
+      children: [],
+      experiment_id: $scope.experiment.id,
+      context: {},
+      view_order: view_order,
+      template_id: $scope.$storage.default_template_id,
     });
   };
 
@@ -186,48 +157,66 @@ app
 
   */
   $scope.importFile = (file) => {
-    var promise = parseTabularFile(file).then(data => {
-      return addBlockData(data);
-    }, function(err) {
-      return 'Error uploading file "' + file.name + '": ' + err.toString();
+    var promise = parseTabularFile(file).then(records => {
+      // and then add the blocks to the table
+      var view_order = getNextViewOrder();
+      var new_blocks = records.map((context, i) => {
+        // block has properties like: context, template_id, view_order
+        // handle templates that cannot be found simply by creating new ones
+        // compute this outside because the promises are not guaranteed to execute in order
+        // return Template.findOrCreate(context).then(template => {
+
+        return {
+          children: [],
+          experiment_id: $scope.experiment.id,
+          context: context,
+          view_order: view_order + i,
+          template_id: $scope.$storage.default_template_id,
+        };
+      });
+      root.children = root.children.concat(new_blocks);
+
+      return `Added ${records.length} blocks`;
+    }, err => {
+      return `Error uploading file "${file.name}": ${err.toString()}`;
     });
     $flash(promise);
   };
 
   $scope.saveTree = () => {
     var url = `/api/experiments/${$state.params.experiment_id}/blocks/tree`;
-    var promise = $http.put(url, root.children).then(data => {
+    var promise = $http.put(url, root.children).then(() => {
       return 'Saved all blocks';
     });
     $flash(promise);
   };
 })
-.controller('admin.experiments.edit.blocks.edit', ($scope, $localStorage, $state,
-  $flash, Template, Block) => {
-  $scope.$storage = $localStorage;
-  $scope.block = Block.get({
-    experiment_id: $state.params.experiment_id,
-    id: $state.params.block_id,
-  }, function() {
-    // set template_id to the default if it's not set
-    _.defaults($scope.block, {template_id: $localStorage.default_template_id});
-  });
-  $scope.templates = Template.query();
+// .controller('admin.experiments.edit.block', ($scope, $localStorage, $state,
+//   $flash, Template, Block) => {
+//   $scope.$storage = $localStorage;
+//   $scope.block = Block.get({
+//     experiment_id: $state.params.experiment_id,
+//     id: $state.params.block_id,
+//   }, function() {
+//     // set template_id to the default if it's not set
+//     _.defaults($scope.block, {template_id: $localStorage.default_template_id});
+//   });
+//   $scope.templates = Template.query();
 
-  // the 'save' event is broadcast on rootScope when command+S is pressed
-  // not sure why it doesn't work here.
-  $scope.$on('save', $scope.syncBlock);
+//   // the 'save' event is broadcast on rootScope when command+S is pressed
+//   // not sure why it doesn't work here.
+//   $scope.$on('save', $scope.syncBlock);
 
-  $scope.syncBlock = function() {
-    var promise = $scope.block.$save(function() {
-      $state.go('^');
-      // $state.go('.', {id: $scope.block.id}, {notify: false});
-    }).then(function() {
-      return 'Saved block';
-    });
-    $flash(promise);
-  };
-})
+//   $scope.syncBlock = function() {
+//     var promise = $scope.block.$save(function() {
+//       $state.go('^');
+//       // $state.go('.', {id: $scope.block.id}, {notify: false});
+//     }).then(function() {
+//       return 'Saved block';
+//     });
+//     $flash(promise);
+//   };
+// })
 .directive('blocks', (RecursionHelper) => {
   return {
     restrict: 'A',
@@ -250,7 +239,6 @@ app
         scope.parameters = parameters;
       });
     },
-    // compile: RecursionHelper.compile,
     compile: function(element) {
       // Use the compile function from the RecursionHelper,
       // And return the linking function(s) which it returns

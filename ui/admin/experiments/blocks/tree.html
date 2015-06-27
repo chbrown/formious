@@ -1,45 +1,51 @@
 <table class="striped grid padded fill blocks">
   <thead>
     <tr>
-      <td></td>
-      <td>block_id</td>
-      <td>template/block params</td>
-      <td ng-repeat="parameter in parameters">
+      <th></th>
+      <th>block_id</th>
+      <th>template/block params</th>
+      <th ng-repeat="parameter in parameters">
         {{parameter}}
-      </td>
-      <td>view_order</td>
-      <td></td>
+      </th>
+      <th>view_order</th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
-    <tr ng-repeat="block in blocks | orderBy:'view_order'"
-      ng-class="{container: !block.template_id}">
+    <tr ng-repeat="block in blocks | orderBy:'view_order'" ng-class="{container: !block.template_id}">
       <td style="padding-right: 5px">
         <input type="checkbox" ng-model="block.selected">
       </td>
       <td>
-        <a ui-sref="admin.experiments.edit.blocks.edit({block_id: block.id})" ng-if="block.id">{{block.id}}</a>
-        <span ng-if="!block.id">unsaved</span>
+        <div>{{block.id || 'unsaved'}}</div>
+        <div><label><input type="checkbox" ng-model="block.editing"> Edit</label></div>
       </td>
       <!-- swap (template_id, context) / (randomize, children) -->
       <!-- stim-type blocks -->
       <td ng-if="block.template_id">
-        <a-template class="nowrap" template-id="{{block.template_id}}"></a-template>
+        <select-template ng-if=" block.editing" model="block.template_id" ></select-template>
+        <a-template      ng-if="!block.editing" template-id="{{block.template_id}}" class="nowrap"></a-template>
       </td>
-      <td ng-if="block.template_id" ng-repeat="parameter in parameters">
+      <td ng-if="block.template_id && !block.editing" ng-repeat="parameter in parameters">
         <span ng-bind="block.context[parameter]"></span>
+      </td>
+      <td ng-if="block.template_id && block.editing" colspan="{{parameters.length}}">
+        <jsonarea ng-model="block.context" style="width: 100%; height: 100px; font: 8pt monospace;"></jsonarea>
       </td>
       <!-- container-type blocks -->
       <td ng-if="!block.template_id" colspan="{{parameters.length + 1}}" style="padding: 0">
         <div>
           Block:
-          <span ng-if="block.randomize">randomize</span> <span ng-if="!block.randomize">in order</span>
+          <label><input type="checkbox" ng-model="block.randomize"> Randomize</label>
           <button ng-click="$emit('collapseBlock', block)">Collapse</button>
         </div>
         <div blocks="block.children"></div>
       </td>
       <!-- the rest are common to both types of blocks -->
-      <td>{{block.view_order}}</td>
+      <td>
+        <input ng-if=" block.editing" type="number" ng-model="block.view_order" step="any" style="width: 50px">
+        <span  ng-if="!block.editing">{{block.view_order}}</span>
+      </td>
       <td class="nowrap">
         <a href="/experiments/{{experiment.id}}/blocks/{{block.id}}?workerId=testing" target="_blank">Public</a>
         <button ng-click="$emit('deleteBlock', block)">Delete</button>

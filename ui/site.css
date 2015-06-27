@@ -30,6 +30,7 @@ time{white-space:nowrap}
 .ng-invalid{box-shadow:0 0 10px #c80000}
 .unlimited{max-height:none!important;max-width:none!important}
 .json{font:9pt monospace;min-height:30px;min-width:400px}
+a[ng-click]{color:#00E;cursor:pointer;text-decoration:underline}
 button{margin:0}
 button.anchor{border-width:0;text-decoration:underline;cursor:pointer;font-size:100%;padding:0}
 body.admin{background-color:#FBFBFB;font-size:80%;overflow-y:scroll}
@@ -56,12 +57,3 @@ table.responses td.context{background-color:#FFF8F8}
 table.responses td.value{background-color:#F8FFF8}
 .hover-flow{word-wrap:break-word;text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
 .hover-flow:hover{white-space:normal;overflow:visible}
-.array .controls{text-align:right}
-.array .add{margin:0;padding:0;background:0 0;border:none;cursor:pointer}
-.array .add::before{content:"add "}
-.array .remove{color:#8b0000;cursor:pointer}
-.preview{position:fixed;max-width:50%;top:10px;right:10px;border:1px solid #DDD}
-.preview .content{padding:10px;background-color:#fff}
-.preview .controls{padding:10px;background-color:#EEE;cursor:pointer}
-.preview .controls span{float:right}
-.preview .controls:hover{background-color:#DDD}
