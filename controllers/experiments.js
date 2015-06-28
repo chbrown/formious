@@ -133,8 +133,9 @@ R.post(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, function(req, res, m) {
     }, function(err, participant /*, responses*/) {
       if (err) return res.die(err);
 
-      models.Block.nextBlockId(experiment_id, participant.id, function(err, next_block_id) {
+      models.Block.nextBlockId(experiment_id, block_id, participant.id, function(err, next_block_id) {
         if (err) return res.die(err);
+        logger.info('models.Block.nextBlockId: %d', next_block_id);
 
         // http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ExternalQuestionArticle.html
         // sadly, this redirect_to doesn't work. Hopefully the user will have a proper

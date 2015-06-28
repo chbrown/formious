@@ -2,7 +2,10 @@ var _ = require('lodash');
 var async = require('async');
 var logger = require('loge');
 var Router = require('regex-router');
+
+var models = require('../../../models');
 var db = require('../../../db');
+var tree = require('../../../lib/tree');
 
 var R = new Router();
 
@@ -106,34 +109,13 @@ R.get(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
   db.Select('blocks')
   .whereEqual({experiment_id: experiment_id})
   .orderBy('view_order')
-  .execute(function(err, blocks) {
+  .execute(function(err, all_blocks) {
     if (err) return res.die(err);
-    var block_hash = _.object(blocks.map(function(block) {
-      block.children = [];
-      return [block.id, block];
-    }));
-    var root_blocks = [];
-    blocks.forEach(function(block) {
-      if (block.parent_block_id) {
-        // block_hash and root blocks contents are linked by reference, so order doesn't matter here
-        block_hash[block.parent_block_id].children.push(block);
-      }
-      else {
-        // blocks with no parent_block_id are added to the root list
-        root_blocks.push(block);
-      }
-    });
+
+    var root_blocks = models.Block.shapeTree(all_blocks);
     res.json(root_blocks);
   });
 });
-
-// depth-first recursion helper
-function recurseEach(nodes, fn) {
-  nodes.forEach(function(node) {
-    fn(node);
-    recurseEach(node.children, fn);
-  });
-}
 
 /**
 PUT /api/experiments/:experiment_id/blocks/tree
@@ -147,7 +129,7 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
 
     // 1. instantiate the missing blocks so that they have id's we can use when flattening
     var new_blocks = [];
-    recurseEach(root_blocks, function(block) {
+    tree.recursiveEach(root_blocks, function(block) {
       if (block.id === undefined) {
         new_blocks.push(block);
       }
@@ -162,12 +144,15 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
         if (err) return callback(err);
         // update by reference
         _.assign(block, rows[0]);
+        // okay, all blocks should have .id fields now; ready to move on
         callback();
       });
     }, function(err) {
       if (err) return res.die(err);
-      // okay, all blocks should have .id fields now
-      recurseEach(root_blocks, function(block) {
+      root_blocks.forEach(function(root_block) {
+        root_block.parent_block_id = null;
+      });
+      tree.recursiveEach(root_blocks, function(block) {
         block.children.forEach(function(child_block) {
           child_block.parent_block_id = block.id;
         });
@@ -175,7 +160,7 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
       // now the tree structure is defined on each block, and the 'children' links are no longer needed.
       // 2. flatten the root_blocks-based tree into a flat Array of blocks
       var all_blocks = [];
-      recurseEach(root_blocks, function(block) {
+      tree.recursiveEach(root_blocks, function(block) {
         all_blocks.push(block);
       });
       var all_blocks_ids = all_blocks.map(function(block) { return block.id; });
