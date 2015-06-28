@@ -23,8 +23,8 @@
       <!-- swap (template_id, context) / (randomize, children) -->
       <!-- stim-type blocks -->
       <td ng-if="block.template_id">
-        <select-template ng-if=" block.editing" model="block.template_id" ></select-template>
-        <a-template      ng-if="!block.editing" template-id="{{block.template_id}}" class="nowrap"></a-template>
+        <a-template ng-if="!block.editing" template-id="{{block.template_id}}" class="nowrap"></a-template>
+        <select-template ng-if="block.editing" model="block.template_id" ></select-template>
       </td>
       <td ng-if="block.template_id && !block.editing" ng-repeat="parameter in parameters">
         <span ng-bind="block.context[parameter]"></span>
@@ -43,8 +43,8 @@
       </td>
       <!-- the rest are common to both types of blocks -->
       <td>
-        <input ng-if=" block.editing" type="number" ng-model="block.view_order" step="any" style="width: 50px">
-        <span  ng-if="!block.editing">{{block.view_order}}</span>
+        <input ng-if="block.editing" type="number" ng-model="block.view_order" step="any" style="width: 50px">
+        <span ng-if="!block.editing">{{block.view_order}}</span>
       </td>
       <td class="nowrap">
         <a href="/experiments/{{experiment.id}}/blocks/{{block.id}}?workerId=testing" target="_blank">Public</a>
