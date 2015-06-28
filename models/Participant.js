@@ -6,17 +6,16 @@ Participant.findOrCreate = function(participant, callback) {
   db.SelectOne('participants')
   .whereEqual({aws_worker_id: participant.aws_worker_id})
   .execute(function(err, existing_participant) {
-    if (err) {
-      if (err.message && !err.message.match(/Could not find match/)) {
-        callback(err);
-      }
-      else {
-        Participant.insert(participant, callback);
-      }
+    if (err) return callback(err);
+
+    if (existing_participant) {
+      return callback(null, existing_participant);
     }
-    else {
-      callback(null, existing_participant);
-    }
+
+    db.InsertOne('participants')
+    .set({aws_worker_id: participant.aws_worker_id})
+    .returning('*')
+    .execute(callback);
   });
 };
 
