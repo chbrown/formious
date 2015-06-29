@@ -72,7 +72,7 @@ Block.nextBlockId = function(experiment_id, block_id, participant_id, callback) 
       if (block.parent_block_id) {
         return [block_id].concat(findPath(block.parent_block_id));
       }
-      return [block_id];
+      return [block_id, null];
     }
     // [parent_of_most_recent, parent_of_that, grandparent_of_most_recent, null]
     var current_path = findPath(most_recent_block.parent_block_id);
