@@ -41,7 +41,7 @@ This repo is automatically built as a docker container on Docker Hub at [`chbrow
 
 To update, pull the latest image and remove the running container:
 
-    docker pull chbrown/formious && docker rm -f formious
+    docker pull chbrown/formious && docker rm -f app
 
 Then enter the same `docker run` command as before.
 
