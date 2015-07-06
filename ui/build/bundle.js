@@ -52793,17 +52793,18 @@ if (typeof angular !== 'undefined') {
 
 }));
 },{}],106:[function(require,module,exports){
-(function(angular, factory) {
-    'use strict';
-    if (typeof define === 'function' && define.amd) {
-        define('ngStorage', ['angular'], function(angular) {
-            return factory(angular);
-        });
-    } else {
-        return factory(angular);
-    }
-}(typeof angular === 'undefined' ? null : angular, function(angular) {
+(function (root, factory) {
+  'use strict';
 
+  if (typeof define === 'function' && define.amd) {
+    define(['angular'], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory(require('angular'));
+  } else {
+    // Browser globals (root is window), we don't register it.
+    factory(root.angular);
+  }
+}(this , function (angular) {
     'use strict';
 
     /**
@@ -52811,7 +52812,7 @@ if (typeof angular !== 'undefined') {
      * @name ngStorage
      */
 
-    angular.module('ngStorage', [])
+    return angular.module('ngStorage', [])
 
     /**
      * @ngdoc object
@@ -52886,6 +52887,7 @@ if (typeof angular !== 'undefined') {
                                 angular.isDefined($storage[k]) || ($storage[k] = items[k]);
                             }
 
+                            $storage.$sync();
                             return $storage;
                         },
                         $reset: function(items) {
@@ -52894,23 +52896,18 @@ if (typeof angular !== 'undefined') {
                             }
 
                             return $storage.$default(items);
+                        },
+                        $sync: function () {
+                            for (var i = 0, l = webStorage.length, k; i < l; i++) {
+                                // #8, #10: `webStorage.key(i)` may be an empty string (or throw an exception in IE9 if `webStorage` is empty)
+                                (k = webStorage.key(i)) && 'ngStorage-' === k.slice(0, 10) && ($storage[k.slice(10)] = angular.fromJson(webStorage.getItem(k)));
+                            }
                         }
                     },
                     _last$storage,
                     _debounce;
 
-                try {
-                    webStorage = $window[storageType];
-                    webStorage.length;
-                } catch(e) {
-                    $log.warn('This browser does not support Web Storage!');
-                    webStorage = {};
-                }
-
-                for (var i = 0, l = webStorage.length, k; i < l; i++) {
-                    // #8, #10: `webStorage.key(i)` may be an empty string (or throw an exception in IE9 if `webStorage` is empty)
-                    (k = webStorage.key(i)) && 'ngStorage-' === k.slice(0, 10) && ($storage[k.slice(10)] = angular.fromJson(webStorage.getItem(k)));
-                }
+                $storage.$sync();
 
                 _last$storage = angular.copy($storage);
 
@@ -52937,7 +52934,7 @@ if (typeof angular !== 'undefined') {
                 });
 
                 // #6: Use `$window.addEventListener` instead of `angular.element` to avoid the jQuery-specific `event.originalEvent`
-                'localStorage' === storageType && $window.addEventListener && $window.addEventListener('storage', function(event) {
+                $window.addEventListener && $window.addEventListener('storage', function(event) {
                     if ('ngStorage-' === event.key.slice(0, 10)) {
                         event.newValue ? $storage[event.key.slice(10)] = angular.fromJson(event.newValue) : delete $storage[event.key.slice(10)];
 
@@ -52954,7 +52951,7 @@ if (typeof angular !== 'undefined') {
 
 }));
 
-},{}],107:[function(require,module,exports){
+},{"angular":5}],107:[function(require,module,exports){
 /*jslint browser: true */
 
 function extend(target /*, source_0, source_1, ... */) {
@@ -55289,28 +55286,17 @@ _app.app.controller('admin.experiments.table', function ($scope, $flash, $state,
     });
     $flash(promise);
   };
-
-  $scope.responses = function (experiment, ev) {
-    ev.preventDefault();
-    var promise = experiment.generateAccessToken().$promise.then(function (access_token) {
-      var url = ['', access_token.relation, access_token.foreign_id, 'responses'].join('/') + '?token=' + access_token.token;
-      // leave the realm of ui-router:
-      window.location = url;
-      return 'Generated';
-    });
-    $flash(promise);
-  };
 }).controller('admin.experiments.edit', function ($scope, $flash, $state, $localStorage, Experiment, Template, Administrator) {
   $scope.$storage = $localStorage.$default({ expand_experiment_html: false });
 
-  $scope.experiment = Experiment.get({ id: $state.params.experiment_id });
+  var experiment = $scope.experiment = Experiment.get({ id: $state.params.experiment_id });
   // $scope.aws_accounts = AWSAccount.query();
   $scope.administrators = Administrator.query();
   $scope.templates = Template.query();
 
   $scope.syncExperiment = function () {
-    var promise = $scope.experiment.$save(function () {
-      $state.go('.', { experiment_id: $scope.experiment.id }, { notify: false });
+    var promise = experiment.$save(function () {
+      $state.go('.', { experiment_id: experiment.id }, { notify: false });
     }).then(function () {
       return 'Saved experiment';
     });
@@ -55319,17 +55305,6 @@ _app.app.controller('admin.experiments.table', function ($scope, $flash, $state,
 
   // the 'save' event is broadcast on rootScope when command+S is pressed
   $scope.$on('save', $scope.syncExperiment);
-
-  $scope.responses = function (ev) {
-    ev.preventDefault();
-    var promise = $scope.experiment.generateAccessToken().$promise.then(function (access_token) {
-      var url = ['', access_token.relation, access_token.foreign_id, 'responses'].join('/') + '?token=' + access_token.token;
-      // leave the realm of ui-router:
-      window.location = url;
-      return 'Generated';
-    });
-    $flash(promise);
-  };
 
   // generate link to hit creation page
   $scope.site_url = _urlobject.Url.parse(window.location).merge({ path: '/' }).toString();
@@ -55525,11 +55500,6 @@ var _lodash2 = _interopRequireDefault(_lodash);
 _app.app.service('AccessToken', function ($resource) {
   return $resource('/api/access_tokens/:id', {
     id: '@id'
-  }, {
-    generate: {
-      method: 'POST',
-      url: '/api/access_tokens/generate'
-    }
   });
 }).service('Administrator', function ($resource) {
   // map: {'id': 'email'}
@@ -55551,17 +55521,10 @@ _app.app.service('AccessToken', function ($resource) {
     administrator_id: '@administrator_id',
     aws_account_id: '@aws_account_id'
   });
-}).service('Experiment', function ($resource, AccessToken) {
+}).service('Experiment', function ($resource) {
   var Experiment = $resource('/api/experiments/:id', {
     id: '@id'
   });
-  Experiment.prototype.generateAccessToken = function () {
-    return AccessToken.generate({
-      relation: 'experiments',
-      id: this.id,
-      length: 10
-    });
-  };
   return Experiment;
 }).service('Participant', function ($resource) {
   return $resource('/api/participants/:id', {

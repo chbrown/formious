@@ -25,8 +25,8 @@
             {{administrators | valueWhere:{id: experiment.administrator_id}:'email'}}
           </a>
         <td>
-          <a href="#" ng-click="responses(experiment, $event)">Responses</a>
-          ({{experiment.count || 0}})
+          <a href="/experiments/{{experiment.id}}/responses?token={{experiment.access_token}}">Responses</a>
+          ({{experiment.responses_count || 0}})
         </td>
         <td class="nowrap">
           <a href="/experiments/{{experiment.id}}" target="_blank">Public</a>

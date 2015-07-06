@@ -21,7 +21,7 @@ R.get(/\/api\/experiments\/(\d+)\/blocks$/, function(req, res, m) {
   .execute(function(err, blocks) {
     if (err) return res.die(err);
 
-    res.ngjson(blocks);
+    res.json(blocks);
   });
 });
 

@@ -6,11 +6,6 @@ app
 .service('AccessToken', function($resource) {
   return $resource('/api/access_tokens/:id', {
     id: '@id',
-  }, {
-    generate: {
-      method: 'POST',
-      url: '/api/access_tokens/generate',
-    }
   });
 })
 .service('Administrator', function($resource) {
@@ -36,17 +31,10 @@ app
     aws_account_id: '@aws_account_id',
   });
 })
-.service('Experiment', function($resource, AccessToken) {
+.service('Experiment', function($resource) {
   var Experiment = $resource('/api/experiments/:id', {
     id: '@id',
   });
-  Experiment.prototype.generateAccessToken = function() {
-    return AccessToken.generate({
-      relation: 'experiments',
-      id: this.id,
-      length: 10,
-    });
-  };
   return Experiment;
 })
 .service('Participant', function($resource) {

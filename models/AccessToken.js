@@ -1,15 +1,6 @@
+var _ = require('lodash');
 var db = require('../db');
-
-var util = require('util-enhanced');
-
-function randomString(length) {
-  var store = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-  var result = '';
-  for (var i = 0; i < length; i++) {
-    result += store[(Math.random() * store.length) | 0];
-  }
-  return result;
-}
+var lib_util = require('../lib/util');
 
 // ['token', 'relation', 'foreign_id', 'expires', 'redacted', 'created']
 
@@ -41,7 +32,7 @@ callback: function(err, access_token_object: Object)
 
 */
 AccessToken.findOrCreate = function(relation, foreign_id, options, callback) {
-  options = util.extend({length: 40, expires: null}, options);
+  options = _.assign({length: 40, expires: null}, options);
 
   db.SelectOne('access_tokens')
   .whereEqual({relation: relation, foreign_id: foreign_id})
@@ -55,13 +46,16 @@ AccessToken.findOrCreate = function(relation, foreign_id, options, callback) {
       return callback(null, access_token);
     }
 
-    var token = randomString(options.length);
-    AccessToken.insert({
+    var token = lib_util.randomString(options.length);
+    db.InsertOne('access_tokens')
+    .set({
       token: token,
       relation: relation,
       foreign_id: foreign_id,
       expires: options.expires,
-    }, callback);
+    })
+    .returning('*')
+    .execute(callback);
   });
 };
 

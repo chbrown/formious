@@ -14,30 +14,19 @@ app
     });
     $flash(promise);
   };
-
-  $scope.responses = function(experiment, ev) {
-    ev.preventDefault();
-    var promise = experiment.generateAccessToken().$promise.then(function(access_token) {
-      var url = ['', access_token.relation, access_token.foreign_id, 'responses'].join('/') + '?token=' + access_token.token;
-      // leave the realm of ui-router:
-      window.location = url;
-      return 'Generated';
-    });
-    $flash(promise);
-  };
 })
 .controller('admin.experiments.edit', function($scope, $flash, $state, $localStorage,
     Experiment, Template, Administrator) {
   $scope.$storage = $localStorage.$default({expand_experiment_html: false});
 
-  $scope.experiment = Experiment.get({id: $state.params.experiment_id});
+  var experiment = $scope.experiment = Experiment.get({id: $state.params.experiment_id});
   // $scope.aws_accounts = AWSAccount.query();
   $scope.administrators = Administrator.query();
   $scope.templates = Template.query();
 
   $scope.syncExperiment = function() {
-    var promise = $scope.experiment.$save(function() {
-      $state.go('.', {experiment_id: $scope.experiment.id}, {notify: false});
+    var promise = experiment.$save(function() {
+      $state.go('.', {experiment_id: experiment.id}, {notify: false});
     }).then(function() {
       return 'Saved experiment';
     });
@@ -46,17 +35,6 @@ app
 
   // the 'save' event is broadcast on rootScope when command+S is pressed
   $scope.$on('save', $scope.syncExperiment);
-
-  $scope.responses = function(ev) {
-    ev.preventDefault();
-    var promise = $scope.experiment.generateAccessToken().$promise.then(function(access_token) {
-      var url = ['', access_token.relation, access_token.foreign_id, 'responses'].join('/') + '?token=' + access_token.token;
-      // leave the realm of ui-router:
-      window.location = url;
-      return 'Generated';
-    });
-    $flash(promise);
-  };
 
   // generate link to hit creation page
   $scope.site_url = Url.parse(window.location).merge({path: '/'}).toString();

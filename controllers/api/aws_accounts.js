@@ -13,7 +13,7 @@ R.get(/^\/api\/aws_accounts$/, function(req, res) {
   .orderBy('id ASC')
   .execute(function(err, aws_accounts) {
     if (err) return res.die(err);
-    res.ngjson(aws_accounts);
+    res.json(aws_accounts);
   });
 });
 

@@ -1,6 +1,9 @@
+var async = require('async');
 var _ = require('lodash');
 var Router = require('regex-router');
 var db = require('../../../db');
+var lib_util = require('../../../lib/util');
+var logger = require('loge');
 
 var R = new Router();
 
@@ -8,18 +11,51 @@ var experiments_columns = ['name', 'administrator_id', 'html'];
 
 R.any(/^\/api\/experiments\/(\d+)\/blocks/, require('./blocks'));
 
+/**
+Take a pre-joined (with access_tokens) row from the experiments table and insert
+a new access_tokens row if there is no access_token available.
+*/
+function ensureAccessToken(experiment, callback) {
+  if (experiment.access_token) {
+    return setImmediate(function() {
+      callback(null, experiment);
+    });
+  }
+
+  // models.AccessToken.findOrCreate('experiments', experiment.id, {length: 10}, function(err, access_token) {
+  db.InsertOne('access_tokens')
+  .set({
+    token: lib_util.randomString(10),
+    relation: 'experiments',
+    foreign_id: experiment.id,
+    // expires: experiment.expires,
+  })
+  .returning('*')
+  .execute(function(err, access_token) {
+    if (err) return callback(err);
+
+    experiment.access_token = access_token.token;
+    callback(null, experiment);
+  });
+}
+
 /** GET /api/experiments
 list all experiments */
 R.get(/^\/api\/experiments$/, function(req, res) {
   db.Select([
     'experiments',
-    'LEFT OUTER JOIN (SELECT experiment_id, COUNT(responses.id) FROM responses JOIN blocks ON blocks.id = responses.block_id GROUP BY experiment_id) AS responses ON responses.experiment_id = experiments.id',
+    'LEFT OUTER JOIN (SELECT experiment_id, COUNT(responses.id) AS responses_count FROM responses JOIN blocks ON blocks.id = responses.block_id GROUP BY experiment_id) AS responses ON responses.experiment_id = experiments.id',
+    "LEFT OUTER JOIN access_tokens ON access_tokens.relation = 'experiments' AND access_tokens.foreign_id = experiments.id AND (access_tokens.expires < NOW() OR access_tokens.expires IS NULL) AND access_tokens.redacted IS NULL",
   ].join(' '))
+  .add(['experiments.*', 'responses_count', 'access_tokens.token AS access_token'])
   .orderBy('created DESC')
   .execute(function(err, experiments) {
     if (err) return res.die(err);
-    // experiments is a list, so we use ngjson
-    res.ngjson(experiments);
+
+    async.map(experiments, ensureAccessToken, function(err, experiments) {
+      if (err) return res.die(err);
+      res.json(experiments);
+    });
   });
 });
 
@@ -53,11 +89,20 @@ R.get(/^\/api\/experiments\/new$/, function(req, res) {
 /** GET /api/experiments/:id
 Show existing experiment. */
 R.get(/^\/api\/experiments\/(\d+)$/, function(req, res, m) {
-  db.SelectOne('experiments')
-  .whereEqual({id: m[1]})
+  db.SelectOne([
+    'experiments',
+    "LEFT OUTER JOIN access_tokens ON access_tokens.relation = 'experiments' AND access_tokens.foreign_id = experiments.id AND (access_tokens.expires < NOW() OR access_tokens.expires IS NULL) AND access_tokens.redacted IS NULL",
+  ].join(' '))
+  .add(['experiments.*', 'access_tokens.token AS access_token'])
+  .whereEqual({'experiments.id': m[1]})
   .execute(function(err, experiment) {
     if (err) return res.die(err);
-    res.json(experiment);
+
+    ensureAccessToken(experiment, function(err, experiment) {
+      if (err) return res.die(err);
+
+      res.json(experiment);
+    });
   });
 });
 

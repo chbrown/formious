@@ -35,7 +35,7 @@ R.get(/^\/api\/responses(\?|$)/, function(req, res) {
 
   select.execute(function(err, responses) {
     if (err) return res.die(err);
-    res.ngjson(responses);
+    res.json(responses);
   });
 });
 

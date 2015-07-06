@@ -13,7 +13,7 @@ R.get(/^\/api\/administrators$/, function(req, res) {
   .orderBy('created DESC')
   .execute(function(err, administrators) {
     if (err) return res.die(err);
-    res.ngjson(administrators);
+    res.json(administrators);
   });
 });
 
@@ -92,7 +92,7 @@ R.get(/^\/api\/administrators\/(\d+)\/aws_accounts$/, function(req, res, m) {
   .orderBy('aws_account_administrators.priority DESC')
   .execute(function(err, rows) {
     if (err) return res.die(err);
-    res.ngjson(rows);
+    res.json(rows);
   });
 });
 

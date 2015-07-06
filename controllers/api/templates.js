@@ -13,7 +13,7 @@ R.get(/^\/api\/templates$/, function(req, res) {
   .orderBy('id ASC')
   .execute(function(err, templates) {
     if (err) return res.die(err);
-    res.ngjson(templates);
+    res.json(templates);
   });
 });
 

@@ -41,7 +41,6 @@
     "textarea": "*",
     "turk": "~0.6.0",
     "urlobject": "*",
-    "util-enhanced": "*",
     "virtual-dom": "*",
     "xmldom": "0.1.19",
     "xpath": "0.0.9",

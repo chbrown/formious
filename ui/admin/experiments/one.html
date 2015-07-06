@@ -4,7 +4,7 @@
   <div class="control" style="float: right">
     <a ui-sref="admin.mturk.hits.new({Title: experiment.name, ExternalURL: site_url + 'experiments/' + experiment.id})">Prepare HIT</a>
     <a href="/experiments/{{experiment.id}}" target="_blank">Public</a>
-    <a href="#" ng-click="responses($event)">Responses</a>
+    <a href="/experiments/{{experiment.id}}/responses?token={{experiment.access_token}}">Responses</a>
   </div>
 </nav>
 
