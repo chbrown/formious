@@ -5,7 +5,7 @@
     "forms",
     "surveys"
   ],
-  "version": "0.2.3",
+  "version": "0.2.4",
   "homepage": "https://github.com/chbrown/formious",
   "repository": "git://github.com/chbrown/formious.git",
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
