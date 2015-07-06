@@ -17,3 +17,8 @@ ui/build/bundle.js: ui/build.js $(BIN)/browserify
 
 dev: $(BIN)/watchify
 	$(BIN)/watchify ui/build.js --transform babelify --outfile ui/build/bundle.js -v
+
+deploy:
+	docker pull chbrown/formious && \
+    docker rm -f app && \
+    docker run -d -e VIRTUAL_HOST=formious.com --link db:db --restart always --name app chbrown/formious
