@@ -47,7 +47,7 @@
         <span ng-if="!block.editing">{{block.view_order}}</span>
       </td>
       <td class="nowrap">
-        <a href="/experiments/{{experiment.id}}/blocks/{{block.id}}?workerId=testing" target="_blank">Public</a>
+        <a href="/experiments/{{block.experiment_id}}/blocks/{{block.id}}?workerId=testing" target="_blank">Public</a>
         <button ng-click="$emit('deleteBlock', block)">Delete</button>
       </td>
     </tr>

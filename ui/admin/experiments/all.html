@@ -25,7 +25,7 @@
             {{administrators | valueWhere:{id: experiment.administrator_id}:'email'}}
           </a>
         <td>
-          <a href="/experiments/{{experiment.id}}/responses?token={{experiment.access_token}}">Responses</a>
+          <a href="/experiments/{{experiment.id}}/responses?token={{experiment.access_token}}" target="_blank">Responses</a>
           ({{experiment.responses_count || 0}})
         </td>
         <td class="nowrap">
