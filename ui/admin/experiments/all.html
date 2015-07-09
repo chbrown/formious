@@ -24,6 +24,7 @@
           <a ui-sref="admin.administrators.edit({id: experiment.administrator_id})">
             {{administrators | valueWhere:{id: experiment.administrator_id}:'email'}}
           </a>
+        </td>
         <td>
           <a href="/experiments/{{experiment.id}}/responses?token={{experiment.access_token}}" target="_blank">Responses</a>
           ({{experiment.responses_count || 0}})
@@ -37,4 +38,4 @@
       </tr>
     </tbody>
   </table>
-</div>
+</section>

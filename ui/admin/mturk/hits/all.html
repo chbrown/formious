@@ -1,8 +1,9 @@
 <section class="hpad">
   <h3>HITs</h3>
+  <a ui-sref="admin.mturk.hits.new">Create new HIT</a>
 </section>
 
-<section ng-hide="hits.length" class="hpad">
+<section ng-if="hits.length === 0" class="hpad">
   <p>No HITs could be found.</p>
 </section>
 <section ng-repeat="hit in hits" class="box hpad">

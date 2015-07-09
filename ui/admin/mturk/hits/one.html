@@ -37,11 +37,37 @@
   <span class="help">Import data that was submitted to Mechanical Turk directly into the local database.<br>
     Because each Assignment has a unique identifier (the AssignmentId field), duplicate imports will be ignored.</span>
   <p>
-    <!-- <form method="POST" action="{{hit.HITId + '/import'}}"></form> -->
     <form ng-submit="import($event)">
       <p><button>Import</button></p>
     </form>
   </p>
+</section>
+
+<section class="box hpad">
+  <h3>Assign Qualifications</h3>
+  <p>Assign qualification to all {{assignments.length}} workers that completed this HIT.</p>
+  <form ng-submit="assignQualifications($event)">
+    <label>
+      <div><b>Qualification Type</b></div>
+      <select ng-model="$storage.AssignQualification.QualificationTypeId"
+        ng-options="QualificationType.QualificationTypeId as QualificationType.Name for QualificationType in QualificationTypes">
+        <option value="">-- Qualification Type --</option>
+      </select>
+    </label>
+    <label>
+      <div><b>Value</b></div>
+      <input type="number" ng-model="$storage.AssignQualification.IntegerValue">
+    </label>
+    <label>
+      <div>
+        <input type="checkbox" ng-model="$storage.AssignQualification.SendNotification">
+        <b>Send Notification</b>
+      </div>
+    </label>
+    <div>
+      <button>Assign Qualifications</button>
+    </div>
+  </form>
 </section>
 
 <!-- <section class="box hpad">

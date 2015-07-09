@@ -1,7 +1,7 @@
 /*jslint browser: true, esnext: true */
 
 import _ from 'lodash';
-import h from 'virtual-dom/h';
+import {h, create, diff, patch} from 'virtual-dom';
 import {Url} from 'urlobject';
 
 // angular.js libraries:
@@ -28,6 +28,7 @@ export var app = angular.module('app', [
 ]);
 
 function renderObject(object) {
+  // console.log('renderObject', object);
   if (object === undefined) {
     return h('i.undefined', 'undefined');
   }
@@ -64,9 +65,7 @@ function renderObject(object) {
       }
     }
     // otherwise, it's an array of arbitrary objects
-    var array_children = object.map(function(value) {
-      return renderObject(value);
-    });
+    var array_children = object.map(value => renderObject(value));
     return h('div.array', array_children);
   }
   else if (typeof object === 'object') {
@@ -84,18 +83,6 @@ function renderObject(object) {
     return h('b.boolean', object.toString());
   }
   return h('span.string', object.toString());
-}
-
-function summarizeResponse(res) {
-  var parts = [];
-  if (res.status != 200) {
-    parts.push('Error ');
-  }
-  parts.push(res.status);
-  if (res.data) {
-    parts.push(': ' + res.data.toString());
-  }
-  return parts.join('');
 }
 
 app.directive('uiSrefActiveAny', function($state) {
@@ -117,6 +104,29 @@ app.directive('uiSrefActiveAny', function($state) {
   };
 });
 
+class VComponent {
+  constructor(parentNode, renderFunction) {
+    this.parentNode = parentNode;
+    this.renderFunction = renderFunction;
+    this.vtree = undefined;
+    this.element = undefined;
+  }
+  update(value) {
+    if (this.vtree === undefined) {
+      this.vtree = this.renderFunction(value);
+      this.element = create(this.vtree);
+      // attach to the dom on the first draw
+      this.parentNode.appendChild(this.element);
+    }
+    else {
+      var new_vtree = this.renderFunction(value);
+      var patches = diff(this.vtree, new_vtree);
+      this.element = patch(this.element, patches);
+      this.vtree = new_vtree;
+    }
+  }
+}
+
 app.directive('object', function() {
   return {
     restrict: 'A',
@@ -124,19 +134,11 @@ app.directive('object', function() {
       object: '=',
     },
     link: function(scope, el) {
-      // var state = mercury.state({
-      //   object: mercury.value(object),
-      // });
+      var component = new VComponent(el[0], renderObject);
       scope.$watch('object', function(newVal) {
         var object = angular.copy(newVal);
-
-        throw new Error('[object] directive not yet implemented');
-        // renderObject(object);
-      });
-
-      // mercury.app(el[0], state, function(state) {
-      //   return renderObject(state.object);
-      // });
+        component.update(object);
+      }, true);
     }
   };
 });
@@ -526,7 +528,7 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
   })
   .state('admin.mturk.hits', {
     url: '/hits',
-    templateUrl: '/ui/admin/mturk/hits/layout.html',
+    template: '<ui-view></ui-view>',
     abstract: true,
   })
   .state('admin.mturk.hits.table', {
@@ -543,6 +545,26 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     url: '/:HITId',
     templateUrl: '/ui/admin/mturk/hits/one.html',
     controller: 'admin.mturk.hits.edit',
+  })
+  .state('admin.mturk.qualification_types', {
+    url: '/qualification_types',
+    template: '<ui-view></ui-view>',
+    abstract: true,
+  })
+  .state('admin.mturk.qualification_types.table', {
+    url: '/',
+    templateUrl: '/ui/admin/mturk/qualification_types/all.html',
+    controller: 'admin.mturk.qualification_types.table',
+  })
+  .state('admin.mturk.qualification_types.new', {
+    url: '/new',
+    templateUrl: '/ui/admin/mturk/qualification_types/new.html',
+    controller: 'admin.mturk.qualification_types.new',
+  })
+  .state('admin.mturk.qualification_types.edit', {
+    url: '/:QualificationTypeId',
+    templateUrl: '/ui/admin/mturk/qualification_types/one.html',
+    controller: 'admin.mturk.qualification_types.edit',
   })
   // responses
   .state('admin.responses', {

@@ -1,0 +1,39 @@
+<section class="hpad">
+  <h3>Qualification Type: {{QualificationType.QualificationTypeId}}</h3>
+</section>
+
+<section class="box hpad">
+  <table class="keyval">
+    <tr ng-repeat="(key, val) in QualificationType">
+      <td>{{key}}</td>
+      <td>{{val}}</td>
+    </tr>
+  </table>
+</section>
+
+<section class="hpad">
+  <h3>Qualifications</h3>
+</section>
+
+<section class="box">
+  <table class="striped lined padded fill">
+    <thead>
+      <tr>
+        <th>Worker Id</th>
+        <th>Grant Time</th>
+        <th>Integer Value</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="Qualification in Qualifications">
+        <td>{{Qualification.SubjectId}}</a></td>
+        <td><time>{{Qualification.GrantTime | date:"yyyy-MM-dd"}}</time></td>
+        <td>{{Qualification.IntegerValue}}</td>
+        <td>{{Qualification.Status}}</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
