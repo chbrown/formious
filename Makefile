@@ -8,8 +8,9 @@ $(BIN)/lessc $(BIN)/cleancss $(BIN)/browserify:
 %.css: %.less $(BIN)/lessc $(BIN)/cleancss
 	$(BIN)/lessc $< | $(BIN)/cleancss --keep-line-breaks --skip-advanced -o $@
 
+# --compilation_level SIMPLE
 %.min.js: %.js
-	closure-compiler --angular_pass --language_in ECMASCRIPT5 --warning_level QUIET --compilation_level SIMPLE $< >$@
+	closure-compiler --angular_pass --language_in ECMASCRIPT5 --warning_level QUIET $< >$@
 
 ui/build/bundle.js: ui/build.js $(BIN)/browserify
 	mkdir -p $(@D)

@@ -33385,7 +33385,7 @@ exports["default"] = function (module) {
 
 module.exports = exports["default"];
 }).call(this,"/node_modules/babel/node_modules/babel-core/lib/babel/tools")
-},{"path":100}],8:[function(require,module,exports){
+},{"path":101}],8:[function(require,module,exports){
 // false -> Array#indexOf
 // true  -> Array#includes
 var $ = require('./$');
@@ -36985,13 +36985,15 @@ module.exports = require('./modules/$').core;
 );
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":101}],98:[function(require,module,exports){
+},{"_process":102}],98:[function(require,module,exports){
 module.exports = require("./lib/babel/polyfill");
 
 },{"./lib/babel/polyfill":6}],99:[function(require,module,exports){
 module.exports = require("babel-core/polyfill");
 
 },{"babel-core/polyfill":98}],100:[function(require,module,exports){
+
+},{}],101:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -37219,7 +37221,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":101}],101:[function(require,module,exports){
+},{"_process":102}],102:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -37311,7 +37313,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],102:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 /*jslint browser: true */
 
 function CheckboxSequence(container) {
@@ -37394,7 +37396,91 @@ if (typeof angular !== 'undefined') {
   });
 }
 
-},{}],103:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
+function defaults(target, source) {
+    for (var key in source) {
+        if (source.hasOwnProperty(key) && target[key] === undefined) {
+            target[key] = source[key];
+        }
+    }
+}
+var CookieMonster = (function () {
+    /**
+    Generally, this should be called like `new CookieMonster(document)`,
+    where `document` is a DOM Document instance.
+  
+    If a second argument is given, any CookieMonster#set(...) calls will have its
+    options merged with the defaultOptions argument.
+    */
+    function CookieMonster(document, defaultOptions) {
+        if (document === void 0) { document = { cookie: '' }; }
+        this.document = document;
+        this.defaultOptions = defaultOptions;
+        this.cookie_strings = document.cookie.split(/\s*;\s*/);
+    }
+    /**
+    Get a single cookie by name.
+    */
+    CookieMonster.prototype.get = function (name) {
+        var prefix = name + '=';
+        for (var i = 0, cookie_string; (cookie_string = this.cookie_strings[i]); i++) {
+            if (cookie_string.slice(0, prefix.length) == prefix) {
+                var cookie_value = cookie_string.slice(prefix.length);
+                return decodeURIComponent(cookie_value);
+            }
+        }
+    };
+    /**
+    Set a single cookie by name with the given value and options.
+  
+    Returns the added cookie string.
+    */
+    CookieMonster.prototype.set = function (name, value, options) {
+        if (options === void 0) { options = {}; }
+        var pairs = [[encodeURIComponent(name), encodeURIComponent(value)]];
+        defaults(options, this.defaultOptions);
+        if (options.expires !== undefined) {
+            if (options.expires instanceof Date) {
+                pairs.push(['expires', options.expires.toUTCString()]);
+            }
+            else {
+                // TypeScript should be able to infer that, if expires is either a Date
+                // or a string, and it's not a Date, it's a string. But it doesn't yet.
+                pairs.push(['expires', options.expires]);
+            }
+        }
+        if (options.path !== undefined) {
+            pairs.push(['path', options.path]);
+        }
+        if (options.domain !== undefined) {
+            pairs.push(['domain', options.domain]);
+        }
+        if (options.secure !== undefined) {
+            pairs.push(['secure']);
+        }
+        var cookie_string = pairs.map(function (pair) { return pair.join('='); }).join('; ');
+        this.document.cookie = cookie_string;
+        return cookie_string;
+    };
+    /**
+    Since delete is a keyword in Javascript, we'll leave it alone and use `del` instead.
+  
+    This deletes cookies by immediately expiring them, i.e., by setting the
+    `expires` value to the UNIX epoch, i.e., 'Thu, 01 Jan 1970 00:00:00 GMT'.
+  
+    Returns the result of calling this.set(...), which is a string.
+    */
+    CookieMonster.prototype.del = function (name, options) {
+        if (options === void 0) { options = {}; }
+        //
+        options.expires = new Date(0);
+        return this.set(name, '', options);
+    };
+    return CookieMonster;
+})();
+exports.CookieMonster = CookieMonster;
+
+},{}],105:[function(require,module,exports){
 /*jslint browser: true */
 
 function FlowCopy(original) {
@@ -37441,7 +37527,7 @@ if (typeof angular !== 'undefined') {
   });
 }
 
-},{}],104:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -49680,7 +49766,7 @@ if (typeof angular !== 'undefined') {
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],105:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 //! moment.js
 //! version : 2.10.3
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
@@ -52792,7 +52878,7 @@ if (typeof angular !== 'undefined') {
     return _moment;
 
 }));
-},{}],106:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 (function (root, factory) {
   'use strict';
 
@@ -52951,7 +53037,7 @@ if (typeof angular !== 'undefined') {
 
 }));
 
-},{"angular":5}],107:[function(require,module,exports){
+},{"angular":5}],109:[function(require,module,exports){
 /*jslint browser: true */
 
 function extend(target /*, source_0, source_1, ... */) {
@@ -53398,7 +53484,7 @@ if (typeof angular !== 'undefined') {
   });
 }
 
-},{}],108:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 /*jslint browser: true */
 /** Example results:
 
@@ -53607,12 +53693,39 @@ var Url = (function () {
 })();
 exports.Url = Url;
 
-},{}],109:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
+var createElement = require("./vdom/create-element.js")
+
+module.exports = createElement
+
+},{"./vdom/create-element.js":124}],112:[function(require,module,exports){
+var diff = require("./vtree/diff.js")
+
+module.exports = diff
+
+},{"./vtree/diff.js":144}],113:[function(require,module,exports){
 var h = require("./virtual-hyperscript/index.js")
 
 module.exports = h
 
-},{"./virtual-hyperscript/index.js":117}],110:[function(require,module,exports){
+},{"./virtual-hyperscript/index.js":131}],114:[function(require,module,exports){
+var diff = require("./diff.js")
+var patch = require("./patch.js")
+var h = require("./h.js")
+var create = require("./create-element.js")
+var VNode = require('./vnode/vnode.js')
+var VText = require('./vnode/vtext.js')
+
+module.exports = {
+    diff: diff,
+    patch: patch,
+    h: h,
+    create: create,
+    VNode: VNode,
+    VText: VText
+}
+
+},{"./create-element.js":111,"./diff.js":112,"./h.js":113,"./patch.js":122,"./vnode/vnode.js":140,"./vnode/vtext.js":142}],115:[function(require,module,exports){
 /*!
  * Cross-Browser Split 1.1.1
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
@@ -53720,7 +53833,7 @@ module.exports = (function split(undef) {
   return self;
 })();
 
-},{}],111:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
 'use strict';
 
 var OneVersionConstraint = require('individual/one-version');
@@ -53742,7 +53855,7 @@ function EvStore(elem) {
     return hash;
 }
 
-},{"individual/one-version":113}],112:[function(require,module,exports){
+},{"individual/one-version":118}],117:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -53765,7 +53878,7 @@ function Individual(key, value) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],113:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 'use strict';
 
 var Individual = require('./index.js');
@@ -53789,7 +53902,33 @@ function OneVersion(moduleName, version, defaultValue) {
     return Individual(key, defaultValue);
 }
 
-},{"./index.js":112}],114:[function(require,module,exports){
+},{"./index.js":117}],119:[function(require,module,exports){
+(function (global){
+var topLevel = typeof global !== 'undefined' ? global :
+    typeof window !== 'undefined' ? window : {}
+var minDoc = require('min-document');
+
+if (typeof document !== 'undefined') {
+    module.exports = document;
+} else {
+    var doccy = topLevel['__GLOBAL_DOCUMENT_CACHE@4'];
+
+    if (!doccy) {
+        doccy = topLevel['__GLOBAL_DOCUMENT_CACHE@4'] = minDoc;
+    }
+
+    module.exports = doccy;
+}
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"min-document":100}],120:[function(require,module,exports){
+"use strict";
+
+module.exports = function isObject(x) {
+	return typeof x === "object" && x !== null;
+};
+
+},{}],121:[function(require,module,exports){
 var nativeIsArray = Array.isArray
 var toString = Object.prototype.toString
 
@@ -53799,7 +53938,495 @@ function isArray(obj) {
     return toString.call(obj) === "[object Array]"
 }
 
-},{}],115:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
+var patch = require("./vdom/patch.js")
+
+module.exports = patch
+
+},{"./vdom/patch.js":127}],123:[function(require,module,exports){
+var isObject = require("is-object")
+var isHook = require("../vnode/is-vhook.js")
+
+module.exports = applyProperties
+
+function applyProperties(node, props, previous) {
+    for (var propName in props) {
+        var propValue = props[propName]
+
+        if (propValue === undefined) {
+            removeProperty(node, propName, propValue, previous);
+        } else if (isHook(propValue)) {
+            removeProperty(node, propName, propValue, previous)
+            if (propValue.hook) {
+                propValue.hook(node,
+                    propName,
+                    previous ? previous[propName] : undefined)
+            }
+        } else {
+            if (isObject(propValue)) {
+                patchObject(node, props, previous, propName, propValue);
+            } else {
+                node[propName] = propValue
+            }
+        }
+    }
+}
+
+function removeProperty(node, propName, propValue, previous) {
+    if (previous) {
+        var previousValue = previous[propName]
+
+        if (!isHook(previousValue)) {
+            if (propName === "attributes") {
+                for (var attrName in previousValue) {
+                    node.removeAttribute(attrName)
+                }
+            } else if (propName === "style") {
+                for (var i in previousValue) {
+                    node.style[i] = ""
+                }
+            } else if (typeof previousValue === "string") {
+                node[propName] = ""
+            } else {
+                node[propName] = null
+            }
+        } else if (previousValue.unhook) {
+            previousValue.unhook(node, propName, propValue)
+        }
+    }
+}
+
+function patchObject(node, props, previous, propName, propValue) {
+    var previousValue = previous ? previous[propName] : undefined
+
+    // Set attributes
+    if (propName === "attributes") {
+        for (var attrName in propValue) {
+            var attrValue = propValue[attrName]
+
+            if (attrValue === undefined) {
+                node.removeAttribute(attrName)
+            } else {
+                node.setAttribute(attrName, attrValue)
+            }
+        }
+
+        return
+    }
+
+    if(previousValue && isObject(previousValue) &&
+        getPrototype(previousValue) !== getPrototype(propValue)) {
+        node[propName] = propValue
+        return
+    }
+
+    if (!isObject(node[propName])) {
+        node[propName] = {}
+    }
+
+    var replacer = propName === "style" ? "" : undefined
+
+    for (var k in propValue) {
+        var value = propValue[k]
+        node[propName][k] = (value === undefined) ? replacer : value
+    }
+}
+
+function getPrototype(value) {
+    if (Object.getPrototypeOf) {
+        return Object.getPrototypeOf(value)
+    } else if (value.__proto__) {
+        return value.__proto__
+    } else if (value.constructor) {
+        return value.constructor.prototype
+    }
+}
+
+},{"../vnode/is-vhook.js":135,"is-object":120}],124:[function(require,module,exports){
+var document = require("global/document")
+
+var applyProperties = require("./apply-properties")
+
+var isVNode = require("../vnode/is-vnode.js")
+var isVText = require("../vnode/is-vtext.js")
+var isWidget = require("../vnode/is-widget.js")
+var handleThunk = require("../vnode/handle-thunk.js")
+
+module.exports = createElement
+
+function createElement(vnode, opts) {
+    var doc = opts ? opts.document || document : document
+    var warn = opts ? opts.warn : null
+
+    vnode = handleThunk(vnode).a
+
+    if (isWidget(vnode)) {
+        return vnode.init()
+    } else if (isVText(vnode)) {
+        return doc.createTextNode(vnode.text)
+    } else if (!isVNode(vnode)) {
+        if (warn) {
+            warn("Item is not a valid virtual dom node", vnode)
+        }
+        return null
+    }
+
+    var node = (vnode.namespace === null) ?
+        doc.createElement(vnode.tagName) :
+        doc.createElementNS(vnode.namespace, vnode.tagName)
+
+    var props = vnode.properties
+    applyProperties(node, props)
+
+    var children = vnode.children
+
+    for (var i = 0; i < children.length; i++) {
+        var childNode = createElement(children[i], opts)
+        if (childNode) {
+            node.appendChild(childNode)
+        }
+    }
+
+    return node
+}
+
+},{"../vnode/handle-thunk.js":133,"../vnode/is-vnode.js":136,"../vnode/is-vtext.js":137,"../vnode/is-widget.js":138,"./apply-properties":123,"global/document":119}],125:[function(require,module,exports){
+// Maps a virtual DOM tree onto a real DOM tree in an efficient manner.
+// We don't want to read all of the DOM nodes in the tree so we use
+// the in-order tree indexing to eliminate recursion down certain branches.
+// We only recurse into a DOM node if we know that it contains a child of
+// interest.
+
+var noChild = {}
+
+module.exports = domIndex
+
+function domIndex(rootNode, tree, indices, nodes) {
+    if (!indices || indices.length === 0) {
+        return {}
+    } else {
+        indices.sort(ascending)
+        return recurse(rootNode, tree, indices, nodes, 0)
+    }
+}
+
+function recurse(rootNode, tree, indices, nodes, rootIndex) {
+    nodes = nodes || {}
+
+
+    if (rootNode) {
+        if (indexInRange(indices, rootIndex, rootIndex)) {
+            nodes[rootIndex] = rootNode
+        }
+
+        var vChildren = tree.children
+
+        if (vChildren) {
+
+            var childNodes = rootNode.childNodes
+
+            for (var i = 0; i < tree.children.length; i++) {
+                rootIndex += 1
+
+                var vChild = vChildren[i] || noChild
+                var nextIndex = rootIndex + (vChild.count || 0)
+
+                // skip recursion down the tree if there are no nodes down here
+                if (indexInRange(indices, rootIndex, nextIndex)) {
+                    recurse(childNodes[i], vChild, indices, nodes, rootIndex)
+                }
+
+                rootIndex = nextIndex
+            }
+        }
+    }
+
+    return nodes
+}
+
+// Binary search for an index in the interval [left, right]
+function indexInRange(indices, left, right) {
+    if (indices.length === 0) {
+        return false
+    }
+
+    var minIndex = 0
+    var maxIndex = indices.length - 1
+    var currentIndex
+    var currentItem
+
+    while (minIndex <= maxIndex) {
+        currentIndex = ((maxIndex + minIndex) / 2) >> 0
+        currentItem = indices[currentIndex]
+
+        if (minIndex === maxIndex) {
+            return currentItem >= left && currentItem <= right
+        } else if (currentItem < left) {
+            minIndex = currentIndex + 1
+        } else  if (currentItem > right) {
+            maxIndex = currentIndex - 1
+        } else {
+            return true
+        }
+    }
+
+    return false;
+}
+
+function ascending(a, b) {
+    return a > b ? 1 : -1
+}
+
+},{}],126:[function(require,module,exports){
+var applyProperties = require("./apply-properties")
+
+var isWidget = require("../vnode/is-widget.js")
+var VPatch = require("../vnode/vpatch.js")
+
+var render = require("./create-element")
+var updateWidget = require("./update-widget")
+
+module.exports = applyPatch
+
+function applyPatch(vpatch, domNode, renderOptions) {
+    var type = vpatch.type
+    var vNode = vpatch.vNode
+    var patch = vpatch.patch
+
+    switch (type) {
+        case VPatch.REMOVE:
+            return removeNode(domNode, vNode)
+        case VPatch.INSERT:
+            return insertNode(domNode, patch, renderOptions)
+        case VPatch.VTEXT:
+            return stringPatch(domNode, vNode, patch, renderOptions)
+        case VPatch.WIDGET:
+            return widgetPatch(domNode, vNode, patch, renderOptions)
+        case VPatch.VNODE:
+            return vNodePatch(domNode, vNode, patch, renderOptions)
+        case VPatch.ORDER:
+            reorderChildren(domNode, patch)
+            return domNode
+        case VPatch.PROPS:
+            applyProperties(domNode, patch, vNode.properties)
+            return domNode
+        case VPatch.THUNK:
+            return replaceRoot(domNode,
+                renderOptions.patch(domNode, patch, renderOptions))
+        default:
+            return domNode
+    }
+}
+
+function removeNode(domNode, vNode) {
+    var parentNode = domNode.parentNode
+
+    if (parentNode) {
+        parentNode.removeChild(domNode)
+    }
+
+    destroyWidget(domNode, vNode);
+
+    return null
+}
+
+function insertNode(parentNode, vNode, renderOptions) {
+    var newNode = render(vNode, renderOptions)
+
+    if (parentNode) {
+        parentNode.appendChild(newNode)
+    }
+
+    return parentNode
+}
+
+function stringPatch(domNode, leftVNode, vText, renderOptions) {
+    var newNode
+
+    if (domNode.nodeType === 3) {
+        domNode.replaceData(0, domNode.length, vText.text)
+        newNode = domNode
+    } else {
+        var parentNode = domNode.parentNode
+        newNode = render(vText, renderOptions)
+
+        if (parentNode && newNode !== domNode) {
+            parentNode.replaceChild(newNode, domNode)
+        }
+    }
+
+    return newNode
+}
+
+function widgetPatch(domNode, leftVNode, widget, renderOptions) {
+    var updating = updateWidget(leftVNode, widget)
+    var newNode
+
+    if (updating) {
+        newNode = widget.update(leftVNode, domNode) || domNode
+    } else {
+        newNode = render(widget, renderOptions)
+    }
+
+    var parentNode = domNode.parentNode
+
+    if (parentNode && newNode !== domNode) {
+        parentNode.replaceChild(newNode, domNode)
+    }
+
+    if (!updating) {
+        destroyWidget(domNode, leftVNode)
+    }
+
+    return newNode
+}
+
+function vNodePatch(domNode, leftVNode, vNode, renderOptions) {
+    var parentNode = domNode.parentNode
+    var newNode = render(vNode, renderOptions)
+
+    if (parentNode && newNode !== domNode) {
+        parentNode.replaceChild(newNode, domNode)
+    }
+
+    return newNode
+}
+
+function destroyWidget(domNode, w) {
+    if (typeof w.destroy === "function" && isWidget(w)) {
+        w.destroy(domNode)
+    }
+}
+
+function reorderChildren(domNode, moves) {
+    var childNodes = domNode.childNodes
+    var keyMap = {}
+    var node
+    var remove
+    var insert
+
+    for (var i = 0; i < moves.removes.length; i++) {
+        remove = moves.removes[i]
+        node = childNodes[remove.from]
+        if (remove.key) {
+            keyMap[remove.key] = node
+        }
+        domNode.removeChild(node)
+    }
+
+    var length = childNodes.length
+    for (var j = 0; j < moves.inserts.length; j++) {
+        insert = moves.inserts[j]
+        node = keyMap[insert.key]
+        // this is the weirdest bug i've ever seen in webkit
+        domNode.insertBefore(node, insert.to >= length++ ? null : childNodes[insert.to])
+    }
+}
+
+function replaceRoot(oldRoot, newRoot) {
+    if (oldRoot && newRoot && oldRoot !== newRoot && oldRoot.parentNode) {
+        oldRoot.parentNode.replaceChild(newRoot, oldRoot)
+    }
+
+    return newRoot;
+}
+
+},{"../vnode/is-widget.js":138,"../vnode/vpatch.js":141,"./apply-properties":123,"./create-element":124,"./update-widget":128}],127:[function(require,module,exports){
+var document = require("global/document")
+var isArray = require("x-is-array")
+
+var domIndex = require("./dom-index")
+var patchOp = require("./patch-op")
+module.exports = patch
+
+function patch(rootNode, patches) {
+    return patchRecursive(rootNode, patches)
+}
+
+function patchRecursive(rootNode, patches, renderOptions) {
+    var indices = patchIndices(patches)
+
+    if (indices.length === 0) {
+        return rootNode
+    }
+
+    var index = domIndex(rootNode, patches.a, indices)
+    var ownerDocument = rootNode.ownerDocument
+
+    if (!renderOptions) {
+        renderOptions = { patch: patchRecursive }
+        if (ownerDocument !== document) {
+            renderOptions.document = ownerDocument
+        }
+    }
+
+    for (var i = 0; i < indices.length; i++) {
+        var nodeIndex = indices[i]
+        rootNode = applyPatch(rootNode,
+            index[nodeIndex],
+            patches[nodeIndex],
+            renderOptions)
+    }
+
+    return rootNode
+}
+
+function applyPatch(rootNode, domNode, patchList, renderOptions) {
+    if (!domNode) {
+        return rootNode
+    }
+
+    var newNode
+
+    if (isArray(patchList)) {
+        for (var i = 0; i < patchList.length; i++) {
+            newNode = patchOp(patchList[i], domNode, renderOptions)
+
+            if (domNode === rootNode) {
+                rootNode = newNode
+            }
+        }
+    } else {
+        newNode = patchOp(patchList, domNode, renderOptions)
+
+        if (domNode === rootNode) {
+            rootNode = newNode
+        }
+    }
+
+    return rootNode
+}
+
+function patchIndices(patches) {
+    var indices = []
+
+    for (var key in patches) {
+        if (key !== "a") {
+            indices.push(Number(key))
+        }
+    }
+
+    return indices
+}
+
+},{"./dom-index":125,"./patch-op":126,"global/document":119,"x-is-array":121}],128:[function(require,module,exports){
+var isWidget = require("../vnode/is-widget.js")
+
+module.exports = updateWidget
+
+function updateWidget(a, b) {
+    if (isWidget(a) && isWidget(b)) {
+        if ("name" in a && "name" in b) {
+            return a.id === b.id
+        } else {
+            return a.init === b.init
+        }
+    }
+
+    return false
+}
+
+},{"../vnode/is-widget.js":138}],129:[function(require,module,exports){
 'use strict';
 
 var EvStore = require('ev-store');
@@ -53828,7 +54455,7 @@ EvHook.prototype.unhook = function(node, propertyName) {
     es[propName] = undefined;
 };
 
-},{"ev-store":111}],116:[function(require,module,exports){
+},{"ev-store":116}],130:[function(require,module,exports){
 'use strict';
 
 module.exports = SoftSetHook;
@@ -53847,7 +54474,7 @@ SoftSetHook.prototype.hook = function (node, propertyName) {
     }
 };
 
-},{}],117:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 'use strict';
 
 var isArray = require('x-is-array');
@@ -53984,7 +54611,7 @@ function errorString(obj) {
     }
 }
 
-},{"../vnode/is-thunk":119,"../vnode/is-vhook":120,"../vnode/is-vnode":121,"../vnode/is-vtext":122,"../vnode/is-widget":123,"../vnode/vnode.js":125,"../vnode/vtext.js":126,"./hooks/ev-hook.js":115,"./hooks/soft-set-hook.js":116,"./parse-tag.js":118,"x-is-array":114}],118:[function(require,module,exports){
+},{"../vnode/is-thunk":134,"../vnode/is-vhook":135,"../vnode/is-vnode":136,"../vnode/is-vtext":137,"../vnode/is-widget":138,"../vnode/vnode.js":140,"../vnode/vtext.js":142,"./hooks/ev-hook.js":129,"./hooks/soft-set-hook.js":130,"./parse-tag.js":132,"x-is-array":121}],132:[function(require,module,exports){
 'use strict';
 
 var split = require('browser-split');
@@ -54040,14 +54667,56 @@ function parseTag(tag, props) {
     return props.namespace ? tagName : tagName.toUpperCase();
 }
 
-},{"browser-split":110}],119:[function(require,module,exports){
+},{"browser-split":115}],133:[function(require,module,exports){
+var isVNode = require("./is-vnode")
+var isVText = require("./is-vtext")
+var isWidget = require("./is-widget")
+var isThunk = require("./is-thunk")
+
+module.exports = handleThunk
+
+function handleThunk(a, b) {
+    var renderedA = a
+    var renderedB = b
+
+    if (isThunk(b)) {
+        renderedB = renderThunk(b, a)
+    }
+
+    if (isThunk(a)) {
+        renderedA = renderThunk(a, null)
+    }
+
+    return {
+        a: renderedA,
+        b: renderedB
+    }
+}
+
+function renderThunk(thunk, previous) {
+    var renderedThunk = thunk.vnode
+
+    if (!renderedThunk) {
+        renderedThunk = thunk.vnode = thunk.render(previous)
+    }
+
+    if (!(isVNode(renderedThunk) ||
+            isVText(renderedThunk) ||
+            isWidget(renderedThunk))) {
+        throw new Error("thunk did not return a valid node");
+    }
+
+    return renderedThunk
+}
+
+},{"./is-thunk":134,"./is-vnode":136,"./is-vtext":137,"./is-widget":138}],134:[function(require,module,exports){
 module.exports = isThunk
 
 function isThunk(t) {
     return t && t.type === "Thunk"
 }
 
-},{}],120:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 module.exports = isHook
 
 function isHook(hook) {
@@ -54056,7 +54725,7 @@ function isHook(hook) {
        typeof hook.unhook === "function" && !hook.hasOwnProperty("unhook"))
 }
 
-},{}],121:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = isVirtualNode
@@ -54065,7 +54734,7 @@ function isVirtualNode(x) {
     return x && x.type === "VirtualNode" && x.version === version
 }
 
-},{"./version":124}],122:[function(require,module,exports){
+},{"./version":139}],137:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = isVirtualText
@@ -54074,17 +54743,17 @@ function isVirtualText(x) {
     return x && x.type === "VirtualText" && x.version === version
 }
 
-},{"./version":124}],123:[function(require,module,exports){
+},{"./version":139}],138:[function(require,module,exports){
 module.exports = isWidget
 
 function isWidget(w) {
     return w && w.type === "Widget"
 }
 
-},{}],124:[function(require,module,exports){
+},{}],139:[function(require,module,exports){
 module.exports = "2"
 
-},{}],125:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 var version = require("./version")
 var isVNode = require("./is-vnode")
 var isWidget = require("./is-widget")
@@ -54158,7 +54827,31 @@ function VirtualNode(tagName, properties, children, key, namespace) {
 VirtualNode.prototype.version = version
 VirtualNode.prototype.type = "VirtualNode"
 
-},{"./is-thunk":119,"./is-vhook":120,"./is-vnode":121,"./is-widget":123,"./version":124}],126:[function(require,module,exports){
+},{"./is-thunk":134,"./is-vhook":135,"./is-vnode":136,"./is-widget":138,"./version":139}],141:[function(require,module,exports){
+var version = require("./version")
+
+VirtualPatch.NONE = 0
+VirtualPatch.VTEXT = 1
+VirtualPatch.VNODE = 2
+VirtualPatch.WIDGET = 3
+VirtualPatch.PROPS = 4
+VirtualPatch.ORDER = 5
+VirtualPatch.INSERT = 6
+VirtualPatch.REMOVE = 7
+VirtualPatch.THUNK = 8
+
+module.exports = VirtualPatch
+
+function VirtualPatch(type, vNode, patch) {
+    this.type = Number(type)
+    this.vNode = vNode
+    this.patch = patch
+}
+
+VirtualPatch.prototype.version = version
+VirtualPatch.prototype.type = "VirtualPatch"
+
+},{"./version":139}],142:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = VirtualText
@@ -54170,7 +54863,496 @@ function VirtualText(text) {
 VirtualText.prototype.version = version
 VirtualText.prototype.type = "VirtualText"
 
-},{"./version":124}],127:[function(require,module,exports){
+},{"./version":139}],143:[function(require,module,exports){
+var isObject = require("is-object")
+var isHook = require("../vnode/is-vhook")
+
+module.exports = diffProps
+
+function diffProps(a, b) {
+    var diff
+
+    for (var aKey in a) {
+        if (!(aKey in b)) {
+            diff = diff || {}
+            diff[aKey] = undefined
+        }
+
+        var aValue = a[aKey]
+        var bValue = b[aKey]
+
+        if (aValue === bValue) {
+            continue
+        } else if (isObject(aValue) && isObject(bValue)) {
+            if (getPrototype(bValue) !== getPrototype(aValue)) {
+                diff = diff || {}
+                diff[aKey] = bValue
+            } else if (isHook(bValue)) {
+                 diff = diff || {}
+                 diff[aKey] = bValue
+            } else {
+                var objectDiff = diffProps(aValue, bValue)
+                if (objectDiff) {
+                    diff = diff || {}
+                    diff[aKey] = objectDiff
+                }
+            }
+        } else {
+            diff = diff || {}
+            diff[aKey] = bValue
+        }
+    }
+
+    for (var bKey in b) {
+        if (!(bKey in a)) {
+            diff = diff || {}
+            diff[bKey] = b[bKey]
+        }
+    }
+
+    return diff
+}
+
+function getPrototype(value) {
+  if (Object.getPrototypeOf) {
+    return Object.getPrototypeOf(value)
+  } else if (value.__proto__) {
+    return value.__proto__
+  } else if (value.constructor) {
+    return value.constructor.prototype
+  }
+}
+
+},{"../vnode/is-vhook":135,"is-object":120}],144:[function(require,module,exports){
+var isArray = require("x-is-array")
+
+var VPatch = require("../vnode/vpatch")
+var isVNode = require("../vnode/is-vnode")
+var isVText = require("../vnode/is-vtext")
+var isWidget = require("../vnode/is-widget")
+var isThunk = require("../vnode/is-thunk")
+var handleThunk = require("../vnode/handle-thunk")
+
+var diffProps = require("./diff-props")
+
+module.exports = diff
+
+function diff(a, b) {
+    var patch = { a: a }
+    walk(a, b, patch, 0)
+    return patch
+}
+
+function walk(a, b, patch, index) {
+    if (a === b) {
+        return
+    }
+
+    var apply = patch[index]
+    var applyClear = false
+
+    if (isThunk(a) || isThunk(b)) {
+        thunks(a, b, patch, index)
+    } else if (b == null) {
+
+        // If a is a widget we will add a remove patch for it
+        // Otherwise any child widgets/hooks must be destroyed.
+        // This prevents adding two remove patches for a widget.
+        if (!isWidget(a)) {
+            clearState(a, patch, index)
+            apply = patch[index]
+        }
+
+        apply = appendPatch(apply, new VPatch(VPatch.REMOVE, a, b))
+    } else if (isVNode(b)) {
+        if (isVNode(a)) {
+            if (a.tagName === b.tagName &&
+                a.namespace === b.namespace &&
+                a.key === b.key) {
+                var propsPatch = diffProps(a.properties, b.properties)
+                if (propsPatch) {
+                    apply = appendPatch(apply,
+                        new VPatch(VPatch.PROPS, a, propsPatch))
+                }
+                apply = diffChildren(a, b, patch, apply, index)
+            } else {
+                apply = appendPatch(apply, new VPatch(VPatch.VNODE, a, b))
+                applyClear = true
+            }
+        } else {
+            apply = appendPatch(apply, new VPatch(VPatch.VNODE, a, b))
+            applyClear = true
+        }
+    } else if (isVText(b)) {
+        if (!isVText(a)) {
+            apply = appendPatch(apply, new VPatch(VPatch.VTEXT, a, b))
+            applyClear = true
+        } else if (a.text !== b.text) {
+            apply = appendPatch(apply, new VPatch(VPatch.VTEXT, a, b))
+        }
+    } else if (isWidget(b)) {
+        if (!isWidget(a)) {
+            applyClear = true
+        }
+
+        apply = appendPatch(apply, new VPatch(VPatch.WIDGET, a, b))
+    }
+
+    if (apply) {
+        patch[index] = apply
+    }
+
+    if (applyClear) {
+        clearState(a, patch, index)
+    }
+}
+
+function diffChildren(a, b, patch, apply, index) {
+    var aChildren = a.children
+    var orderedSet = reorder(aChildren, b.children)
+    var bChildren = orderedSet.children
+
+    var aLen = aChildren.length
+    var bLen = bChildren.length
+    var len = aLen > bLen ? aLen : bLen
+
+    for (var i = 0; i < len; i++) {
+        var leftNode = aChildren[i]
+        var rightNode = bChildren[i]
+        index += 1
+
+        if (!leftNode) {
+            if (rightNode) {
+                // Excess nodes in b need to be added
+                apply = appendPatch(apply,
+                    new VPatch(VPatch.INSERT, null, rightNode))
+            }
+        } else {
+            walk(leftNode, rightNode, patch, index)
+        }
+
+        if (isVNode(leftNode) && leftNode.count) {
+            index += leftNode.count
+        }
+    }
+
+    if (orderedSet.moves) {
+        // Reorder nodes last
+        apply = appendPatch(apply, new VPatch(
+            VPatch.ORDER,
+            a,
+            orderedSet.moves
+        ))
+    }
+
+    return apply
+}
+
+function clearState(vNode, patch, index) {
+    // TODO: Make this a single walk, not two
+    unhook(vNode, patch, index)
+    destroyWidgets(vNode, patch, index)
+}
+
+// Patch records for all destroyed widgets must be added because we need
+// a DOM node reference for the destroy function
+function destroyWidgets(vNode, patch, index) {
+    if (isWidget(vNode)) {
+        if (typeof vNode.destroy === "function") {
+            patch[index] = appendPatch(
+                patch[index],
+                new VPatch(VPatch.REMOVE, vNode, null)
+            )
+        }
+    } else if (isVNode(vNode) && (vNode.hasWidgets || vNode.hasThunks)) {
+        var children = vNode.children
+        var len = children.length
+        for (var i = 0; i < len; i++) {
+            var child = children[i]
+            index += 1
+
+            destroyWidgets(child, patch, index)
+
+            if (isVNode(child) && child.count) {
+                index += child.count
+            }
+        }
+    } else if (isThunk(vNode)) {
+        thunks(vNode, null, patch, index)
+    }
+}
+
+// Create a sub-patch for thunks
+function thunks(a, b, patch, index) {
+    var nodes = handleThunk(a, b)
+    var thunkPatch = diff(nodes.a, nodes.b)
+    if (hasPatches(thunkPatch)) {
+        patch[index] = new VPatch(VPatch.THUNK, null, thunkPatch)
+    }
+}
+
+function hasPatches(patch) {
+    for (var index in patch) {
+        if (index !== "a") {
+            return true
+        }
+    }
+
+    return false
+}
+
+// Execute hooks when two nodes are identical
+function unhook(vNode, patch, index) {
+    if (isVNode(vNode)) {
+        if (vNode.hooks) {
+            patch[index] = appendPatch(
+                patch[index],
+                new VPatch(
+                    VPatch.PROPS,
+                    vNode,
+                    undefinedKeys(vNode.hooks)
+                )
+            )
+        }
+
+        if (vNode.descendantHooks || vNode.hasThunks) {
+            var children = vNode.children
+            var len = children.length
+            for (var i = 0; i < len; i++) {
+                var child = children[i]
+                index += 1
+
+                unhook(child, patch, index)
+
+                if (isVNode(child) && child.count) {
+                    index += child.count
+                }
+            }
+        }
+    } else if (isThunk(vNode)) {
+        thunks(vNode, null, patch, index)
+    }
+}
+
+function undefinedKeys(obj) {
+    var result = {}
+
+    for (var key in obj) {
+        result[key] = undefined
+    }
+
+    return result
+}
+
+// List diff, naive left to right reordering
+function reorder(aChildren, bChildren) {
+    // O(M) time, O(M) memory
+    var bChildIndex = keyIndex(bChildren)
+    var bKeys = bChildIndex.keys
+    var bFree = bChildIndex.free
+
+    if (bFree.length === bChildren.length) {
+        return {
+            children: bChildren,
+            moves: null
+        }
+    }
+
+    // O(N) time, O(N) memory
+    var aChildIndex = keyIndex(aChildren)
+    var aKeys = aChildIndex.keys
+    var aFree = aChildIndex.free
+
+    if (aFree.length === aChildren.length) {
+        return {
+            children: bChildren,
+            moves: null
+        }
+    }
+
+    // O(MAX(N, M)) memory
+    var newChildren = []
+
+    var freeIndex = 0
+    var freeCount = bFree.length
+    var deletedItems = 0
+
+    // Iterate through a and match a node in b
+    // O(N) time,
+    for (var i = 0 ; i < aChildren.length; i++) {
+        var aItem = aChildren[i]
+        var itemIndex
+
+        if (aItem.key) {
+            if (bKeys.hasOwnProperty(aItem.key)) {
+                // Match up the old keys
+                itemIndex = bKeys[aItem.key]
+                newChildren.push(bChildren[itemIndex])
+
+            } else {
+                // Remove old keyed items
+                itemIndex = i - deletedItems++
+                newChildren.push(null)
+            }
+        } else {
+            // Match the item in a with the next free item in b
+            if (freeIndex < freeCount) {
+                itemIndex = bFree[freeIndex++]
+                newChildren.push(bChildren[itemIndex])
+            } else {
+                // There are no free items in b to match with
+                // the free items in a, so the extra free nodes
+                // are deleted.
+                itemIndex = i - deletedItems++
+                newChildren.push(null)
+            }
+        }
+    }
+
+    var lastFreeIndex = freeIndex >= bFree.length ?
+        bChildren.length :
+        bFree[freeIndex]
+
+    // Iterate through b and append any new keys
+    // O(M) time
+    for (var j = 0; j < bChildren.length; j++) {
+        var newItem = bChildren[j]
+
+        if (newItem.key) {
+            if (!aKeys.hasOwnProperty(newItem.key)) {
+                // Add any new keyed items
+                // We are adding new items to the end and then sorting them
+                // in place. In future we should insert new items in place.
+                newChildren.push(newItem)
+            }
+        } else if (j >= lastFreeIndex) {
+            // Add any leftover non-keyed items
+            newChildren.push(newItem)
+        }
+    }
+
+    var simulate = newChildren.slice()
+    var simulateIndex = 0
+    var removes = []
+    var inserts = []
+    var simulateItem
+
+    for (var k = 0; k < bChildren.length;) {
+        var wantedItem = bChildren[k]
+        simulateItem = simulate[simulateIndex]
+
+        // remove items
+        while (simulateItem === null && simulate.length) {
+            removes.push(remove(simulate, simulateIndex, null))
+            simulateItem = simulate[simulateIndex]
+        }
+
+        if (!simulateItem || simulateItem.key !== wantedItem.key) {
+            // if we need a key in this position...
+            if (wantedItem.key) {
+                if (simulateItem && simulateItem.key) {
+                    // if an insert doesn't put this key in place, it needs to move
+                    if (bKeys[simulateItem.key] !== k + 1) {
+                        removes.push(remove(simulate, simulateIndex, simulateItem.key))
+                        simulateItem = simulate[simulateIndex]
+                        // if the remove didn't put the wanted item in place, we need to insert it
+                        if (!simulateItem || simulateItem.key !== wantedItem.key) {
+                            inserts.push({key: wantedItem.key, to: k})
+                        }
+                        // items are matching, so skip ahead
+                        else {
+                            simulateIndex++
+                        }
+                    }
+                    else {
+                        inserts.push({key: wantedItem.key, to: k})
+                    }
+                }
+                else {
+                    inserts.push({key: wantedItem.key, to: k})
+                }
+                k++
+            }
+            // a key in simulate has no matching wanted key, remove it
+            else if (simulateItem && simulateItem.key) {
+                removes.push(remove(simulate, simulateIndex, simulateItem.key))
+            }
+        }
+        else {
+            simulateIndex++
+            k++
+        }
+    }
+
+    // remove all the remaining nodes from simulate
+    while(simulateIndex < simulate.length) {
+        simulateItem = simulate[simulateIndex]
+        removes.push(remove(simulate, simulateIndex, simulateItem && simulateItem.key))
+    }
+
+    // If the only moves we have are deletes then we can just
+    // let the delete patch remove these items.
+    if (removes.length === deletedItems && !inserts.length) {
+        return {
+            children: newChildren,
+            moves: null
+        }
+    }
+
+    return {
+        children: newChildren,
+        moves: {
+            removes: removes,
+            inserts: inserts
+        }
+    }
+}
+
+function remove(arr, index, key) {
+    arr.splice(index, 1)
+
+    return {
+        from: index,
+        key: key
+    }
+}
+
+function keyIndex(children) {
+    var keys = {}
+    var free = []
+    var length = children.length
+
+    for (var i = 0; i < length; i++) {
+        var child = children[i]
+
+        if (child.key) {
+            keys[child.key] = i
+        } else {
+            free.push(i)
+        }
+    }
+
+    return {
+        keys: keys,     // A hash of key name to index
+        free: free,     // An array of unkeyed item indices
+    }
+}
+
+function appendPatch(apply, patch) {
+    if (apply) {
+        if (isArray(apply)) {
+            apply.push(patch)
+        } else {
+            apply = [apply, patch]
+        }
+
+        return apply
+    } else {
+        return patch
+    }
+}
+
+},{"../vnode/handle-thunk":133,"../vnode/is-thunk":134,"../vnode/is-vnode":136,"../vnode/is-vtext":137,"../vnode/is-widget":138,"../vnode/vpatch":141,"./diff-props":143,"x-is-array":121}],145:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -54190,7 +55372,7 @@ _app.app.controller('admin.access_tokens.table', function ($scope, $flash, Acces
   $scope.access_token = AccessToken.get({ id: $state.params.access_token_id });
 });
 
-},{"../app":129}],128:[function(require,module,exports){
+},{"../app":147}],146:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -54240,7 +55422,7 @@ _app.app.controller('admin.administrators.table', function ($scope, $flash, Admi
   };
 });
 
-},{"../app":129}],129:[function(require,module,exports){
+},{"../app":147}],147:[function(require,module,exports){
 /*jslint browser: true, esnext: true */
 
 'use strict';
@@ -54249,15 +55431,17 @@ Object.defineProperty(exports, '__esModule', {
   value: true
 });
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _virtualDomH = require('virtual-dom/h');
-
-var _virtualDomH2 = _interopRequireDefault(_virtualDomH);
+var _virtualDom = require('virtual-dom');
 
 var _urlobject = require('urlobject');
 
@@ -54291,10 +55475,11 @@ var app = _angular2['default'].module('app', ['ngResource', 'ngStorage', 'ui.rou
 
 exports.app = app;
 function renderObject(object) {
+  // console.log('renderObject', object);
   if (object === undefined) {
-    return (0, _virtualDomH2['default'])('i.undefined', 'undefined');
+    return (0, _virtualDom.h)('i.undefined', 'undefined');
   } else if (object === null) {
-    return (0, _virtualDomH2['default'])('b.null', 'null');
+    return (0, _virtualDom.h)('b.null', 'null');
   } else if (Array.isArray(object)) {
     // check for tabular arrays (all of the items are objects with the same keys)
     var items_are_objects = object.every(function (value) {
@@ -54307,46 +55492,34 @@ function renderObject(object) {
         return _lodash2['default'].isEqual(Object.keys(value), columns);
       });
       if (items_have_indentical_keys) {
-        var thead_children = (0, _virtualDomH2['default'])('tr', columns.map(function (column) {
-          return (0, _virtualDomH2['default'])('th', column);
+        var thead_children = (0, _virtualDom.h)('tr', columns.map(function (column) {
+          return (0, _virtualDom.h)('th', column);
         }));
         var tbody_children = object.map(function (value) {
           var cells = columns.map(function (column) {
-            return (0, _virtualDomH2['default'])('td', renderObject(value[column]));
+            return (0, _virtualDom.h)('td', renderObject(value[column]));
           });
-          return (0, _virtualDomH2['default'])('tr', cells);
+          return (0, _virtualDom.h)('tr', cells);
         });
-        return (0, _virtualDomH2['default'])('div.table', [(0, _virtualDomH2['default'])('table', [(0, _virtualDomH2['default'])('thead', thead_children), (0, _virtualDomH2['default'])('tbody', tbody_children)])]);
+        return (0, _virtualDom.h)('div.table', [(0, _virtualDom.h)('table', [(0, _virtualDom.h)('thead', thead_children), (0, _virtualDom.h)('tbody', tbody_children)])]);
       }
     }
     // otherwise, it's an array of arbitrary objects
     var array_children = object.map(function (value) {
       return renderObject(value);
     });
-    return (0, _virtualDomH2['default'])('div.array', array_children);
+    return (0, _virtualDom.h)('div.array', array_children);
   } else if (typeof object === 'object') {
     var object_children = _lodash2['default'].map(object, function (value, key) {
-      return (0, _virtualDomH2['default'])('tr', [(0, _virtualDomH2['default'])('td', key), (0, _virtualDomH2['default'])('td', renderObject(value))]);
+      return (0, _virtualDom.h)('tr', [(0, _virtualDom.h)('td', key), (0, _virtualDom.h)('td', renderObject(value))]);
     });
-    return (0, _virtualDomH2['default'])('div.object', (0, _virtualDomH2['default'])('table.keyval', object_children));
+    return (0, _virtualDom.h)('div.object', (0, _virtualDom.h)('table.keyval', object_children));
   } else if (typeof object === 'number') {
-    return (0, _virtualDomH2['default'])('b.number', object.toString());
+    return (0, _virtualDom.h)('b.number', object.toString());
   } else if (typeof object === 'boolean') {
-    return (0, _virtualDomH2['default'])('b.boolean', object.toString());
+    return (0, _virtualDom.h)('b.boolean', object.toString());
   }
-  return (0, _virtualDomH2['default'])('span.string', object.toString());
-}
-
-function summarizeResponse(res) {
-  var parts = [];
-  if (res.status != 200) {
-    parts.push('Error ');
-  }
-  parts.push(res.status);
-  if (res.data) {
-    parts.push(': ' + res.data.toString());
-  }
-  return parts.join('');
+  return (0, _virtualDom.h)('span.string', object.toString());
 }
 
 app.directive('uiSrefActiveAny', function ($state) {
@@ -54368,6 +55541,36 @@ app.directive('uiSrefActiveAny', function ($state) {
   };
 });
 
+var VComponent = (function () {
+  function VComponent(parentNode, renderFunction) {
+    _classCallCheck(this, VComponent);
+
+    this.parentNode = parentNode;
+    this.renderFunction = renderFunction;
+    this.vtree = undefined;
+    this.element = undefined;
+  }
+
+  _createClass(VComponent, [{
+    key: 'update',
+    value: function update(value) {
+      if (this.vtree === undefined) {
+        this.vtree = this.renderFunction(value);
+        this.element = (0, _virtualDom.create)(this.vtree);
+        // attach to the dom on the first draw
+        this.parentNode.appendChild(this.element);
+      } else {
+        var new_vtree = this.renderFunction(value);
+        var patches = (0, _virtualDom.diff)(this.vtree, new_vtree);
+        this.element = (0, _virtualDom.patch)(this.element, patches);
+        this.vtree = new_vtree;
+      }
+    }
+  }]);
+
+  return VComponent;
+})();
+
 app.directive('object', function () {
   return {
     restrict: 'A',
@@ -54375,19 +55578,11 @@ app.directive('object', function () {
       object: '='
     },
     link: function link(scope, el) {
-      // var state = mercury.state({
-      //   object: mercury.value(object),
-      // });
+      var component = new VComponent(el[0], renderObject);
       scope.$watch('object', function (newVal) {
         var object = _angular2['default'].copy(newVal);
-
-        throw new Error('[object] directive not yet implemented');
-        // renderObject(object);
-      });
-
-      // mercury.app(el[0], state, function(state) {
-      //   return renderObject(state.object);
-      // });
+        component.update(object);
+      }, true);
     }
   };
 });
@@ -54761,7 +55956,7 @@ app.config(function ($stateProvider, $urlRouterProvider, $locationProvider) {
     controller: 'admin.mturk.dashboard'
   }).state('admin.mturk.hits', {
     url: '/hits',
-    templateUrl: '/ui/admin/mturk/hits/layout.html',
+    template: '<ui-view></ui-view>',
     abstract: true
   }).state('admin.mturk.hits.table', {
     url: '/',
@@ -54775,6 +55970,22 @@ app.config(function ($stateProvider, $urlRouterProvider, $locationProvider) {
     url: '/:HITId',
     templateUrl: '/ui/admin/mturk/hits/one.html',
     controller: 'admin.mturk.hits.edit'
+  }).state('admin.mturk.qualification_types', {
+    url: '/qualification_types',
+    template: '<ui-view></ui-view>',
+    abstract: true
+  }).state('admin.mturk.qualification_types.table', {
+    url: '/',
+    templateUrl: '/ui/admin/mturk/qualification_types/all.html',
+    controller: 'admin.mturk.qualification_types.table'
+  }).state('admin.mturk.qualification_types.new', {
+    url: '/new',
+    templateUrl: '/ui/admin/mturk/qualification_types/new.html',
+    controller: 'admin.mturk.qualification_types.new'
+  }).state('admin.mturk.qualification_types.edit', {
+    url: '/:QualificationTypeId',
+    templateUrl: '/ui/admin/mturk/qualification_types/one.html',
+    controller: 'admin.mturk.qualification_types.edit'
   })
   // responses
   .state('admin.responses', {
@@ -54899,7 +56110,7 @@ app.directive('aTemplate', function (Template) {
   };
 });
 
-},{"./misc-js-plugins":133,"angular":5,"angular-resource":2,"angular-ui-router":3,"checkbox-sequence":102,"flow-copy":103,"lodash":104,"ngstorage":106,"textarea":107,"urlobject":108,"virtual-dom/h":109}],130:[function(require,module,exports){
+},{"./misc-js-plugins":151,"angular":5,"angular-resource":2,"angular-ui-router":3,"checkbox-sequence":103,"flow-copy":105,"lodash":106,"ngstorage":108,"textarea":109,"urlobject":110,"virtual-dom":114}],148:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -54960,7 +56171,7 @@ _app.app.controller('admin.aws_accounts.table', function ($scope, AWSAccount) {
   $scope.$on('save', $scope.sync);
 });
 
-},{"../app":129}],131:[function(require,module,exports){
+},{"../app":147}],149:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -55267,7 +56478,7 @@ _app.app.controller('admin.experiments.edit.blocks', function ($scope, $q, $http
   };
 });
 
-},{"../../app":129,"lodash":104}],132:[function(require,module,exports){
+},{"../../app":147,"lodash":106}],150:[function(require,module,exports){
 /*jslint browser: true, esnext: true */
 'use strict';
 
@@ -55310,7 +56521,7 @@ _app.app.controller('admin.experiments.table', function ($scope, $flash, $state,
   $scope.site_url = _urlobject.Url.parse(window.location).merge({ path: '/' }).toString();
 });
 
-},{"../app":129,"urlobject":108}],133:[function(require,module,exports){
+},{"../app":147,"urlobject":110}],151:[function(require,module,exports){
 /*jslint browser: true, esnext: true */ /*globals angular, Event */
 /** Copyright 2012-2014, Christopher Brown <io@henrian.com>, MIT Licensed
 
@@ -55485,7 +56696,7 @@ var misc_js_plugins = angular.module('misc-js-plugins', [])
 });
 exports.misc_js_plugins = misc_js_plugins;
 
-},{}],134:[function(require,module,exports){
+},{}],152:[function(require,module,exports){
 /*jslint browser: true, esnext: true */
 'use strict';
 
@@ -55597,7 +56808,7 @@ _app.app.service('AccessToken', function ($resource) {
 
 // query: {method: 'GET', isArray: true, cache: true},
 
-},{"./app":129,"lodash":104}],135:[function(require,module,exports){
+},{"./app":147,"lodash":106}],153:[function(require,module,exports){
 /*jslint browser: true, esnext: true */
 'use strict';
 
@@ -55614,6 +56825,12 @@ var _moment2 = _interopRequireDefault(_moment);
 var _app = require('../app');
 
 var _urlobject = require('urlobject');
+
+var _cookiemonster = require('cookiemonster');
+
+var cookies = new _cookiemonster.CookieMonster(document, {
+  path: '/',
+  expires: new Date(new Date().getTime() + 31 * 24 * 60 * 60 * 1000) });
 
 function nodesToJSON(nodes) {
   var pairs = _lodash2['default'].map(nodes, function (node) {
@@ -55697,15 +56914,16 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
   };
 }).controller('admin.mturk', function ($scope, $state, AWSAccount) {
   // environments
-  $scope.environment = $state.params.environment;
+  $scope.environment = $state.params.environment || cookies.get('environment');
   $scope.environments = [{ name: 'production' }, { name: 'sandbox' }, { name: 'local' }];
   // aws accounts
-  $scope.aws_account_id = $state.params.aws_account_id;
+  $scope.aws_account_id = $state.params.aws_account_id || cookies.get('aws_account_id');
   $scope.aws_accounts = AWSAccount.query();
-  // on change watcher
-  $scope.$watchGroup(['environment', 'aws_account_id'], function () {
-    $state.go('.', { environment: $scope.environment, aws_account_id: $scope.aws_account_id });
-  });
+  // change watcher called from the view/template
+  $scope.changeSetting = function (key, value) {
+    cookies.set(key, value);
+    $state.go('.', _lodash2['default'].object([key], [value]));
+  };
 }).controller('admin.mturk.hits.table', function ($scope, $state, $turk) {
   $turk({
     Operation: 'SearchHITs',
@@ -55719,6 +56937,7 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
   });
 }).controller('admin.mturk.hits.new', function ($scope, $http, $state, $location, $localStorage, $flash, $turk) {
   $scope.$storage = $localStorage.$default({
+    Operation: 'CreateHIT',
     Title: $state.params.Title || 'Exciting task!',
     // Description: 'Look at some cool pictures and answer a lot of really easy questions.',
     MaxAssignments: 20,
@@ -55736,7 +56955,7 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
   $scope.sync = function () {
     var Question = createExternalQuestionString($scope.$storage.ExternalURL, $scope.$storage.FrameHeight);
     var data = {
-      Operation: 'CreateHIT',
+      Operation: $scope.Operation,
       Title: $scope.$storage.Title,
       Description: $scope.$storage.Description,
       MaxAssignments: $scope.$storage.MaxAssignments,
@@ -55791,11 +57010,16 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
       $scope.preview_url = '';
     }
   });
-}).controller('admin.mturk.hits.edit', function ($scope, $localStorage, $state, $flash, $turk) {
+}).controller('admin.mturk.hits.edit', function ($scope, $localStorage, $state, $q, $flash, $turk) {
   $scope.$storage = $localStorage.$default({
     assignments_limit: 10,
-    responses_summarizer: 'return responses;'
+    responses_summarizer: 'return responses;',
+    AssignQualification: {
+      IntegerValue: 1,
+      SendNotification: 1
+    }
   });
+
   $turk({
     Operation: 'GetHIT',
     HITId: $state.params.HITId
@@ -55820,31 +57044,6 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
     });
   });
 
-  // participant.duration = responses[0].duration.toFixed(0) + ' seconds';
-
-  // var xml = new XMLSerializer().serializeToString(res.data);
-  // console.log(xml);
-
-  // var aws_worker_ids = assignments.map(function(assignment) {
-  //   return assignment.WorkerId;
-  // });
-
-  // bonus_payments: {
-  //   method: 'GET',
-  //   url: '/api/mturk/HITs/:HITId/BonusPayments',
-  //   isArray: true,
-  // },
-  // ExtendHIT: {
-  //   method: 'POST',
-  //   url: '/api/mturk/HITs/:HITId/ExtendHIT',
-  // },
-  // import: {
-  //   method: 'POST',
-  //   url: '/api/mturk/HITs/:HITId/import',
-  // },
-
-  // $scope.bonus_payments = HIT.bonus_payments({HITId: HITId});
-
   $scope.ExtendHIT = function () {
     var data = _lodash2['default'].extend({ HITId: HITId }, $scope.extension);
     var promise = HIT.ExtendHIT(data).$promise.then(function () {
@@ -55856,6 +57055,32 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
   $scope['import'] = function () {
     var promise = HIT['import']({ HITId: HITId }).$promise.then(function (res) {
       return res.message || 'Imported';
+    });
+    $flash(promise);
+  };
+
+  $turk({
+    Operation: 'SearchQualificationTypes',
+    MustBeOwnedByCaller: true
+  }).then(function (res) {
+    $scope.QualificationTypes = _lodash2['default'].map(res.data.querySelectorAll('QualificationType'), function (QualificationType) {
+      return nodesToJSON(QualificationType.children);
+    });
+  });
+
+  $scope.assignQualifications = function () {
+    var AssignQualification = $scope.$storage.AssignQualification;
+    var promises = $scope.assignments.map(function (assignment) {
+      return $turk({
+        Operation: 'AssignQualification',
+        QualificationTypeId: AssignQualification.QualificationTypeId,
+        WorkerId: assignment.WorkerId,
+        IntegerValue: AssignQualification.IntegerValue,
+        SendNotification: AssignQualification.SendNotification
+      });
+    });
+    var promise = $q.all(promises).then(function (results) {
+      return 'Sent ' + results.length + ' AssignQualification requests';
     });
     $flash(promise);
   };
@@ -55872,9 +57097,7 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
         var transform_functionBody = $localStorage.responses_summarizer || 'return responses;';
         var transform_function = new Function('responses', transform_functionBody);
 
-        // console.log('transform_function:', transform_function.toString());
         var transformed_responses = transform_function(angular.copy(responses));
-        // console.log('transformed_responses', transformed_responses);
 
         scope.responses = transformed_responses;
       });
@@ -55931,9 +57154,227 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
       console.log(xml);
     });
   };
-});
+}).controller('admin.mturk.qualification_types.new', function ($scope, $http, $state, $location, $localStorage, $flash, $turk) {
+  $scope.QualificationType = $localStorage.$default({
+    QualificationType: {
+      RetryDelay: '30m',
+      QualificationTypeStatus: 'Active',
+      AutoGranted: false,
+      AutoGrantedValue: 1
+    }
+  }).QualificationType;
 
-},{"../app":129,"lodash":104,"moment":105,"urlobject":108}],136:[function(require,module,exports){
+  $scope.sync = function () {
+    var data = {
+      Operation: 'CreateQualificationType',
+      Name: $scope.QualificationType.Name,
+      Description: $scope.QualificationType.Description,
+      Keywords: $scope.QualificationType.Keywords,
+      RetryDelayInSeconds: durationStringToSeconds($scope.QualificationType.RetryDelay),
+      QualificationTypeStatus: $scope.QualificationType.QualificationTypeStatus,
+      Test: $scope.QualificationType.Test,
+      TestDuration: $scope.QualificationType.TestDuration,
+      AnswerKey: $scope.QualificationType.AnswerKey,
+      AutoGranted: $scope.QualificationType.AutoGranted,
+      AutoGrantedValue: $scope.QualificationType.AutoGranted ? $scope.QualificationType.AutoGrantedValue : undefined
+    };
+    var promise = $turk(data).then(function (res) {
+      /**
+      res.data is a Document instance; a successful response looks like:
+       <CreateQualificationTypeResponse>
+        <OperationRequest><RequestId>4936164b-41e9-45be-9189-b43fdf973e1d</RequestId></OperationRequest>
+        <QualificationType>
+          <Request><IsValid>True</IsValid></Request>
+          <QualificationTypeId>33MAVWP2GREQRM6IPUX4EU7SU2KZL1</QualificationTypeId>
+          <CreationTime>2015-07-09T00:39:15Z</CreationTime>
+          <Name>Test qualification 1</Name>
+          <Description>My first qualification type (it's temporary)</Description>
+          <Keywords>test,autogrant</Keywords>
+          <QualificationTypeStatus>Active</QualificationTypeStatus>
+          <RetryDelayInSeconds>1800</RetryDelayInSeconds>
+          <AutoGranted>1</AutoGranted>
+          <AutoGrantedValue>1</AutoGrantedValue>
+        </QualificationType>
+      </CreateQualificationTypeResponse>
+       An error response looks like:
+       <CreateQualificationTypeResponse>
+        <OperationRequest><RequestId>f8504a5e-00ab-4208-b069-7917bba88871</RequestId></OperationRequest>
+        <QualificationType>
+          <Request>
+            <IsValid>False</IsValid>
+            <Errors>
+              <Error>
+                <Code>AWS.MechanicalTurk.QualificationTypeAlreadyExists</Code>
+                <Message>
+                  You have already created a QualificationType with this name. A QualificationType's name must be unique among all of the QualificationTypes created by the same user. (1436402412782)
+                </Message>
+                <Data>
+                  <Key>QualificationTypeId</Key>
+                  <Value>33MAVWP2GREQRM6IPUX4EU7SU2KZL1</Value>
+                </Data>
+                <Data>
+                  <Key>QualificationTypeId</Key>
+                  <Value>33MAVWP2GREQRM6IPUX4EU7SU2KZL1</Value>
+                </Data>
+              </Error>
+            </Errors>
+          </Request>
+        </QualificationType>
+      </CreateQualificationTypeResponse>
+      */
+      var success = res.data.querySelector('IsValid').textContent === 'True';
+      if (success) {
+        var QualificationTypeId = res.data.querySelector('QualificationTypeId').textContent;
+        return 'Created QualificationType: ' + QualificationTypeId;
+      } else {
+        var message = res.data.querySelector('Errors > Error > Message').textContent;
+        return 'Failure: ' + message;
+      }
+    });
+    $flash(promise);
+  };
+}).controller('admin.mturk.qualification_types.edit', function ($scope, $state, $turk) {
+  $turk({
+    Operation: 'GetQualificationType',
+    QualificationTypeId: $state.params.QualificationTypeId
+  }).then(function (res) {
+    // res.data is a Document instance.
+    $scope.QualificationType = nodesToJSON(res.data.querySelector('QualificationType').children);
+  });
+
+  $turk({
+    Operation: 'GetQualificationsForQualificationType',
+    QualificationTypeId: $state.params.QualificationTypeId,
+    // Status: 'Granted' | 'Revoked',
+    PageSize: 100,
+    PageNumber: 1
+  }).then(function (res) {
+    /**
+    Success looks like:
+     <GetQualificationsForQualificationTypeResponse>
+      <OperationRequest><RequestId>5e57d866-70e2-4e76-a1ce-f0b28e69977b</RequestId></OperationRequest>
+      <GetQualificationsForQualificationTypeResult>
+        <Request><IsValid>True</IsValid></Request>
+        <NumResults>20</NumResults>
+        <TotalNumResults>20</TotalNumResults>
+        <PageNumber>1</PageNumber>
+        <Qualification>
+          <QualificationTypeId>3C8RUX4LESAVRD6QL84K1JKOF4LM9A</QualificationTypeId>
+          <SubjectId>AHM21AWBZPEJNM</SubjectId>
+          <GrantTime>2015-07-08T21:16:39.000-07:00</GrantTime>
+          <IntegerValue>1</IntegerValue>
+          <Status>Granted</Status>
+        </Qualification>
+        <Qualification>
+          <QualificationTypeId>3C8RUX4LESAVRD6QL84K1JKOF4LM9A</QualificationTypeId>
+          <SubjectId>APOLZKWYE7JF6B</SubjectId>
+          <GrantTime>2015-07-08T21:16:39.000-07:00</GrantTime>
+          <IntegerValue>1</IntegerValue>
+          <Status>Granted</Status>
+        </Qualification>
+      </GetQualificationsForQualificationTypeResult>
+    </GetQualificationsForQualificationTypeResponse>
+    */
+    $scope.Qualifications = _lodash2['default'].map(res.data.querySelectorAll('Qualification'), function (Qualification) {
+      return nodesToJSON(Qualification.children);
+    });
+  });
+}).controller('admin.mturk.qualification_types.table', function ($scope, $localStorage, $turk, $flash) {
+  $scope.SearchQualificationTypes = $localStorage.$default({
+    SearchQualificationTypes: {
+      Operation: 'SearchQualificationTypes',
+      SortProperty: 'Name', // default, only option, not required
+      SortDirection: 'Ascending',
+      PageSize: 10,
+      PageNumber: 1,
+      MustBeRequestable: false,
+      MustBeOwnedByCaller: true
+    }
+  }).SearchQualificationTypes;
+
+  $scope.refresh = function () {
+    var data = $scope.SearchQualificationTypes;
+    if (data.Query === '') {
+      data.Query = null;
+    }
+    $turk(data).then(function (res) {
+      // res.data is a Document instance.
+      $scope.QualificationTypes = _lodash2['default'].map(res.data.querySelectorAll('QualificationType'), function (QualificationType) {
+        return nodesToJSON(QualificationType.children);
+      });
+    });
+  };
+
+  $scope.refresh();
+
+  $scope['delete'] = function (QualificationType) {
+    var promise = $turk({
+      Operation: 'DisposeQualificationType',
+      QualificationTypeId: QualificationType.QualificationTypeId
+    }).then(function (res) {
+      /**
+      On success:
+       <DisposeQualificationTypeResponse>
+        <OperationRequest><RequestId>9dfced88-390e-43ba-b0a6-db0fd8bf32a6</RequestId></OperationRequest>
+        <DisposeQualificationTypeResult>
+          <Request>
+            <IsValid>True</IsValid>
+          </Request>
+        </DisposeQualificationTypeResult>
+      </DisposeQualificationTypeResponse>
+       On failure:
+       <DisposeQualificationTypeResponse>
+        <OperationRequest><RequestId>4d4f425d-1a25-47ab-ae10-f801c02fab33</RequestId></OperationRequest>
+        <DisposeQualificationTypeResult>
+          <Request>
+            <IsValid>False</IsValid>
+            <Errors>
+              <Error>
+                <Code>AWS.MechanicalTurk.InvalidQualificationTypeState</Code>
+                <Message>
+                  This operation can be called with a status of: Active,Inactive (1436410660581)
+                </Message>
+                <Data>
+                  <Key>QualificationTypeId</Key>
+                  <Value>3IUNFP8DKUS0R71E78UIQ0J2B48LJ3</Value>
+                </Data>
+                <Data>
+                  <Key>CurrentState</Key>
+                  <Value>Disposing</Value>
+                </Data>
+                <Data>
+                  <Key>ExpectedStates</Key>
+                  <Value>Active,Inactive</Value>
+                </Data>
+                <Data>
+                  <Key>ExpectedStates</Key>
+                  <Value>Active,Inactive</Value>
+                </Data>
+                <Data>
+                  <Key>QualificationTypeId</Key>
+                  <Value>3IUNFP8DKUS0R71E78UIQ0J2B48LJ3</Value>
+                </Data>
+              </Error>
+            </Errors>
+          </Request>
+        </DisposeQualificationTypeResult>
+      </DisposeQualificationTypeResponse>
+      */
+      var success = res.data.querySelector('IsValid').textContent === 'True';
+      if (success) {
+        $scope.QualificationTypes.splice($scope.QualificationTypes.indexOf(QualificationType), 1);
+        return 'Deleted QualificationType: ' + QualificationType.QualificationTypeId;
+      } else {
+        var message = res.data.querySelector('Errors > Error > Message').textContent;
+        return 'Failure: ' + message;
+      }
+    });
+    $flash(promise);
+  };
+});
+// one month from now
+
+},{"../app":147,"cookiemonster":104,"lodash":106,"moment":107,"urlobject":110}],154:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -55953,7 +57394,7 @@ _app.app.controller('admin.responses.table', function ($scope, Response) {
   });
 });
 
-},{"../app":129,"lodash":104}],137:[function(require,module,exports){
+},{"../app":147,"lodash":106}],155:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -55992,7 +57433,7 @@ _app.app.controller('admin.templates.table', function ($scope, $flash, Template)
   };
 });
 
-},{"../app":129}],138:[function(require,module,exports){
+},{"../app":147}],156:[function(require,module,exports){
 /*jslint esnext: true */
 
 // required for generators
@@ -56032,4 +57473,4 @@ Array.prototype.includes = function (searchElement, fromIndex) {
   return this.indexOf(searchElement) !== -1;
 };
 
-},{"./admin/access_tokens/controllers":127,"./admin/administrators/controllers":128,"./admin/app":129,"./admin/aws_accounts/controllers":130,"./admin/experiments/blocks/controllers":131,"./admin/experiments/controllers":132,"./admin/models":134,"./admin/mturk/controllers":135,"./admin/responses/controllers":136,"./admin/templates/controllers":137,"babel/polyfill":99}]},{},[138]);
+},{"./admin/access_tokens/controllers":145,"./admin/administrators/controllers":146,"./admin/app":147,"./admin/aws_accounts/controllers":148,"./admin/experiments/blocks/controllers":149,"./admin/experiments/controllers":150,"./admin/models":152,"./admin/mturk/controllers":153,"./admin/responses/controllers":154,"./admin/templates/controllers":155,"babel/polyfill":99}]},{},[156]);
