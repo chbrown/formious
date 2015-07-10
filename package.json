@@ -28,6 +28,7 @@
     "flow-copy": "*",
     "handlebars": "*",
     "http-enhanced": "*",
+    "httprequest": "*",
     "jszip": "*",
     "lodash": "*",
     "loge": "*",
