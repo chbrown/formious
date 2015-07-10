@@ -37528,6 +37528,99 @@ if (typeof angular !== 'undefined') {
 }
 
 },{}],106:[function(require,module,exports){
+var NetworkError = (function () {
+    function NetworkError(method, url) {
+        this.name = 'NetworkError';
+        this.message = this.name + " with request: " + method + " " + url;
+    }
+    return NetworkError;
+})();
+exports.NetworkError = NetworkError;
+/**
+Example:
+
+new Request('POST', '/api/reservations').sendData({venue_id: 100}, (err, response) => {
+  if (err) throw err;
+  console.log('got response', res);
+});
+*/
+var Request = (function () {
+    /**
+    XMLHttpRequest doesn't expose method and url after setting them, so we need
+    to keep track of them in the Request instance for error reporting purposes.
+    */
+    function Request(method, url, responseType) {
+        var _this = this;
+        if (responseType === void 0) { responseType = ''; }
+        this.method = method;
+        this.url = url;
+        this.headers = [];
+        this.xhr = new XMLHttpRequest();
+        this.xhr.responseType = responseType;
+        this.xhr.onreadystatechange = function (event) {
+            var readyState = _this.xhr.readyState;
+            if (readyState == 2) {
+                var content_type = _this.xhr.getResponseHeader('content-type');
+                if (content_type.indexOf('application/json') === 0) {
+                    _this.xhr.responseType = 'json';
+                }
+                else if (content_type.indexOf('text/xml') === 0) {
+                    _this.xhr.responseType = 'document';
+                }
+            }
+        };
+        this.xhr.onerror = function (event) {
+            _this.callback(new NetworkError(method, url));
+        };
+        // onload is better than onreadystatechange() { if (readyState == 4) ... }
+        //   since onload will not be called if there is an error.
+        this.xhr.onload = function (event) {
+            if (_this.xhr.status >= 400) {
+                var error = new Error(_this.xhr.response);
+                return _this.callback(error);
+            }
+            _this.callback(null, _this.xhr.response);
+        };
+    }
+    /**
+    Add a header-value pair to be set on the XMLHttpRequest once it is opened.
+    */
+    Request.prototype.addHeader = function (header, value) {
+        this.headers.push([header, value]);
+        return this;
+    };
+    Request.prototype.send = function (callback) {
+        return this.sendData(undefined, callback);
+    };
+    Request.prototype.sendJSON = function (object, callback) {
+        this.headers.push(['Content-Type', 'application/json']);
+        return this.sendData(JSON.stringify(object), callback);
+    };
+    Request.prototype.sendData = function (data, callback) {
+        var _this = this;
+        this.callback = callback;
+        // delay opening until we actually need to so that custom event listeners
+        // can be added by the user
+        this.xhr.open(this.method, this.url);
+        this.headers.forEach(function (_a) {
+            var header = _a[0], value = _a[1];
+            return _this.xhr.setRequestHeader(header, value);
+        });
+        try {
+            // this might raise an error without even trying the server if we break
+            // some kind of cross-origin request rule.
+            this.xhr.send(data);
+        }
+        catch (exc) {
+            setTimeout(function () { return callback(exc); }, 0);
+        }
+        return this;
+    };
+    return Request;
+})();
+exports.Request = Request;
+
+},{}],107:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -49766,7 +49859,7 @@ if (typeof angular !== 'undefined') {
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],107:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 //! moment.js
 //! version : 2.10.3
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
@@ -52878,7 +52971,7 @@ if (typeof angular !== 'undefined') {
     return _moment;
 
 }));
-},{}],108:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 (function (root, factory) {
   'use strict';
 
@@ -53037,7 +53130,7 @@ if (typeof angular !== 'undefined') {
 
 }));
 
-},{"angular":5}],109:[function(require,module,exports){
+},{"angular":5}],110:[function(require,module,exports){
 /*jslint browser: true */
 
 function extend(target /*, source_0, source_1, ... */) {
@@ -53484,7 +53577,7 @@ if (typeof angular !== 'undefined') {
   });
 }
 
-},{}],110:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 /*jslint browser: true */
 /** Example results:
 
@@ -53693,22 +53786,22 @@ var Url = (function () {
 })();
 exports.Url = Url;
 
-},{}],111:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 var createElement = require("./vdom/create-element.js")
 
 module.exports = createElement
 
-},{"./vdom/create-element.js":124}],112:[function(require,module,exports){
+},{"./vdom/create-element.js":125}],113:[function(require,module,exports){
 var diff = require("./vtree/diff.js")
 
 module.exports = diff
 
-},{"./vtree/diff.js":144}],113:[function(require,module,exports){
+},{"./vtree/diff.js":145}],114:[function(require,module,exports){
 var h = require("./virtual-hyperscript/index.js")
 
 module.exports = h
 
-},{"./virtual-hyperscript/index.js":131}],114:[function(require,module,exports){
+},{"./virtual-hyperscript/index.js":132}],115:[function(require,module,exports){
 var diff = require("./diff.js")
 var patch = require("./patch.js")
 var h = require("./h.js")
@@ -53725,7 +53818,7 @@ module.exports = {
     VText: VText
 }
 
-},{"./create-element.js":111,"./diff.js":112,"./h.js":113,"./patch.js":122,"./vnode/vnode.js":140,"./vnode/vtext.js":142}],115:[function(require,module,exports){
+},{"./create-element.js":112,"./diff.js":113,"./h.js":114,"./patch.js":123,"./vnode/vnode.js":141,"./vnode/vtext.js":143}],116:[function(require,module,exports){
 /*!
  * Cross-Browser Split 1.1.1
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
@@ -53833,7 +53926,7 @@ module.exports = (function split(undef) {
   return self;
 })();
 
-},{}],116:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 'use strict';
 
 var OneVersionConstraint = require('individual/one-version');
@@ -53855,7 +53948,7 @@ function EvStore(elem) {
     return hash;
 }
 
-},{"individual/one-version":118}],117:[function(require,module,exports){
+},{"individual/one-version":119}],118:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -53878,7 +53971,7 @@ function Individual(key, value) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],118:[function(require,module,exports){
+},{}],119:[function(require,module,exports){
 'use strict';
 
 var Individual = require('./index.js');
@@ -53902,7 +53995,7 @@ function OneVersion(moduleName, version, defaultValue) {
     return Individual(key, defaultValue);
 }
 
-},{"./index.js":117}],119:[function(require,module,exports){
+},{"./index.js":118}],120:[function(require,module,exports){
 (function (global){
 var topLevel = typeof global !== 'undefined' ? global :
     typeof window !== 'undefined' ? window : {}
@@ -53921,14 +54014,14 @@ if (typeof document !== 'undefined') {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"min-document":100}],120:[function(require,module,exports){
+},{"min-document":100}],121:[function(require,module,exports){
 "use strict";
 
 module.exports = function isObject(x) {
 	return typeof x === "object" && x !== null;
 };
 
-},{}],121:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 var nativeIsArray = Array.isArray
 var toString = Object.prototype.toString
 
@@ -53938,12 +54031,12 @@ function isArray(obj) {
     return toString.call(obj) === "[object Array]"
 }
 
-},{}],122:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 var patch = require("./vdom/patch.js")
 
 module.exports = patch
 
-},{"./vdom/patch.js":127}],123:[function(require,module,exports){
+},{"./vdom/patch.js":128}],124:[function(require,module,exports){
 var isObject = require("is-object")
 var isHook = require("../vnode/is-vhook.js")
 
@@ -54042,7 +54135,7 @@ function getPrototype(value) {
     }
 }
 
-},{"../vnode/is-vhook.js":135,"is-object":120}],124:[function(require,module,exports){
+},{"../vnode/is-vhook.js":136,"is-object":121}],125:[function(require,module,exports){
 var document = require("global/document")
 
 var applyProperties = require("./apply-properties")
@@ -54090,7 +54183,7 @@ function createElement(vnode, opts) {
     return node
 }
 
-},{"../vnode/handle-thunk.js":133,"../vnode/is-vnode.js":136,"../vnode/is-vtext.js":137,"../vnode/is-widget.js":138,"./apply-properties":123,"global/document":119}],125:[function(require,module,exports){
+},{"../vnode/handle-thunk.js":134,"../vnode/is-vnode.js":137,"../vnode/is-vtext.js":138,"../vnode/is-widget.js":139,"./apply-properties":124,"global/document":120}],126:[function(require,module,exports){
 // Maps a virtual DOM tree onto a real DOM tree in an efficient manner.
 // We don't want to read all of the DOM nodes in the tree so we use
 // the in-order tree indexing to eliminate recursion down certain branches.
@@ -54177,7 +54270,7 @@ function ascending(a, b) {
     return a > b ? 1 : -1
 }
 
-},{}],126:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 var applyProperties = require("./apply-properties")
 
 var isWidget = require("../vnode/is-widget.js")
@@ -54331,7 +54424,7 @@ function replaceRoot(oldRoot, newRoot) {
     return newRoot;
 }
 
-},{"../vnode/is-widget.js":138,"../vnode/vpatch.js":141,"./apply-properties":123,"./create-element":124,"./update-widget":128}],127:[function(require,module,exports){
+},{"../vnode/is-widget.js":139,"../vnode/vpatch.js":142,"./apply-properties":124,"./create-element":125,"./update-widget":129}],128:[function(require,module,exports){
 var document = require("global/document")
 var isArray = require("x-is-array")
 
@@ -54409,7 +54502,7 @@ function patchIndices(patches) {
     return indices
 }
 
-},{"./dom-index":125,"./patch-op":126,"global/document":119,"x-is-array":121}],128:[function(require,module,exports){
+},{"./dom-index":126,"./patch-op":127,"global/document":120,"x-is-array":122}],129:[function(require,module,exports){
 var isWidget = require("../vnode/is-widget.js")
 
 module.exports = updateWidget
@@ -54426,7 +54519,7 @@ function updateWidget(a, b) {
     return false
 }
 
-},{"../vnode/is-widget.js":138}],129:[function(require,module,exports){
+},{"../vnode/is-widget.js":139}],130:[function(require,module,exports){
 'use strict';
 
 var EvStore = require('ev-store');
@@ -54455,7 +54548,7 @@ EvHook.prototype.unhook = function(node, propertyName) {
     es[propName] = undefined;
 };
 
-},{"ev-store":116}],130:[function(require,module,exports){
+},{"ev-store":117}],131:[function(require,module,exports){
 'use strict';
 
 module.exports = SoftSetHook;
@@ -54474,7 +54567,7 @@ SoftSetHook.prototype.hook = function (node, propertyName) {
     }
 };
 
-},{}],131:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 'use strict';
 
 var isArray = require('x-is-array');
@@ -54611,7 +54704,7 @@ function errorString(obj) {
     }
 }
 
-},{"../vnode/is-thunk":134,"../vnode/is-vhook":135,"../vnode/is-vnode":136,"../vnode/is-vtext":137,"../vnode/is-widget":138,"../vnode/vnode.js":140,"../vnode/vtext.js":142,"./hooks/ev-hook.js":129,"./hooks/soft-set-hook.js":130,"./parse-tag.js":132,"x-is-array":121}],132:[function(require,module,exports){
+},{"../vnode/is-thunk":135,"../vnode/is-vhook":136,"../vnode/is-vnode":137,"../vnode/is-vtext":138,"../vnode/is-widget":139,"../vnode/vnode.js":141,"../vnode/vtext.js":143,"./hooks/ev-hook.js":130,"./hooks/soft-set-hook.js":131,"./parse-tag.js":133,"x-is-array":122}],133:[function(require,module,exports){
 'use strict';
 
 var split = require('browser-split');
@@ -54667,7 +54760,7 @@ function parseTag(tag, props) {
     return props.namespace ? tagName : tagName.toUpperCase();
 }
 
-},{"browser-split":115}],133:[function(require,module,exports){
+},{"browser-split":116}],134:[function(require,module,exports){
 var isVNode = require("./is-vnode")
 var isVText = require("./is-vtext")
 var isWidget = require("./is-widget")
@@ -54709,14 +54802,14 @@ function renderThunk(thunk, previous) {
     return renderedThunk
 }
 
-},{"./is-thunk":134,"./is-vnode":136,"./is-vtext":137,"./is-widget":138}],134:[function(require,module,exports){
+},{"./is-thunk":135,"./is-vnode":137,"./is-vtext":138,"./is-widget":139}],135:[function(require,module,exports){
 module.exports = isThunk
 
 function isThunk(t) {
     return t && t.type === "Thunk"
 }
 
-},{}],135:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 module.exports = isHook
 
 function isHook(hook) {
@@ -54725,7 +54818,7 @@ function isHook(hook) {
        typeof hook.unhook === "function" && !hook.hasOwnProperty("unhook"))
 }
 
-},{}],136:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = isVirtualNode
@@ -54734,7 +54827,7 @@ function isVirtualNode(x) {
     return x && x.type === "VirtualNode" && x.version === version
 }
 
-},{"./version":139}],137:[function(require,module,exports){
+},{"./version":140}],138:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = isVirtualText
@@ -54743,17 +54836,17 @@ function isVirtualText(x) {
     return x && x.type === "VirtualText" && x.version === version
 }
 
-},{"./version":139}],138:[function(require,module,exports){
+},{"./version":140}],139:[function(require,module,exports){
 module.exports = isWidget
 
 function isWidget(w) {
     return w && w.type === "Widget"
 }
 
-},{}],139:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 module.exports = "2"
 
-},{}],140:[function(require,module,exports){
+},{}],141:[function(require,module,exports){
 var version = require("./version")
 var isVNode = require("./is-vnode")
 var isWidget = require("./is-widget")
@@ -54827,7 +54920,7 @@ function VirtualNode(tagName, properties, children, key, namespace) {
 VirtualNode.prototype.version = version
 VirtualNode.prototype.type = "VirtualNode"
 
-},{"./is-thunk":134,"./is-vhook":135,"./is-vnode":136,"./is-widget":138,"./version":139}],141:[function(require,module,exports){
+},{"./is-thunk":135,"./is-vhook":136,"./is-vnode":137,"./is-widget":139,"./version":140}],142:[function(require,module,exports){
 var version = require("./version")
 
 VirtualPatch.NONE = 0
@@ -54851,7 +54944,7 @@ function VirtualPatch(type, vNode, patch) {
 VirtualPatch.prototype.version = version
 VirtualPatch.prototype.type = "VirtualPatch"
 
-},{"./version":139}],142:[function(require,module,exports){
+},{"./version":140}],143:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = VirtualText
@@ -54863,7 +54956,7 @@ function VirtualText(text) {
 VirtualText.prototype.version = version
 VirtualText.prototype.type = "VirtualText"
 
-},{"./version":139}],143:[function(require,module,exports){
+},{"./version":140}],144:[function(require,module,exports){
 var isObject = require("is-object")
 var isHook = require("../vnode/is-vhook")
 
@@ -54923,7 +55016,7 @@ function getPrototype(value) {
   }
 }
 
-},{"../vnode/is-vhook":135,"is-object":120}],144:[function(require,module,exports){
+},{"../vnode/is-vhook":136,"is-object":121}],145:[function(require,module,exports){
 var isArray = require("x-is-array")
 
 var VPatch = require("../vnode/vpatch")
@@ -55352,7 +55445,7 @@ function appendPatch(apply, patch) {
     }
 }
 
-},{"../vnode/handle-thunk":133,"../vnode/is-thunk":134,"../vnode/is-vnode":136,"../vnode/is-vtext":137,"../vnode/is-widget":138,"../vnode/vpatch":141,"./diff-props":143,"x-is-array":121}],145:[function(require,module,exports){
+},{"../vnode/handle-thunk":134,"../vnode/is-thunk":135,"../vnode/is-vnode":137,"../vnode/is-vtext":138,"../vnode/is-widget":139,"../vnode/vpatch":142,"./diff-props":144,"x-is-array":122}],146:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -55372,7 +55465,7 @@ _app.app.controller('admin.access_tokens.table', function ($scope, $flash, Acces
   $scope.access_token = AccessToken.get({ id: $state.params.access_token_id });
 });
 
-},{"../app":147}],146:[function(require,module,exports){
+},{"../app":148}],147:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -55422,7 +55515,7 @@ _app.app.controller('admin.administrators.table', function ($scope, $flash, Admi
   };
 });
 
-},{"../app":147}],147:[function(require,module,exports){
+},{"../app":148}],148:[function(require,module,exports){
 /*jslint browser: true, esnext: true */
 
 'use strict';
@@ -55433,6 +55526,8 @@ Object.defineProperty(exports, '__esModule', {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
+exports.sendTurkRequest = sendTurkRequest;
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
@@ -55441,9 +55536,15 @@ var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+var _moment = require('moment');
+
+var _moment2 = _interopRequireDefault(_moment);
+
 var _virtualDom = require('virtual-dom');
 
 var _urlobject = require('urlobject');
+
+var _httprequest = require('httprequest');
 
 // angular.js libraries:
 var _angular = require('angular');
@@ -55608,57 +55709,39 @@ app.filter('keys', function () {
   };
 });
 
-/**
-interface XHROptions {
-  method: string;
-  url: string;
-  params: any;
-  data?: any;
-}
+function sendTurkRequest(data, callback) {
+  // ui-router reloads the controllers before changing the location URL, which
+  // means this will get called with the wrong url after a account/environment change
+  // console.log('sendTurkRequest pathname', location.pathname, data);
+  var path_match = window.location.pathname.match(/^\/admin\/mturk\/(\w+)\/(\d+)/);
+  if (path_match === null) {
+    throw new Error('Cannot find AWS Account ID and MTurk environment parameters in URL');
+  }
+  var environment = path_match[1];
+  var aws_account_id = path_match[2];
+  var url = new _urlobject.Url({ path: '/api/mturk', query: { environment: environment, aws_account_id: aws_account_id } }).toString();
 
-interface XMLResponse {
-  config: XHROptions;
-  data: Document;
-  status: number;
-  statusText: string;
-}
-
-xhr(options: XHROptions, callback: (error: Error, response?: XMLResponse) => void) { ... }
-
-The 'Content-Type' header of the outgoing request will be set to
-'application/json', and options.data will be serialized with JSON.stringify().
-*/
-function xhrXML(options, callback) {
-  var url = new _urlobject.Url({ path: options.url, query: options.params }).toString();
-  var xhr = new XMLHttpRequest();
-  xhr.open(options.method, url);
-  xhr.setRequestHeader('Content-Type', 'application/json');
-  xhr.onerror = function (error) {
-    callback(error);
-  };
-  xhr.onload = function () {
-    if (xhr.status >= 300) {
-      var error = new Error(xhr.responseText);
-      return callback(error);
+  var request = new _httprequest.Request('POST', url).sendJSON(data, function (err, res) {
+    if (err) return callback(err);
+    // res is a Document instance
+    window.request = request;
+    var valid = res.querySelector('IsValid').textContent === 'True';
+    if (!valid) {
+      var Messages = res.querySelectorAll('Errors > Error > Message');
+      var errors = _lodash2['default'].map(Messages, function (Message) {
+        return Message.textContent;
+      });
+      var message = 'AWS API Error: ' + errors.join(', ');
+      return callback(new Error(message));
     }
-    // a 'Content-Type: text/xml' header in the response will prompt
-    // XMLHttpRequest to automatically parse it into a Document instance.
-    // we return a `response` object that's much like Angular's own $http
-    // response object, except that we use that document as the `data` field.
-    callback(null, {
-      config: options,
-      data: xhr.responseXML,
-      status: xhr.status,
-      statusText: xhr.statusText
-    });
-  };
-  xhr.send(JSON.stringify(options.data));
+    callback(null, res);
+  });
 }
 
-app.factory('$xml', function ($q) {
-  return function (options) {
+app.factory('$turk', function ($q) {
+  return function (data) {
     return $q(function (resolve, reject) {
-      xhrXML(options, function (err, response) {
+      sendTurkRequest(data, function (err, response) {
         return err ? reject(err) : resolve(response);
       });
     });
@@ -56110,7 +56193,57 @@ app.directive('aTemplate', function (Template) {
   };
 });
 
-},{"./misc-js-plugins":151,"angular":5,"angular-resource":2,"angular-ui-router":3,"checkbox-sequence":103,"flow-copy":105,"lodash":106,"ngstorage":108,"textarea":109,"urlobject":110,"virtual-dom":114}],148:[function(require,module,exports){
+app.directive('durationString', function () {
+  var units = {
+    d: 86400,
+    h: 3600,
+    m: 60
+  };
+  return {
+    restrict: 'A',
+    require: 'ngModel',
+    link: function link(scope, el, attrs, ngModel) {
+      ngModel.$formatters.push(function (seconds) {
+        seconds = Number(seconds);
+        var parts = [];
+        if (seconds > units.d) {
+          var d = seconds / units.d | 0;
+          parts.push(d + 'd');
+          seconds -= d * units.d;
+        }
+        if (seconds > units.h) {
+          var h = seconds / units.h | 0;
+          parts.push(h + 'h');
+          seconds -= h * units.h;
+        }
+        if (seconds > units.m) {
+          var m = seconds / units.m | 0;
+          parts.push(m + 'm');
+          seconds -= m * units.m;
+        }
+        if (seconds > 0) {
+          parts.push(seconds + 's');
+        }
+        return parts.join(' ');
+      });
+      ngModel.$parsers.push(function (string) {
+        // take a string, return a number
+        // e.g., "5h" -> 5*60*60, the number of seconds in five hours
+        var matches = string.match(/\d+\w/g);
+        if (matches !== null) {
+          var duration = _moment2['default'].duration(0);
+          matches.forEach(function (match) {
+            var parts = match.match(/(\d+)(\w)/);
+            duration.add(parseInt(parts[1], 10), parts[2]);
+          });
+          return duration.asSeconds();
+        }
+      });
+    }
+  };
+});
+
+},{"./misc-js-plugins":152,"angular":5,"angular-resource":2,"angular-ui-router":3,"checkbox-sequence":103,"flow-copy":105,"httprequest":106,"lodash":107,"moment":108,"ngstorage":109,"textarea":110,"urlobject":111,"virtual-dom":115}],149:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -56123,39 +56256,15 @@ _app.app.controller('admin.aws_accounts.table', function ($scope, AWSAccount) {
       $scope.aws_accounts = AWSAccount.query();
     });
   };
-}).controller('admin.aws_accounts.edit', function ($scope, $http, $xml, $flash, $stateParams, AWSAccount) {
+}).controller('admin.aws_accounts.edit', function ($scope, $http, $turk, $flash, $stateParams, AWSAccount) {
   $scope.environments = [{ name: 'production' }, { name: 'sandbox' }];
   $scope.aws_account = AWSAccount.get($stateParams, function () {
     if ($scope.aws_account.id && $scope.aws_account.id != 'new') {
       $scope.environments.forEach(function (environment) {
-        $xml({
-          method: 'POST',
-          url: '/api/mturk',
-          params: {
-            aws_account_id: $scope.aws_account.id,
-            environment: environment.name
-          },
-          data: {
-            Operation: 'GetAccountBalance'
-          }
-        }).then(function (res) {
-          /** res.data is a Document instance; a successful response looks like this:
-               <?xml version="1.0"?>
-              <GetAccountBalanceResponse>
-                <OperationRequest>
-                  <RequestId>2d3fc952-8df3-b65b-6cc4-68ac6892b71a</RequestId>
-                </OperationRequest>
-                <GetAccountBalanceResult>
-                  <Request><IsValid>True</IsValid></Request>
-                  <AvailableBalance>
-                    <Amount>239.410</Amount>
-                    <CurrencyCode>USD</CurrencyCode>
-                    <FormattedPrice>$239.41</FormattedPrice>
-                  </AvailableBalance>
-                </GetAccountBalanceResult>
-              </GetAccountBalanceResponse>
-          */
-          environment.account_balance = res.data.querySelector('FormattedPrice').textContent;
+        $turk({
+          Operation: 'GetAccountBalance'
+        }).then(function (document) {
+          environment.account_balance = document.querySelector('FormattedPrice').textContent;
         });
       });
     }
@@ -56171,7 +56280,7 @@ _app.app.controller('admin.aws_accounts.table', function ($scope, AWSAccount) {
   $scope.$on('save', $scope.sync);
 });
 
-},{"../app":147}],149:[function(require,module,exports){
+},{"../app":148}],150:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -56478,7 +56587,7 @@ _app.app.controller('admin.experiments.edit.blocks', function ($scope, $q, $http
   };
 });
 
-},{"../../app":147,"lodash":106}],150:[function(require,module,exports){
+},{"../../app":148,"lodash":107}],151:[function(require,module,exports){
 /*jslint browser: true, esnext: true */
 'use strict';
 
@@ -56521,7 +56630,7 @@ _app.app.controller('admin.experiments.table', function ($scope, $flash, $state,
   $scope.site_url = _urlobject.Url.parse(window.location).merge({ path: '/' }).toString();
 });
 
-},{"../app":147,"urlobject":110}],151:[function(require,module,exports){
+},{"../app":148,"urlobject":111}],152:[function(require,module,exports){
 /*jslint browser: true, esnext: true */ /*globals angular, Event */
 /** Copyright 2012-2014, Christopher Brown <io@henrian.com>, MIT Licensed
 
@@ -56696,7 +56805,7 @@ var misc_js_plugins = angular.module('misc-js-plugins', [])
 });
 exports.misc_js_plugins = misc_js_plugins;
 
-},{}],152:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 /*jslint browser: true, esnext: true */
 'use strict';
 
@@ -56808,19 +56917,23 @@ _app.app.service('AccessToken', function ($resource) {
 
 // query: {method: 'GET', isArray: true, cache: true},
 
-},{"./app":147,"lodash":106}],153:[function(require,module,exports){
+},{"./app":148,"lodash":107}],154:[function(require,module,exports){
 /*jslint browser: true, esnext: true */
 'use strict';
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _moment = require('moment');
+var _angular = require('angular');
 
-var _moment2 = _interopRequireDefault(_moment);
+var _angular2 = _interopRequireDefault(_angular);
 
 var _app = require('../app');
 
@@ -56834,8 +56947,17 @@ var cookies = new _cookiemonster.CookieMonster(document, {
 
 function nodesToJSON(nodes) {
   var pairs = _lodash2['default'].map(nodes, function (node) {
-    var hasChildren = node.children && node.children.length > 0;
-    return [node.tagName, hasChildren ? nodesToJSON(node.children) : node.textContent];
+    if (node.children && node.children.length > 0) {
+      return [node.tagName, nodesToJSON(node.children)];
+    } else {
+      var value = node.textContent;
+      if (/^-?[0-9]*\.[0-9]+$/.test(value)) {
+        value = parseFloat(value);
+      } else if (/^-?[0-9]+$/.test(value)) {
+        value = parseInt(value, 10);
+      }
+      return [node.tagName, value];
+    }
   });
   return _lodash2['default'].zipObject(pairs);
 }
@@ -56873,25 +56995,15 @@ function parseAnswer(answer_escaped) {
   var answer_xml = answer_escaped.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
   var answer_doc = new DOMParser().parseFromString(answer_xml, 'text/xml');
   var pairs = _lodash2['default'].map(answer_doc.querySelectorAll('Answer'), function (Answer) {
-    return [Answer.querySelector('QuestionIdentifier').textContent, Answer.querySelector('FreeText').textContent];
+    var key = Answer.querySelector('QuestionIdentifier').textContent;
+    var value = Answer.querySelector('FreeText').textContent;
+    return [key, value];
   });
   return _lodash2['default'].zipObject(pairs);
 }
 
-function durationStringToSeconds(s) {
-  // takes a string like "5h" and returns 5*60*60, the number of seconds in five hours
-  var matches = s.match(/\d+\w/g);
-  var duration = _moment2['default'].duration(0);
-  matches.forEach(function (match) {
-    var parts = match.match(/(\d+)(\w)/);
-    duration.add(parseInt(parts[1], 10), parts[2]);
-  });
-  return duration.asSeconds();
-}
-
 function createExternalQuestionString(ExternalURL, FrameHeight) {
   var xmlns = 'http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2006-07-14/ExternalQuestion.xsd';
-  // var report = document.implementation.createDocument(null, "report", null);
   var doc = document.implementation.createDocument(xmlns, 'ExternalQuestion');
   var ExternalURL_el = doc.documentElement.appendChild(doc.createElement('ExternalURL'));
   ExternalURL_el.textContent = ExternalURL;
@@ -56900,19 +57012,92 @@ function createExternalQuestionString(ExternalURL, FrameHeight) {
   return new XMLSerializer().serializeToString(doc);
 }
 
-_app.app.factory('$turk', function ($xml, $stateParams) {
-  return function (data) {
-    return $xml({
-      method: 'POST',
-      url: '/api/mturk',
-      params: {
-        aws_account_id: $stateParams.aws_account_id,
-        environment: $stateParams.environment
-      },
-      data: data
-    });
-  };
-}).controller('admin.mturk', function ($scope, $state, AWSAccount) {
+var QualificationType = (function () {
+  function QualificationType() {
+    _classCallCheck(this, QualificationType);
+  }
+
+  _createClass(QualificationType, null, [{
+    key: 'query',
+    value: function query(data, callback) {
+      _lodash2['default'].defaults(data, {
+        Operation: 'SearchQualificationTypes',
+        MustBeOwnedByCaller: true
+      });
+      (0, _app.sendTurkRequest)(data, callback);
+    }
+  }, {
+    key: 'get',
+    value: function get(data, callback) {
+      if (data.QualificationTypeId === undefined) {
+        setTimeout(function () {
+          return callback(new Error('The QualificationTypeId parameter is required'));
+        }, 0);
+      }
+      _lodash2['default'].defaults(data, {
+        Operation: 'GetQualificationType'
+      });
+      (0, _app.sendTurkRequest)(data, callback);
+    }
+  }, {
+    key: 'assign',
+    value: function assign(data, callback) {
+      if (data.QualificationTypeId === undefined) {
+        setTimeout(function () {
+          return callback(new Error('The QualificationTypeId parameter is required'));
+        }, 0);
+      }
+      if (data.WorkerId === undefined) {
+        setTimeout(function () {
+          return callback(new Error('The WorkerId parameter is required'));
+        }, 0);
+      }
+      _lodash2['default'].defaults(data, {
+        Operation: 'AssignQualification',
+        IntegerValue: 1,
+        SendNotification: false
+      });
+      (0, _app.sendTurkRequest)(data, callback);
+    }
+  }, {
+    key: 'revoke',
+    value: function revoke(data, callback) {
+      if (data.QualificationTypeId === undefined) {
+        setTimeout(function () {
+          return callback(new Error('The QualificationTypeId parameter is required'));
+        }, 0);
+      }
+      if (data.SubjectId === undefined) {
+        setTimeout(function () {
+          return callback(new Error('The SubjectId parameter is required'));
+        }, 0);
+      }
+      _lodash2['default'].defaults(data, {
+        Operation: 'RevokeQualification'
+      });
+      (0, _app.sendTurkRequest)(data, callback);
+    }
+  }, {
+    key: 'update',
+    value: function update(data, callback) {
+      data = _lodash2['default'].pick(data, ['QualificationTypeId', 'RetryDelayInSeconds', 'QualificationTypeStatus', 'Description', 'Test', 'AnswerKey', 'TestDurationInSeconds', 'AutoGranted', 'AutoGrantedValue']);
+      if (data.QualificationTypeId === undefined) {
+        setTimeout(function () {
+          return callback(new Error('The QualificationTypeId parameter is required'));
+        }, 0);
+      }
+      if (data.AutoGranted === 0) {
+        delete data.AutoGrantedValue;
+      }
+      _lodash2['default'].defaults(data, { Operation: 'UpdateQualificationType' });
+      (0, _app.sendTurkRequest)(data, callback);
+    }
+  }]);
+
+  return QualificationType;
+})();
+
+_app.app.controller('admin.mturk', function ($scope, $state, AWSAccount) {
   // environments
   $scope.environment = $state.params.environment || cookies.get('environment');
   $scope.environments = [{ name: 'production' }, { name: 'sandbox' }, { name: 'local' }];
@@ -56929,13 +57114,12 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
     Operation: 'SearchHITs',
     SortDirection: 'Descending',
     PageSize: 100
-  }).then(function (res) {
-    // res.data is a Document instance.
-    $scope.hits = _lodash2['default'].map(res.data.querySelectorAll('HIT'), function (HIT) {
+  }).then(function (document) {
+    $scope.hits = _lodash2['default'].map(document.querySelectorAll('HIT'), function (HIT) {
       return nodesToJSON(HIT.children);
     });
   });
-}).controller('admin.mturk.hits.new', function ($scope, $http, $state, $location, $localStorage, $flash, $turk) {
+}).controller('admin.mturk.hits.new', function ($scope, $http, $location, $sce, $state, $localStorage, $flash, $turk) {
   $scope.$storage = $localStorage.$default({
     Operation: 'CreateHIT',
     Title: $state.params.Title || 'Exciting task!',
@@ -56943,9 +57127,9 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
     MaxAssignments: 20,
     Reward: 0.05,
     Keywords: 'research,science',
-    AssignmentDuration: '2h',
-    Lifetime: '12h',
-    AutoApprovalDelay: '48h',
+    AssignmentDurationInSeconds: 2 * 60 * 60, // 2h
+    LifetimeInSeconds: 12 * 60 * 60, // 12h
+    AutoApprovalDelayInSeconds: 2 * 24 * 60 * 60, // 2d
     // experiment/show may send over ExternalURL and Title query params
     ExternalURL: $state.params.ExternalURL || '/experiments/MISSING',
     FrameHeight: 550,
@@ -56955,7 +57139,7 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
   $scope.sync = function () {
     var Question = createExternalQuestionString($scope.$storage.ExternalURL, $scope.$storage.FrameHeight);
     var data = {
-      Operation: $scope.Operation,
+      Operation: $scope.$storage.Operation,
       Title: $scope.$storage.Title,
       Description: $scope.$storage.Description,
       MaxAssignments: $scope.$storage.MaxAssignments,
@@ -56965,26 +57149,14 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
       },
       Keywords: $scope.$storage.Keywords,
       Question: Question,
-      AssignmentDurationInSeconds: durationStringToSeconds($scope.$storage.AssignmentDuration),
-      LifetimeInSeconds: durationStringToSeconds($scope.$storage.Lifetime),
-      AutoApprovalDelayInSeconds: durationStringToSeconds($scope.$storage.AutoApprovalDelay)
+      AssignmentDurationInSeconds: $scope.$storage.AssignmentDurationInSeconds,
+      LifetimeInSeconds: $scope.$storage.LifetimeInSeconds,
+      AutoApprovalDelayInSeconds: $scope.$storage.AutoApprovalDelayInSeconds
     };
     _lodash2['default'].extend(data, $scope.$storage.extra);
-    var promise = $turk(data).then(function (res) {
-      /**
-      res.data is a Document instance; a successful response looks like:
-       <?xml version="1.0"?>
-      <CreateHITResponse>
-        <OperationRequest><RequestId>3fb91ca0-8df3-b65b-6cc4-b84205e11e5c</RequestId></OperationRequest>
-        <HIT>
-          <Request><IsValid>True</IsValid></Request>
-          <HITId>3WV80UW08Y4VD8LBFL8W0CY4E4CW55</HITId>
-          <HITTypeId>3I47MBBHDSXH4CD71VX6NB5EWOFB6N</HITTypeId>
-        </HIT>
-      </CreateHITResponse>
-      */
-      var HITId = res.data.querySelector('HITId').textContent;
-      // var HITTypeId = res.data.querySelector('HITTypeId').textContent;
+    var promise = $turk(data).then(function (document) {
+      var HITId = document.querySelector('HITId').textContent;
+      // var HITTypeId = document.querySelector('HITTypeId').textContent;
       $state.go('admin.mturk.hits.edit', { HITId: HITId });
       return 'Created HIT: ' + HITId;
     });
@@ -56993,9 +57165,9 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
 
   // AWS adds four parameters: assignmentId, hitId, workerId, and turkSubmitTo
   //   turkSubmitTo is the host, not the full path
-  $scope.$watch('$storage.hit.ExternalURL', function (newVal) {
-    if (newVal !== '') {
-      var url = _urlobject.Url.parse(newVal);
+  $scope.$watch('$storage.ExternalURL', function (ExternalURL) {
+    if (ExternalURL !== '') {
+      var url = _urlobject.Url.parse(ExternalURL);
       _lodash2['default'].extend(url.query, {
         // Once assigned, assignmentId is a 30-character alphadecimal mess
         // assignmentId: 'ASSIGNMENT_ID_NOT_AVAILABLE',
@@ -57005,9 +57177,9 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
         // turkSubmitTo is normally https://workersandbox.mturk.com or https://www.mturk.com
         turkSubmitTo: ''
       });
-      $scope.preview_url = url.toString();
+      $scope.preview_url = $sce.trustAsResourceUrl(url.toString());
     } else {
-      $scope.preview_url = '';
+      $scope.preview_url = null;
     }
   });
 }).controller('admin.mturk.hits.edit', function ($scope, $localStorage, $state, $q, $flash, $turk) {
@@ -57023,9 +57195,9 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
   $turk({
     Operation: 'GetHIT',
     HITId: $state.params.HITId
-  }).then(function (res) {
-    // res.data is a Document instance, with GetHITResponse as its root element
-    var HIT = res.data.querySelector('HIT');
+  }).then(function (document) {
+    // document is a Document instance with GetHITResponse as its root element
+    var HIT = document.querySelector('HIT');
     $scope.hit = nodesToJSON(HIT.children);
   });
 
@@ -57035,9 +57207,9 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
     PageSize: 100,
     SortProperty: 'SubmitTime',
     SortDirection: 'Ascending'
-  }).then(function (res) {
-    // res.data is a Document instance, with GetAssignmentsForHITResponse as its root element
-    $scope.assignments = _lodash2['default'].map(res.data.querySelectorAll('Assignment'), function (Assignment) {
+  }).then(function (document) {
+    // document is a Document instance, with GetAssignmentsForHITResponse as its root element
+    $scope.assignments = _lodash2['default'].map(document.querySelectorAll('Assignment'), function (Assignment) {
       var assignment_json = nodesToJSON(Assignment.children);
       assignment_json.Answer = parseAnswer(assignment_json.Answer);
       return assignment_json;
@@ -57059,11 +57231,9 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
     $flash(promise);
   };
 
-  $turk({
-    Operation: 'SearchQualificationTypes',
-    MustBeOwnedByCaller: true
-  }).then(function (res) {
-    $scope.QualificationTypes = _lodash2['default'].map(res.data.querySelectorAll('QualificationType'), function (QualificationType) {
+  QualificationType.query({}, function (err, document) {
+    if (err) throw err;
+    $scope.QualificationTypes = _lodash2['default'].map(document.querySelectorAll('QualificationType'), function (QualificationType) {
       return nodesToJSON(QualificationType.children);
     });
   });
@@ -57095,9 +57265,9 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
       scope.$storage = $localStorage;
       var responses = Response.query({ aws_worker_id: scope.assignment.WorkerId }, function () {
         var transform_functionBody = $localStorage.responses_summarizer || 'return responses;';
-        var transform_function = new Function('responses', transform_functionBody);
+        var transform_function = new Function('responses', 'assignment', transform_functionBody);
 
-        var transformed_responses = transform_function(angular.copy(responses));
+        var transformed_responses = transform_function(_angular2['default'].copy(responses), _angular2['default'].copy(scope.assignment));
 
         scope.responses = transformed_responses;
       });
@@ -57107,8 +57277,8 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
           Operation: 'BlockWorker',
           WorkerId: scope.assignment.WorkerId,
           Reason: Reason
-        }).then(function (res) {
-          var xml = new XMLSerializer().serializeToString(res.data);
+        }).then(function (document) {
+          var xml = new XMLSerializer().serializeToString(document);
           console.log('BlockWorker response', xml);
           return xml;
         });
@@ -57121,8 +57291,8 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
           Operation: prefix + 'Assignment',
           AssignmentId: scope.assignment.AssignmentId,
           RequesterFeedback: scope.RequesterFeedback
-        }).then(function (res) {
-          var xml = new XMLSerializer().serializeToString(res.data);
+        }).then(function (document) {
+          var xml = new XMLSerializer().serializeToString(document);
           console.log('setStatus response', xml);
           return xml;
 
@@ -57148,138 +57318,12 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
       Subject: $scope.notification.Subject,
       MessageText: $scope.notification.MessageText,
       WorkerId: $scope.notification.WorkerId
-    }).then(function (res) {
-      // res.data is a Document instance.
-      var xml = new XMLSerializer().serializeToString(res.data);
+    }).then(function (document) {
+      var xml = new XMLSerializer().serializeToString(document);
       console.log(xml);
     });
   };
-}).controller('admin.mturk.qualification_types.new', function ($scope, $http, $state, $location, $localStorage, $flash, $turk) {
-  $scope.QualificationType = $localStorage.$default({
-    QualificationType: {
-      RetryDelay: '30m',
-      QualificationTypeStatus: 'Active',
-      AutoGranted: false,
-      AutoGrantedValue: 1
-    }
-  }).QualificationType;
-
-  $scope.sync = function () {
-    var data = {
-      Operation: 'CreateQualificationType',
-      Name: $scope.QualificationType.Name,
-      Description: $scope.QualificationType.Description,
-      Keywords: $scope.QualificationType.Keywords,
-      RetryDelayInSeconds: durationStringToSeconds($scope.QualificationType.RetryDelay),
-      QualificationTypeStatus: $scope.QualificationType.QualificationTypeStatus,
-      Test: $scope.QualificationType.Test,
-      TestDuration: $scope.QualificationType.TestDuration,
-      AnswerKey: $scope.QualificationType.AnswerKey,
-      AutoGranted: $scope.QualificationType.AutoGranted,
-      AutoGrantedValue: $scope.QualificationType.AutoGranted ? $scope.QualificationType.AutoGrantedValue : undefined
-    };
-    var promise = $turk(data).then(function (res) {
-      /**
-      res.data is a Document instance; a successful response looks like:
-       <CreateQualificationTypeResponse>
-        <OperationRequest><RequestId>4936164b-41e9-45be-9189-b43fdf973e1d</RequestId></OperationRequest>
-        <QualificationType>
-          <Request><IsValid>True</IsValid></Request>
-          <QualificationTypeId>33MAVWP2GREQRM6IPUX4EU7SU2KZL1</QualificationTypeId>
-          <CreationTime>2015-07-09T00:39:15Z</CreationTime>
-          <Name>Test qualification 1</Name>
-          <Description>My first qualification type (it's temporary)</Description>
-          <Keywords>test,autogrant</Keywords>
-          <QualificationTypeStatus>Active</QualificationTypeStatus>
-          <RetryDelayInSeconds>1800</RetryDelayInSeconds>
-          <AutoGranted>1</AutoGranted>
-          <AutoGrantedValue>1</AutoGrantedValue>
-        </QualificationType>
-      </CreateQualificationTypeResponse>
-       An error response looks like:
-       <CreateQualificationTypeResponse>
-        <OperationRequest><RequestId>f8504a5e-00ab-4208-b069-7917bba88871</RequestId></OperationRequest>
-        <QualificationType>
-          <Request>
-            <IsValid>False</IsValid>
-            <Errors>
-              <Error>
-                <Code>AWS.MechanicalTurk.QualificationTypeAlreadyExists</Code>
-                <Message>
-                  You have already created a QualificationType with this name. A QualificationType's name must be unique among all of the QualificationTypes created by the same user. (1436402412782)
-                </Message>
-                <Data>
-                  <Key>QualificationTypeId</Key>
-                  <Value>33MAVWP2GREQRM6IPUX4EU7SU2KZL1</Value>
-                </Data>
-                <Data>
-                  <Key>QualificationTypeId</Key>
-                  <Value>33MAVWP2GREQRM6IPUX4EU7SU2KZL1</Value>
-                </Data>
-              </Error>
-            </Errors>
-          </Request>
-        </QualificationType>
-      </CreateQualificationTypeResponse>
-      */
-      var success = res.data.querySelector('IsValid').textContent === 'True';
-      if (success) {
-        var QualificationTypeId = res.data.querySelector('QualificationTypeId').textContent;
-        return 'Created QualificationType: ' + QualificationTypeId;
-      } else {
-        var message = res.data.querySelector('Errors > Error > Message').textContent;
-        return 'Failure: ' + message;
-      }
-    });
-    $flash(promise);
-  };
-}).controller('admin.mturk.qualification_types.edit', function ($scope, $state, $turk) {
-  $turk({
-    Operation: 'GetQualificationType',
-    QualificationTypeId: $state.params.QualificationTypeId
-  }).then(function (res) {
-    // res.data is a Document instance.
-    $scope.QualificationType = nodesToJSON(res.data.querySelector('QualificationType').children);
-  });
-
-  $turk({
-    Operation: 'GetQualificationsForQualificationType',
-    QualificationTypeId: $state.params.QualificationTypeId,
-    // Status: 'Granted' | 'Revoked',
-    PageSize: 100,
-    PageNumber: 1
-  }).then(function (res) {
-    /**
-    Success looks like:
-     <GetQualificationsForQualificationTypeResponse>
-      <OperationRequest><RequestId>5e57d866-70e2-4e76-a1ce-f0b28e69977b</RequestId></OperationRequest>
-      <GetQualificationsForQualificationTypeResult>
-        <Request><IsValid>True</IsValid></Request>
-        <NumResults>20</NumResults>
-        <TotalNumResults>20</TotalNumResults>
-        <PageNumber>1</PageNumber>
-        <Qualification>
-          <QualificationTypeId>3C8RUX4LESAVRD6QL84K1JKOF4LM9A</QualificationTypeId>
-          <SubjectId>AHM21AWBZPEJNM</SubjectId>
-          <GrantTime>2015-07-08T21:16:39.000-07:00</GrantTime>
-          <IntegerValue>1</IntegerValue>
-          <Status>Granted</Status>
-        </Qualification>
-        <Qualification>
-          <QualificationTypeId>3C8RUX4LESAVRD6QL84K1JKOF4LM9A</QualificationTypeId>
-          <SubjectId>APOLZKWYE7JF6B</SubjectId>
-          <GrantTime>2015-07-08T21:16:39.000-07:00</GrantTime>
-          <IntegerValue>1</IntegerValue>
-          <Status>Granted</Status>
-        </Qualification>
-      </GetQualificationsForQualificationTypeResult>
-    </GetQualificationsForQualificationTypeResponse>
-    */
-    $scope.Qualifications = _lodash2['default'].map(res.data.querySelectorAll('Qualification'), function (Qualification) {
-      return nodesToJSON(Qualification.children);
-    });
-  });
-}).controller('admin.mturk.qualification_types.table', function ($scope, $localStorage, $turk, $flash) {
+}).controller('admin.mturk.qualification_types.table', function ($scope, $localStorage, $turk, $timeout, $flash) {
   $scope.SearchQualificationTypes = $localStorage.$default({
     SearchQualificationTypes: {
       Operation: 'SearchQualificationTypes',
@@ -57297,10 +57341,13 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
     if (data.Query === '') {
       data.Query = null;
     }
-    $turk(data).then(function (res) {
-      // res.data is a Document instance.
-      $scope.QualificationTypes = _lodash2['default'].map(res.data.querySelectorAll('QualificationType'), function (QualificationType) {
-        return nodesToJSON(QualificationType.children);
+    QualificationType.query(data, function (err, document) {
+      if (err) throw err;
+      // document is a Document instance.
+      $timeout(function () {
+        $scope.QualificationTypes = _lodash2['default'].map(document.querySelectorAll('QualificationType'), function (QualificationType) {
+          return nodesToJSON(QualificationType.children);
+        });
       });
     });
   };
@@ -57311,70 +57358,95 @@ _app.app.factory('$turk', function ($xml, $stateParams) {
     var promise = $turk({
       Operation: 'DisposeQualificationType',
       QualificationTypeId: QualificationType.QualificationTypeId
-    }).then(function (res) {
-      /**
-      On success:
-       <DisposeQualificationTypeResponse>
-        <OperationRequest><RequestId>9dfced88-390e-43ba-b0a6-db0fd8bf32a6</RequestId></OperationRequest>
-        <DisposeQualificationTypeResult>
-          <Request>
-            <IsValid>True</IsValid>
-          </Request>
-        </DisposeQualificationTypeResult>
-      </DisposeQualificationTypeResponse>
-       On failure:
-       <DisposeQualificationTypeResponse>
-        <OperationRequest><RequestId>4d4f425d-1a25-47ab-ae10-f801c02fab33</RequestId></OperationRequest>
-        <DisposeQualificationTypeResult>
-          <Request>
-            <IsValid>False</IsValid>
-            <Errors>
-              <Error>
-                <Code>AWS.MechanicalTurk.InvalidQualificationTypeState</Code>
-                <Message>
-                  This operation can be called with a status of: Active,Inactive (1436410660581)
-                </Message>
-                <Data>
-                  <Key>QualificationTypeId</Key>
-                  <Value>3IUNFP8DKUS0R71E78UIQ0J2B48LJ3</Value>
-                </Data>
-                <Data>
-                  <Key>CurrentState</Key>
-                  <Value>Disposing</Value>
-                </Data>
-                <Data>
-                  <Key>ExpectedStates</Key>
-                  <Value>Active,Inactive</Value>
-                </Data>
-                <Data>
-                  <Key>ExpectedStates</Key>
-                  <Value>Active,Inactive</Value>
-                </Data>
-                <Data>
-                  <Key>QualificationTypeId</Key>
-                  <Value>3IUNFP8DKUS0R71E78UIQ0J2B48LJ3</Value>
-                </Data>
-              </Error>
-            </Errors>
-          </Request>
-        </DisposeQualificationTypeResult>
-      </DisposeQualificationTypeResponse>
-      */
-      var success = res.data.querySelector('IsValid').textContent === 'True';
-      if (success) {
-        $scope.QualificationTypes.splice($scope.QualificationTypes.indexOf(QualificationType), 1);
-        return 'Deleted QualificationType: ' + QualificationType.QualificationTypeId;
-      } else {
-        var message = res.data.querySelector('Errors > Error > Message').textContent;
-        return 'Failure: ' + message;
-      }
+    }).then(function () {
+      $scope.QualificationTypes.splice($scope.QualificationTypes.indexOf(QualificationType), 1);
+      return 'Deleted QualificationType: ' + QualificationType.QualificationTypeId;
     });
     $flash(promise);
+  };
+}).controller('admin.mturk.qualification_types.new', function ($scope, $http, $state, $location, $localStorage, $flash, $turk) {
+  $scope.QualificationType = $localStorage.$default({
+    QualificationType: {
+      RetryDelayInSeconds: '30m',
+      QualificationTypeStatus: 'Active',
+      AutoGranted: false,
+      AutoGrantedValue: 1
+    }
+  }).QualificationType;
+
+  $scope.sync = function () {
+    var data = {
+      Operation: 'CreateQualificationType',
+      Name: $scope.QualificationType.Name,
+      Description: $scope.QualificationType.Description,
+      Keywords: $scope.QualificationType.Keywords,
+      RetryDelayInSeconds: $scope.QualificationType.RetryDelayInSeconds,
+      QualificationTypeStatus: $scope.QualificationType.QualificationTypeStatus,
+      Test: $scope.QualificationType.Test,
+      TestDuration: $scope.QualificationType.TestDuration,
+      AnswerKey: $scope.QualificationType.AnswerKey,
+      AutoGranted: $scope.QualificationType.AutoGranted,
+      AutoGrantedValue: $scope.QualificationType.AutoGranted ? $scope.QualificationType.AutoGrantedValue : undefined
+    };
+    var promise = $turk(data).then(function (res) {
+      var QualificationTypeId = res.querySelector('QualificationTypeId').textContent;
+      return 'Created QualificationType: ' + QualificationTypeId;
+    });
+    $flash(promise);
+  };
+}).controller('admin.mturk.qualification_types.edit', function ($scope, $state, $localStorage, $flash, $turk) {
+  $scope.$storage = $localStorage.$default({
+    AssignQualification: {
+      IntegerValue: 1,
+      SendNotification: 1
+    }
+  });
+
+  QualificationType.get({ QualificationTypeId: $state.params.QualificationTypeId }, function (err, document) {
+    if (err) throw err;
+    $scope.QualificationType = nodesToJSON(document.querySelector('QualificationType').children);
+  });
+
+  $turk({
+    Operation: 'GetQualificationsForQualificationType',
+    QualificationTypeId: $state.params.QualificationTypeId,
+    // Status: 'Granted' | 'Revoked',
+    PageSize: 100,
+    PageNumber: 1
+  }).then(function (document) {
+    $scope.Qualifications = _lodash2['default'].map(document.querySelectorAll('Qualification'), function (Qualification) {
+      return nodesToJSON(Qualification.children);
+    });
+  });
+
+  $scope.assignQualification = function () {
+    $scope.$storage.AssignQualification.QualificationTypeId = $state.params.QualificationTypeId;
+    QualificationType.assign($scope.$storage.AssignQualification, function (err) {
+      if (err) throw err;
+      $flash('Assigned Qualification Type to ' + $scope.$storage.AssignQualification.WorkerId + '.');
+    });
+  };
+
+  $scope.deleteQualification = function (Qualification) {
+    $scope.$storage.AssignQualification.QualificationTypeId = $state.params.QualificationTypeId;
+    QualificationType.revoke({ SubjectId: Qualification.SubjectId, QualificationTypeId: $state.params.QualificationTypeId }, function (err) {
+      if (err) throw err;
+      $scope.Qualifications.splice($scope.Qualifications.indexOf(Qualification), 1);
+      $flash('Revoked Qualification Type from ' + Qualification.SubjectId + '.');
+    });
+  };
+
+  $scope.sync = function () {
+    // $scope.$storage.AssignQualification.QualificationTypeId = $state.params.QualificationTypeId;
+    QualificationType.update($scope.QualificationType, function (err) {
+      if (err) throw err;
+      $flash('Updated Qualification Type.');
+    });
   };
 });
 // one month from now
 
-},{"../app":147,"cookiemonster":104,"lodash":106,"moment":107,"urlobject":110}],154:[function(require,module,exports){
+},{"../app":148,"angular":5,"cookiemonster":104,"lodash":107,"urlobject":111}],155:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -57394,7 +57466,7 @@ _app.app.controller('admin.responses.table', function ($scope, Response) {
   });
 });
 
-},{"../app":147,"lodash":106}],155:[function(require,module,exports){
+},{"../app":148,"lodash":107}],156:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -57433,7 +57505,7 @@ _app.app.controller('admin.templates.table', function ($scope, $flash, Template)
   };
 });
 
-},{"../app":147}],156:[function(require,module,exports){
+},{"../app":148}],157:[function(require,module,exports){
 /*jslint esnext: true */
 
 // required for generators
@@ -57473,4 +57545,4 @@ Array.prototype.includes = function (searchElement, fromIndex) {
   return this.indexOf(searchElement) !== -1;
 };
 
-},{"./admin/access_tokens/controllers":145,"./admin/administrators/controllers":146,"./admin/app":147,"./admin/aws_accounts/controllers":148,"./admin/experiments/blocks/controllers":149,"./admin/experiments/controllers":150,"./admin/models":152,"./admin/mturk/controllers":153,"./admin/responses/controllers":154,"./admin/templates/controllers":155,"babel/polyfill":99}]},{},[156]);
+},{"./admin/access_tokens/controllers":146,"./admin/administrators/controllers":147,"./admin/app":148,"./admin/aws_accounts/controllers":149,"./admin/experiments/blocks/controllers":150,"./admin/experiments/controllers":151,"./admin/models":153,"./admin/mturk/controllers":154,"./admin/responses/controllers":155,"./admin/templates/controllers":156,"babel/polyfill":99}]},{},[157]);
