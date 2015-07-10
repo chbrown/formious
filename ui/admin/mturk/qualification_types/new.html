@@ -4,85 +4,10 @@
 
 <section class="box hpad">
   <form ng-submit="sync($event)">
-    <!-- http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_CreateQualificationTypeOperation.html -->
-
-    <label class="block">
-      <div><b>Name</b>
-        <span class="help">The name of the Qualification type. The type name is used to represent the Qualification to Workers, and to find the type using a Qualification type search.</span>
-      </div>
-      <input type="text" ng-model="QualificationType.Name" style="width: 500px"><!-- required -->
-    </label>
-
-    <label class="block">
-      <div><b>Description</b>
-        <span class="help">A long description for the Qualification type. On the Amazon Mechanical Turk website, the long description is displayed when a Worker examines a Qualification type. 2000 character maximum.</span>
-      </div>
-      <textarea ng-model="QualificationType.Description" rows="2" style="width: 500px"></textarea><!-- required -->
-    </label>
-
-    <label class="block">
-      <div><b>Keywords</b>
-        <span class="help">One or more words or phrases that describe the Qualification type, separated by commas. The keywords of a type make the type easier to find during a search.</span>
-      </div>
-      <input type="text" ng-model="QualificationType.Keywords" style="width: 500px">
-    </label>
-
-    <label class="block">
-      <div><b>Retry Delay (e.g., 60m)</b>
-        <span class="help">The amount of time that a Worker must wait after requesting a Qualification of the Qualification type before the worker can retry the Qualification request.</span>
-      </div>
-      <input type="text" ng-model="QualificationType.RetryDelay">
-    </label>
-
-    <label class="block">
-      <div><b>Status</b>
-        <span class="help">The initial status of the Qualification type.</span>
-      </div>
-      <select ng-model="QualificationType.QualificationTypeStatus"><!-- required -->
-        <option value="Active">Active</option>
-        <option value="Inactive">Inactive</option>
-      </select>
-    </label>
-
-    <label class="block">
-      <div><b>Test</b>
-        <span class="help">The questions for the Qualification test a Worker must answer correctly to obtain a Qualification of this type, in the form of a QuestionForm data structure. Must not be be specified if <code>Auto Granted</code> is checked.</span>
-      </div>
-      <span><i>Not yet implemented.</i></span>
-    </label>
-
-    <label class="block" ng-show="QualificationType.Test">
-      <div><b>Test Duration</b>
-        <span class="help">The amount of time the Worker has to complete the Qualification test, starting from the time the Worker requests the Qualification. Required if the Test parameter is specified.</span>
-      </div>
-      <input type="text" ng-model="QualificationType.TestDuration">
-    </label>
-
-    <label class="block" ng-show="QualificationType.Test">
-      <div><b>AnswerKey</b>
-        <span class="help">The answers to the Qualification test specified in the Test parameter, in the form of an AnswerKey data structure.</span>
-      </div>
-      <span><i>Not yet implemented.</i></span>
-    </label>
-
-    <label class="block">
-      <div>
-        <input type="checkbox" ng-model="QualificationType.AutoGranted">
-        <b>Auto Granted</b>
-        <span class="help">Specifies whether requests for the Qualification type are granted immediately, without prompting the Worker with a Qualification test.</span>
-      </div>
-    </label>
-
-    <label class="block" ng-show="QualificationType.AutoGranted">
-      <div><b>Auto Granted Value</b>
-        <span class="help">The Qualification value to use for automatically granted Qualifications.</span>
-      </div>
-      <input type="number" ng-model="QualificationType.AutoGrantedValue">
-    </label>
+    <ng-include src="'/ui/admin/mturk/qualification_types/form.html'"></ng-include>
 
     <div class="block">
       <button>Submit</button>
     </div>
-
   </form>
 </section>

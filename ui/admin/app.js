@@ -1,8 +1,10 @@
 /*jslint browser: true, esnext: true */
 
 import _ from 'lodash';
+import moment from 'moment';
 import {h, create, diff, patch} from 'virtual-dom';
 import {Url} from 'urlobject';
+import {Request} from 'httprequest';
 
 // angular.js libraries:
 import angular from 'angular';
@@ -164,57 +166,37 @@ app.filter('keys', function() {
   };
 });
 
-/**
-interface XHROptions {
-  method: string;
-  url: string;
-  params: any;
-  data?: any;
-}
+export function sendTurkRequest(data, callback) {
+  // ui-router reloads the controllers before changing the location URL, which
+  // means this will get called with the wrong url after a account/environment change
+  // console.log('sendTurkRequest pathname', location.pathname, data);
+  var path_match = window.location.pathname.match(/^\/admin\/mturk\/(\w+)\/(\d+)/);
+  if (path_match === null) {
+    throw new Error('Cannot find AWS Account ID and MTurk environment parameters in URL');
+  }
+  var environment = path_match[1];
+  var aws_account_id = path_match[2];
+  var url = new Url({path: '/api/mturk', query: {environment, aws_account_id}}).toString();
 
-interface XMLResponse {
-  config: XHROptions;
-  data: Document;
-  status: number;
-  statusText: string;
-}
-
-xhr(options: XHROptions, callback: (error: Error, response?: XMLResponse) => void) { ... }
-
-The 'Content-Type' header of the outgoing request will be set to
-'application/json', and options.data will be serialized with JSON.stringify().
-*/
-function xhrXML(options,  callback) {
-  var url = new Url({path: options.url, query: options.params}).toString();
-  var xhr = new XMLHttpRequest();
-  xhr.open(options.method, url);
-  xhr.setRequestHeader('Content-Type', 'application/json');
-  xhr.onerror = function(error) {
-    callback(error);
-  };
-  xhr.onload = function() {
-    if (xhr.status >= 300) {
-      var error = new Error(xhr.responseText);
-      return callback(error);
+  var request = new Request('POST', url).sendJSON(data, (err, res) => {
+    if (err) return callback(err);
+    // res is a Document instance
+    window.request = request;
+    var valid = res.querySelector('IsValid').textContent === 'True';
+    if (!valid) {
+      var Messages = res.querySelectorAll('Errors > Error > Message');
+      var errors = _.map(Messages, Message => Message.textContent);
+      var message = `AWS API Error: ${errors.join(', ')}`;
+      return callback(new Error(message));
     }
-    // a 'Content-Type: text/xml' header in the response will prompt
-    // XMLHttpRequest to automatically parse it into a Document instance.
-    // we return a `response` object that's much like Angular's own $http
-    // response object, except that we use that document as the `data` field.
-    callback(null, {
-      config: options,
-      data: xhr.responseXML,
-      status: xhr.status,
-      statusText: xhr.statusText,
-    });
-  };
-  xhr.send(JSON.stringify(options.data));
+    callback(null, res);
+  });
 }
 
-app.factory('$xml', function($q) {
-  return function(options) {
+app.factory('$turk', function($q) {
+  return function(data) {
     return $q(function(resolve, reject) {
-      xhrXML(options, function(err, response) {
+      sendTurkRequest(data, function(err, response) {
         return err ? reject(err) : resolve(response);
       });
     });
@@ -688,6 +670,56 @@ app.directive('aTemplate', function(Template) {
     replace: true,
     link: function(scope) {
       scope.template = Template.get({id: scope.id});
+    }
+  };
+});
+
+app.directive('durationString', function() {
+  var units = {
+    d: 86400,
+    h: 3600,
+    m: 60,
+  };
+  return {
+    restrict: 'A',
+    require: 'ngModel',
+    link: function(scope, el, attrs, ngModel) {
+      ngModel.$formatters.push((seconds) => {
+        seconds = Number(seconds);
+        var parts = [];
+        if (seconds > units.d) {
+          var d = seconds / units.d | 0;
+          parts.push(`${d}d`);
+          seconds -= d * units.d;
+        }
+        if (seconds > units.h) {
+          var h = seconds / units.h | 0;
+          parts.push(`${h}h`);
+          seconds -= h * units.h;
+        }
+        if (seconds > units.m) {
+          var m = seconds / units.m | 0;
+          parts.push(`${m}m`);
+          seconds -= m * units.m;
+        }
+        if (seconds > 0) {
+          parts.push(`${seconds}s`);
+        }
+        return parts.join(' ');
+      });
+      ngModel.$parsers.push((string) => {
+        // take a string, return a number
+        // e.g., "5h" -> 5*60*60, the number of seconds in five hours
+        var matches = string.match(/\d+\w/g);
+        if (matches !== null) {
+          var duration = moment.duration(0);
+          matches.forEach((match) => {
+            var parts = match.match(/(\d+)(\w)/);
+            duration.add(parseInt(parts[1], 10), parts[2]);
+          });
+          return duration.asSeconds();
+        }
+      });
     }
   };
 });

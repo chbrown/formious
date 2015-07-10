@@ -43,14 +43,14 @@
       <div><b>Assignment Duration (e.g., 3h)</b>
         <span class="help">The amount of time that a Worker has to complete the HIT after accepting it</span>
       </div>
-      <input type="text" ng-model="$storage.AssignmentDuration">
+      <input type="text" ng-model="$storage.AssignmentDurationInSeconds" duration-string>
     </label>
 
     <label class="block">
       <div><b>Auto-approval Delay (e.g., 60m)</b>
         <span class="help">The amount of time after a HIT has been submitted before the assignment is automatically approved</span>
       </div>
-      <input type="text" ng-model="$storage.AutoApprovalDelay">
+      <input type="text" ng-model="$storage.AutoApprovalDelayInSeconds" duration-string>
     </label>
 
     <label class="block">
@@ -90,7 +90,7 @@
         <div><b>Lifetime (e.g., 3d)</b>
           <span class="help">The amount of time that a HIT can be accepted; after the lifetime expires, the HIT no longer appears in searches</span>
         </div>
-        <input type="text" ng-model="$storage.Lifetime">
+        <input type="text" ng-model="$storage.LifetimeInSeconds" duration-string>
       </label>
 
       <h3>HIT <code>Question</code> parameters</h3>
