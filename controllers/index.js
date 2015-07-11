@@ -42,4 +42,17 @@ R.get(/^\/info$/, function(req, res) {
   res.json(info);
 });
 
+R.get(/^\/echo$/, function(req, res) {
+  res.json({
+    httpVersion: req.httpVersion,
+    url: req.url,
+    method: req.method,
+    headers: req.headers,
+    trailers: req.trailers,
+    client: {
+      remoteAddress: req.client.remoteAddress,
+    },
+  });
+});
+
 module.exports = R.route.bind(R);
