@@ -29,36 +29,3 @@
     </div>
   </form>
 </section>
-
-<section class="hpad">
-  <h3>Mechanical Turk Environments</h3>
-</section>
-
-<section class="box">
-  <table class="lined padded">
-    <thead>
-      <tr>
-        <th>Environment</th>
-        <th>Account Balance</th>
-        <th></th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr ng-repeat="environment in environments">
-        <td>{{environment.name}}</td>
-        <td style="text-align: right">{{environment.account_balance}}</td>
-        <td>
-          <a ui-sref="admin.mturk.hits.table({aws_account_id: aws_account.id, environment: environment.name})">
-            View HITs
-          </a>
-        </td>
-        <td>
-          <a href="/admin/mturk/HITs/new?aws_account_id={{aws_account.id}}&environment={{environment.name}}">
-            Create new HIT
-          </a>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</section>

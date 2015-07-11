@@ -18,11 +18,11 @@
     <span class="{{assignment.AssignmentStatus}}">{{assignment.AssignmentStatus}}</span>
   </div>
   <span ng-show="assignment.AssignmentStatus == 'Submitted'">
-    <button ng-click="setStatus('Approve')">Approve</button>
-    <button ng-click="setStatus('Reject')">Reject</button>
+    <button ng-click="setStatus('ApproveAssignment')">Approve</button>
+    <button ng-click="setStatus('RejectAssignment')">Reject</button>
   </span>
   <span ng-show="assignment.AssignmentStatus == 'Rejected'">
-    <button ng-click="setStatus('ApproveRejected')">Unreject and Approve</button>
+    <button ng-click="setStatus('ApproveRejectedAssignment')">Unreject and Approve</button>
   </span>
   <span ng-show="assignment.AssignmentStatus == 'Submitted' || assignment.AssignmentStatus == 'Rejected'">
     <input ng-model="RequesterFeedback" placeholder="Requester Feedback">

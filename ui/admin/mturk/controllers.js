@@ -5,10 +5,10 @@ import {app, sendTurkRequest} from '../app';
 import {Url} from 'urlobject';
 import {CookieMonster} from 'cookiemonster';
 
-var cookies = new CookieMonster(document, {
+const cookie_defaults = {
   path: '/',
   expires: new Date(new Date().getTime() + 31*24*60*60*1000), // one month from now
-});
+};
 
 function nodesToJSON(nodes) {
   var pairs = _.map(nodes, function(node) {
@@ -150,11 +150,19 @@ class QualificationType {
 
 app
 .controller('admin.mturk', function($scope, $state, AWSAccount) {
-  // environments
-  $scope.environment = $state.params.environment || cookies.get('environment');
+  // TODO: improve interface between cookies and $state
+  var cookies = new CookieMonster(document, cookie_defaults);
+  // environment
+  if ($state.params.environment === '' && cookies.get('environment')) {
+    $state.go('.', {environment: cookies.get('environment')});
+  }
+  $scope.environment = $state.params.environment;
   $scope.environments = [{name: 'production'}, {name: 'sandbox'}, {name: 'local'}];
   // aws accounts
-  $scope.aws_account_id = $state.params.aws_account_id || cookies.get('aws_account_id');
+  if ($state.params.aws_account_id === '' && cookies.get('aws_account_id')) {
+    $state.go('.', {aws_account_id: cookies.get('aws_account_id')});
+  }
+  $scope.aws_account_id = $state.params.aws_account_id;
   $scope.aws_accounts = AWSAccount.query();
   // change watcher called from the view/template
   $scope.changeSetting = function(key, value) {
@@ -340,24 +348,14 @@ app
         $flash(promise);
       };
 
-      scope.setStatus = function(prefix) {
-        // prefix should be one of 'Approve' | 'Reject' | 'ApproveRejected'
+      scope.setStatus = function(Operation) {
+        // Operation should start with one of 'Approve' | 'Reject' | 'ApproveRejected'
         var promise = $turk({
-          Operation: prefix + 'Assignment',
+          Operation: Operation,
           AssignmentId: scope.assignment.AssignmentId,
           RequesterFeedback: scope.RequesterFeedback,
-        }).then(function(document) {
-          var xml = new XMLSerializer().serializeToString(document);
-          console.log('setStatus response', xml);
-          return xml;
-
-          // return $turk({
-          //   Operation: 'GetAssignment',
-          //   AssignmentId: scope.assignment.AssignmentId,
-          // }).then(function(res) {
-          //   scope.assignment =
-          //   return 'Updated Assignment';
-          // });
+        }).then(() => {
+          return 'Set status successfully';
         });
         $flash(promise);
       };
@@ -365,22 +363,25 @@ app
   };
 })
 .controller('admin.mturk.dashboard', function($scope, $localStorage, $state, $flash, $turk) {
-  // $scope.$storage = $localStorage.$default({
-  //   assignments_limit: 10,
-  //   responses_summarizer: 'return responses;',
   $scope.NotifyWorkers = function() {
     $turk({
       Operation: 'NotifyWorkers',
       Subject: $scope.notification.Subject,
       MessageText: $scope.notification.MessageText,
       WorkerId: $scope.notification.WorkerId,
-    }).then(function(document) {
+    }).then(document => {
       var xml = new XMLSerializer().serializeToString(document);
       console.log(xml);
     });
   };
+
+  $turk({
+    Operation: 'GetAccountBalance',
+  }).then(document => {
+    $scope.AvailableBalance = nodesToJSON(document.querySelector('AvailableBalance').children);
+  });
 })
-.controller('admin.mturk.qualification_types.table', function($scope, $localStorage, $turk, $timeout, $flash) {
+.controller('admin.mturk.qualification_types.table', ($scope, $localStorage, $turk, $timeout, $flash) => {
   $scope.SearchQualificationTypes = $localStorage.$default({
     SearchQualificationTypes: {
       Operation: 'SearchQualificationTypes',

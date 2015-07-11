@@ -11,18 +11,7 @@ app
   };
 })
 .controller('admin.aws_accounts.edit', function($scope, $http, $turk, $flash, $stateParams, AWSAccount) {
-  $scope.environments = [{name: 'production'}, {name: 'sandbox'}];
-  $scope.aws_account = AWSAccount.get($stateParams, function() {
-    if ($scope.aws_account.id && $scope.aws_account.id != 'new') {
-      $scope.environments.forEach(function(environment) {
-        $turk({
-          Operation: 'GetAccountBalance',
-        }).then(function(document) {
-          environment.account_balance = document.querySelector('FormattedPrice').textContent;
-        });
-      });
-    }
-  });
+  $scope.aws_account = AWSAccount.get($stateParams);
 
   $scope.sync = function() {
     var promise = $scope.aws_account.$save().then(function() {
