@@ -56257,18 +56257,7 @@ _app.app.controller('admin.aws_accounts.table', function ($scope, AWSAccount) {
     });
   };
 }).controller('admin.aws_accounts.edit', function ($scope, $http, $turk, $flash, $stateParams, AWSAccount) {
-  $scope.environments = [{ name: 'production' }, { name: 'sandbox' }];
-  $scope.aws_account = AWSAccount.get($stateParams, function () {
-    if ($scope.aws_account.id && $scope.aws_account.id != 'new') {
-      $scope.environments.forEach(function (environment) {
-        $turk({
-          Operation: 'GetAccountBalance'
-        }).then(function (document) {
-          environment.account_balance = document.querySelector('FormattedPrice').textContent;
-        });
-      });
-    }
-  });
+  $scope.aws_account = AWSAccount.get($stateParams);
 
   $scope.sync = function () {
     var promise = $scope.aws_account.$save().then(function () {
@@ -56941,9 +56930,9 @@ var _urlobject = require('urlobject');
 
 var _cookiemonster = require('cookiemonster');
 
-var cookies = new _cookiemonster.CookieMonster(document, {
+var cookie_defaults = {
   path: '/',
-  expires: new Date(new Date().getTime() + 31 * 24 * 60 * 60 * 1000) });
+  expires: new Date(new Date().getTime() + 31 * 24 * 60 * 60 * 1000) };
 
 function nodesToJSON(nodes) {
   var pairs = _lodash2['default'].map(nodes, function (node) {
@@ -57098,11 +57087,19 @@ var QualificationType = (function () {
 })();
 
 _app.app.controller('admin.mturk', function ($scope, $state, AWSAccount) {
-  // environments
-  $scope.environment = $state.params.environment || cookies.get('environment');
+  // TODO: improve interface between cookies and $state
+  var cookies = new _cookiemonster.CookieMonster(document, cookie_defaults);
+  // environment
+  if ($state.params.environment === '' && cookies.get('environment')) {
+    $state.go('.', { environment: cookies.get('environment') });
+  }
+  $scope.environment = $state.params.environment;
   $scope.environments = [{ name: 'production' }, { name: 'sandbox' }, { name: 'local' }];
   // aws accounts
-  $scope.aws_account_id = $state.params.aws_account_id || cookies.get('aws_account_id');
+  if ($state.params.aws_account_id === '' && cookies.get('aws_account_id')) {
+    $state.go('.', { aws_account_id: cookies.get('aws_account_id') });
+  }
+  $scope.aws_account_id = $state.params.aws_account_id;
   $scope.aws_accounts = AWSAccount.query();
   // change watcher called from the view/template
   $scope.changeSetting = function (key, value) {
@@ -57285,33 +57282,20 @@ _app.app.controller('admin.mturk', function ($scope, $state, AWSAccount) {
         $flash(promise);
       };
 
-      scope.setStatus = function (prefix) {
-        // prefix should be one of 'Approve' | 'Reject' | 'ApproveRejected'
+      scope.setStatus = function (Operation) {
+        // Operation should start with one of 'Approve' | 'Reject' | 'ApproveRejected'
         var promise = $turk({
-          Operation: prefix + 'Assignment',
+          Operation: Operation,
           AssignmentId: scope.assignment.AssignmentId,
           RequesterFeedback: scope.RequesterFeedback
-        }).then(function (document) {
-          var xml = new XMLSerializer().serializeToString(document);
-          console.log('setStatus response', xml);
-          return xml;
-
-          // return $turk({
-          //   Operation: 'GetAssignment',
-          //   AssignmentId: scope.assignment.AssignmentId,
-          // }).then(function(res) {
-          //   scope.assignment =
-          //   return 'Updated Assignment';
-          // });
+        }).then(function () {
+          return 'Set status successfully';
         });
         $flash(promise);
       };
     }
   };
 }).controller('admin.mturk.dashboard', function ($scope, $localStorage, $state, $flash, $turk) {
-  // $scope.$storage = $localStorage.$default({
-  //   assignments_limit: 10,
-  //   responses_summarizer: 'return responses;',
   $scope.NotifyWorkers = function () {
     $turk({
       Operation: 'NotifyWorkers',
@@ -57323,6 +57307,12 @@ _app.app.controller('admin.mturk', function ($scope, $state, AWSAccount) {
       console.log(xml);
     });
   };
+
+  $turk({
+    Operation: 'GetAccountBalance'
+  }).then(function (document) {
+    $scope.AvailableBalance = nodesToJSON(document.querySelector('AvailableBalance').children);
+  });
 }).controller('admin.mturk.qualification_types.table', function ($scope, $localStorage, $turk, $timeout, $flash) {
   $scope.SearchQualificationTypes = $localStorage.$default({
     SearchQualificationTypes: {
