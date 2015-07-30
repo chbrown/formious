@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 var path = require('path');
-var logger = require('loge');
+var loge = require('loge');
 
 var db = require('../db');
 var server = require('../server');
@@ -23,7 +23,7 @@ var yargs = require('yargs')
   });
 
 var argv = yargs.argv;
-logger.level = argv.verbose ? 'debug' : 'info';
+loge.logger.level = argv.verbose ? loge.Level.debug : loge.Level.info;
 
 if (argv.help) {
   yargs.showHelp();
