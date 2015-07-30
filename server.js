@@ -1,5 +1,5 @@
 var http = require('http-enhanced');
-var logger = require('loge');
+var logger = require('loge').logger;
 var controllers = require('./controllers');
 
 http.ServerResponse.prototype.die = function(error) {
