@@ -1,8 +1,14 @@
 BIN := node_modules/.bin
+DTS := async/async lodash/lodash node/node
 
-all: ui/build/bundle.js ui/build/bundle.min.js ui/site.css
+all: ui/build/bundle.js ui/build/bundle.min.js ui/site.css type_declarations
+type_declarations: $(DTS:%=type_declarations/DefinitelyTyped/%.d.ts)
 
-$(BIN)/lessc $(BIN)/cleancss $(BIN)/browserify:
+type_declarations/DefinitelyTyped/%:
+	mkdir -p $(@D)
+	curl -s https://raw.githubusercontent.com/borisyankov/DefinitelyTyped/master/$* > $@
+
+$(BIN)/lessc $(BIN)/cleancss $(BIN)/browserify $(BIN)/watsh $(BIN)/tsc:
 	npm install
 
 %.css: %.less $(BIN)/lessc $(BIN)/cleancss
@@ -16,8 +22,11 @@ ui/build/bundle.js: ui/build.js $(BIN)/browserify
 	mkdir -p $(@D)
 	$(BIN)/browserify $< --transform babelify --outfile $@
 
-dev: $(BIN)/watchify
-	$(BIN)/watchify ui/build.js --transform babelify --outfile ui/build/bundle.js -v
+dev: $(BIN)/watsh $(BIN)/watchify
+	(\
+    $(BIN)/watsh 'make ui/site.css' ui/site.less & \
+    $(BIN)/watchify ui/build.js -t babelify -o ui/build/bundle.js -v & \
+    wait)
 
 deploy:
 	docker pull chbrown/formious && \
