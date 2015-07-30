@@ -21,7 +21,7 @@ export var misc_js_plugins = angular.module('misc-js-plugins', [])
       '<span class="full" ng-show="expanded" ng-click="expanded = false" ng-transclude></span>',
     transclude: true,
     scope: {},
-    link: function(scope, el, attrs) {
+    link: function(scope, el) {
       var summary_el = el.children().eq(0);
       var full_el = el.children().eq(1);
       scope.expanded = false;
@@ -77,108 +77,6 @@ export var misc_js_plugins = angular.module('misc-js-plugins', [])
           ngModel.$setValidity('json', false);
           // return undefined;
         }
-      });
-    }
-  };
-})
-.directive('onUpload', function($parse) {
-  /** AngularJS documentation for the input directive:
-
-  > Note: Not every feature offered is available for all input types.
-  > Specifically, data binding and event handling via ng-model is
-  > unsupported for input[file].
-
-  So we have this little shim to fill in for that.
-
-  Use like:
-
-      <input type="file" on-upload="file = $file">
-
-  Or:
-
-      <input type="file" on-upload="handle($files)" multiple>
-
-  */
-  return {
-    restrict: 'A',
-    compile: function(el, attrs) {
-      var fn = $parse(attrs.onUpload);
-      return function(scope, element, attr) {
-        // the element we listen to inside the link function should not be the
-        // element from the compile function signature; that one may match up
-        // with the linked one, but maybe not, if this element does not occur
-        // directly in the DOM, e.g., if it's inside a ng-repeat or ng-if.
-        element.on('change', function(event) {
-          scope.$apply(function() {
-            var context = {$event: event};
-            if (attrs.multiple) {
-              context.$files = event.target.files;
-            }
-            else {
-              context.$file = event.target.files[0];
-            }
-            fn(scope, context);
-          });
-        });
-      };
-    }
-  };
-})
-// services
-.service('$flash', function($rootScope) {
-  // basically a $rootScope wrapper
-  return function(value, timeout) {
-    // value can be a string or a promise
-    // default to a 3 second timeout, but allow permanent flashes
-    if (timeout === undefined) timeout = 3000;
-    $rootScope.$broadcast('flash', value, timeout);
-  };
-})
-.directive('flash', function($timeout, $q) {
-  /**
-  Inject $flash and use like:
-      $flash('OMG it burns!')
-  or
-      $flash(asyncResultPromise)
-  */
-  return {
-    restrict: 'E',
-    template:
-      '<div class="flash" ng-show="messages.length > 0">' +
-        '<span ng-repeat="message in messages track by $index" ng-bind="message"></span>' +
-      '</div>',
-    replace: true,
-    scope: {messages: '&'},
-    link: function(scope, el, attrs) {
-      scope.messages = [];
-
-      scope.add = function(message) {
-        scope.messages.push(message);
-      };
-      scope.remove = function(message) {
-        var index = scope.messages.indexOf(message);
-        scope.messages.splice(index, 1);
-      };
-
-      scope.$on('flash', function(ev, value, timeout) {
-        scope.add('...');
-
-        // for some reason, .finally() doesn't get the promise's value,
-        // so we have to use .then(a, a)
-        var done = function(message) {
-          // so we recreate
-          scope.remove('...');
-          scope.add(message);
-
-          // if timeout is null, for example, leave the message permanently
-          if (timeout) {
-            $timeout(function() {
-              scope.remove(message);
-            }, timeout);
-          }
-        };
-        // wrap value with .when() to support both strings and promises of strings
-        $q.when(value).then(done, done);
       });
     }
   };

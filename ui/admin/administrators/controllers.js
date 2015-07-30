@@ -1,18 +1,19 @@
 /*jslint esnext: true */
 import {app} from '../app';
+import {NotifyUI} from 'notify-ui';
 
 app
-.controller('admin.administrators.table', function($scope, $flash, Administrator) {
+.controller('admin.administrators.table', function($scope, Administrator) {
   $scope.administrators = Administrator.query();
   $scope.delete = function(administrator) {
     var promise = administrator.$delete().then(function() {
       $scope.administrators.splice($scope.administrators.indexOf(administrator), 1);
       return 'Deleted';
     });
-    $flash(promise);
+    NotifyUI.addPromise(promise);
   };
 })
-.controller('admin.administrators.edit', function($scope, $http, $flash, $window, $stateParams,
+.controller('admin.administrators.edit', function($scope, $http, $window, $stateParams,
     Administrator, AWSAccount, AWSAccountAdministrator) {
   $scope.administrator = Administrator.get($stateParams);
 
@@ -24,7 +25,7 @@ app
     var promise = $scope.administrator.$save().then(function() {
       return 'Saved';
     });
-    $flash(promise);
+    NotifyUI.addPromise(promise);
   };
 
   $scope.$on('save', $scope.sync);
@@ -44,6 +45,6 @@ app
     }).then(function() {
       return 'Saved';
     });
-    $flash(promise);
+    NotifyUI.addPromise(promise);
   };
 });

@@ -1,6 +1,7 @@
 /*jslint esnext: true */
 import _ from 'lodash';
 import {app} from '../../app';
+import {NotifyUI} from 'notify-ui';
 
 class Node {
   /**
@@ -45,7 +46,7 @@ function pluralize(singular, array) {
 }
 
 app
-.controller('admin.experiments.edit.blocks', function($scope, $q, $http, $localStorage, $state, $flash,
+.controller('admin.experiments.edit.blocks', function($scope, $q, $http, $localStorage, $state,
   Template, Block, parseTabularFile) {
   $scope.$storage = $localStorage;
   $scope.templates = Template.query();
@@ -180,7 +181,7 @@ app
     }, err => {
       return `Error uploading file "${file.name}": ${err.toString()}`;
     });
-    $flash(promise);
+    NotifyUI.addPromise(promise);
   };
 
   $scope.saveTree = () => {
@@ -188,11 +189,11 @@ app
     var promise = $http.put(url, root.children).then(() => {
       return 'Saved all blocks';
     });
-    $flash(promise);
+    NotifyUI.addPromise(promise);
   };
 })
 // .controller('admin.experiments.edit.block', ($scope, $localStorage, $state,
-//   $flash, Template, Block) => {
+//   Template, Block) => {
 //   $scope.$storage = $localStorage;
 //   $scope.block = Block.get({
 //     experiment_id: $state.params.experiment_id,
@@ -214,7 +215,7 @@ app
 //     }).then(function() {
 //       return 'Saved block';
 //     });
-//     $flash(promise);
+//     NotifyUI.addPromise(promise);
 //   };
 // })
 .directive('blocks', (RecursionHelper) => {

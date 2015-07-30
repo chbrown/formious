@@ -1,5 +1,6 @@
 /*jslint esnext: true */
 import {app} from '../app';
+import {NotifyUI} from 'notify-ui';
 
 app
 .controller('admin.aws_accounts.table', function($scope, AWSAccount) {
@@ -10,14 +11,14 @@ app
     });
   };
 })
-.controller('admin.aws_accounts.edit', function($scope, $http, $turk, $flash, $stateParams, AWSAccount) {
+.controller('admin.aws_accounts.edit', function($scope, $http, $turk, $stateParams, AWSAccount) {
   $scope.aws_account = AWSAccount.get($stateParams);
 
   $scope.sync = function() {
     var promise = $scope.aws_account.$save().then(function() {
       return 'Saved';
     });
-    $flash(promise);
+    NotifyUI.addPromise(promise);
   };
 
   $scope.$on('save', $scope.sync);

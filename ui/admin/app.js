@@ -1,16 +1,17 @@
 /*jslint browser: true, esnext: true */
-
 import _ from 'lodash';
 import moment from 'moment';
 import {h, create, diff, patch} from 'virtual-dom';
 import {Url} from 'urlobject';
 import {Request} from 'httprequest';
+import {NotifyUI} from 'notify-ui';
 
 // angular.js libraries:
 import angular from 'angular';
 import 'angular-resource';
 import 'angular-ui-router';
 import 'ngstorage';
+import 'ng-upload';
 // angular modules
 import 'flow-copy';
 import 'checkbox-sequence';
@@ -23,6 +24,7 @@ export var app = angular.module('app', [
   'ngResource',
   'ngStorage',
   'ui.router',
+  'ngUpload',
   'misc-js-plugins', // TODO: factor this out
   'flow-copy', // exposes an EA 'fixedflow' directive
   'checkbox-sequence', // exposes an A 'checkbox-sequence' directive
@@ -379,7 +381,7 @@ $state once, so we use $timeout to wait for the next digest. It'll still
 be called as many times as there were errors at the same time, but they'll all
 be 'to' the original state name (since it's scoped outside the $timeout).
 */
-app.run(function($rootScope, $state, $flash, $timeout) {
+app.run(function($rootScope, $state, $timeout) {
   $rootScope.$on('unauthorized', function() {
     var to = $state.current.name;
     $timeout(function() {
@@ -580,7 +582,7 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
   $locationProvider.html5Mode(true);
 });
 
-app.controller('admin', function($scope, $flash, $state, $http) {
+app.controller('admin', function($scope, $state, $http) {
   $scope.login = function(email, password) {
     var promise = $http.post('/login', {
       email: email,
@@ -591,12 +593,12 @@ app.controller('admin', function($scope, $flash, $state, $http) {
     }, function(res) {
       return res.data.message;
     });
-    $flash(promise);
+    NotifyUI.addPromise(promise);
   };
 
   $scope.logout = function() {
     cookies.del('administrator_token', {path: '/'});
-    $flash('Deleted administrator token');
+    NotifyUI.add('Deleted administrator token');
     $state.go('.', {}, {reload: true});
   };
 });

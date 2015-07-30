@@ -1,9 +1,10 @@
 /*jslint browser: true, esnext: true */
 import {app} from '../app';
 import {Url} from 'urlobject';
+import {NotifyUI} from 'notify-ui';
 
 app
-.controller('admin.experiments.table', function($scope, $flash, $state, $location, Experiment, Administrator) {
+.controller('admin.experiments.table', function($scope, $state, $location, Experiment, Administrator) {
   $scope.experiments = Experiment.query();
   $scope.administrators = Administrator.query();
 
@@ -12,10 +13,10 @@ app
       $scope.experiments.splice($scope.experiments.indexOf(experiment), 1);
       return 'Deleted';
     });
-    $flash(promise);
+    NotifyUI.addPromise(promise);
   };
 })
-.controller('admin.experiments.edit', function($scope, $flash, $state, $localStorage,
+.controller('admin.experiments.edit', function($scope, $state, $localStorage,
     Experiment, Template, Administrator) {
   $scope.$storage = $localStorage.$default({expand_experiment_html: false});
 
@@ -30,7 +31,7 @@ app
     }).then(function() {
       return 'Saved experiment';
     });
-    $flash(promise);
+    NotifyUI.addPromise(promise);
   };
 
   // the 'save' event is broadcast on rootScope when command+S is pressed

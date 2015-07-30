@@ -1,8 +1,9 @@
 /*jslint esnext: true */
 import {app} from '../app';
+import {NotifyUI} from 'notify-ui';
 
 app
-.controller('admin.templates.table', function($scope, $flash, Template) {
+.controller('admin.templates.table', function($scope, Template) {
   $scope.templates = Template.query();
   $scope.delete = function(template) {
     // is this really the best way?
@@ -10,10 +11,10 @@ app
       $scope.templates.splice($scope.templates.indexOf(template), 1);
       return 'Deleted';
     });
-    $flash(promise);
+    NotifyUI.addPromise(promise);
   };
 })
-.controller('admin.templates.edit', function($scope, $http, $flash, $stateParams, $state, $location, Template) {
+.controller('admin.templates.edit', function($scope, $http, $stateParams, $state, $location, Template) {
   $scope.template = Template.get($stateParams);
 
   $scope.sync = function() {
@@ -21,7 +22,7 @@ app
       $state.go('.', {id: $scope.template.id}, {notify: false});
       return 'Saved template';
     });
-    $flash(promise);
+    NotifyUI.addPromise(promise);
   };
 
   // the 'save' event is broadcast on rootScope when command+S is pressed

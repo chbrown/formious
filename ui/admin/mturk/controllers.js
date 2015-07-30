@@ -4,6 +4,8 @@ import angular from 'angular';
 import {app, sendTurkRequest} from '../app';
 import {Url} from 'urlobject';
 import {CookieMonster} from 'cookiemonster';
+import {NotifyUI} from 'notify-ui';
+
 
 const cookie_defaults = {
   path: '/',
@@ -179,7 +181,7 @@ app
     $scope.hits = _.map(document.querySelectorAll('HIT'), HIT => nodesToJSON(HIT.children));
   });
 })
-.controller('admin.mturk.hits.new', function($scope, $http, $location, $sce, $state, $localStorage, $flash, $turk) {
+.controller('admin.mturk.hits.new', function($scope, $http, $location, $sce, $state, $localStorage, $turk) {
   $scope.$storage = $localStorage.$default({
     Operation: 'CreateHIT',
     Title: $state.params.Title || 'Exciting task!',
@@ -220,7 +222,7 @@ app
       $state.go('admin.mturk.hits.edit', {HITId: HITId});
       return `Created HIT: ${HITId}`;
     });
-    $flash(promise);
+    NotifyUI.addPromise(promise);
   };
 
   // AWS adds four parameters: assignmentId, hitId, workerId, and turkSubmitTo
@@ -244,7 +246,7 @@ app
     }
   });
 })
-.controller('admin.mturk.hits.edit', function($scope, $localStorage, $state, $q, $flash, $turk) {
+.controller('admin.mturk.hits.edit', function($scope, $localStorage, $state, $q, $turk) {
   $scope.$storage = $localStorage.$default({
     assignments_limit: 10,
     responses_summarizer: 'return responses;',
@@ -283,14 +285,14 @@ app
     var promise = HIT.ExtendHIT(data).$promise.then(function() {
       return 'Extended';
     });
-    $flash(promise);
+    NotifyUI.addPromise(promise);
   };
 
   $scope.import = function() {
     var promise = HIT.import({HITId: HITId}).$promise.then(function(res) {
       return res.message || 'Imported';
     });
-    $flash(promise);
+    NotifyUI.addPromise(promise);
   };
 
   QualificationType.query({}, (err, document) => {
@@ -313,11 +315,11 @@ app
     var promise = $q.all(promises).then((results) => {
       return `Sent ${results.length} AssignQualification requests`;
     });
-    $flash(promise);
+    NotifyUI.addPromise(promise);
   };
 
 })
-.directive('assignment', function($state, $localStorage, $turk, $flash, Response) {
+.directive('assignment', function($state, $localStorage, $turk, Response) {
   return {
     restrict: 'A',
     templateUrl: '/ui/admin/mturk/assignment.html',
@@ -345,7 +347,7 @@ app
           console.log('BlockWorker response', xml);
           return xml;
         });
-        $flash(promise);
+        NotifyUI.addPromise(promise);
       };
 
       scope.setStatus = function(Operation) {
@@ -357,12 +359,12 @@ app
         }).then(() => {
           return 'Set status successfully';
         });
-        $flash(promise);
+        NotifyUI.addPromise(promise);
       };
     }
   };
 })
-.controller('admin.mturk.dashboard', function($scope, $localStorage, $state, $flash, $turk) {
+.controller('admin.mturk.dashboard', function($scope, $localStorage, $state, $turk) {
   $scope.NotifyWorkers = function() {
     $turk({
       Operation: 'NotifyWorkers',
@@ -381,7 +383,7 @@ app
     $scope.AvailableBalance = nodesToJSON(document.querySelector('AvailableBalance').children);
   });
 })
-.controller('admin.mturk.qualification_types.table', ($scope, $localStorage, $turk, $timeout, $flash) => {
+.controller('admin.mturk.qualification_types.table', ($scope, $localStorage, $turk, $timeout) => {
   $scope.SearchQualificationTypes = $localStorage.$default({
     SearchQualificationTypes: {
       Operation: 'SearchQualificationTypes',
@@ -419,10 +421,10 @@ app
       $scope.QualificationTypes.splice($scope.QualificationTypes.indexOf(QualificationType), 1);
       return `Deleted QualificationType: ${QualificationType.QualificationTypeId}`;
     });
-    $flash(promise);
+    NotifyUI.addPromise(promise);
   };
 })
-.controller('admin.mturk.qualification_types.new', function($scope, $http, $state, $location, $localStorage, $flash, $turk) {
+.controller('admin.mturk.qualification_types.new', function($scope, $http, $state, $location, $localStorage, $turk) {
   $scope.QualificationType = $localStorage.$default({
     QualificationType: {
       RetryDelayInSeconds: '30m',
@@ -450,10 +452,10 @@ app
       var QualificationTypeId = res.querySelector('QualificationTypeId').textContent;
       return `Created QualificationType: ${QualificationTypeId}`;
     });
-    $flash(promise);
+    NotifyUI.addPromise(promise);
   };
 })
-.controller('admin.mturk.qualification_types.edit', function($scope, $state, $localStorage, $flash, $turk) {
+.controller('admin.mturk.qualification_types.edit', function($scope, $state, $localStorage, $turk) {
   $scope.$storage = $localStorage.$default({
     AssignQualification: {
       IntegerValue: 1,
@@ -481,7 +483,7 @@ app
     $scope.$storage.AssignQualification.QualificationTypeId = $state.params.QualificationTypeId;
     QualificationType.assign($scope.$storage.AssignQualification, (err) => {
       if (err) throw err;
-      $flash(`Assigned Qualification Type to ${$scope.$storage.AssignQualification.WorkerId}.`);
+      NotifyUI.add(`Assigned Qualification Type to ${$scope.$storage.AssignQualification.WorkerId}.`);
     });
   };
 
@@ -490,7 +492,7 @@ app
     QualificationType.revoke({SubjectId: Qualification.SubjectId, QualificationTypeId: $state.params.QualificationTypeId}, (err) => {
       if (err) throw err;
       $scope.Qualifications.splice($scope.Qualifications.indexOf(Qualification), 1);
-      $flash(`Revoked Qualification Type from ${Qualification.SubjectId}.`);
+      NotifyUI.add(`Revoked Qualification Type from ${Qualification.SubjectId}.`);
     });
   };
 
@@ -498,7 +500,7 @@ app
     // $scope.$storage.AssignQualification.QualificationTypeId = $state.params.QualificationTypeId;
     QualificationType.update($scope.QualificationType, (err) => {
       if (err) throw err;
-      $flash(`Updated Qualification Type.`);
+      NotifyUI.add(`Updated Qualification Type.`);
     });
   };
 
