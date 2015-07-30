@@ -27,10 +27,14 @@ R.get(/^\/api\/responses(\?|$)/, function(req, res) {
   .orderBy('responses.created DESC')
   .limit(limit);
 
+  if (urlObj.query.experiment_id) {
+    select = select.whereEqual({experiment_id: urlObj.query.experiment_id});
+  }
+  if (urlObj.query.template_id) {
+    select = select.whereEqual({template_id: urlObj.query.template_id});
+  }
   if (urlObj.query.aws_worker_id) {
-    select = select.whereEqual({
-      aws_worker_id: urlObj.query.aws_worker_id
-    });
+    select = select.whereEqual({aws_worker_id: urlObj.query.aws_worker_id});
   }
 
   select.execute(function(err, responses) {

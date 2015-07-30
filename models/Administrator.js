@@ -15,14 +15,14 @@ function sha256(string) {
 function Administrator() { }
 
 Administrator.add = function(email, password, callback) {
-  db.Insert('administrators')
+  db.InsertOne('administrators')
   .set({
     email: email,
     password: sha256(password),
   })
   .returning('*')
-  .execute(function(err, rows) {
-    callback(err, rows ? rows[0] : undefined);
+  .execute(function(err, administrator) {
+    callback(err, administrator);
   });
 };
 

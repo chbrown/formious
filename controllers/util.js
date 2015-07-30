@@ -1,27 +1,10 @@
 var Router = require('regex-router');
 var streaming = require('streaming');
 var sv = require('sv');
-var _ = require('lodash');
 
 var excel = require('../lib/excel');
 
 var R = new Router();
-
-/** zipKeysFn(keys: string[]) => (values: any[]) => {[index: string]: any}
-
-Create a function closure around an Array of unique keys, which takes an Array
-of values and returns an object mapping the keys in values in the given order.
-
-For example:
-
-    zipKeysFn(['name', 'age])(['Chris', 25]) => {name: 'Chris', age: 25}
-*/
-function zipKeysFn(keys) {
-  return function(values) {
-    var pairs = _.zip(keys, values);
-    return _.object(pairs);
-  };
-}
 
 /** POST /util/parse-table
 
@@ -32,16 +15,9 @@ R.post(/\/util\/parse-table/, function(req, res) {
     req.readToEnd(function(err, data) {
       if (err) return res.die(err);
 
-      // rows: string[][]
-      var rows = excel.parseZip(data);
-      if (rows instanceof Error) {
-        return res.die(rows);
-      }
-
-      var columns = rows[0];
-      var objects = rows.slice(1).map(zipKeysFn(columns));
-      // result is now a {columns: [String], rows: [Object]} object
-      res.setHeader('X-Columns', columns.join(','));
+      var objects = excel.parseXlsx(data);
+      // var columns = _.chain(objects).map(_.keys).flatten().unique().value();
+      // res.setHeader('X-Columns', columns);
       res.json(objects);
     });
   }

@@ -17,8 +17,8 @@
         <input type="checkbox" ng-model="block.selected">
       </td>
       <td>
-        <div>{{block.id || 'unsaved'}}</div>
-        <div><label><input type="checkbox" ng-model="block.editing"> Edit</label></div>
+        <span>{{block.id || 'unsaved'}}</span>
+        <a ng-click="block.editing = !block.editing">{{block.editing ? 'View' : 'Edit'}}</a>
       </td>
       <!-- swap (template_id, context) / (randomize, children) -->
       <!-- stim-type blocks -->
@@ -36,9 +36,15 @@
       <td ng-if="!block.template_id" colspan="{{parameters.length + 1}}" style="padding: 0">
         <div>
           Block:
-          <label><input type="checkbox" ng-model="block.randomize"> Randomize</label>
+          <label>
+            <input type="checkbox" ng-model="block.randomize"> Randomize
+          </label>
+          <label>
+            <b>Quota</b>: <input type="number" ng-model="block.quota">
+          </label>
           <button ng-click="$emit('collapseBlock', block)">Collapse</button>
         </div>
+
         <div blocks="block.children"></div>
       </td>
       <!-- the rest are common to both types of blocks -->

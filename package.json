@@ -34,6 +34,8 @@
     "loge": "*",
     "moment": "*",
     "ngstorage": "gsklee/ngStorage",
+    "ng-upload": "*",
+    "notify-ui": "*",
     "regex-router": "*",
     "send": "*",
     "sqlcmd-pg": "*",
@@ -43,6 +45,7 @@
     "turk": "~0.6.0",
     "urlobject": "*",
     "virtual-dom": "*",
+    "xlsx": "*",
     "xmldom": "0.1.19",
     "xpath": "0.0.9",
     "yargs": "*"
@@ -54,7 +57,8 @@
     "clean-css": "*",
     "less": "*",
     "mocha": "*",
-    "watchify": "*"
+    "watchify": "*",
+    "watsh": "*"
   },
   "staticPattern": "public/{file}",
   "staticDependencies": {

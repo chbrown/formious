@@ -3,12 +3,32 @@ import _ from 'lodash';
 import {app} from '../app';
 
 app
-.controller('admin.responses.table', function($scope, Response) {
-  $scope.value_keys = [];
-  $scope.responses = Response.query({}, function() {
-    $scope.context_keys = _.chain($scope.responses)
-      .pluck('context').map(_.keys).flatten().uniq().without('$$hashKey').value();
-    $scope.value_keys = _.chain($scope.responses)
-      .pluck('value').map(_.keys).flatten().uniq().without('$$hashKey').value();
+.controller('admin.responses.table', ($scope, $localStorage, Response, Template, Experiment) => {
+  $scope.$storage = $localStorage.$default({
+    responses_query: {
+      order_column: 'created',
+      order_direction: 'DESC',
+      limit: 250,
+    }
   });
+  $scope.templates = Template.query();
+  $scope.experiments = Experiment.query();
+  $scope.value_keys = [];
+
+  $scope.refresh = () => {
+    var params = {
+      experiment_id: $scope.$storage.responses_query.experiment_id,
+      template_id: $scope.$storage.responses_query.template_id,
+      order_column: $scope.$storage.responses_query.order_column,
+      order_direction: $scope.$storage.responses_query.order_direction,
+      limit: $scope.$storage.responses_query.limit,
+    };
+    $scope.responses = Response.query(params, function() {
+      $scope.context_keys = _.chain($scope.responses)
+        .pluck('context').map(_.keys).flatten().uniq().without('$$hashKey').value();
+      $scope.value_keys = _.chain($scope.responses)
+        .pluck('value').map(_.keys).flatten().uniq().without('$$hashKey').value();
+    });
+  };
+  $scope.refresh();
 });

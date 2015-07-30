@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var async = require('async');
-var logger = require('loge');
+var logger = require('loge').logger;
 var Router = require('regex-router');
 
 var models = require('../../../models');
@@ -10,7 +10,7 @@ var tree = require('../../../lib/tree');
 var R = new Router();
 
 var blocks_columns = ['id', 'experiment_id', 'template_id', 'context',
-  'view_order', 'created', 'randomize', 'parent_block_id'];
+  'view_order', 'created', 'randomize', 'parent_block_id', 'quota'];
 
 /** GET /api/experiments/:experiment_id/blocks
 list all of an experiment's blocks */
@@ -38,13 +38,13 @@ R.post(/\/api\/experiments\/(\d+)\/blocks$/, function(req, res, m) {
       view_order: data.view_order,
     };
 
-    db.Insert('blocks')
+    db.InsertOne('blocks')
     .set(fields)
     .returning('*')
-    .execute(function(err, rows) {
+    .execute(function(err, block) {
       if (err) return res.die(err);
 
-      res.status(201).json(rows[0]);
+      res.status(201).json(block);
     });
   });
 });
@@ -137,13 +137,13 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
     async.each(new_blocks, function(block, callback) {
       var fields = _.pick(block, blocks_columns);
 
-      db.Insert('blocks')
+      db.InsertOne('blocks')
       .set(fields)
       .returning('*')
-      .execute(function(err, rows) {
+      .execute(function(err, block) {
         if (err) return callback(err);
         // update by reference
-        _.assign(block, rows[0]);
+        _.assign(block, block);
         // okay, all blocks should have .id fields now; ready to move on
         callback();
       });

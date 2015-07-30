@@ -156,22 +156,6 @@ body.admin {
   font-size: 80%; // why is the default so big!?
   overflow-y: scroll;
 
-  .flash {
-    position: fixed;
-    left: 0;
-    right: 0;
-
-    padding: 2px;
-    height: 22px;
-    box-sizing: border-box;
-
-    z-index: 1000; // only needs to be greater than the nav's z-index
-    text-align: center;
-    color: white;
-    background-color: rgba(0, 0, 0, 66%);
-    pointer-events: none; // allows click through to elements underneath
-  }
-
   nav {
     left: 0;
     right: 0;
@@ -242,11 +226,41 @@ body.admin {
   border-width: 1px 0;
 }
 
+.notification-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000; // only needs to be greater than the nav's z-index
+
+  vertical-align: middle;
+  text-align: center;
+  padding: 10px;
+  pointer-events: none; // allows click through to elements underneath
+}
+.notification {
+  display: inline-block;
+  vertical-align: middle;
+  background-color: rgba(0, 0, 0, .80);
+  border: 1px solid rgba(0, 0, 0, .90);
+  color: #DDD;
+  border-radius: 2px;
+  padding: 4px 8px;
+  margin: 5px;
+  pointer-events: auto;
+}
+
 form {
   .block {
     display: block;
     margin-top: 5px;
     margin-bottom: 5px;
+  }
+  .controls {
+    display: flex;
+    & > .control {
+      margin: 10px 10px 0 0;
+    }
   }
 }
 

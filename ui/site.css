@@ -34,7 +34,6 @@ a[ng-click]{color:#00E;cursor:pointer;text-decoration:underline}
 button{margin:0}
 button.anchor{border-width:0;text-decoration:underline;cursor:pointer;font-size:100%;padding:0}
 body.admin{background-color:#FBFBFB;font-size:80%;overflow-y:scroll}
-body.admin .flash{position:fixed;left:0;right:0;padding:2px;height:22px;box-sizing:border-box;z-index:1000;text-align:center;color:#fff;background-color:rgba(0,0,0,.66);pointer-events:none}
 body.admin nav{left:0;right:0;box-sizing:border-box}
 body.admin nav[fixedflow]{position:fixed;z-index:100;background-color:#333}
 body.admin nav.sub{background-color:#FBFBFB;border-bottom:1px solid #BBB}
@@ -48,7 +47,11 @@ body.admin nav .tab:first-child{margin-left:3px}
 body.admin nav .tab:last-child{margin-right:3px}
 body.admin nav .tab.current,body.admin nav .tab:hover{border-color:#FBFBFB;background-color:#FBFBFB}
 .box{background-color:#fff;border:1px solid #EEE;border-width:1px 0}
+.notification-container{position:fixed;top:0;left:0;right:0;z-index:1000;vertical-align:middle;text-align:center;padding:10px;pointer-events:none}
+.notification{display:inline-block;vertical-align:middle;background-color:rgba(0,0,0,.8);border:1px solid rgba(0,0,0,.9);color:#DDD;border-radius:2px;padding:4px 8px;margin:5px;pointer-events:auto}
 form .block{display:block;margin-top:5px;margin-bottom:5px}
+form .controls{display:flex}
+form .controls>.control{margin:10px 10px 0 0}
 table td,table th{vertical-align:top}
 table.keyval td:first-child{font-weight:700}
 table.keyval tbody{border-top:1px solid #CCC}

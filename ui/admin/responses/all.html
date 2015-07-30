@@ -1,6 +1,50 @@
 <section class="hpad">
   <h3>Responses</h3>
-  <p>Showing {{responses.length}} out of {{responses[0].count}}</p>
+</section>
+
+<section class="box hpad">
+  <form ng-submit="refresh()">
+    <div class="controls">
+      <label class="control">
+        <div><b>Template</b></div>
+        <select ng-model="$storage.responses_query.template_id"
+          ng-options="template.id as template.name for template in templates">
+          <option value>-- all --</option>
+        </select>
+      </label>
+      <label class="control">
+        <div><b>Experiment</b></div>
+        <select ng-model="$storage.responses_query.experiment_id"
+          ng-options="experiment.id as experiment.name for experiment in experiments">
+          <option value>-- all --</option>
+        </select>
+      </label>
+      <div class="control">
+        <div><b>Order</b></div>
+        <select ng-model="$storage.responses_query.order_column">
+          <option value="experiment_id">experiment_id</option>
+          <option value="template_id">template_id</option>
+          <option value="view_order">view_order</option>
+          <option value="created">created</option>
+        </select>
+        <select ng-model="$storage.responses_query.order_direction">
+          <option value="ASC" title="smallest first">ASC</option>
+          <option value="DESC" title="largest first">DESC</option>
+        </select>
+      </div>
+      <div class="control">
+        <div><b>Limit</b></div>
+        <input ng-model="$storage.responses_query.limit" type="number">
+      </div>
+    </div>
+    <section>
+      <button>Refresh</button>
+    </section>
+  </form>
+</section>
+
+<section class="hpad">
+  <p>Showing {{responses.length}} out of {{responses[0].count || 0}} responses</p>
 </section>
 
 <section class="box">

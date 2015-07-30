@@ -3,7 +3,7 @@ var fs = require('fs');
 var path = require('path');
 var async = require('async');
 var handlebars = require('handlebars');
-var logger = require('loge');
+var logger = require('loge').logger;
 var Router = require('regex-router');
 var url = require('url');
 
@@ -112,11 +112,12 @@ R.get(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, function(req, res, m) {
 });
 
 /** POST /experiments/:experiment_id/blocks/:block_id
+
 Save response
 */
 R.post(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, function(req, res, m) {
-  var experiment_id = m[1];
-  var block_id = m[2];
+  var experiment_id = parseInt(m[1], 10);
+  var block_id = parseInt(m[2], 10);
   var urlObj = url.parse(req.url, true);
   var aws_worker_id = urlObj.query.workerId || 'WORKER_ID_NOT_AVAILABLE';
 
@@ -135,17 +136,20 @@ R.post(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, function(req, res, m) {
 
       models.Block.nextBlockId(experiment_id, block_id, participant.id, function(err, next_block_id) {
         if (err) return res.die(err);
-        logger.info('models.Block.nextBlockId: %d', next_block_id);
+        logger.info('models.Block.nextBlockId: %j', next_block_id);
 
         // http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ExternalQuestionArticle.html
         // sadly, this redirect_to doesn't work. Hopefully the user will have a proper
         // POST-to-MT form in their last block
-        var redirect_to = urlObj.query.turkSubmitTo + '/mturk/externalSubmit?assignmentId=' + urlObj.query.assignmentId;
-        if (next_block_id) {
-          // only change the path part of the url
-          urlObj.pathname = '/experiments/' + experiment_id + '/blocks/' + next_block_id;
-          redirect_to = url.format(urlObj);
+        // var redirect_to = urlObj.query.turkSubmitTo + '/mturk/externalSubmit?assignmentId=' + urlObj.query.assignmentId;
+        if (next_block_id === null) {
+          // meaning, there are no more blocks to complete
+          return res.text('You have already completed all available blocks in this experiment.');
         }
+
+        // only change the path part of the url
+        urlObj.pathname = '/experiments/' + experiment_id + '/blocks/' + next_block_id;
+        var redirect_to = url.format(urlObj);
 
         var ajax = req.headers['x-requested-with'] == 'XMLHttpRequest';
         if (ajax) {
