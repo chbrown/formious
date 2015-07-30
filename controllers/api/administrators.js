@@ -101,15 +101,14 @@ R.get(/^\/api\/administrators\/(\d+)\/aws_accounts$/, function(req, res, m) {
 Create administrator-AWS account link */
 R.post(/^\/api\/administrators\/(\d+)\/aws_accounts\/(\d+)$/, function(req, res, m) {
   req.readData(function(err, data) {
-    db.Insert('aws_account_administrators')
+    db.InsertOne('aws_account_administrators')
     .set({
       administrator_id: m[1],
       aws_account_id: m[2],
       priority: data.priority,
     })
-    .execute(function(err, rows) {
+    .execute(function(err, aws_account_administrator) {
       if (err) return res.die(err);
-      var aws_account_administrator = rows[0];
       res.status(201).json(aws_account_administrator);
     });
   });

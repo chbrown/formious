@@ -31,10 +31,10 @@ R.post(/^\/api\/templates$/, function(req, res) {
 
     var fields = _.pick(data, templates_columns);
 
-    db.Insert('templates')
+    db.InsertOne('templates')
     .set(fields)
     .returning('*')
-    .execute(function(err, rows) {
+    .execute(function(err, template) {
       if (err) {
         if (err.message && err.message.match(/duplicate key value violates unique constraint/)) {
           // 303 is a "See other" and SHOULD include a Location header
@@ -42,7 +42,7 @@ R.post(/^\/api\/templates$/, function(req, res) {
         }
         return res.die(err);
       }
-      res.status(201).json(rows[0]);
+      res.status(201).json(template);
     });
   });
 });

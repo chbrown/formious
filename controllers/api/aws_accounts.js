@@ -31,12 +31,12 @@ R.post(/^\/api\/aws_accounts$/, function(req, res) {
 
     var fields = _.pick(data, aws_accounts_columns);
 
-    db.Insert('aws_accounts')
+    db.InsertOne('aws_accounts')
     .set(fields)
     .returning('*')
-    .execute(function(err, rows) {
+    .execute(function(err, aws_account) {
       if (err) return res.die(err);
-      res.status(201).json(rows[0]);
+      res.status(201).json(aws_account);
     });
   });
 });

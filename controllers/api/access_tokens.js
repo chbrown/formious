@@ -32,12 +32,12 @@ R.post(/^\/api\/access_tokens$/, function(req, res) {
 
     var fields = _.pick(data, access_tokens_columns);
 
-    db.Insert('access_tokens')
+    db.InsertOne('access_tokens')
     .set(fields)
     .returning('*')
-    .execute(function(err, rows) {
+    .execute(function(err, access_token) {
       if (err) return res.die(err);
-      res.status(201).json(rows[0]);
+      res.status(201).json(access_token);
     });
   });
 });

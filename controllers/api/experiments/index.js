@@ -3,7 +3,7 @@ var _ = require('lodash');
 var Router = require('regex-router');
 var db = require('../../../db');
 var lib_util = require('../../../lib/util');
-var logger = require('loge');
+var logger = require('loge').logger;
 
 var R = new Router();
 
@@ -67,12 +67,12 @@ R.post(/^\/api\/experiments$/, function(req, res) {
 
     var fields = _.pick(data, experiments_columns);
 
-    db.Insert('experiments')
+    db.InsertOne('experiments')
     .set(fields)
     .returning('*')
-    .execute(function(err, rows) {
+    .execute(function(err, experiment) {
       if (err) return res.die(err);
-      res.status(201).json(rows[0]);
+      res.status(201).json(experiment);
     });
   });
 });
