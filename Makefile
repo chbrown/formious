@@ -20,7 +20,7 @@ $(BIN)/lessc $(BIN)/cleancss $(BIN)/browserify $(BIN)/watsh $(BIN)/tsc:
 
 ui/build/bundle.js: ui/build.js $(BIN)/browserify
 	mkdir -p $(@D)
-	$(BIN)/browserify $< --transform babelify --outfile $@
+	$(BIN)/browserify $< -t babelify -o $@
 
 dev: $(BIN)/watsh $(BIN)/watchify
 	(\
