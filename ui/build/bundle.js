@@ -37047,107 +37047,13 @@ module.exports = require('./modules/$').core;
 );
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":100}],97:[function(require,module,exports){
+},{"_process":145}],97:[function(require,module,exports){
 module.exports = require("./lib/polyfill");
 
 },{"./lib/polyfill":6}],98:[function(require,module,exports){
 module.exports = require("babel-core/polyfill");
 
 },{"babel-core/polyfill":97}],99:[function(require,module,exports){
-
-},{}],100:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = setTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            currentQueue[queueIndex].run();
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    clearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        setTimeout(drainQueue, 0);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-},{}],101:[function(require,module,exports){
 /*jslint browser: true */
 
 function CheckboxSequence(container) {
@@ -37230,7 +37136,7 @@ if (typeof angular !== 'undefined') {
   });
 }
 
-},{}],102:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
 var CookieMonster = (function () {
     /**
     Generally, this should be called like `new CookieMonster(document.cookie)`,
@@ -37302,7 +37208,7 @@ var CookieMonster = (function () {
 })();
 exports.CookieMonster = CookieMonster;
 
-},{}],103:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 /*jslint browser: true */
 
 function FlowCopy(original) {
@@ -37349,7 +37255,7 @@ if (typeof angular !== 'undefined') {
   });
 }
 
-},{}],104:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 //// export module httprequest {
 var NetworkError = (function () {
     function NetworkError(method, url) {
@@ -37444,7 +37350,7 @@ var Request = (function () {
 exports.Request = Request;
 //// }
 
-},{}],105:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -49799,7 +49705,7 @@ exports.Request = Request;
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],106:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 //! moment.js
 //! version : 2.10.6
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
@@ -52995,7 +52901,7 @@ exports.Request = Request;
     return _moment;
 
 }));
-},{}],107:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 /*jslint browser: true */
 function ngUploadDirective($parse) {
   return {
@@ -53029,7 +52935,7 @@ if (typeof angular !== 'undefined') {
   angular.module('ngUpload', []).directive('ngUpload', ['$parse', ngUploadDirective]);
 }
 
-},{}],108:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 (function (root, factory) {
   'use strict';
 
@@ -53192,7 +53098,7 @@ if (typeof angular !== 'undefined') {
 
 }));
 
-},{"angular":5}],109:[function(require,module,exports){
+},{"angular":5}],107:[function(require,module,exports){
 //// export module notify-ui {
 var Notification = (function () {
     function Notification(message, className) {
@@ -53306,7 +53212,7 @@ var NotifyUI = (function () {
 exports.NotifyUI = NotifyUI;
 //// }
 
-},{}],110:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 /*jslint browser: true */
 
 function extend(target /*, source_0, source_1, ... */) {
@@ -53753,7 +53659,7 @@ if (typeof angular !== 'undefined') {
   });
 }
 
-},{}],111:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 /*jslint browser: true */
 /** Example results:
 
@@ -53962,22 +53868,22 @@ var Url = (function () {
 })();
 exports.Url = Url;
 
-},{}],112:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 var createElement = require("./vdom/create-element.js")
 
 module.exports = createElement
 
-},{"./vdom/create-element.js":125}],113:[function(require,module,exports){
+},{"./vdom/create-element.js":123}],111:[function(require,module,exports){
 var diff = require("./vtree/diff.js")
 
 module.exports = diff
 
-},{"./vtree/diff.js":145}],114:[function(require,module,exports){
+},{"./vtree/diff.js":143}],112:[function(require,module,exports){
 var h = require("./virtual-hyperscript/index.js")
 
 module.exports = h
 
-},{"./virtual-hyperscript/index.js":132}],115:[function(require,module,exports){
+},{"./virtual-hyperscript/index.js":130}],113:[function(require,module,exports){
 var diff = require("./diff.js")
 var patch = require("./patch.js")
 var h = require("./h.js")
@@ -53994,7 +53900,7 @@ module.exports = {
     VText: VText
 }
 
-},{"./create-element.js":112,"./diff.js":113,"./h.js":114,"./patch.js":123,"./vnode/vnode.js":141,"./vnode/vtext.js":143}],116:[function(require,module,exports){
+},{"./create-element.js":110,"./diff.js":111,"./h.js":112,"./patch.js":121,"./vnode/vnode.js":139,"./vnode/vtext.js":141}],114:[function(require,module,exports){
 /*!
  * Cross-Browser Split 1.1.1
  * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
@@ -54102,7 +54008,7 @@ module.exports = (function split(undef) {
   return self;
 })();
 
-},{}],117:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 'use strict';
 
 var OneVersionConstraint = require('individual/one-version');
@@ -54124,7 +54030,7 @@ function EvStore(elem) {
     return hash;
 }
 
-},{"individual/one-version":119}],118:[function(require,module,exports){
+},{"individual/one-version":117}],116:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -54147,7 +54053,7 @@ function Individual(key, value) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],119:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 'use strict';
 
 var Individual = require('./index.js');
@@ -54171,7 +54077,7 @@ function OneVersion(moduleName, version, defaultValue) {
     return Individual(key, defaultValue);
 }
 
-},{"./index.js":118}],120:[function(require,module,exports){
+},{"./index.js":116}],118:[function(require,module,exports){
 (function (global){
 var topLevel = typeof global !== 'undefined' ? global :
     typeof window !== 'undefined' ? window : {}
@@ -54190,14 +54096,14 @@ if (typeof document !== 'undefined') {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"min-document":99}],121:[function(require,module,exports){
+},{"min-document":144}],119:[function(require,module,exports){
 "use strict";
 
 module.exports = function isObject(x) {
 	return typeof x === "object" && x !== null;
 };
 
-},{}],122:[function(require,module,exports){
+},{}],120:[function(require,module,exports){
 var nativeIsArray = Array.isArray
 var toString = Object.prototype.toString
 
@@ -54207,12 +54113,12 @@ function isArray(obj) {
     return toString.call(obj) === "[object Array]"
 }
 
-},{}],123:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 var patch = require("./vdom/patch.js")
 
 module.exports = patch
 
-},{"./vdom/patch.js":128}],124:[function(require,module,exports){
+},{"./vdom/patch.js":126}],122:[function(require,module,exports){
 var isObject = require("is-object")
 var isHook = require("../vnode/is-vhook.js")
 
@@ -54311,7 +54217,7 @@ function getPrototype(value) {
     }
 }
 
-},{"../vnode/is-vhook.js":136,"is-object":121}],125:[function(require,module,exports){
+},{"../vnode/is-vhook.js":134,"is-object":119}],123:[function(require,module,exports){
 var document = require("global/document")
 
 var applyProperties = require("./apply-properties")
@@ -54359,7 +54265,7 @@ function createElement(vnode, opts) {
     return node
 }
 
-},{"../vnode/handle-thunk.js":134,"../vnode/is-vnode.js":137,"../vnode/is-vtext.js":138,"../vnode/is-widget.js":139,"./apply-properties":124,"global/document":120}],126:[function(require,module,exports){
+},{"../vnode/handle-thunk.js":132,"../vnode/is-vnode.js":135,"../vnode/is-vtext.js":136,"../vnode/is-widget.js":137,"./apply-properties":122,"global/document":118}],124:[function(require,module,exports){
 // Maps a virtual DOM tree onto a real DOM tree in an efficient manner.
 // We don't want to read all of the DOM nodes in the tree so we use
 // the in-order tree indexing to eliminate recursion down certain branches.
@@ -54446,7 +54352,7 @@ function ascending(a, b) {
     return a > b ? 1 : -1
 }
 
-},{}],127:[function(require,module,exports){
+},{}],125:[function(require,module,exports){
 var applyProperties = require("./apply-properties")
 
 var isWidget = require("../vnode/is-widget.js")
@@ -54599,7 +54505,7 @@ function replaceRoot(oldRoot, newRoot) {
     return newRoot;
 }
 
-},{"../vnode/is-widget.js":139,"../vnode/vpatch.js":142,"./apply-properties":124,"./update-widget":129}],128:[function(require,module,exports){
+},{"../vnode/is-widget.js":137,"../vnode/vpatch.js":140,"./apply-properties":122,"./update-widget":127}],126:[function(require,module,exports){
 var document = require("global/document")
 var isArray = require("x-is-array")
 
@@ -54679,7 +54585,7 @@ function patchIndices(patches) {
     return indices
 }
 
-},{"./create-element":125,"./dom-index":126,"./patch-op":127,"global/document":120,"x-is-array":122}],129:[function(require,module,exports){
+},{"./create-element":123,"./dom-index":124,"./patch-op":125,"global/document":118,"x-is-array":120}],127:[function(require,module,exports){
 var isWidget = require("../vnode/is-widget.js")
 
 module.exports = updateWidget
@@ -54696,7 +54602,7 @@ function updateWidget(a, b) {
     return false
 }
 
-},{"../vnode/is-widget.js":139}],130:[function(require,module,exports){
+},{"../vnode/is-widget.js":137}],128:[function(require,module,exports){
 'use strict';
 
 var EvStore = require('ev-store');
@@ -54725,7 +54631,7 @@ EvHook.prototype.unhook = function(node, propertyName) {
     es[propName] = undefined;
 };
 
-},{"ev-store":117}],131:[function(require,module,exports){
+},{"ev-store":115}],129:[function(require,module,exports){
 'use strict';
 
 module.exports = SoftSetHook;
@@ -54744,7 +54650,7 @@ SoftSetHook.prototype.hook = function (node, propertyName) {
     }
 };
 
-},{}],132:[function(require,module,exports){
+},{}],130:[function(require,module,exports){
 'use strict';
 
 var isArray = require('x-is-array');
@@ -54883,7 +54789,7 @@ function errorString(obj) {
     }
 }
 
-},{"../vnode/is-thunk":135,"../vnode/is-vhook":136,"../vnode/is-vnode":137,"../vnode/is-vtext":138,"../vnode/is-widget":139,"../vnode/vnode.js":141,"../vnode/vtext.js":143,"./hooks/ev-hook.js":130,"./hooks/soft-set-hook.js":131,"./parse-tag.js":133,"x-is-array":122}],133:[function(require,module,exports){
+},{"../vnode/is-thunk":133,"../vnode/is-vhook":134,"../vnode/is-vnode":135,"../vnode/is-vtext":136,"../vnode/is-widget":137,"../vnode/vnode.js":139,"../vnode/vtext.js":141,"./hooks/ev-hook.js":128,"./hooks/soft-set-hook.js":129,"./parse-tag.js":131,"x-is-array":120}],131:[function(require,module,exports){
 'use strict';
 
 var split = require('browser-split');
@@ -54939,7 +54845,7 @@ function parseTag(tag, props) {
     return props.namespace ? tagName : tagName.toUpperCase();
 }
 
-},{"browser-split":116}],134:[function(require,module,exports){
+},{"browser-split":114}],132:[function(require,module,exports){
 var isVNode = require("./is-vnode")
 var isVText = require("./is-vtext")
 var isWidget = require("./is-widget")
@@ -54981,14 +54887,14 @@ function renderThunk(thunk, previous) {
     return renderedThunk
 }
 
-},{"./is-thunk":135,"./is-vnode":137,"./is-vtext":138,"./is-widget":139}],135:[function(require,module,exports){
+},{"./is-thunk":133,"./is-vnode":135,"./is-vtext":136,"./is-widget":137}],133:[function(require,module,exports){
 module.exports = isThunk
 
 function isThunk(t) {
     return t && t.type === "Thunk"
 }
 
-},{}],136:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
 module.exports = isHook
 
 function isHook(hook) {
@@ -54997,7 +54903,7 @@ function isHook(hook) {
        typeof hook.unhook === "function" && !hook.hasOwnProperty("unhook"))
 }
 
-},{}],137:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = isVirtualNode
@@ -55006,7 +54912,7 @@ function isVirtualNode(x) {
     return x && x.type === "VirtualNode" && x.version === version
 }
 
-},{"./version":140}],138:[function(require,module,exports){
+},{"./version":138}],136:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = isVirtualText
@@ -55015,17 +54921,17 @@ function isVirtualText(x) {
     return x && x.type === "VirtualText" && x.version === version
 }
 
-},{"./version":140}],139:[function(require,module,exports){
+},{"./version":138}],137:[function(require,module,exports){
 module.exports = isWidget
 
 function isWidget(w) {
     return w && w.type === "Widget"
 }
 
-},{}],140:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 module.exports = "2"
 
-},{}],141:[function(require,module,exports){
+},{}],139:[function(require,module,exports){
 var version = require("./version")
 var isVNode = require("./is-vnode")
 var isWidget = require("./is-widget")
@@ -55099,7 +55005,7 @@ function VirtualNode(tagName, properties, children, key, namespace) {
 VirtualNode.prototype.version = version
 VirtualNode.prototype.type = "VirtualNode"
 
-},{"./is-thunk":135,"./is-vhook":136,"./is-vnode":137,"./is-widget":139,"./version":140}],142:[function(require,module,exports){
+},{"./is-thunk":133,"./is-vhook":134,"./is-vnode":135,"./is-widget":137,"./version":138}],140:[function(require,module,exports){
 var version = require("./version")
 
 VirtualPatch.NONE = 0
@@ -55123,7 +55029,7 @@ function VirtualPatch(type, vNode, patch) {
 VirtualPatch.prototype.version = version
 VirtualPatch.prototype.type = "VirtualPatch"
 
-},{"./version":140}],143:[function(require,module,exports){
+},{"./version":138}],141:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = VirtualText
@@ -55135,7 +55041,7 @@ function VirtualText(text) {
 VirtualText.prototype.version = version
 VirtualText.prototype.type = "VirtualText"
 
-},{"./version":140}],144:[function(require,module,exports){
+},{"./version":138}],142:[function(require,module,exports){
 var isObject = require("is-object")
 var isHook = require("../vnode/is-vhook")
 
@@ -55195,7 +55101,7 @@ function getPrototype(value) {
   }
 }
 
-},{"../vnode/is-vhook":136,"is-object":121}],145:[function(require,module,exports){
+},{"../vnode/is-vhook":134,"is-object":119}],143:[function(require,module,exports){
 var isArray = require("x-is-array")
 
 var VPatch = require("../vnode/vpatch")
@@ -55624,7 +55530,101 @@ function appendPatch(apply, patch) {
     }
 }
 
-},{"../vnode/handle-thunk":134,"../vnode/is-thunk":135,"../vnode/is-vnode":137,"../vnode/is-vtext":138,"../vnode/is-widget":139,"../vnode/vpatch":142,"./diff-props":144,"x-is-array":122}],146:[function(require,module,exports){
+},{"../vnode/handle-thunk":132,"../vnode/is-thunk":133,"../vnode/is-vnode":135,"../vnode/is-vtext":136,"../vnode/is-widget":137,"../vnode/vpatch":140,"./diff-props":142,"x-is-array":120}],144:[function(require,module,exports){
+
+},{}],145:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = setTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            currentQueue[queueIndex].run();
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    clearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        setTimeout(drainQueue, 0);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],146:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -55646,7 +55646,7 @@ _app.app.controller('admin.access_tokens.table', function ($scope, AccessToken) 
   $scope.access_token = AccessToken.get({ id: $state.params.access_token_id });
 });
 
-},{"../app":148,"notify-ui":109}],147:[function(require,module,exports){
+},{"../app":148,"notify-ui":107}],147:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -55698,7 +55698,7 @@ _app.app.controller('admin.administrators.table', function ($scope, Administrato
   };
 });
 
-},{"../app":148,"notify-ui":109}],148:[function(require,module,exports){
+},{"../app":148,"notify-ui":107}],148:[function(require,module,exports){
 /*jslint browser: true, esnext: true */
 'use strict';
 
@@ -56429,7 +56429,7 @@ app.directive('durationString', function () {
   };
 });
 
-},{"./misc-js-plugins":152,"angular":5,"angular-resource":2,"angular-ui-router":3,"checkbox-sequence":101,"flow-copy":103,"httprequest":104,"lodash":105,"moment":106,"ng-upload":107,"ngstorage":108,"notify-ui":109,"textarea":110,"urlobject":111,"virtual-dom":115}],149:[function(require,module,exports){
+},{"./misc-js-plugins":152,"angular":5,"angular-resource":2,"angular-ui-router":3,"checkbox-sequence":99,"flow-copy":101,"httprequest":102,"lodash":103,"moment":104,"ng-upload":105,"ngstorage":106,"notify-ui":107,"textarea":108,"urlobject":109,"virtual-dom":113}],149:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -56457,7 +56457,7 @@ _app.app.controller('admin.aws_accounts.table', function ($scope, AWSAccount) {
   $scope.$on('save', $scope.sync);
 });
 
-},{"../app":148,"notify-ui":109}],150:[function(require,module,exports){
+},{"../app":148,"notify-ui":107}],150:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -56474,6 +56474,14 @@ var _lodash2 = _interopRequireDefault(_lodash);
 var _app = require('../../app');
 
 var _notifyUi = require('notify-ui');
+
+/**
+interface Node {
+  children: Node[];
+}
+
+The `nodes` argument to each static function should implement the Node interface above.
+*/
 
 var Node = (function () {
   function Node() {
@@ -56679,21 +56687,44 @@ _app.app.controller('admin.experiments.edit.blocks', function ($scope, $q, $http
     var promise = parseTabularFile(file).then(function (records) {
       // and then add the blocks to the table
       var view_order = getNextViewOrder();
-      var new_blocks = records.map(function (context, i) {
+      var blocks_lookup = {};
+      // iterate through the given flat list of blocks.
+      records.forEach(function (context, i) {
         // block has properties like: context, template_id, view_order
         // handle templates that cannot be found simply by creating new ones
         // compute this outside because the promises are not guaranteed to execute in order
         // return Template.findOrCreate(context).then(template => {
-
-        return {
-          children: [],
+        var block = {
           experiment_id: $scope.experiment.id,
           context: context,
           view_order: view_order + i,
-          template_id: $scope.$storage.default_template_id
+          // created: assigned automatically
+          randomize: context.randomize === 'true',
+          // children is a UI-side abstraction
+          children: []
         };
+
+        if (context.quota) {
+          block.quota = parseInt(context.quota, 10);
+        }
+
+        // 1) if a node has a block_id field, add that node to a list of lookup-nodes
+        if (context.block_id) {
+          blocks_lookup[context.block_id] = block;
+        }
+        // 1b) otherwise, it should have a template_id
+        else {
+            block.template_id = $scope.$storage.default_template_id;
+          }
+        // 2a) if a node has a parent_block_id field, add it to that node's children
+        if (context.parent_block_id) {
+          blocks_lookup[context.parent_block_id].children.push(block);
+        }
+        // 2b) otherwise, add it to the root's children
+        else {
+            root.children.push(block);
+          }
       });
-      root.children = root.children.concat(new_blocks);
 
       return 'Added ' + records.length + ' blocks';
     }, function (err) {
@@ -56766,7 +56797,7 @@ _app.app.controller('admin.experiments.edit.blocks', function ($scope, $q, $http
   };
 });
 
-},{"../../app":148,"lodash":105,"notify-ui":109}],151:[function(require,module,exports){
+},{"../../app":148,"lodash":103,"notify-ui":107}],151:[function(require,module,exports){
 /*jslint browser: true, esnext: true */
 'use strict';
 
@@ -56811,7 +56842,7 @@ _app.app.controller('admin.experiments.table', function ($scope, $state, $locati
   $scope.site_url = _urlobject.Url.parse(window.location).merge({ path: '/' }).toString();
 });
 
-},{"../app":148,"notify-ui":109,"urlobject":111}],152:[function(require,module,exports){
+},{"../app":148,"notify-ui":107,"urlobject":109}],152:[function(require,module,exports){
 /*jslint browser: true, esnext: true */ /*globals angular, Event */
 /** Copyright 2012-2014, Christopher Brown <io@henrian.com>, MIT Licensed
 
@@ -56909,24 +56940,43 @@ var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
+_app.app.factory('appResourceCache', function ($cacheFactory) {
+  return $cacheFactory('appResourceCache');
+});
+
 _app.app.service('AccessToken', function ($resource) {
   return $resource('/api/access_tokens/:id', {
     id: '@id'
   });
-}).service('Administrator', function ($resource) {
+}).service('Administrator', function ($resource, appResourceCache) {
   // map: {'id': 'email'}
   return $resource('/api/administrators/:id', {
     id: '@id'
   }, {
+    get: {
+      method: 'GET',
+      cache: appResourceCache
+    },
     query: {
-      cache: true,
-      isArray: true
+      method: 'GET',
+      isArray: true,
+      cache: appResourceCache
     }
   });
-}).service('AWSAccount', function ($resource) {
+}).service('AWSAccount', function ($resource, appResourceCache) {
   // map: {'id': 'name'}
   return $resource('/api/aws_accounts/:id', {
     id: '@id'
+  }, {
+    get: {
+      method: 'GET',
+      cache: appResourceCache
+    },
+    query: {
+      method: 'GET',
+      isArray: true,
+      cache: appResourceCache
+    }
   });
 }).service('AWSAccountAdministrator', function ($resource) {
   return $resource('/api/administrators/:administrator_id/aws_accounts/:aws_account_id', {
@@ -56977,12 +57027,23 @@ _app.app.service('AccessToken', function ($resource) {
   };
 
   return Block;
-}).service('Template', function ($resource, $q) {
+}).service('Template', function ($resource, $q, appResourceCache) {
   // map: {'id': 'name'}
   var Template = $resource('/api/templates/:id', {
     id: '@id'
   }, {
-    // query: {method: 'GET', isArray: true, cache: true},
+    get: {
+      method: 'GET',
+      cache: appResourceCache
+    },
+    // save:   {
+    //   method: 'POST',
+    // },
+    query: {
+      method: 'GET',
+      isArray: true,
+      cache: appResourceCache
+    }
   });
 
   /**
@@ -56991,6 +57052,9 @@ _app.app.service('AccessToken', function ($resource) {
   templates and find one where `name` == `context.template`; otherwise, create
   a new Template with {name: `context.template`} and return it.
   */
+  // delete: {
+  //   method: 'DELETE',
+  // },
   Template.findOrCreate = function (context) {
     return $q(function (resolve, reject) {
       if (context.template_id !== undefined) {
@@ -57009,7 +57073,7 @@ _app.app.service('AccessToken', function ($resource) {
   return Template;
 });
 
-},{"./app":148,"lodash":105}],154:[function(require,module,exports){
+},{"./app":148,"lodash":103}],154:[function(require,module,exports){
 /*jslint browser: true, esnext: true */
 'use strict';
 
@@ -57541,7 +57605,7 @@ _app.app.controller('admin.mturk', function ($scope, $state, AWSAccount) {
   };
 });
 
-},{"../app":148,"angular":5,"cookiemonster":102,"lodash":105,"notify-ui":109,"urlobject":111}],155:[function(require,module,exports){
+},{"../app":148,"angular":5,"cookiemonster":100,"lodash":103,"notify-ui":107,"urlobject":109}],155:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -57581,7 +57645,7 @@ _app.app.controller('admin.responses.table', function ($scope, $localStorage, Re
   $scope.refresh();
 });
 
-},{"../app":148,"lodash":105}],156:[function(require,module,exports){
+},{"../app":148,"lodash":103}],156:[function(require,module,exports){
 /*jslint esnext: true */
 'use strict';
 
@@ -57622,7 +57686,7 @@ _app.app.controller('admin.templates.table', function ($scope, Template) {
   };
 });
 
-},{"../app":148,"notify-ui":109}],157:[function(require,module,exports){
+},{"../app":148,"notify-ui":107}],157:[function(require,module,exports){
 /*jslint esnext: true */
 
 // required for generators
