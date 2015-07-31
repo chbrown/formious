@@ -3,6 +3,13 @@ import _ from 'lodash';
 import {app} from '../../app';
 import {NotifyUI} from 'notify-ui';
 
+/**
+interface Node {
+  children: Node[];
+}
+
+The `nodes` argument to each static function should implement the Node interface above.
+*/
 class Node {
   /**
   Returns new Nodes
@@ -161,21 +168,44 @@ app
     var promise = parseTabularFile(file).then(records => {
       // and then add the blocks to the table
       var view_order = getNextViewOrder();
-      var new_blocks = records.map((context, i) => {
+      var blocks_lookup = {};
+      // iterate through the given flat list of blocks.
+      records.forEach((context, i) => {
         // block has properties like: context, template_id, view_order
         // handle templates that cannot be found simply by creating new ones
         // compute this outside because the promises are not guaranteed to execute in order
         // return Template.findOrCreate(context).then(template => {
-
-        return {
-          children: [],
+        var block = {
           experiment_id: $scope.experiment.id,
           context: context,
           view_order: view_order + i,
-          template_id: $scope.$storage.default_template_id,
+          // created: assigned automatically
+          randomize: context.randomize === 'true',
+          // children is a UI-side abstraction
+          children: [],
         };
+
+        if (context.quota) {
+          block.quota = parseInt(context.quota, 10);
+        }
+
+        // 1) if a node has a block_id field, add that node to a list of lookup-nodes
+        if (context.block_id) {
+          blocks_lookup[context.block_id] = block;
+        }
+        // 1b) otherwise, it should have a template_id
+        else {
+          block.template_id = $scope.$storage.default_template_id;
+        }
+        // 2a) if a node has a parent_block_id field, add it to that node's children
+        if (context.parent_block_id) {
+          blocks_lookup[context.parent_block_id].children.push(block);
+        }
+        // 2b) otherwise, add it to the root's children
+        else {
+          root.children.push(block);
+        }
       });
-      root.children = root.children.concat(new_blocks);
 
       return `Added ${records.length} blocks`;
     }, err => {
