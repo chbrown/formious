@@ -3,26 +3,46 @@ import {app} from './app';
 import _ from 'lodash';
 
 app
+.factory('appResourceCache', function($cacheFactory) {
+  return $cacheFactory('appResourceCache');
+});
+
+app
 .service('AccessToken', function($resource) {
   return $resource('/api/access_tokens/:id', {
     id: '@id',
   });
 })
-.service('Administrator', function($resource) {
+.service('Administrator', function($resource, appResourceCache) {
   // map: {'id': 'email'}
   return $resource('/api/administrators/:id', {
     id: '@id',
   }, {
-    query: {
-      cache: true,
+    get: {
+      method: 'GET',
+      cache: appResourceCache,
+    },
+    query:  {
+      method: 'GET',
       isArray: true,
-    }
+      cache: appResourceCache,
+    },
   });
 })
-.service('AWSAccount', function($resource) {
+.service('AWSAccount', function($resource, appResourceCache) {
   // map: {'id': 'name'}
   return $resource('/api/aws_accounts/:id', {
     id: '@id',
+  }, {
+    get: {
+      method: 'GET',
+      cache: appResourceCache,
+    },
+    query:  {
+      method: 'GET',
+      isArray: true,
+      cache: appResourceCache,
+    },
   });
 })
 .service('AWSAccountAdministrator', function($resource) {
@@ -80,12 +100,26 @@ app
 
   return Block;
 })
-.service('Template', function($resource, $q) {
+.service('Template', function($resource, $q, appResourceCache) {
   // map: {'id': 'name'}
   var Template = $resource('/api/templates/:id', {
     id: '@id',
   }, {
-    // query: {method: 'GET', isArray: true, cache: true},
+    get: {
+      method: 'GET',
+      cache: appResourceCache,
+    },
+    // save:   {
+    //   method: 'POST',
+    // },
+    query:  {
+      method: 'GET',
+      isArray: true,
+      cache: appResourceCache,
+    },
+    // delete: {
+    //   method: 'DELETE',
+    // },
   });
 
   /**
