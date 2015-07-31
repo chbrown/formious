@@ -140,10 +140,10 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
       db.InsertOne('blocks')
       .set(fields)
       .returning('*')
-      .execute(function(err, block) {
+      .execute(function(err, full_block) {
         if (err) return callback(err);
         // update by reference
-        _.assign(block, block);
+        _.assign(block, full_block);
         // okay, all blocks should have .id fields now; ready to move on
         callback();
       });
@@ -171,9 +171,13 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
       async.each(all_blocks, function(block, callback) {
         var fields = _.pick(block, blocks_columns);
 
+
         db.Update('blocks')
         .setEqual(fields)
-        .whereEqual({id: block.id})
+        .whereEqual({
+          // careful, if block.id is null/undefined, this could wreak havoc!
+          id: block.id || 0
+        })
         .execute(callback);
       }, function(err) {
         if (err) return res.die(err);
