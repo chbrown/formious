@@ -1,7 +1,6 @@
 /// <reference path="../type_declarations/index.d.ts" />
 var _ = require('lodash');
 var async = require('async');
-var loge_1 = require('loge');
 var db = require('../db');
 var tree = require('../lib/tree');
 var Block = (function () {
@@ -41,11 +40,12 @@ var Block = (function () {
     callback(null, null)             // no more blocks in experiment
     */
     Block.nextBlockId = function (experiment_id, block_id, participant_id, callback) {
-        db.query("SELECT blocks.*, participant_responses.created AS completed FROM blocks\n      LEFT OUTER JOIN (SELECT DISTINCT ON (block_id) * FROM responses WHERE responses.participant_id = $1)\n        AS participant_responses ON participant_responses.block_id = blocks.id\n      WHERE blocks.experiment_id = $2\n      ORDER BY view_order ASC\n    ", [participant_id, experiment_id], function (err, blocks) {
+        // this query is fast in the database (like 3ms) but can take much longer in javascript (like 25ms)
+        // if we're requesting the whole block row, with its bulky context, so we
+        // only select the columns we need
+        db.query("SELECT blocks.id, blocks.template_id, blocks.template_id, blocks.randomize, blocks.quota,\n        blocks.parent_block_id, blocks.view_order, participant_responses.created AS completed FROM blocks\n      LEFT OUTER JOIN (SELECT DISTINCT ON (block_id) * FROM responses WHERE responses.participant_id = $1)\n        AS participant_responses ON participant_responses.block_id = blocks.id\n      WHERE blocks.experiment_id = $2\n      ORDER BY view_order ASC\n    ", [participant_id, experiment_id], function (err, blocks) {
             if (err)
                 return callback(err);
-            loge_1.logger.info('nextBlockId: experiment_id=%j block_id=%j participant_id=%j', experiment_id, block_id, participant_id);
-            // logger.info('blocks: %s', JSON.stringify(blocks, null, '  '));
             // should id = null?
             var root = {
                 id: null,
@@ -53,9 +53,7 @@ var Block = (function () {
                 children: Block.shapeTree(blocks),
             };
             function findBlock(id) {
-                return tree.recursiveFind([root], function (block) {
-                    return block.id === id;
-                });
+                return tree.recursiveFind([root], function (block) { return block.id === id; });
             }
             // we need to get the parent_block_id of the most_recent block
             var most_recent_block = findBlock(block_id);
@@ -64,7 +62,6 @@ var Block = (function () {
                 return callback(new Error("Block with id=" + block_id + " cannot be found."));
             }
             // var current_parent_block_id = most_recent_block.parent_block_id;
-            loge_1.logger.info('most_recent_block: %j', most_recent_block);
             // 1. get the path of block ids (only ids, since we mutate the tree when
             //    pruning) from the parent of the most recent block to the root.
             /**
@@ -86,9 +83,7 @@ var Block = (function () {
                 if (next_parent_block === root) {
                     return false;
                 }
-                loge_1.logger.info('next_parent_block id=%j', next_parent_block.id);
                 var completed_children = next_parent_block.children.filter(function (block) { return !!block.completed; });
-                loge_1.logger.info('next_parent_block children.length=%d completed_children.length=%d quota=%d', next_parent_block.children.length, completed_children.length, next_parent_block.quota);
                 if (completed_children.length == next_parent_block.children.length) {
                     return true;
                 }
@@ -114,31 +109,76 @@ var Block = (function () {
                     return callback(error);
                 // ok, current_path is either empty or current_path[0] is the next block we should do
                 var next_parent_block = current_path[0];
-                loge_1.logger.info('after whilst next_parent_block id=%j', next_parent_block);
-                // 3. recurse downward and randomize as needed
-                function findNextBlock(parent_block) {
-                    var incomplete_children_blocks = parent_block.children.filter(function (block) { return !block.completed; });
-                    // if next_parent_block was `root` all the children might be completed
-                    if (incomplete_children_blocks.length === 0) {
-                        // so, we've completed all there is to complete!
-                        return null;
-                    }
-                    var next_block;
-                    if (parent_block.randomize) {
-                        // _.sample called with a single argument returns a single item, not a list
-                        next_block = _.sample(incomplete_children_blocks);
-                    }
-                    else {
-                        next_block = _.first(incomplete_children_blocks);
-                    }
-                    // only return blocks with a template_id field
-                    return next_block.template_id ? next_block.id : findNextBlock(next_block);
-                }
-                var next_block_id = findNextBlock(next_parent_block);
-                return callback(null, next_block_id);
+                // 3. recurse downward and randomize as needed. this is async since we
+                // may need to query past responses when randomizing
+                // var next_parent_block = next_parent_block;
+                // var next_block_id = findNextBlock(next_parent_block);
+                // async.whilst(() => {
+                (function next(next_parent_block) {
+                    nextChildBlock(next_parent_block, function (error, next_block) {
+                        if (error)
+                            return callback(error);
+                        // if there are no more blocks to do, next_block will be null
+                        if (next_block === null) {
+                            return callback(null, null);
+                        }
+                        // only return blocks with a template_id field
+                        if (next_block.template_id) {
+                            callback(null, next_block.id);
+                        }
+                        else {
+                            next(next_block);
+                        }
+                    });
+                })(next_parent_block);
             });
         });
     };
     return Block;
 })();
+function nextChildBlock(parent_block, callback) {
+    var incomplete_child_blocks = parent_block.children.filter(function (block) { return !block.completed; });
+    // if next_parent_block was `root` all the children might be completed
+    if (incomplete_child_blocks.length === 0) {
+        // so, we've completed all there is to complete!
+        return callback(null, null);
+    }
+    if (parent_block.randomize) {
+        if (parent_block.quota !== null) {
+            var incomplete_child_block_ids = incomplete_child_blocks.map(function (block) { return block.id; });
+            // find the next candidate that has the fewest completions
+            db.Select('responses')
+                .add('block_id, COUNT(id)::int')
+                .where('block_id = ANY(?)', incomplete_child_block_ids)
+                .groupBy('block_id')
+                .execute(function (error, counts) {
+                if (error)
+                    return callback(error);
+                var block_counts = _.zipObject(counts.map(function (count) { return [count.block_id, count.count]; }));
+                // it's possible there are no responses for any of the candidate blocks
+                incomplete_child_blocks.forEach(function (block) {
+                    block.responses = block_counts[block.id] || 0;
+                });
+                var minimum_count = _.min(incomplete_child_blocks.map(function (block) { return block.responses; }));
+                var candidate_child_blocks = incomplete_child_blocks.filter(function (block) { return block.responses == minimum_count; });
+                //
+                var next_block = _.sample(candidate_child_blocks);
+                callback(null, next_block);
+            });
+        }
+        else {
+            setImmediate(function () {
+                // _.sample called with a single argument returns a single item, not a list
+                var next_block = _.sample(incomplete_child_blocks);
+                callback(null, next_block);
+            });
+        }
+    }
+    else {
+        setImmediate(function () {
+            var next_block = _.first(incomplete_child_blocks);
+            callback(null, next_block);
+        });
+    }
+}
 module.exports = Block;
