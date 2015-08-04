@@ -57617,7 +57617,7 @@ var _lodash2 = _interopRequireDefault(_lodash);
 
 var _app = require('../app');
 
-_app.app.controller('admin.responses.table', function ($scope, $localStorage, Response, Template, Experiment) {
+_app.app.controller('admin.responses.table', function ($scope, $timeout, $localStorage, Response, Template, Experiment) {
   $scope.$storage = $localStorage.$default({
     responses_query: {
       order_column: 'created',
@@ -57642,7 +57642,7 @@ _app.app.controller('admin.responses.table', function ($scope, $localStorage, Re
       $scope.value_keys = _lodash2['default'].chain($scope.responses).pluck('value').map(_lodash2['default'].keys).flatten().uniq().without('$$hashKey').value();
     });
   };
-  $scope.refresh();
+  $scope.$watch('$storage.responses_query', _lodash2['default'].debounce($scope.refresh, 500), true);
 });
 
 },{"../app":148,"lodash":103}],156:[function(require,module,exports){

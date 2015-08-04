@@ -37,14 +37,11 @@
         <input ng-model="$storage.responses_query.limit" type="number">
       </div>
     </div>
-    <section>
-      <button>Refresh</button>
-    </section>
   </form>
 </section>
 
 <section class="hpad">
-  <p>Showing {{responses.length}} out of {{responses[0].count || 0}} responses</p>
+  <p>Showing {{responses.length}} out of {{responses.length === 0 ? 0 : (responses[0].count ? responses[0].count : 'N/A')}} responses</p>
 </section>
 
 <section class="box">

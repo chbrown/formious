@@ -3,7 +3,7 @@ import _ from 'lodash';
 import {app} from '../app';
 
 app
-.controller('admin.responses.table', ($scope, $localStorage, Response, Template, Experiment) => {
+.controller('admin.responses.table', ($scope, $timeout, $localStorage, Response, Template, Experiment) => {
   $scope.$storage = $localStorage.$default({
     responses_query: {
       order_column: 'created',
@@ -30,5 +30,5 @@ app
         .pluck('value').map(_.keys).flatten().uniq().without('$$hashKey').value();
     });
   };
-  $scope.refresh();
+  $scope.$watch('$storage.responses_query', _.debounce($scope.refresh, 500), true);
 });
