@@ -7,6 +7,7 @@ var logger = require('loge').logger;
 var Router = require('regex-router');
 var url = require('url');
 
+var adapt = require('../lib/adapt');
 var db = require('../db');
 var models = require('../models');
 
@@ -187,7 +188,11 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
     .execute(function(err, responses) {
       if (err) return res.die(err);
 
-      var writer = req.createWriter();
+      var accept = urlObj.query.accept || req.headers.accept || 'application/json; boundary=LF';
+      var writer = adapt.createTransform(accept);
+      if (writer.content_type) {
+        res.setHeader('Content-Type', writer.content_type);
+      }
       writer.pipe(res);
       responses.forEach(function(response) {
         var response_object = {
@@ -200,7 +205,8 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
         };
         // merge those static values with the dynamic context and value objects,
         // using _.defaults so that further-left arguments have priority
-        var row = _.defaults(response.value, response_object, response.context);
+        // if value is null, that will stall the writer, which we don't want
+        var row = _.defaults(response.value || {}, response_object, response.context);
         writer.write(row);
       });
       writer.end();
