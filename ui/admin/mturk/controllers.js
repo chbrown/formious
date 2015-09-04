@@ -5,7 +5,7 @@ import {app, sendTurkRequest} from '../app';
 import {Url} from 'urlobject';
 import {CookieMonster} from 'cookiemonster';
 import {NotifyUI} from 'notify-ui';
-
+import {toArray} from 'arrays';
 
 const cookie_defaults = {
   path: '/',
@@ -68,6 +68,7 @@ function parseAnswer(answer_escaped) {
   var answer_doc = new DOMParser().parseFromString(answer_xml, 'text/xml');
   var pairs = _.map(answer_doc.querySelectorAll('Answer'), function(Answer) {
     var key = Answer.querySelector('QuestionIdentifier').textContent;
+    // TODO: handle other types of values besides FreeText
     var value = Answer.querySelector('FreeText').textContent;
     return [key, value];
   });
@@ -246,7 +247,7 @@ app
     }
   });
 })
-.controller('admin.mturk.hits.edit', function($scope, $localStorage, $state, $q, $turk) {
+.controller('admin.mturk.hits.edit', function($scope, $localStorage, $state, $q, $turk, Response) {
   $scope.$storage = $localStorage.$default({
     assignments_limit: 10,
     responses_summarizer: 'return responses;',
@@ -256,9 +257,11 @@ app
     },
   });
 
+  var HITId = $state.params.HITId;
+
   $turk({
     Operation: 'GetHIT',
-    HITId: $state.params.HITId,
+    HITId,
   }).then(function(document) {
     // document is a Document instance with GetHITResponse as its root element
     var HIT = document.querySelector('HIT');
@@ -267,13 +270,13 @@ app
 
   $turk({
     Operation: 'GetAssignmentsForHIT',
-    HITId: $state.params.HITId,
+    HITId,
     PageSize: 100,
     SortProperty: 'SubmitTime',
     SortDirection: 'Ascending',
-  }).then(function(document) {
+  }).then(document => {
     // document is a Document instance, with GetAssignmentsForHITResponse as its root element
-    $scope.assignments = _.map(document.querySelectorAll('Assignment'), function(Assignment) {
+    $scope.assignments = _.map(document.querySelectorAll('Assignment'), Assignment => {
       var assignment_json = nodesToJSON(Assignment.children);
       assignment_json.Answer = parseAnswer(assignment_json.Answer);
       return assignment_json;
@@ -281,18 +284,43 @@ app
   });
 
   $scope.ExtendHIT = function() {
-    var data = _.extend({HITId: HITId}, $scope.extension);
-    var promise = HIT.ExtendHIT(data).$promise.then(function() {
+    var promise = $turk({
+      Operation: 'ExtendHIT',
+      HITId,
+      MaxAssignmentsIncrement: $scope.extension.MaxAssignmentsIncrement,
+      ExpirationIncrement: $scope.extension.ExpirationIncrement,
+    }).then(ExtendHITResponse => {
+      console.log('ExtendHITResponse', ExtendHITResponse);
       return 'Extended';
     });
-    NotifyUI.addPromise(promise);
+    NotifyUI.addPromise(promise, 'Extending HIT');
   };
 
   $scope.import = function() {
-    var promise = HIT.import({HITId: HITId}).$promise.then(function(res) {
-      return res.message || 'Imported';
+    var promises = $scope.assignments.map(assignment => {
+      // toArray(doc.querySelectorAll('Assignment')).map(Assignment => {
+      var params = _.assign({
+        value: _.pick(assignment, 'HITId', 'AutoApprovalTime', 'AcceptTime', 'SubmitTime', 'ApprovalTime'),
+        assignment_id: assignment.AssignmentId,
+        // block_id isn't required, but if it's provided, it had better be an actual stim!
+        block_id: assignment.Answer.block_id,
+        aws_worker_id: assignment.WorkerId,
+      }, assignment.Answer);
+      console.log('assignment params', params);
+
+      var response = new Response(params);
+      return response.$save().then(res => {
+        return {response: res};
+      }, res => {
+        // err.message.match(/duplicate key value violates unique constraint/))
+        return {error: `Error: ${res.toString()}`};
+      });
     });
-    NotifyUI.addPromise(promise);
+    var promise = $q.all(promises).then(results => {
+      var errors = results.filter(result => result.error);
+      return `Imported ${results.length - errors.length} out of ${results.length} assignments (${errors.length} duplicates)`;
+    });
+    NotifyUI.addPromise(promise, 'Importing assignments');
   };
 
   QualificationType.query({}, (err, document) => {

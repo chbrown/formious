@@ -1,5 +1,7 @@
+var _ = require('lodash');
 var Router = require('regex-router');
 var db = require('../../db');
+var models = require('../../models');
 var url = require('url');
 
 var R = new Router();
@@ -52,6 +54,25 @@ R.get(/^\/api\/responses\/(\d+)$/, function(req, res, m) {
   .execute(function(err, response) {
     if (err) return res.die(err);
     res.json(response);
+  });
+});
+
+/**
+POST /api/responses
+*/
+R.post(/^\/api\/responses$/, function(req, res) {
+  req.readData(function(err, data) {
+    if (err) return res.die(err);
+
+    var response = _.pick(data, ['participant_id', 'block_id', 'value', 'assignment_id']);
+
+    models.Participant.addResponse({
+      aws_worker_id: data.aws_worker_id,
+    }, response, function(err, participant, response) {
+      if (err) return res.die(err);
+
+      res.json(response);
+    });
   });
 });
 

@@ -21,6 +21,7 @@
     "angular": "*",
     "angular-resource": "*",
     "angular-ui-router": "*",
+    "arrays": "chbrown/arrays",
     "async": "*",
     "checkbox-sequence": "*",
     "cookiemonster": "*",

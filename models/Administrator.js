@@ -53,6 +53,7 @@ Administrator.authenticate = function(email, password, callback) {
   })
   .execute(function(err, administrator) {
     if (err) return callback(err);
+    if (!administrator) return callback(new Error('Authentication failed'));
 
     AccessToken.findOrCreate('administrators', administrator.id, {length: 40}, function(err, access_token) {
       if (err) return callback(err);

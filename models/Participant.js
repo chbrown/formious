@@ -38,13 +38,13 @@ Participant.addResponse = function(participant, response, callback) {
     if (err) return callback(err);
 
     response.participant_id = participant.id;
-    db.Insert('responses')
+    db.InsertOne('responses')
     .set(response)
     .returning('*')
-    .execute(function(err, responses) {
+    .execute(function(err, response) {
       if (err) return callback(err);
 
-      callback(err, participant, responses);
+      callback(err, participant, response);
     });
   });
 };
