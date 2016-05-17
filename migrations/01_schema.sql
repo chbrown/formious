@@ -55,7 +55,7 @@ CREATE TABLE experiments (
 
   name TEXT,
   -- slug TEXT,
-  administrator_id INTEGER REFERENCES administrators(id) ON DELETE CASCADE NOT NULL , -- owner
+  administrator_id INTEGER REFERENCES administrators(id) ON DELETE CASCADE NOT NULL, -- owner
   html TEXT, -- to be included on every page, at the top of the <body>
 
   -- `parameters` should match the keys of each stim's `context` object, or most of them
