@@ -5,7 +5,8 @@ var loge = require('loge');
 var db = require('../db');
 var server = require('../server');
 
-var yargs = require('yargs')
+var argvparser = require('optimist')
+  .usage("node_restarter 'bin/formious --port 1451 -v'")
   .describe({
     hostname: 'hostname to listen on',
     port: 'port to listen on',
@@ -13,7 +14,6 @@ var yargs = require('yargs')
     verbose: 'print extra output',
     version: 'print version',
   })
-  .example("node_restarter 'bin/formious --port 1451 -v'")
   .boolean(['help', 'verbose', 'version'])
   .alias({verbose: 'v'})
   .default({
@@ -22,11 +22,11 @@ var yargs = require('yargs')
     verbose: process.env.DEBUG !== undefined,
   });
 
-var argv = yargs.argv;
+var argv = argvparser.argv;
 loge.logger.level = argv.verbose ? loge.Level.debug : loge.Level.info;
 
 if (argv.help) {
-  yargs.showHelp();
+  argvparser.showHelp();
 }
 else if (argv.version) {
   console.log(require('../package').version);
