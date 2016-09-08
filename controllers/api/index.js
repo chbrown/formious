@@ -9,7 +9,6 @@ R.any(/^\/api\/administrators/, require('./administrators'));
 R.any(/^\/api\/aws_accounts/, require('./aws_accounts'));
 R.any(/^\/api\/experiments/, require('./experiments'));
 R.any(/^\/api\/mturk/, require('./mturk'));
-R.any(/^\/api\/participants/, require('./participants'));
 R.any(/^\/api\/responses/, require('./responses'));
 R.any(/^\/api\/templates/, require('./templates'));
 
