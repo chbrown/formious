@@ -1,4 +1,3 @@
-/// <reference path="../type_declarations/index.d.ts" />
 import _ = require('lodash');
 import async = require('async');
 import {logger} from 'loge';

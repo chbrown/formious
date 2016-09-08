@@ -21,7 +21,6 @@
     "angular": "*",
     "angular-resource": "*",
     "angular-ui-router": "*",
-    "arrays": "chbrown/arrays",
     "async": "*",
     "checkbox-sequence": "*",
     "cookiemonster": "*",
@@ -34,14 +33,15 @@
     "lodash": "*",
     "loge": "*",
     "moment": "*",
-    "ngstorage": "gsklee/ngStorage",
+    "ngstorage": "*",
     "ng-upload": "*",
     "notify-ui": "*",
-    "regex-router": "*",
+    "regex-router": "^0.2.0",
     "send": "*",
     "sqlcmd-pg": "*",
     "streaming": "*",
     "sv": "*",
+    "tarry": "*",
     "textarea": "*",
     "turk": "~0.6.0",
     "urlobject": "*",
@@ -49,20 +49,17 @@
     "xlsx": "*",
     "xmldom": "0.1.19",
     "xpath": "0.0.9",
-    "yargs": "*"
+    "optimist": "*"
   },
   "devDependencies": {
     "babel": "*",
     "babelify": "*",
     "browserify": "*",
     "clean-css": "*",
+    "declarations": "*",
     "less": "*",
     "mocha": "*",
     "watchify": "*",
     "watsh": "*"
-  },
-  "staticPattern": "public/{file}",
-  "staticDependencies": {
-    "jquery": "*"
   }
 }

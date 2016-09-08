@@ -1,12 +1,6 @@
 BIN := node_modules/.bin
-DTS := async/async lodash/lodash node/node
 
-all: ui/build/bundle.js ui/build/bundle.min.js ui/site.css type_declarations
-type_declarations: $(DTS:%=type_declarations/DefinitelyTyped/%.d.ts)
-
-type_declarations/DefinitelyTyped/%:
-	mkdir -p $(@D)
-	curl -s https://raw.githubusercontent.com/borisyankov/DefinitelyTyped/master/$* > $@
+all: ui/build/bundle.js ui/build/bundle.min.js ui/site.css
 
 $(BIN)/lessc $(BIN)/cleancss $(BIN)/browserify $(BIN)/watsh $(BIN)/tsc:
 	npm install
