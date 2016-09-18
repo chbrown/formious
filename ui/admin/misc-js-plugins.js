@@ -1,9 +1,7 @@
-/*jslint browser: true, esnext: true */ /*globals angular, Event */
+/*globals angular */
 /** Copyright 2012-2014, Christopher Brown <io@henrian.com>, MIT Licensed
 
 https://raw.github.com/chbrown/misc-js/master/angular-plugins.js
-
-jslint with 'browser: true' really ought to recognize 'Event' as a global type
 
 */
 export var misc_js_plugins = angular.module('misc-js-plugins', [])

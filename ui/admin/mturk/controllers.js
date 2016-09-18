@@ -5,7 +5,6 @@ import {app, sendTurkRequest} from '../app';
 import {Url} from 'urlobject';
 import {CookieMonster} from 'cookiemonster';
 import {NotifyUI} from 'notify-ui';
-import {toArray} from 'arrays';
 
 const cookie_defaults = {
   path: '/',

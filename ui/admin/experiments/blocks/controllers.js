@@ -1,4 +1,3 @@
-/*jslint esnext: true */
 import _ from 'lodash';
 import {app} from '../../app';
 import {NotifyUI} from 'notify-ui';
@@ -35,12 +34,12 @@ class Node {
 
   This is a search function, and doesn't copy anything, because it doesn't change anything.
   */
-  static* recursiveSearch(nodes, predicateFunction) {
+  static* depthFirstSearch(nodes, predicateFunction) {
     for (var node, i = 0; (node = nodes[i]); i++) {
       if (predicateFunction(node)) {
         yield node;
       }
-      yield* Node.recursiveSearch(node.children, predicateFunction);
+      yield* Node.depthFirstSearch(node.children, predicateFunction);
     }
   }
 }
@@ -79,7 +78,7 @@ app
 
   $scope.$on('collapseBlock', function(ev, collapsed_block) {
     // 1. find the parent of the collapsed_block
-    var parent_block = Node.recursiveSearch([root],
+    var parent_block = Node.depthFirstSearch([root],
       block => block.children.includes(collapsed_block)).next().value;
     // 2. add the collapsed_block's children to the parent
     parent_block.children = parent_block.children.concat(collapsed_block.children);
@@ -91,7 +90,7 @@ app
   Move the selected blocks into a new block of their own.
   */
   $scope.groupSelectedBlocks = function() {
-    var selected_blocks = Array.from(Node.recursiveSearch(root.children, block => block.selected));
+    var selected_blocks = Array.from(Node.depthFirstSearch(root.children, block => block.selected));
     if (selected_blocks.length === 0) {
       throw new Error('Cannot group empty selection');
     }
@@ -100,7 +99,7 @@ app
     // 1. if the selected blocks all have the same parent block, group them
     //   inside it, otherwise, group them inside the root block.
     var original_parent_blocks = selected_blocks.map(selected_block => {
-      return Node.recursiveSearch([root],
+      return Node.depthFirstSearch([root],
         block => block.children.includes(selected_block)).next().value;
     });
     // determine if all the items in original_parent_blocks are the same
