@@ -7,7 +7,7 @@ $(BREW_PATH)/fswatch:
 	brew install fswatch
 
 $(NODE_PATH)/lessc $(NODE_PATH)/cleancss $(NODE_PATH)/webpack: # $(NODE_PATH)/tsc
-	npm install
+	npm install less postcss-cli webpack autoprefixer
 
 %.css: %.less $(NODE_PATH)/lessc $(NODE_PATH)/postcss $(NODE_PATH)/cleancss
 	$(NODE_PATH)/lessc $< |\
