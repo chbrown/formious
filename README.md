@@ -45,7 +45,13 @@ To update, pull the latest image and remove the running container:
 
 Then enter the same `docker run` command as before.
 
+Update, stop, and redeploy all in one go:
+
+    docker pull chbrown/formious && \
+      docker rm -f app && \
+      docker run -d -e VIRTUAL_HOST=formious.com --link db:db --restart always --name app chbrown/formious
+
 
 ## License
 
-Copyright 2011–2015 Christopher Brown. [MIT Licensed](http://chbrown.github.io/licenses/MIT/#2011-2015).
+Copyright 2011-2016 Christopher Brown. [MIT Licensed](http://chbrown.github.io/licenses/MIT/#2011-2016).

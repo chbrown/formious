@@ -1,0 +1,51 @@
+{
+  "name": "formious",
+  "description": "Experimental experience server",
+  "keywords": [
+    "forms",
+    "surveys"
+  ],
+  "version": "0.4.0",
+  "homepage": "https://github.com/chbrown/formious",
+  "repository": "git://github.com/chbrown/formious.git",
+  "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
+  "license": "MIT",
+  "dependencies": {
+    "angular": "1.5.8",
+    "angular-resource": "1.5.8",
+    "angular-ui-router": "0.3.0",
+    "checkbox-sequence": "*",
+    "cookies": "chbrown/cookies",
+    "cookiemonster": "*",
+    "flow-copy": "*",
+    "httprequest": "*",
+    "lodash": "^3",
+    "moment": "2.13.0",
+    "ngstorage": "*",
+    "ng-upload": "*",
+    "notify-ui": "*",
+    "textarea": "0.2.1",
+    "urlobject": "*",
+    "virtual-dom": "*"
+  },
+  "devDependencies": {
+    "autoprefixer": "*",
+    "babel-core": "*",
+    "babel-loader": "*",
+    "babel-polyfill": "*",
+    "babel-preset-react": "*",
+    "babel-preset-es2015": "*",
+    "clean-css": "*",
+    "css-loader": "*",
+    "less": "*",
+    "less-loader": "*",
+    "postcss-cli": "*",
+    "style-loader": "*",
+    "webpack": "*"
+  },
+  "babel": {
+    "presets": [
+      "es2015"
+    ]
+  }
+}
