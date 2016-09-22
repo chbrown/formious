@@ -29,6 +29,9 @@ scalacOptions ++= Seq(
   "-language:implicitConversions",
   "-language:postfixOps")
 
+// lint
+//scalacOptions ++= Seq("-Ywarn-unused", "-Ywarn-unused-import")
+
 // expose build information to sources
 lazy val root = (project in file(".")).
   enablePlugins(BuildInfoPlugin).
