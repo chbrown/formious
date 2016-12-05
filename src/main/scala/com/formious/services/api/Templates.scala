@@ -1,73 +1,52 @@
 package com.formious.services.api
 
+import io.circe.generic.auto._
+import io.circe.syntax.EncoderOps
+
 import com.formious.models.Template
-import scalikejdbc.{delete => _, _}
-import io.finch._
+import com.formious.common.Encoders._
+import com.formious.common.Decoders._
+
+import org.http4s._
+import org.http4s.dsl._
+import org.http4s.circe._
 
 object Templates {
-  /** GET /api/templates
-  List all templates. */
-  val listTemplates: Endpoint[List[Template]] = get(/) {
-    Ok(Template.all())
+  case class TemplateData(name: String,
+                          html: String)
+
+  val service = HttpService {
+    case GET -> Root =>
+      // List all templates
+      Ok(Template.all.asJson)
+    case GET -> Root / "new" =>
+      // Generate blank template
+      Ok(TemplateData("", "").asJson)
+    case request @ POST -> Root =>
+      // Create new template
+      request.as(jsonOf[TemplateData]).flatMap { bodyTemplate =>
+        val TemplateData(name, html) = bodyTemplate
+        val template = Template.create(name, html)
+        // if (err.message && err.message.match(/duplicate key value violates unique constraint/)) {
+        //   // 303 is a "See other" and SHOULD include a Location header
+        //   return res.status(303).die('Template already exists')
+        // }
+        Created(template.asJson)
+      }
+    case GET -> Root / IntVar(id) =>
+      // Show existing template
+      val template = Template.find(id)
+      Ok(template.asJson).putHeaders(Header("Cache-Control", "max-age=5"))
+    case request @ POST -> Root / IntVar(id) =>
+      // Update existing template
+      request.as(jsonOf[Template]).flatMap { bodyTemplate =>
+        val Template(_, name, html, _) = bodyTemplate
+        Template.update(id, name, html)
+        NoContent()
+      }
+    case DELETE -> Root / IntVar(id) =>
+      // Delete existing template
+      Template.delete(id)
+      NoContent()
   }
-
-  /** GET /api/templates/new
-  Generate blank template. */
-  val newTemplate: Endpoint[Template] = get("new") {
-    Ok(Template.empty)
-  }
-
-  private val settableParams = param("name") :: param("html")
-
-  /** POST /api/templates
-  Create new template. */
-  val createTemplate: Endpoint[Template] = post(settableParams) { (name: String, html: String) =>
-    // if (err.message && err.message.match(/duplicate key value violates unique constraint/)) {
-    //   // 303 is a "See other" and SHOULD include a Location header
-    //   return res.status(303).die('Template already exists')
-    // }
-    val template = DB.localTx { implicit session =>
-      withSQL {
-        insert.into(Template).namedValues(
-          Template.column.name -> name,
-          Template.column.html -> html
-        ).append(sqls"RETURNING *")
-      }.map(Template(_)).single.apply().get
-    }
-    Created(template)
-  }
-
-  /** GET /api/templates/:id
-  Show existing template. */
-  val showTemplate: Endpoint[Template] = get(int) { (id: Int) =>
-    Ok(Template.find(id)).withHeader("Cache-Control", "max-age=5")
-  }
-
-  /** POST /api/templates/:id
-  Update existing template. */
-  val updateTemplate: Endpoint[Unit] = post(int :: settableParams) { (id: Int, name: String, html: String) =>
-    DB.localTx { implicit session =>
-      withSQL {
-        update(Template).set(
-          Template.column.name -> name,
-          Template.column.html -> html
-        ).where.eq(Template.column.id, id)
-      }.update.apply()
-    }
-    NoContent[Unit]
-  }
-
-  /** DELETE /api/templates/:id
-  Delete existing template. */
-  val deleteTemplate: Endpoint[Unit] = post(int) { (id: Int) =>
-    DB.localTx { implicit session =>
-      withSQL {
-        deleteFrom(Template).where.eq(Template.column.id, id)
-      }.update.apply()
-    }
-    NoContent[Unit]
-  }
-
-  val endpoint = "templates" ::
-    (listTemplates :+: newTemplate :+: showTemplate :+: updateTemplate :+: deleteTemplate)
 }

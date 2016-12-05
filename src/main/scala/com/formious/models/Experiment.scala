@@ -1,7 +1,9 @@
 package com.formious.models
 
 import java.time.ZonedDateTime
-import scalikejdbc._, jsr310._
+import java.sql.ResultSet
+import com.formious.common.Database.{query, execute}
+import com.formious.common.Recoders._
 
 case class Experiment(id: Int,
                       name: String,
@@ -9,27 +11,46 @@ case class Experiment(id: Int,
                       html: String,
                       created: ZonedDateTime)
 
-object Experiment extends SQLSyntaxSupport[Experiment] {
-  override val tableName = "experiment"
+object Experiment {
+  def apply(row: ResultSet) = new Experiment(
+    row.getInt("id"),
+    row.getString("name"),
+    row.getInt("administrator_id"),
+    row.getString("html"),
+    row.getTimestamp("created").toZonedDateTime)
 
-  def apply(rs: WrappedResultSet) = new Experiment(
-    rs.get("id"),
-    rs.get("name"),
-    rs.get("administrator_id"),
-    rs.get("html"),
-    rs.get("created"))
-
-  def empty = new Experiment(0, "", 0, "", ZonedDateTime.now)
-
-  def all()(implicit session: DBSession = ReadOnlyAutoSession) = {
-    sql"SELECT * FROM experiment ORDER BY id".map(Experiment(_)).list.apply()
+  def all = {
+    query("SELECT * FROM experiment ORDER BY id ASC") { Experiment(_) }
   }
 
-  def find(id: Int)(implicit session: DBSession = ReadOnlyAutoSession) = {
-    sql"SELECT * FROM experiment WHERE id = $id".map(Experiment(_)).single.apply().get
+  def find(id: Int) = {
+    query("SELECT * FROM experiment WHERE id = ?", List(id)) { Experiment(_) }.head
   }
 
-  def findOrCreateAccessToken(id: Int, length: Int = 12, expires: Option[ZonedDateTime] = None)(implicit session: DBSession) = {
+  def findOrCreateAccessToken(id: Int, length: Int = 12, expires: Option[ZonedDateTime] = None) = {
     AccessToken.findOrCreate("experiments", id, length, expires)
+  }
+
+  def create(name: String,
+             administrator_id: Int,
+             html: String) = {
+    query("""
+      INSERT INTO experiment (name, administrator_id, html)
+      VALUES (?, ?, ?) RETURNING *
+    """, List(name, administrator_id, html)) { Experiment(_) }.head
+  }
+
+  def update(id: Int,
+             name: String,
+             administrator_id: Int,
+             html: String) = {
+    execute("""
+      UPDATE experiment SET name = ?, administrator_id = ?, html = ?
+      WHERE id = ?
+    """, List(name, administrator_id, html, id))
+  }
+
+  def delete(id: Int) = {
+    execute("DELETE FROM experiment WHERE id = ?", List(id))
   }
 }

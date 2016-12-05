@@ -1,23 +1,22 @@
 package com.formious.models
 
 import java.time.ZonedDateTime
-import scalikejdbc._, jsr310._
+import java.sql.ResultSet
+import com.formious.common.logger
+import com.formious.common.Database.{query, execute}
+import com.formious.common.Recoders._
 
 case class Administrator(id: Int,
                          email: String,
                          password: String,
                          created: ZonedDateTime)
 
-object Administrator extends SQLSyntaxSupport[Administrator] {
-  override val tableName = "administrator"
-
-  def apply(rs: WrappedResultSet) = new Administrator(
-    rs.get("id"),
-    rs.get("email"),
-    rs.get("password"),
-    rs.get("created"))
-
-  def empty = new Administrator(0, "", "", ZonedDateTime.now)
+object Administrator {
+  def apply(row: ResultSet) = new Administrator(
+    row.getInt("id"),
+    row.getString("email"),
+    row.getString("password"),
+    row.getTimestamp("created").toZonedDateTime)
 
   private val saltBytes = "rNxROdgCbAkBI2WvZJtH".getBytes("UTF-8")
 
@@ -29,23 +28,24 @@ object Administrator extends SQLSyntaxSupport[Administrator] {
     javax.xml.bind.DatatypeConverter.printHexBinary(digestBytes)
   }
 
-  def all()(implicit session: DBSession = ReadOnlyAutoSession): List[Administrator] = {
-    sql"SELECT * FROM administrator ORDER BY created DESC".map(Administrator(_)).list.apply()
+  def all = {
+    query("SELECT * FROM administrator ORDER BY created DESC") { Administrator(_) }
   }
 
-  def find(id: Int)(implicit session: DBSession = ReadOnlyAutoSession): Administrator = {
-    sql"SELECT * FROM administrator WHERE id = $id".map(Administrator(_)).single.apply().get
+  def find(id: Int) = {
+    query("SELECT * FROM administrator WHERE id = ?", List(id)) { Administrator(_) }.head
   }
 
-  def delete(id: Int)(implicit session: DBSession) = {
-    sql"""DELETE FROM administrators WHERE id = $id""".update.apply()
+  def delete(id: Int) = {
+    execute("DELETE FROM access_token WHERE id = ?", List(id))
   }
 
-  def add(email: String, password: String)(implicit session: DBSession): Administrator = {
-    val hashed_password = createSHA256(password)
-    sql"""INSERT INTO administrator (email, password)
-          VALUES ($email, $hashed_password)
-          RETURNING *""".map(Administrator(_)).single.apply().get
+  def create(email: String, password: String) = {
+    val hashedPassword = createSHA256(password)
+    query("""
+      INSERT INTO administrator (email, password) FROM
+      VALUES (?, ?) RETURNING *
+    """, List(email, hashedPassword)) { Administrator(_) }.head
   }
 
   /**
@@ -53,31 +53,28 @@ object Administrator extends SQLSyntaxSupport[Administrator] {
     */
   def updateCredentials(id: Int,
                         email: String,
-                        passwordOption: Option[String])
-                       (implicit session: DBSession) = {
-    val col = Administrator.column // Administrator.syntax("col")
-    withSQL {
-      val query = update(Administrator).set(col.email -> email)
-      val query2 = passwordOption match {
-        case Some(password) =>
-          query.set(col.password -> Administrator.createSHA256(password))
-        case _ => query
-      }
-      query2.where.eq(col.id, id)
-      //.append(sql"RETURNING *")
-    }.update.apply()
-    //  .map(Administrator(_)).single.apply().get
+                        passwordOption: Option[String]) = {
+    passwordOption match {
+      case Some(password) =>
+        val hashedPassword = createSHA256(password)
+        execute("""
+          UPDATE administrator SET email = ?, password = ? WHERE id = ?
+        """, List(email, hashedPassword, id))
+      case _ =>
+        execute("""
+          UPDATE administrator SET email = ? WHERE id = ?
+        """, List(email, id))
+    }
+    // "RETURNING *"
   }
 
-  def authenticate(email: String, password: String)
-                  (implicit session: DBSession): Option[AccessToken] = {
-    val hashed_password = createSHA256(password)
-    val administrator = sql"""SELECT * FROM administrator
-      WHERE email = $email AND password = $hashed_password""".map(Administrator(_)).single.apply()
-    administrator.map { administrator =>
-      val accessToken = AccessToken.findOrCreate("administrators", administrator.id, 40)
-      Console.err.println(s"Authenticated administrator '${administrator.id}' and inserted token '${accessToken.token}'")
-      accessToken
+  def authenticate(email: String, password: String) = {
+    val hashedPassword = createSHA256(password)
+    query("""
+      SELECT * FROM administrator WHERE email = ? AND password = ?
+    """, List(email, hashedPassword)) { Administrator(_) }.headOption.map { administrator =>
+      logger.debug(s"Authenticating administrator '${administrator.id}' and with new or existing token")
+      AccessToken.findOrCreate("administrators", administrator.id, 40)
     }
   }
 
@@ -85,15 +82,15 @@ object Administrator extends SQLSyntaxSupport[Administrator] {
     *
     * @return None if no access token matched or if no administrator is linked to that token
     */
-  def fromToken(token: String)(implicit session: DBSession = ReadOnlyAutoSession) = {
-    sql"""
+  def fromToken(token: String) = {
+    query("""
       SELECT * FROM access_token
-      WHERE token = $token
+      WHERE token = ?
         AND relation = 'administrators'
         AND (expires IS NULL OR expires > NOW())
-    """.map(AccessToken(_)).single.apply().map { accessToken =>
-      Console.err.println(s"Authenticating administrator for token '${accessToken.token}'")
-      sql"SELECT * FROM administrator WHERE id = ${accessToken.foreign_id}".map(Administrator(_)).single.apply().get
+    """, token)(AccessToken(_)).headOption.map { accessToken =>
+      logger.debug(s"Authenticating administrator for token '${accessToken.token}'")
+      find(accessToken.foreign_id)
     }
   }
 }

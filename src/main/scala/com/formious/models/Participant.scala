@@ -1,7 +1,9 @@
 package com.formious.models
 
 import java.time.ZonedDateTime
-import scalikejdbc._, jsr310._
+import java.sql.ResultSet
+import com.formious.common.Database.query
+import com.formious.common.Recoders._
 
 case class Participant(id: Int,
                        name: Option[String],
@@ -12,32 +14,42 @@ case class Participant(id: Int,
                        user_agent: Option[String],
                        created: ZonedDateTime)
 
-object Participant extends SQLSyntaxSupport[Participant] {
-  override val tableName = "participant"
+object Participant {
+  def apply(row: ResultSet) = new Participant(
+    row.getInt("id"),
+    Option(row.getString("name")),
+    Option(row.getString("aws_worker_id")),
+    row.getBigDecimal("aws_bonus_owed"),
+    row.getBigDecimal("aws_bonus_paid"),
+    Option(row.getString("ip_address")),
+    Option(row.getString("user_agent")),
+    row.getTimestamp("created").toZonedDateTime)
 
-  def apply(rs: WrappedResultSet) = new Participant(
-    rs.get("id"),
-    rs.get("name"),
-    rs.get("aws_worker_id"),
-    rs.get("aws_bonus_owed"),
-    rs.get("aws_bonus_paid"),
-    rs.get("ip_address"),
-    rs.get("user_agent"),
-    rs.get("created"))
-
-  def find(id: Int)(implicit session: DBSession = ReadOnlyAutoSession) = {
-    sql"SELECT * FROM participant WHERE id = $id".map(Participant(_)).single.apply().get
+  def find(id: Int) = {
+    query("SELECT * FROM participant WHERE id = ?", List(id))(Participant(_)).head
   }
 
-  def findOrCreateByWorkerId(aws_worker_id: String, ip_address: Option[String], user_agent: Option[String])
-                            (implicit session: DBSession): Participant = {
-    val participant = sql"""
-      SELECT * FROM participant WHERE aws_worker_id = $aws_worker_id
-    """.map(Participant(_)).single.apply()
-    participant.getOrElse {
-      sql"""INSERT INTO participant (aws_worker_id, ip_address, user_agent)
-            VALUES ($aws_worker_id, $ip_address, $user_agent)
-            RETURNING *""".map(Participant(_)).single.apply().get
+  def create(aws_worker_id: String, ip_address: Option[String], user_agent: Option[String]) = {
+    query("""
+      INSERT INTO participant (aws_worker_id, ip_address, user_agent)
+      VALUES (?, ?, ?)
+      RETURNING *
+    """, List(aws_worker_id, ip_address, user_agent))(Participant(_)).head
+  }
+
+  def findOrCreateByWorkerId(aws_worker_id: String, ip_address: Option[String], user_agent: Option[String]) = {
+    query("""
+      SELECT * FROM participant WHERE aws_worker_id = ?
+    """, List(aws_worker_id))(Participant(_)).headOption.getOrElse {
+      create(aws_worker_id, ip_address, user_agent)
+    }
+  }
+
+  def findOrCreate(participantIdOption: Option[Int], workerIdOption: Option[String]) = {
+    (participantIdOption, workerIdOption) match {
+      case (Some(participantId), _) => Some(find(participantId))
+      case (_, Some(workerId)) => Some(findOrCreateByWorkerId(workerId, None, None))
+      case _ => None
     }
   }
 }

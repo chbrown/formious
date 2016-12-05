@@ -17,6 +17,8 @@ object Excel {
       case Cell.CELL_TYPE_FORMULA =>
         //cell.getCellFormula
         cell.getStringCellValue
+      case Cell.CELL_TYPE_BLANK =>
+        ""
       case Cell.CELL_TYPE_BOOLEAN =>
         cell.getBooleanCellValue.toString
       case Cell.CELL_TYPE_ERROR =>
@@ -27,7 +29,7 @@ object Excel {
   private def cellTuple(cell: Cell) = cell.getColumnIndex -> cellString(cell)
 
   def sheetToMaps(sheet: XSSFSheet) = {
-    Console.err.println(s"Parsing XLSX sheet '${sheet.getSheetName}'")
+    logger.debug(s"Parsing XLSX sheet '${sheet.getSheetName}'")
     val rowIterator = sheet.iterator
     // TODO: figure out if there's a way to pattern-match on Iterator?
     val columnHeaders = rowIterator.next.map(cellTuple).toMap.withDefault(index => s"column_${index + 1}")

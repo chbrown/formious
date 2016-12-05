@@ -1,7 +1,10 @@
 package com.formious.models
 
 import java.time.ZonedDateTime
-import scalikejdbc._, jsr310._
+import java.sql.ResultSet
+import com.formious.common.logger
+import com.formious.common.Database.{query, execute}
+import com.formious.common.Recoders._
 
 case class Block(id: Int,
                  experiment_id: Int,
@@ -13,72 +16,65 @@ case class Block(id: Int,
                  quota: Option[Int],
                  created: ZonedDateTime)
 
-object Block extends SQLSyntaxSupport[Block] {
-  override val tableName = "block"
+object Block {
+  def apply(row: ResultSet) = new Block(
+    row.getInt("id"),
+    row.getInt("experiment_id"),
+    Option(row.getInt("template_id")),
+    row.getString("context"),
+    row.getInt("view_order"),
+    row.getBoolean("randomize"),
+    Option(row.getInt("parent_block_id")),
+    Option(row.getInt("quota")),
+    row.getTimestamp("created").toZonedDateTime)
 
-  def apply(rs: WrappedResultSet) = new Block(
-    rs.get("id"),
-    rs.get("experiment_id"),
-    rs.get("template_id"),
-    rs.get("context"),
-    rs.get("view_order"),
-    rs.get("randomize"),
-    rs.get("parent_block_id"),
-    rs.get("quota"),
-    rs.get("created"))
-
-  def empty = new Block(0, 0, None, "{}", 0.0, false, None, None, ZonedDateTime.now)
-
-  val select = (experiment_id: Int) =>
-    sql"SELECT * FROM block WHERE experiment_id = $experiment_id ORDER BY view_order ASC"
-
-  def all(experiment_id: Int)(implicit session: DBSession = ReadOnlyAutoSession) = {
-    select(experiment_id).map(Block(_)).list.apply()
+  def all(experiment_id: Int) = {
+    query("""
+      SELECT * FROM block WHERE experiment_id = ? ORDER BY view_order ASC
+    """, List(experiment_id)) { Block(_) }
   }
 
-  def next(experiment_id: Int)(implicit session: DBSession = ReadOnlyAutoSession) = {
-    select(experiment_id).map(Block(_)).single.apply()
+  def next(experiment_id: Int) = {
+    query("""
+      SELECT * FROM block WHERE experiment_id = ? ORDER BY view_order ASC LIMIT 1
+    """, List(experiment_id)) { Block(_) }.headOption
   }
 
-  def find(experiment_id: Int, id: Int)(implicit session: DBSession = ReadOnlyAutoSession) = {
-    sql"SELECT * FROM block WHERE experiment_id = $experiment_id AND id = $id".map(Block(_)).single.apply().get
+  def find(experiment_id: Int, id: Int) = {
+    query("""
+      SELECT * FROM block WHERE experiment_id = ? AND id = ?
+    """, List(experiment_id, id)) { Block(_) }.head
   }
 
-  def insert(template_id: Option[Int],
-             context: String,
-             view_order: Double,
-             randomize: Boolean,
-             parent_block_id: Option[Int],
-             quota: Option[Int])(implicit session: DBSession) = {
-    withSQL {
-      insertInto(Block).namedValues(
-        Block.column.template_id -> template_id,
-        Block.column.context -> context,
-        Block.column.view_order -> view_order,
-        Block.column.randomize -> randomize,
-        Block.column.parent_block_id -> parent_block_id,
-        Block.column.quota -> quota
-      ).append(sqls"RETURNING *")
-    }.map(Block(_)).single.apply().get
-  }
-
-  def update(id: Int,
+  def create(experiment_id: Int,
              template_id: Option[Int],
              context: String,
              view_order: Double,
              randomize: Boolean,
              parent_block_id: Option[Int],
-             quota: Option[Int])(implicit session: DBSession) = {
-    withSQL {
-      scalikejdbc.update(Block).set(
-        Block.column.template_id -> template_id,
-        Block.column.context -> context,
-        Block.column.view_order -> view_order,
-        Block.column.randomize -> randomize,
-        Block.column.parent_block_id -> parent_block_id,
-        Block.column.quota -> quota
-      ).where.eq(Block.column.id, id)
-    }.update.apply()
+             quota: Option[Int]) = {
+    query("""
+      INSERT INTO block (experiment_id, template_id, context, view_order, randomize, parent_block_id, quota)
+      VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *
+    """, List(experiment_id, template_id, context, view_order, randomize, parent_block_id, quota)) { Block(_) }.head
+  }
+
+  def update(id: Int,
+             experiment_id: Int,
+             template_id: Option[Int],
+             context: String,
+             view_order: Double,
+             randomize: Boolean,
+             parent_block_id: Option[Int],
+             quota: Option[Int]) = {
+    execute("""
+      UPDATE block SET template_id = ?, context = ?, view_order = ?, randomize = ?, parent_block_id = ?, quota = ?
+      WHERE id = ? AND experiment_id = ?
+    """, List(template_id, context, view_order, randomize, parent_block_id, quota, id, experiment_id))
+  }
+
+  def delete(id: Int, experiment_id: Int) = {
+    execute("DELETE FROM block WHERE id = ? AND experiment_id = ?", List(id, experiment_id))
   }
 
   /**
@@ -89,14 +85,14 @@ object Block extends SQLSyntaxSupport[Block] {
     * @param childrenMap Mapping from block ID to that block's children (if any)
     * @return Structured tree
     */
-  private def buildBranchNode(parentBlock: Block, childrenMap: Map[Option[Int], List[Block]]): BranchNode[Block] = {
+  private def buildBranchNode(parentBlock: Block, childrenMap: Map[Option[Int], Seq[Block]]): BranchNode[Block] = {
     val children = childrenMap(Some(parentBlock.id)).map { block =>
       buildBranchNode(block, childrenMap)
     }
     BranchNode(children, parentBlock)
   }
 
-  def buildTree(blocks: List[Block]): RootNode[Block] = {
+  def buildTree(blocks: Seq[Block]): RootNode[Block] = {
     val childrenMap = blocks.groupBy(_.parent_block_id)
     // blocks with no parent_block_id are added to the root list
     val branches = childrenMap(None).map { rootBlock =>
@@ -110,6 +106,17 @@ object Block extends SQLSyntaxSupport[Block] {
     xs(idx)
   }
 
+  /** Generate mapping from block.id to total number of responses for that block */
+  private def fetchBlockResponseCounts(blockIds: Seq[Int]): Map[Int, Long] = {
+    val blockIdCountPairs = query("""
+      SELECT block_id, COUNT(id) FROM response
+        WHERE block_id = ANY(?)
+        GROUP BY block_id
+    """, blockIds) { row => row.getInt("block_id") -> row.getLong("count") }
+    // it's possible there are no responses for any of the candidate blocks, so we supply a default
+    blockIdCountPairs.toMap.withDefaultValue(0L)
+  }
+
   /**
     * Find the next block that needs to be done. If randomize is false, just take the first of the given blocks.
     * If randomize is true, and there is a quota, pick a less-completed (by previous participants) block, otherwise
@@ -120,22 +127,12 @@ object Block extends SQLSyntaxSupport[Block] {
     *                   to the children, if the selected block is a container (parent).
     * @return One of the given blocks
     */
-  def sampleBlockNode(blockNodes: Seq[BranchNode[Block]], randomize: Boolean, quotaOption: Option[Int])
-                     (implicit session: DBSession = ReadOnlyAutoSession): BranchNode[Block] = {
+  def sampleBlockNode(blockNodes: Seq[BranchNode[Block]], randomize: Boolean, quotaOption: Option[Int]): BranchNode[Block] = {
     // TODO: handle case where quota is true, but randomize is false (does that make any sense, though?)
     if (randomize) {
       quotaOption match {
         case Some(quota) =>
-
-          /** Mapping from block.id to total number of responses for that block */
-          val blockIds = blockNodes.map(_.value.id)
-          val blockResponseCountPairs = sql"""
-              SELECT block_id, COUNT(id) FROM response
-              WHERE block_id = ANY($blockIds)
-              GROUP BY block_id
-            """.map(rs => rs.get[Int]("block_id") -> rs.get[Long]("count")).list.apply()
-          // it's possible there are no responses for any of the candidate blocks, so we supply a default
-          val blockResponseCount = blockResponseCountPairs.toMap.withDefaultValue(0L)
+          val blockResponseCount = fetchBlockResponseCounts(blockNodes.map(_.value.id))
           // sort by which block has the fewest completions
           val sortedBlockNodes = blockNodes.sortBy(blockNode => blockResponseCount(blockNode.value.id))
           // TODO: randomly sample weighted by missing completions, maybe?
@@ -168,17 +165,15 @@ object Block extends SQLSyntaxSupport[Block] {
     * For the given blockNode, which should be pre-determined to have at least one incomplete child block,
     * determine the next ...
     */
-  def nextPhysicalBlock(parentBlockNode: TreeNode[Block], completedBlocks: Set[Int])
-                       (implicit session: DBSession = ReadOnlyAutoSession): BranchNode[Block] = {
+  def nextPhysicalBlock(parentBlockNode: TreeNode[Block], completedBlocks: Set[Int]): BranchNode[Block] = {
     val incompleteBlockNodes = parentBlockNode.children.filterNot { blockNode =>
       completedBlocks(blockNode.value.id)
     }
-    val childBlockNode = parentBlockNode match {
-      case BranchNode(_, value) =>
-        sampleBlockNode(incompleteBlockNodes, value.randomize, value.quota)
-      case RootNode(_) =>
-        sampleBlockNode(incompleteBlockNodes, false, None)
+    val (randomize, quota) = parentBlockNode match {
+      case BranchNode(_, value) => (value.randomize, value.quota)
+      case RootNode(_) => (false, None)
     }
+    val childBlockNode = sampleBlockNode(incompleteBlockNodes, randomize, quota)
     // 3. recurse downward and randomize as needed. this is recursive since we
     // may need to query past responses when randomizing
     childBlockNode.value.template_id match {
@@ -197,8 +192,7 @@ object Block extends SQLSyntaxSupport[Block] {
     * @return None if there are no more incomplete blocks in experiment,
     *         or the next block to be completed if there is one
     */
-  def nextBlock(experiment_id: Int, block_id: Int, participant_id: Int)
-               (implicit session: DBSession): Option[Block] = {
+  def nextBlock(experiment_id: Int, block_id: Int, participant_id: Int): Option[Block] = {
     // TODO: maybe select only the columns we need? I.e., exclude the bulky context
     val blocks = Block.all(experiment_id)
     val responses = Response.whereParticipant(participant_id)
@@ -209,7 +203,7 @@ object Block extends SQLSyntaxSupport[Block] {
     val currentBlockNodeOption = rootNode.findFirst(_.id == block_id)
     if (currentBlockNodeOption.isEmpty) {
       // not funny. that block doesn't exist in this experiment.
-      Console.err.println(s"Block with id=$block_id cannot be found.")
+      logger.debug(s"Block with id=$block_id cannot be found.")
     }
     // we need to get the parent_block_id of the most_recent block
     currentBlockNodeOption.flatMap { currentBlockNode =>
@@ -231,7 +225,7 @@ object Block extends SQLSyntaxSupport[Block] {
             parentBlockNode match {
               // if it's not a pseudo-Node, like the root, that is
               case BranchNode(_, value) =>
-                Response.insert(participant_id, value.id)
+                Response.create(participant_id, value.id)
                 (None, completedBlocks + value.id)
               case RootNode(_) =>
                 (None, completedBlocks)
@@ -248,15 +242,14 @@ object Block extends SQLSyntaxSupport[Block] {
     }
   }
 
-  def updateTree(root: TreeNode[Block], experiment_id: Int)
-                (implicit session: DBSession) {
+  def updateTree(root: TreeNode[Block], experiment_id: Int) {
     // flatten the structured tree into a flat Array of blocks
     val allBlocks_original = root.flatten.map(_.value)
 
     // 1. instantiate the missing blocks so that they have id's we can use when flattening
     val allBlocks = allBlocks_original.map { block =>
       if (block.id == 0) {
-        Block.insert(block.template_id, block.context, block.view_order, block.randomize, block.parent_block_id, block.quota)
+        Block.create(experiment_id, block.template_id, block.context, block.view_order, block.randomize, block.parent_block_id, block.quota)
       }
       else {
         block
@@ -272,12 +265,13 @@ object Block extends SQLSyntaxSupport[Block] {
     // now the tree structure is defined on each block, and the 'children' links are no longer needed.
     //val allBlockIds = allBlocks.map(_.id)
 
-    Console.err.println(s"Updating ${allBlocks.size} blocks")
+    logger.debug(s"Updating ${allBlocks.size} blocks")
 
     // 3. brute-force: update them all
     allBlocks.foreach { block =>
       // careful, if block.id is null, this could wreak havoc and lose data!
       Block.update(block.id,
+        experiment_id,
         block.template_id,
         block.context,
         block.view_order,
@@ -285,13 +279,12 @@ object Block extends SQLSyntaxSupport[Block] {
         block.parent_block_id,
         block.quota)
     }
-
     // 4. delete all the other blocks
-    sql"""
+    execute("""
       DELETE FROM block
-      WHERE experiment_id = $experiment_id
-        AND NOT (id = ANY(${allBlocks.map(_.id)}::integer[]))
-    """.update.apply()
+      WHERE experiment_id = ?
+        AND NOT (id = ANY(?::integer[]))
+    """, List(experiment_id, allBlocks.map(_.id)))
   }
 }
 

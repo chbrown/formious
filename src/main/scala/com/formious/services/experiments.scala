@@ -1,56 +1,55 @@
 package com.formious.services
 
-import java.nio.charset.Charset
-
-import com.twitter.io.Buf
-import com.twitter.finagle.http.Status
-import io.finch._
-import io.finch.internal.BufText
 import io.circe._
 import io.circe.parser._
-import scalikejdbc._
+
 import com.gilt.handlebars.scala.binding.dynamic._
 import com.gilt.handlebars.scala.Handlebars
+
 import com.formious.models.{Block, Experiment, Participant, Response, Template}
 
+import org.http4s._
+import org.http4s.dsl._
+
 object experiments {
-  /** GET /experiments/:experiment_id
-    * Redirect to first block of experiment */
-  val startExperiment: Endpoint[String] = get(int) { (experiment_id: Int) =>
-    Block.next(experiment_id) match {
-      case Some(block) =>
-        // val urlObj = url.parse(req.url, true)
-        // val block_url = url.format(urlObj)
-        Output.empty[String](Status.SeeOther).withHeader("Location" -> s"/experiments/$experiment_id/blocks/${block.id}")
-      case None =>
-        NotFound(new Exception("No available blocks"))
-    }
-  }
+  //object AWSAccountId extends QueryParamDecoderMatcher[Int]("aws_account_id")
+  object ExperimentId extends QueryParamDecoderMatcher[Int]("experiment_id")
+  object AssignmentId extends OptionalQueryParamDecoderMatcher[String]("AssignmentId")
+  object WorkerId extends OptionalQueryParamDecoderMatcher[String]("workerId")
 
   case class LayoutContext(context: String, header: String, html: String)
 
-  /** GET /experiments/:experiment_id/blocks/:block_id
-    * Render block as html
-    *
-    * the querystring will usually have the fields: assignmentId, hitId, turkSubmitTo, workerId
-    *
-    * the Amazon Mechanical Turk frame will give us the following variables:
-    *
-    * https://tictactoe.amazon.com/gamesurvey.cgi?gameid=01523
-    * &assignmentId=123RVWYBAZW00EXAMPLE456RVWYBAZW00EXAMPLE
-    * &hitId=123RVWYBAZW00EXAMPLE
-    * &turkSubmitTo=https://www.mturk.com
-    * &workerId=AZ3456EXAMPLE
-    */
-  val renderBlock: Endpoint[String] = get(int :: "blocks" :: int) { (experiment_id: Int, block_id: Int) =>
-    val html = DB.readOnly { implicit session =>
+  val service = HttpService {
+    case GET -> Root / IntVar(experiment_id) =>
+      // Redirect to first block of experiment
+      Block.next(experiment_id) match {
+        case Some(block) =>
+          // val urlObj = url.parse(req.url, true)
+          // val block_url = url.format(urlObj)
+          SeeOther(Uri(path=s"/experiments/$experiment_id/blocks/${block.id}")) // location=
+        case None =>
+          NotFound("No available blocks")
+      }
+    case GET -> Root / IntVar(experiment_id) / "blocks" / IntVar(block_id) =>
+      // Render block as html
+      // the querystring will usually have the fields: assignmentId, hitId, turkSubmitTo, workerId
+      // the Amazon Mechanical Turk frame will give us the following variables:
+      //
+      // https://tictactoe.amazon.com/gamesurvey.cgi?gameid=01523
+      // &assignmentId=123RVWYBAZW00EXAMPLE456RVWYBAZW00EXAMPLE
+      // &hitId=123RVWYBAZW00EXAMPLE
+      // &turkSubmitTo=https://www.mturk.com
+      // &workerId=AZ3456EXAMPLE
       val experiment = Experiment.find(experiment_id)
       val block = Block.find(experiment_id, block_id)
-      val blockTemplateHtml = block.template_id.map(Template.find).map(_.html).getOrElse("")
-
+      // why do I need these parens around the match?
+      val blockTemplateHtml = block.template_id match {
+        case Some(template_id) => Template.find(template_id).html
+        case None => ""
+      }
       // context: the current state to render the template with
       //.as[Map[String, Json]]
-      val blockContext: Json = parse(block.context).getOrElse(Json.Null)
+      val blockContext = parse(block.context).getOrElse(Json.Null)
       // Supply "experiment_id" and "block_id" in the blockContext
       val fullContext = blockContext.hcursor
         .downField("experiment_id").set(Json.fromInt(experiment_id))
@@ -69,59 +68,43 @@ object experiments {
       val contextJsonString = fullContext.noSpaces //.replaceAll("<\/".r, "<\\/")
 
       val layoutContext = LayoutContext(contextJsonString, experiment.html, templateHtml)
-      layoutFn(layoutContext)
-    }
-    Ok(html)
-  }
+      val html = layoutFn(layoutContext)
+      Ok(html)
+    case request @ POST -> Root / IntVar(experiment_id) / "blocks" / IntVar(block_id) :? WorkerId(workerIdOption) +& AssignmentId(assignmentIdOption) =>
+      // Save response
+      val workerId = workerIdOption.getOrElse("WORKER_ID_NOT_AVAILABLE")
+      //val assignmentId = assignmentIdOption.getOrElse("ASSIGNMENT_ID_NOT_AVAILABLE")
+      val ipAddress: Option[String] = request.headers.get("x-real-ip".ci).map(_.value)
+      //val ipAddress = ipAddressHeader // OrElse(request.remoteAddress.toString)
+      val userAgent: Option[String] = request.headers.get("user-agent".ci).map(_.value)
+      val requestedWith: Option[String] = request.headers.get("x-requested-with".ci).map(_.value)
 
-  /** POST /experiments/:experiment_id/blocks/:block_id
-    * Save response */
-  val saveResponse: Endpoint[String] = post(int :: "blocks" :: int :: body :: paramOption("workerId") :: paramOption("assignmentId") :: headerOption("x-real-ip") :: headerOption("user-agent") :: headerOption("x-requested-with")) { (experiment_id: Int, block_id: Int, body: String, workerIdOption: Option[String], assignmentId: Option[String], ipAddress: Option[String], userAgent: Option[String], requestedWith: Option[String]) =>
-    val workerId = workerIdOption.getOrElse("WORKER_ID_NOT_AVAILABLE")
-    //val ipAddress = ipAddressHeader // OrElse(request.remoteAddress.toString)
-    val postData = parse(body).getOrElse(Json.Null)
-
-    DB.localTx { implicit session =>
       val participant = Participant.findOrCreateByWorkerId(workerId, ipAddress, userAgent)
-      Response.insert(participant.id, block_id, postData.toString, assignmentId)
-
+      val blockOption = Block.nextBlock(experiment_id, block_id, participant.id)
       // http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ExternalQuestionArticle.html
       // sadly, this redirect_to doesn't work. Hopefully the user will have a proper
       // POST-to-MT form in their last block
       // val redirect_to = urlObj.query.turkSubmitTo + "/mturk/externalSubmit?assignmentId=" + urlObj.query.assignmentId
-      Block.nextBlock(experiment_id, block_id, participant.id) match {
-        case Some(block) =>
-          //println(s"models.Block.nextBlockId: ${block.id}")
 
-          // only change the path part of the url
-          val newPathname = s"/experiments/$experiment_id/blocks/${block.id}"
-          val redirect_to = newPathname // url.format(urlObj)
+      request.as[String].flatMap { postData =>
+        //val postData = body parse().getOrElse(Json.Null)
+        val response = Response.create(participant.id, block_id, postData, assignmentIdOption)
+        blockOption match {
+          case Some(block) =>
+            // only change the path part of the url
+            val newPathname = s"/experiments/$experiment_id/blocks/${block.id}"
+            val redirect_to = newPathname // url.format(urlObj)
 
-          if (requestedWith.contains("XMLHttpRequest")) {
-            NoContent[String].withHeader("Location" -> redirect_to)
-          }
-          else {
-            Output.empty[String](Status.Found).withHeader("Location" -> redirect_to)
-          }
-        case None =>
-          // meaning, there are no more blocks to complete
-          Ok("You have already completed all available blocks in this experiment.")
+            if (requestedWith.contains("XMLHttpRequest")) {
+              NoContent().putHeaders(Header("Location", redirect_to))
+            }
+            else {
+              Found(Uri(path = redirect_to))
+            }
+          case None =>
+            // meaning, there are no more blocks to complete
+            Ok("You have already completed all available blocks in this experiment.")
+        }
       }
-    }
   }
-
-  type Html[A] = Encode.Aux[A, Text.Html]
-
-  def html[A](fn: (A, Charset) => Buf): Html[A] =
-    Encode.instance[A, Text.Html](fn)
-
-  implicit val encodeHtml: Html[String] =
-    html((s, charset) => BufText(s, charset))
-
-  implicit val encodeExceptionAsHtml: Html[Exception] = html(
-    (e, charset) => BufText(Option(e.getMessage).getOrElse(""), charset)
-  )
-
-  val service = ("experiments" ::
-    (startExperiment :+: renderBlock :+: saveResponse)).toServiceAs[Text.Html]
 }

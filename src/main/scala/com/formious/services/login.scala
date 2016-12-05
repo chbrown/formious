@@ -1,31 +1,33 @@
 package com.formious.services
 
-import scalikejdbc._
-import io.finch._
-import com.twitter.util.Duration
-import com.twitter.finagle.http.Cookie
+import io.circe.generic.auto._
+
 import com.formious.models.Administrator
 
-object login {
-  /** POST /login
-    * Try to login as user with email and password
-    * TODO: make artificially slow to deflect brute force attacks
-    * setTimeout(function() { ... }, 500) */
-  val login: Endpoint[String] = post("login" :: param("email") :: param("password")) { (email: String, password: String) =>
-    DB.localTx { implicit session =>
-      Administrator.authenticate(email, password)
-    } match {
-      case Some(accessToken) =>
-        // logger.info('%s token = %s', message, token)
-        val tokenCookie = new Cookie("administrator_token", accessToken.token)
-        tokenCookie.path = "/"
-        tokenCookie.maxAge = Duration.fromSeconds(60 * 60 * 24 * 31) // 31 days
-        Ok("Authenticated successfully").withCookie(tokenCookie)
-      // we serve the login page from GET as well as failed login POSTs
-      case _ =>
-        Unauthorized(new Exception("Access token failed to match"))
-    }
-  }
+import org.http4s._
+import org.http4s.dsl._
+import org.http4s.circe._
 
-  val service = login.toServiceAs[Text.Plain]
+object login {
+  case class Credentials(email: String, password: String)
+
+  val service = HttpService {
+    case request @ POST -> Root =>
+      // Try to login as user with email and password
+      // TODO: make artificially slow to deflect brute force attacks
+      // setTimeout(function() { ... }, 500)
+      request.as(jsonOf[Credentials]).flatMap { case Credentials(email: String, password: String) =>
+        Administrator.authenticate(email, password) match {
+          case Some(accessToken) =>
+            // logger.info('%s token = %s', message, token)
+            //val tokenCookie = new Cookie()
+            //tokenCookie.path = "/"
+            //tokenCookie.maxAge = Duration.fromSeconds(60 * 60 * 24 * 31) // 31 days
+            Ok("Authenticated successfully").addCookie("administrator_token", accessToken.token, None)
+          case _ =>
+            // we serve the login page from GET as well as failed login POSTs
+            Unauthorized(Challenge("Basic", "Admin Realm"))
+        }
+      }
+  }
 }

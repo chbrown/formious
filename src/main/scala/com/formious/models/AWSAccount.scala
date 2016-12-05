@@ -1,7 +1,9 @@
 package com.formious.models
 
 import java.time.ZonedDateTime
-import scalikejdbc._, jsr310._
+import java.sql.ResultSet
+import com.formious.common.Database.{query, execute}
+import com.formious.common.Recoders._
 
 case class AWSAccount(id: Int,
                       name: String,
@@ -9,30 +11,51 @@ case class AWSAccount(id: Int,
                       secret_access_key: String,
                       created: ZonedDateTime)
 
-object AWSAccount extends SQLSyntaxSupport[AWSAccount] {
-  override val tableName = "aws_account"
+object AWSAccount {
+  def apply(row: ResultSet) = new AWSAccount(
+    row.getInt("id"),
+    row.getString("name"),
+    row.getString("access_key_id"),
+    row.getString("secret_access_key"),
+    row.getTimestamp("created").toZonedDateTime)
 
-  def apply(rs: WrappedResultSet) = new AWSAccount(
-    rs.get("id"),
-    rs.get("name"),
-    rs.get("access_key_id"),
-    rs.get("secret_access_key"),
-    rs.get("created"))
-
-  def empty = new AWSAccount(0, "", "", "", ZonedDateTime.now)
-
-  def all()(implicit session: DBSession = ReadOnlyAutoSession) = {
-    sql"SELECT * FROM aws_account ORDER BY id ASC".map(AWSAccount(_)).list.apply()
+  def all = {
+    query("SELECT * FROM aws_account ORDER BY id DESC")(AWSAccount(_))
   }
 
-  def find(id: Int)(implicit session: DBSession = ReadOnlyAutoSession) = {
-    sql"SELECT * FROM aws_account WHERE id = $id".map(AWSAccount(_)).single.apply().get
+  def find(id: Int) = {
+    query("SELECT * FROM aws_account WHERE id = ?", List(id))(AWSAccount(_)).head
   }
 
-  def allByAdministrator(administrator_id: Int)(implicit session: DBSession = ReadOnlyAutoSession) = {
-    sql"""SELECT * FROM aws_accounts
-          JOIN aws_account_administrators.aws_account_id = aws_accounts.id
-          WHERE aws_account_administrators.administrator_id = $administrator_id
-          ORDER BY aws_account_administrators.priority DESC""".map(AWSAccount(_)).list.apply()
+  def create(name: String,
+             access_key_id: String,
+             secret_access_key: String) = {
+    query("""
+      INSERT INTO aws_account (name, access_key_id, secret_access_key)
+      VALUES (?, ?, ?) RETURNING *
+    """, List(name, access_key_id, secret_access_key))(AWSAccount(_)).head
+  }
+
+  def update(id: Int,
+             name: String,
+             access_key_id: String,
+             secret_access_key: String) = {
+    execute("""
+      UPDATE aws_account SET name = ?, access_key_id = ?, secret_access_key = ?
+      WHERE id = ?
+    """, List(name, access_key_id, secret_access_key, id))
+  }
+
+  def delete(id: Int) = {
+    execute("DELETE FROM aws_account WHERE id = ?", List(id))
+  }
+
+  def allByAdministrator(administrator_id: Int) = {
+    query("""
+      SELECT * FROM aws_accounts
+        JOIN aws_account_administrators.aws_account_id = aws_accounts.id
+      WHERE aws_account_administrators.administrator_id = ?
+      ORDER BY aws_account_administrators.priority DESC
+    """, List(administrator_id))(AWSAccount(_))
   }
 }

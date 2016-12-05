@@ -8,4 +8,7 @@ object JsonUtil {
       accumulator.add(key, value)
     }
   }
+  def mergeJsonObjects(objects: Iterable[JsonObject]): JsonObject = {
+    objects.tail.foldLeft(objects.head)(mergeJsonObjects)
+  }
 }

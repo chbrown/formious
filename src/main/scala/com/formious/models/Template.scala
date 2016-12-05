@@ -1,29 +1,48 @@
 package com.formious.models
 
 import java.time.ZonedDateTime
-import scalikejdbc._, jsr310._
+import java.sql.ResultSet
+import com.formious.common.Database.{query, execute}
+import com.formious.common.Recoders._
 
 case class Template(id: Int,
                     name: String,
                     html: String,
                     created: ZonedDateTime)
 
-object Template extends SQLSyntaxSupport[Template] {
-  override val tableName = "template"
+object Template {
+  def apply(row: ResultSet) = new Template(
+    row.getInt("id"),
+    row.getString("name"),
+    row.getString("html"),
+    row.getTimestamp("created").toZonedDateTime)
 
-  def apply(rs: WrappedResultSet) = new Template(
-    rs.get("id"),
-    rs.get("name"),
-    rs.get("html"),
-    rs.get("created"))
-
-  def empty = new Template(0, "", "", ZonedDateTime.now)
-
-  def all()(implicit session: DBSession = ReadOnlyAutoSession) = {
-    sql"SELECT * FROM template ORDER BY id ASC".map(Template(_)).list.apply()
+  def all = {
+    query("SELECT * FROM template ORDER BY id ASC") { Template(_) }
   }
 
-  def find(id: Int)(implicit session: DBSession = ReadOnlyAutoSession) = {
-    sql"SELECT * FROM template WHERE id = $id".map(Template(_)).single.apply().get
+  def find(id: Int) = {
+    query("SELECT * FROM template WHERE id = ?", List(id)) { Template(_) }.head
+  }
+
+  def create(name: String,
+             html: String) = {
+    query("""
+      INSERT INTO template (name, html)
+      VALUES (?, ?) RETURNING *
+    """, List(name, html)) { Template(_) }.head
+  }
+
+  def update(id: Int,
+             name: String,
+             html: String) = {
+    execute("""
+      UPDATE template SET name = ?, html = ?
+      WHERE id = ?
+    """, List(name, html, id))
+  }
+
+  def delete(id: Int) = {
+    execute("DELETE FROM template WHERE id = ?", List(id))
   }
 }
