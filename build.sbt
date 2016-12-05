@@ -9,16 +9,17 @@ scalaVersion := "2.11.8"
 // latest versions in Maven Central as of 2016-09-08 (or later)
 libraryDependencies ++=
   Seq("ch.qos.logback" % "logback-classic" % "1.1.7") ++
-  Seq("http4s-circe", "http4s-dsl", "http4s-blaze-server").map("org.http4s" %% _ % "0.14.7") ++
+  Seq("http4s-circe", "http4s-dsl", "http4s-blaze-server").map("org.http4s" %% _ % "0.14.11") ++
   // Circe for JSON parsing/serialization
-  Seq("circe-core", "circe-generic", "circe-parser").map("io.circe" %% _ % "0.5.2") ++
+  Seq("circe-core", "circe-generic", "circe-parser").map("io.circe" %% _ % "0.5.4") ++
   // Database access
-  Seq("org.postgresql" % "postgresql" % "9.4.1211") ++
-  // Handlebars templates (gilt behaves badly; it shouldn't specify an actual logging library)
+  Seq("org.postgresql" % "postgresql" % "9.4.1212") ++
+  // Handlebars templates (gilt behaves badly; they shouldn't specify an actual logging library)
   Seq("com.gilt" %% "handlebars-scala" % "2.1.1" exclude("org.slf4j", "slf4j-simple")) ++
-  Seq("org.rogach" %% "scallop" % "2.0.2") ++
-  Seq("com.typesafe" % "config" % "1.3.0") ++
+  Seq("org.rogach" %% "scallop" % "2.0.5") ++
+  Seq("com.typesafe" % "config" % "1.3.1") ++
   // java-aws-mturk from personal bintray
+  //Seq("com.amazonaws" % "java-aws-mturk" % "1.7.0-SNAPSHOT") ++
   Seq("com.amazonaws" % "java-aws-mturk" % "1.7.0") ++
   // super-csv for parsing CSV
   Seq("super-csv", "super-csv-java8").map("net.sf.supercsv" % _ % "2.4.0") ++
@@ -38,12 +39,13 @@ scalacOptions ++= Seq(
   "-language:postfixOps")
 
 // lint
-//scalacOptions ++= Seq("-Ywarn-unused", "-Ywarn-unused-import", "-Xlint")
+scalacOptions ++= Seq("-Ywarn-unused", "-Ywarn-unused-import", "-Xlint")
 
 // expose build information to sources
 lazy val root = (project in file(".")).
   enablePlugins(BuildInfoPlugin).
   settings(
     buildInfoKeys := Seq[BuildInfoKey](organization, name, version, scalaVersion, sbtVersion, libraryDependencies),
-    buildInfoPackage := organization.value ++ "." ++ name.value
+    buildInfoPackage := organization.value ++ "." ++ name.value,
+    buildInfoOptions += BuildInfoOption.BuildTime
   )

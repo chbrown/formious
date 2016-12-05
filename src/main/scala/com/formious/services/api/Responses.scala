@@ -26,6 +26,7 @@ object Responses {
       val maxLimit = math.min(limit.getOrElse(250), 1000)
       val responses = Response.allWhere(maxLimit, experiment_id, template_id, aws_worker_id)
       Ok(responses.asJson)
+
     case request @ POST -> Root :? ParticipantId(participantIdOption) +& AWSWorkerId(workerIdOption) =>
       Participant.findOrCreate(participantIdOption, workerIdOption) match {
         case Some(participant) =>
@@ -37,6 +38,7 @@ object Responses {
         case None =>
           NotFound("No matching participant found")
       }
+
     case GET -> Root / IntVar(id) =>
       Ok(Response.find(id).asJson)
   }

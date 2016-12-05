@@ -5,12 +5,10 @@ import java.nio.file.Paths
 import org.rogach.scallop.ScallopConf
 
 import scalaz.concurrent.Task
-import org.http4s.{BuildInfo => Http4sBuildInfo, _}
+import org.http4s.{BuildInfo => _, _}
 import org.http4s.server.staticcontent
 import org.http4s.dsl._
-import org.http4s.circe._
 
-import io.circe._
 import io.circe.generic.auto._
 import io.circe.syntax.EncoderOps
 
@@ -18,14 +16,9 @@ import org.http4s.server.{Server, ServerApp}
 import org.http4s.server.blaze._
 
 import com.formious.services.{mturk, responses, experiments, util}
-import com.formious.services.api.{AWSAccounts, MTurk, AccessTokens, Templates, Administrators, Responses, Experiments, ExperimentBlocks}
+import com.formious.services.api
 
 object Main extends ServerApp {
-  // TODO: use a better SQL library
-  //import scalikejdbc._
-  //import scalikejdbc.{DB, ConnectionPool, GlobalSettings, LoggingSQLAndTimeSettings, SQLInterpolationString}
-  //ConnectionPool.singleton("jdbc:postgresql:formious", System.getProperty("user.name"), "")
-  //GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(singleLineMode = true)
   case class ProjectInfo(organization: String,
                          name: String,
                          version: String,
@@ -38,13 +31,10 @@ object Main extends ServerApp {
                          headers: Map[String, String],
                          remoteAddress: String)
 
-  //private val logger = Logger(getClass.getName)
-  //import org.slf4j.Logger
   import org.slf4j.LoggerFactory
   private val logger = LoggerFactory.getLogger(getClass.getName)
 
   override def server(args: List[String]): Task[Server] = {
-  //def main(args: Array[String]): Unit = {
     object opts extends ScallopConf(args.toSeq) {
       appendDefaultToDescription = true
       banner("formious --port 1451 -v")
@@ -53,7 +43,7 @@ object Main extends ServerApp {
         default=Some(sys.env.getOrElse("HOSTNAME", "127.0.0.1")))
       val port = opt[Int]("port", 'p', descr="port to listen on",
         default=Some(sys.env.getOrElse("PORT", "80").toInt))
-      val verbose = opt[Boolean]("verbose", 'v', descr="print extra output") // process.env.DEBUG !== undefined
+      val verbose = opt[Boolean]("verbose", 'v', descr="print extra output")
       val version = opt[Boolean]("version", descr="print version")
       // val help = opt[Boolean]("help", "print this help message")
       verify()
@@ -61,13 +51,10 @@ object Main extends ServerApp {
     val hostname = opts.hostname()
     val port = opts.port()
 
-    //LoggerFactory
-    // TODO: set logging level depending on opts.verbose()
+    // TODO: set logging level depending on opts.verbose() or sthg like: process.env.DEBUG !== undefined
 
     logger.info(s"Starting http4s listening on http://$hostname:$port")
 
-    // for some reason FileResourceManager wants the minimum filesize, in bytes,
-    // to use a transfer task instead of a read/write operation
     val uiServiceConfig = staticcontent.FileService.Config(Paths.get("ui").toString)
     val uiService = staticcontent.fileService(uiServiceConfig)
 
@@ -113,14 +100,14 @@ object Main extends ServerApp {
       .mountService(adminService, "/admin")
       .mountService(faviconService, "/favicon.ico")
       // /api/*
-      .mountService(AccessTokens.service, "/api/access_tokens")
-      .mountService(Administrators.service, "/api/administrators")
-      .mountService(AWSAccounts.service, "/api/aws_accounts")
-      .mountService(Experiments.service, "/api/experiments")
-      .mountService(ExperimentBlocks.service, "/api/experiments!")
-      .mountService(MTurk.service, "/api/mturk")
-      .mountService(Responses.service, "/api/responses")
-      .mountService(Templates.service, "/api/templates")
+      .mountService(api.AccessTokens.service, "/api/access_tokens")
+      .mountService(api.Administrators.service, "/api/administrators")
+      .mountService(api.AWSAccounts.service, "/api/aws_accounts")
+      .mountService(api.Experiments.service, "/api/experiments")
+      .mountService(api.ExperimentBlocks.service, "/api/experiments!")
+      .mountService(api.MTurk.service, "/api/mturk")
+      .mountService(api.Responses.service, "/api/responses")
+      .mountService(api.Templates.service, "/api/templates")
       // /misc
       .mountService(infoService, "/info")
       .mountService(echoService, "/echo")
@@ -128,10 +115,9 @@ object Main extends ServerApp {
       .mountService(mturk.service, "/mturk")
       .mountService(responses.service, "/responses")
       .mountService(util.service, "/util")
-      .start
       // TODO: add global exception handler
       //case otherwise =>
       //  Console.err.println(s"No matching route for $otherwise")
-
+      .start
   }
 }

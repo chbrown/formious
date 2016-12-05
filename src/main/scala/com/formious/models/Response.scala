@@ -11,7 +11,7 @@ import io.circe.parser._
 import io.circe.generic.auto._
 import io.circe.syntax.EncoderOps
 import com.formious.common.Encoders._
-import com.formious.common.JsonUtil.mergeJsonObjects
+import com.formious.common.JsonUtil
 
 case class Response(id: Int,
                     participant_id: Int,
@@ -49,20 +49,25 @@ object Response {
     query("SELECT * FROM response WHERE participant_id = ?", List(participant_id))(Response.apply)
   }
 
+
   def allWhere(limit: Int,
                experiment_id: Option[Int],
                template_id: Option[Int],
                aws_worker_id: Option[String]) = {
+    // 'id' and 'created' from the other tables conflict with responses
     query("""
-      SELECT *
+      SELECT *, response.id AS id, response.created AS created, COUNT(response.id) OVER() AS count
         FROM response
           INNER JOIN participant ON participant.id = response.participant_id
           INNER JOIN block ON block.id = response.block_id
         WHERE (block.experiment_id = ? OR ?::int IS NULL)
           AND (block.template_id = ? OR ?::int IS NULL)
           AND (participant.aws_worker_id = ? OR ?::int IS NULL)
+        ORDER BY response.created DESC
         LIMIT ?
-    """, List(experiment_id, experiment_id, template_id, template_id, aws_worker_id, aws_worker_id, limit))(Response.apply)
+    """, List(experiment_id, experiment_id, template_id, template_id, aws_worker_id, aws_worker_id, limit)) { resultSet =>
+      JsonUtil.resultSetToJson(resultSet)
+    }
   }
 
   case class ResponseMetadata(context: String,
@@ -99,10 +104,7 @@ object Response {
       // merge those static values with the dynamic context and value objects,
       // using _.defaults so that further-left arguments have priority
       // if value is null, that will stall the writer, which we don't want
-      println("Merging objects")
-      println(response.data, responseJson, contextJson)
-
-      mergeJsonObjects(Seq(response.data, responseJson, contextJson))
+      JsonUtil.mergeJsonObjects(Seq(response.data, responseJson, contextJson))
     }
     extendedResponses
   }
