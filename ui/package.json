@@ -11,22 +11,16 @@
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
   "license": "MIT",
   "dependencies": {
-    "angular": "1.5.8",
-    "angular-resource": "1.5.8",
-    "angular-ui-router": "0.3.0",
     "checkbox-sequence": "*",
     "cookies": "chbrown/cookies",
     "cookiemonster": "*",
-    "flow-copy": "*",
-    "httprequest": "*",
     "lodash": "^3",
     "moment": "2.13.0",
-    "ngstorage": "*",
-    "ng-upload": "*",
-    "notify-ui": "*",
+    "react": "^15",
+    "react-dom": "^15",
+    "react-router": "*",
     "textarea": "0.2.1",
-    "urlobject": "*",
-    "virtual-dom": "*"
+    "urlobject": "*"
   },
   "devDependencies": {
     "autoprefixer": "*",

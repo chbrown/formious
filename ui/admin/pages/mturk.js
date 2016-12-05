@@ -1,4 +1,145 @@
-/*jslint browser: true, esnext: true */
+import React from 'react';
+
+export class MTurkLayout extends React.Component {
+  render() {
+    return (
+      <div>
+        <nav fixedflow className="sub">
+          <div className="control">
+            {/* ng-options must use toString() since params.aws_account_id will always be a string */}
+            <select ng-model="aws_account_id" ng-change="changeSetting('aws_account_id', aws_account_id)"
+              ng-options="aws_account.id.toString() as aws_account.name for aws_account in aws_accounts">
+            </select>
+            <select ng-model="environment" ng-change="changeSetting('environment', environment)"
+              ng-options="environment.name as environment.name for environment in environments">
+            </select>
+          </div>
+
+          <span ui-sref-active-any="{current: 'admin.mturk.hits'}" className="tab">
+            <a ui-sref="admin.mturk.hits.table">HITs</a>
+          </span>
+          <span ui-sref-active-any="{current: 'admin.mturk.qualification_types'}" className="tab">
+            <a ui-sref="admin.mturk.qualification_types.table">Qualification Types</a>
+          </span>
+        </nav>
+        {children}
+      </div>
+    );
+  }
+}
+
+export class MTurkDashboard extends React.Component {
+  render() {
+    return (
+      <div>
+        <section className="box hpad">
+          <h3>Notify Workers</h3>
+          <label>
+            <div>
+              <b>Subject</b>
+              <span className="help">The subject line of the email message to send; up to 200 characters</span>
+            </div>
+            <input ng-model="notification.Subject" />
+          </label>
+          <label>
+            <div>
+              <b>Body</b>
+              <span className="help">The text of the email message to send; up to 4,096 characters</span>
+            </div>
+            <textarea ng-model="notification.MessageText" style="width: 600px; height: 200px"></textarea>
+          </label>
+          <label>
+            <div>
+              <b>WorkerId</b>
+              <span className="help">The ID of the Worker to notify, as returned by the GetAssignmentsForHIT operation; repeat this parameter up to 100 times to notify multiple Workers.</span>
+            </div>
+            <input ng-model="notification.WorkerId" />
+
+          </label>
+          <div>
+            <button ng-click="NotifyWorkers()">Notify Workers</button>
+          </div>
+        </section>
+
+        <section className="box hpad">
+          <h3>Available Balance</h3>
+          <p>{AvailableBalance.FormattedPrice}</p>
+        </section>
+      </div>
+    );
+  }
+}
+
+export class MTurkAssignment extends React.Component {
+  render() {
+    return (
+      <div>
+        <div className="hpad">
+          <h3>Assignment: {assignment.AssignmentId}</h3>
+          <h4>WorkerId: {assignment.WorkerId}</h4>
+        </div>
+
+        <section className="hpad" ng-if="$storage.assignments_show_times">
+          <table className="keyval">
+            <tr><td>AutoApprovalTime</td><td>{assignment.AutoApprovalTime}</td></tr>
+            <tr><td>AcceptTime</td><td>{assignment.AcceptTime}</td></tr>
+            <tr><td>SubmitTime</td><td>{assignment.SubmitTime}</td></tr>
+            <tr><td>ApprovalTime</td><td>{assignment.ApprovalTime}</td></tr>
+          </table>
+        </section>
+
+        <section className="hpad">
+          <div>
+            <b>Status:</b>
+            <span className="{assignment.AssignmentStatus}">{assignment.AssignmentStatus}</span>
+          </div>
+          <span ng-show="assignment.AssignmentStatus == 'Submitted'">
+            <button ng-click="setStatus('ApproveAssignment')">Approve</button>
+            <button ng-click="setStatus('RejectAssignment')">Reject</button>
+          </span>
+          <span ng-show="assignment.AssignmentStatus == 'Rejected'">
+            <button ng-click="setStatus('ApproveRejectedAssignment')">Unreject and Approve</button>
+          </span>
+          <span ng-show="assignment.AssignmentStatus == 'Submitted' || assignment.AssignmentStatus == 'Rejected'">
+            <input ng-model="RequesterFeedback" placeholder="Requester Feedback" />
+            <span className="help">1024 character max</span>
+          </span>
+        </section>
+
+        <section className="hpad" ng-if="$storage.assignments_show_bonus">
+          <b>Bonus:</b>
+          <label>
+            <input ng-model="bonus.bonus_owed" placeholder="Amount" />
+          </label>
+          <label>
+            <input ng-model="bonus.reason" placeholder="Reason" />
+          </label>
+          <button ng-click="grantBonus()">Grant Bonus</button>
+        </section>
+
+        <section className="hpad" ng-if="$storage.assignments_show_block">
+          <button ng-click="blockWorker(blockWorkerReason)">Block Worker</button>
+          <input ng-model="blockWorkerReason" placeholder="Reason" />
+        </section>
+
+        <div className="hpad" ng-if="$storage.assignments_show_answer">
+          <h4>Assignment Answer</h4>
+          <table className="keyval">
+            <tr ng-repeat="(key, val) in assignment.Answer">
+              <td ng-bind="key"></td><td ng-bind="val"></td>
+            </tr>
+          </table>
+        </div>
+
+        <section className="hpad">
+          <h4>Responses</h4>
+          <div ng-if="responses" object="responses"></div>
+        </section>
+      </div>
+    );
+  }
+}
+
 import _ from 'lodash';
 import angular from 'angular';
 import {app, sendTurkRequest} from '../app';
@@ -84,7 +225,7 @@ function createExternalQuestionString(ExternalURL, FrameHeight) {
   return new XMLSerializer().serializeToString(doc);
 }
 
-class QualificationType {
+export class QualificationType {
   static query(data, callback) {
     _.defaults(data, {
       Operation: 'SearchQualificationTypes',

@@ -1,7 +1,7 @@
 NODE_PATH := $(shell npm bin)
 BREW_PATH := $(shell brew --prefix)/bin
 
-all: build/bundle.js site.css
+all: build/bundle.js bundle/site.css
 
 $(BREW_PATH)/fswatch:
 	brew install fswatch
@@ -9,14 +9,10 @@ $(BREW_PATH)/fswatch:
 $(NODE_PATH)/lessc $(NODE_PATH)/cleancss $(NODE_PATH)/webpack: # $(NODE_PATH)/tsc
 	npm install less postcss-cli webpack autoprefixer
 
-%.css: %.less $(NODE_PATH)/lessc $(NODE_PATH)/postcss $(NODE_PATH)/cleancss
+bundle/%.css: %.less $(NODE_PATH)/lessc $(NODE_PATH)/postcss $(NODE_PATH)/cleancss
 	$(NODE_PATH)/lessc $< |\
 	  $(NODE_PATH)/postcss --use autoprefixer |\
 	  $(NODE_PATH)/cleancss --keep-line-breaks --skip-advanced -o $@
-
-# --compilation_level SIMPLE
-# %.min.js: %.js
-# closure-compiler --angular_pass --language_in ECMASCRIPT5 --warning_level QUIET $< >$@
 
 build/bundle.js: webpack.config.js build.js $(NODE_PATH)/webpack
 	@mkdir -p $(@D)

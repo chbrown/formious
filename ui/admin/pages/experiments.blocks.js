@@ -1,6 +1,161 @@
+import React from 'react';
 import _ from 'lodash';
-import {app} from '../../app';
-import {NotifyUI} from 'notify-ui';
+
+export class BlocksTree extends React.Component {
+  render() {
+    return (
+      <div>
+        <table className="striped grid padded fill blocks">
+          <thead>
+            <tr>
+              <th></th>
+              <th>block_id</th>
+              <th>template/block params</th>
+              <th ng-repeat="parameter in parameters">
+                {parameter}
+              </th>
+              <th>view_order</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="block in blocks | orderBy:'view_order'" ng-className="{container: !block.template_id}">
+              <td style="padding-right: 5px">
+                <input type="checkbox" ng-model="block.selected" />
+              </td>
+              <td>
+                <span>{block.id || 'unsaved'}</span>
+                <a ng-click="block.editing = !block.editing">{block.editing ? 'View' : 'Edit'}</a>
+              </td>
+              {/* swap (template_id, context) / (randomize, children) */}
+              {/* stim-type blocks */}
+              <td ng-if="block.template_id">
+                <a-template ng-if="!block.editing" template-id="{block.template_id}" className="nowrap"></a-template>
+                <select-template ng-if="block.editing" model="block.template_id" ></select-template>
+              </td>
+              <td ng-if="block.template_id && !block.editing" ng-repeat="parameter in parameters">
+                <span ng-bind="block.context[parameter]"></span>
+              </td>
+              <td ng-if="block.template_id && block.editing" colspan="{parameters.length}">
+                <jsonarea ng-model="block.context" style="width: 100%; height: 100px; font: 8pt monospace;"></jsonarea>
+              </td>
+              {/* container-type blocks */}
+              <td ng-if="!block.template_id" colspan="{parameters.length + 1}" style="padding: 0">
+                <div>
+                  Block:
+                  <label>
+                    <input type="checkbox" ng-model="block.randomize" /> Randomize
+                  </label>
+                  <label>
+                    <b>Quota</b>: <input type="number" ng-model="block.quota" />
+                  </label>
+                  <button ng-click="$emit('collapseBlock', block)">Collapse</button>
+                </div>
+
+                <div blocks="block.children"></div>
+              </td>
+              {/* the rest are common to both types of blocks */}
+              <td>
+                <input ng-if="block.editing" type="number" ng-model="block.view_order" step="any" style="width: 50px" />
+                <span ng-if="!block.editing">{block.view_order}</span>
+              </td>
+              <td className="nowrap">
+                <a href="/experiments/{block.experiment_id}/blocks/{block.id}?workerId=testing" target="_blank">Public</a>
+                <button ng-click="$emit('deleteBlock', block)">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+}
+
+export class BlocksTable extends React.Component {
+  render() {
+    return (
+      <div>
+        <section className="box hpad">
+          <form className="vform">
+            <label className="block">
+              <div><b>Default template</b></div>
+              <select ng-model="$storage.default_template_id"
+                ng-options="template.id as template.name for template in templates"></select>
+            </label>
+            <label className="block">
+              <div><b>Import blocks from file</b></div>
+              <input type="file" ng-upload="importFile($file)" />
+            </label>
+          </form>
+        </section>
+
+        <section className="box vpad">
+          <div blocks="root.children" checkbox-sequence style="font-size: 90%"></div>
+        </section>
+
+        <nav fixedflow style="bottom: 0; border-top: 1px solid #BBB; padding: 5px; background-color: #EEE;">
+          <ui-view>
+            <button ng-click="deleteSelectedBlocks()">Delete selection</button>
+            <button ng-click="groupSelectedBlocks()">Group selection</button>
+            <button ng-click="saveTree()">Save tree</button>
+            <button ng-click="addEmptyBlock()">Add empty block</button>
+          </ui-view>
+        </nav>
+      </div>
+    );
+  }
+}
+
+export class BlocksEdit extends React.Component {
+  render() {
+    return (
+      <div>
+        <form ng-submit="syncBlock($event)">
+          <div style="display: inline-block; min-width: 200px; vertical-align: top;">
+            <label>
+              <div><b>Parent Block ID</b></div>
+              <input type="number" ng-model="block.parent_block_id" disabled />
+            </label>
+
+            <label>
+              <div>
+                <input type="checkbox" ng-model="block.randomize" /> <b>Randomize</b>
+              </div>
+            </label>
+
+            <label>
+              <div><b>Quota</b></div>
+              <input type="number" ng-model="block.quota" />
+            </label>
+
+            <label>
+              <div><b>Template</b></div>
+              <select-template model="block.template_id"></select-template>
+            </label>
+
+            <label>
+              <div><b>View order</b></div>
+              <input type="number" ng-model="block.view_order" step="any" />
+            </label>
+
+            <p><button>Save</button></p>
+          </div>
+
+          <div style="display: inline-block; vertical-align: top;">
+            <label>
+              <div><b>Context</b></div>
+              <jsonarea ng-model="block.context" style="width: 600px; height: 100px; font: 8pt monospace;"></jsonarea>
+            </label>
+          </div>
+        </form>
+      </div>
+    );
+  }
+}
+
+
+
+
 
 /**
 interface Node {
@@ -9,7 +164,7 @@ interface Node {
 
 The `nodes` argument to each static function should implement the Node interface above.
 */
-class Node {
+export class Node {
   /**
   Returns new Nodes
   */
@@ -276,3 +431,4 @@ app
     }
   };
 });
+
