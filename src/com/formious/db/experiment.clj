@@ -19,7 +19,7 @@
   [row]
   (->> row (db/insert! "experiment") row->AWSAccountAdministrator))
 
-(defn find
+(defn find-by-id
   [id]
   (-> (db/query ["SELECT * FROM experiment WHERE id = ?", id])
       first

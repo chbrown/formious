@@ -73,7 +73,7 @@
       first
       row->AccessToken))
 
-(defn find
+(defn find-by-id
   [id]
   (-> (db/query ["SELECT * FROM access_token WHERE id = ?", id])
       first

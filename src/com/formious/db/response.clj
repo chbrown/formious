@@ -13,7 +13,7 @@
       (update :created .toZonedDateTime)
       (map->Response)))
 
-(defn find
+(defn find-by-id
   [id]
   (-> (db/query ["SELECT * FROM response WHERE id = ?", id])
       first

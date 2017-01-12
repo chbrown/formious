@@ -20,7 +20,7 @@
   [row]
   (->> row (db/insert! "aws_account") row->AWSAccountAdministrator))
 
-(defn find
+(defn find-by-id
   [id]
   (-> (db/query ["SELECT * FROM aws_account WHERE id = ?", id])
       first

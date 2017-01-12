@@ -28,7 +28,7 @@
       first
       row->Block))
 
-(defn find
+(defn find-by-id
   [experiment_id id]
   (-> (db/query ["SELECT * FROM block WHERE experiment_id = ? AND id = ?" experiment_id id])
       first

@@ -14,4 +14,4 @@
       (-> (Response/create (:id participant), block_id, data, assignment_id) (created))
       (not-found "No matching participant found")))
   (GET "/:id" [id :<< as-int]
-    (Response/find id)))
+    (Response/find-by-id id)))

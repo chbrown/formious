@@ -16,7 +16,7 @@
   []
   (->> (db/query "SELECT * FROM template ORDER BY id ASC") (map row->Template)))
 
-(defn find
+(defn find-by-id
   [id]
   (->> (db/query ["SELECT * FROM template WHERE id = ?" id]) first row->Template))
 

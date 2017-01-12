@@ -19,7 +19,7 @@
   [row]
   (->> row (db/insert! "participant") row->AWSAccountAdministrator))
 
-(defn find
+(defn find-by-id
   [id]
   (-> (db/query ["SELECT * FROM participant WHERE id = ?", id])
       first
@@ -39,6 +39,6 @@
   ; TODO: refactor this
   [id aws_worker_id]
   (if id
-    (find id)
+    (find-by-id id)
     (when aws_worker_id
       (find-or-create-by-worker-id aws_worker_id nil nil))))

@@ -12,7 +12,7 @@
   (POST "/" {{:strings [name, access_key_id, secret_access_key]} :body}
     (-> (AWSAccount/create name, access_key_id, secret_access_key) (created)))
   (GET "/:id" [id :<< as-int]
-    (AWSAccount/find id))
+    (AWSAccount/find-by-id id))
   (POST "/:id" [id :<< as-int :as {{:strings [name, access_key_id, secret_access_key]} :body}]
     (AWSAccount/update id name, access_key_id, secret_access_key)
     (no-content))

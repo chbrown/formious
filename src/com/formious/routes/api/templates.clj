@@ -21,7 +21,7 @@
     (-> (Template/create name, html) (created)))
   ; Show existing template
   (GET "/:id" [id :<< as-int]
-    (-> (Template/find id) (header "Cache-Control", "max-age=5")))
+    (-> (Template/find-by-id id) (header "Cache-Control", "max-age=5")))
   ; Update existing template
   (POST "/:id" [id :<< as-int :as {{:strings [name, html]} :body}]
     (Template/update id, name, html)

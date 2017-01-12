@@ -12,7 +12,7 @@
   (POST "/" {{:strings [email, password]} :body}
     (-> (Administrator/create email, password) (created)))
   (GET "/:id" [id :<< as-int]
-    (-> (Administrator/find id) (dissoc "password")))
+    (-> (Administrator/find-by-id id) (dissoc "password")))
   (POST "/:id" [id :<< as-int :as {{:strings [email, password]} :body}]
     ; TODO: make the password optional and hash it if it is not empty
     (Administrator/updateCredentials id email, password)

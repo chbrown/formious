@@ -20,14 +20,14 @@
 
 (defn row->Administrator
   [{:keys [id email password created]}]
-  (Template. id email password (.toZonedDateTime created)))
+  (Administrator. id email password (.toZonedDateTime created)))
 
 (defn all
   []
   (->> (db/query "SELECT * FROM administrator ORDER BY created DESC")
-       (map row->Administrator))
+       (map row->Administrator)))
 
-(defn find
+(defn find-by-id
   [id]
   (-> (db/query ["SELECT * FROM administrator WHERE id = ?", id])
       first
@@ -65,4 +65,4 @@
                                         AND relation = 'administrators'
                                         AND (expires IS NULL OR expires > NOW())", token])]
     ; logger.debug(s"Authenticating administrator for token '${accessToken.token}'")
-    (find (-> access-token first :foreign_id))))
+    (find-by-id (-> access-token first :foreign_id))))

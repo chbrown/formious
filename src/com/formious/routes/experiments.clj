@@ -26,7 +26,7 @@
     ; &hitId=123RVWYBAZW00EXAMPLE
     ; &turkSubmitTo=https://www.mturk.com
     ; &workerId=AZ3456EXAMPLE
-    (let [experiment (Experiment/find experiment_id)
+    (let [experiment (Experiment/find-by-id experiment_id)
           block (Block/find experiment_id block_id)
           blockTemplateHtml (or (some-> block :template_id templates/find :html) "")
           ; context: the current state to render the template with

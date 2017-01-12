@@ -23,7 +23,7 @@
     (let [SERVICE_URL (if (= environment "sandbox")
                         ClientConfig/SANDBOX_SERVICE_URL
                         ClientConfig.PRODUCTION_SERVICE_URL)
-          {:keys [access_key_id secret_access_key]} (AWSAccount/find aws_account_id)
+          {:keys [access_key_id secret_access_key]} (AWSAccount/find-by-id aws_account_id)
           config (doto (ClientConfig.)
                        (.setServiceURL SERVICE_URL)
                        (.setAccessKeyId access_key_id)
