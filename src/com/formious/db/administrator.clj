@@ -14,9 +14,8 @@
         message-bytes (.digest message)]
     (javax.xml.bind.DatatypeConverter/printHexBinary message-bytes)))
 
-(defrecord Administrator
-  ; Int String String ZonedDateTime
-  [id email password created])
+; Int String String ZonedDateTime
+(defrecord Administrator [id email password created])
 
 (defn row->Administrator
   [{:keys [id email password created]}]

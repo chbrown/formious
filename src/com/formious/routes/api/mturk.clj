@@ -1,5 +1,5 @@
 (ns com.formious.routes.api.mturk
-  (:require [com.formious.common :refer [created ]]
+  (:require [com.formious.common :refer [created]]
             [com.formious.db.aws-account :as AWSAccount]
             [ring.util.response :refer [resource-response not-found]]
             [compojure.core :refer [GET POST defroutes]])

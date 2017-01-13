@@ -3,9 +3,8 @@
             [com.formious.common :as common])
   (:import [java.time ZonedDateTime]))
 
-(defrecord Block
-  ; Int Int Option[Int] String Double Boolean Option[Int] Option[Int] ZonedDateTime
-  [id experiment_id template_id context view_order randomize parent_block_id quota created])
+; Int Int Option[Int] String Double Boolean Option[Int] Option[Int] ZonedDateTime
+(defrecord Block [id experiment_id template_id context view_order randomize parent_block_id quota created])
 
 ; case class BlockData(template_id: Option[Int], context: String, view_order: Double, randomize: Boolean, parent_block_id: Option[Int], quota: Option[Int])
 

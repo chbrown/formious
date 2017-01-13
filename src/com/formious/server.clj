@@ -11,8 +11,8 @@
 
 (def custom-site-defaults
   (-> site-defaults
-    (assoc-in [:params :keywordize] true) ; this doesn't seem to work... at least not for query params
-    (assoc-in [:security :anti-forgery] false))) ; disable this for now - TODO: worry about security later
+      (assoc-in [:params :keywordize] true) ; this doesn't seem to work... at least not for query params
+      (assoc-in [:security :anti-forgery] false))) ; disable this for now - TODO: worry about security later
 
 (defn wrap-server-header
   [handler server]
@@ -44,6 +44,6 @@
   ; val port = opt[Int]("port", 'p', descr="port to listen on", default=Some(sys.env.getOrElse("PORT", "80").toInt))
   ([] (-main (or (System/getenv "PORT") "1451")))
   ([port]
-    (println "Starting server via com.formious.server/-main")
-    (println (str "Listening on :" port))
-    (run-server handler {:port (Integer/parseInt port)})))
+   (println "Starting server via com.formious.server/-main")
+   (println (str "Listening on :" port))
+   (run-server handler {:port (Integer/parseInt port)})))

@@ -2,9 +2,8 @@
   (:require [com.formious.db :as db])
   (:import [java.time ZonedDateTime]))
 
-(defrecord Response
-  ; Int Int Int JsonObject Option[String] ZonedDateTime
-  [id participant_id block_id data assignment_id created])
+; Int Int Int JsonObject Option[String] ZonedDateTime
+(defrecord Response [id participant_id block_id data assignment_id created])
 
 (defn row->Response
   [row]

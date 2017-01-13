@@ -2,9 +2,8 @@
   (:require [com.formious.db :as db])
   (:import [java.time ZonedDateTime]))
 
-(defrecord AWSAccount
-  ; Int String String String ZonedDateTime
-  [id name access_key_id secret_access_key created])
+; Int String String String ZonedDateTime
+(defrecord AWSAccount [id name access_key_id secret_access_key created])
 
 (defn row->AWSAccount
   [row]

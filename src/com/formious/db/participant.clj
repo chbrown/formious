@@ -2,9 +2,8 @@
   (:require [com.formious.db :as db])
   (:import [java.time ZonedDateTime]))
 
-(defrecord Participant
-  ; Int Option[String] Option[String] math.BigDecimal math.BigDecimal Option[String] Option[String] ZonedDateTime
-  [id name aws_worker_id aws_bonus_owed aws_bonus_paid ip_address user_agent created])
+; Int Option[String] Option[String] math.BigDecimal math.BigDecimal Option[String] Option[String] ZonedDateTime
+(defrecord Participant [id name aws_worker_id aws_bonus_owed aws_bonus_paid ip_address user_agent created])
 
 (defn row->Participant
   [row]
@@ -31,7 +30,7 @@
 
 (defn find-or-create-by-worker-id
   [aws_worker_id & {:keys [ip_address user_agent]}]
-  (if-let [participants (db/query ["SELECT * FROM participant WHERE aws_worker_id = ?" ])]
+  (if-let [participants (db/query ["SELECT * FROM participant WHERE aws_worker_id = ?" aws_worker_id])]
     (-> participants first row->AWSAccount)
     (insert! {:aws_worker_id aws_worker_id :ip_address ip_address :user_agent user_agent})))
 

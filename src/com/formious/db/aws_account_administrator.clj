@@ -2,9 +2,8 @@
   (:require [com.formious.db :as db])
   (:import [java.time ZonedDateTime]))
 
-(defrecord AWSAccountAdministrator
-  ; Int Int Int Int ZonedDateTime
-  [id aws_account_id administrator_id priority created])
+; Int Int Int Int ZonedDateTime
+(defrecord AWSAccountAdministrator [id aws_account_id administrator_id priority created])
 
 (defn row->AWSAccountAdministrator
   [row]

@@ -17,7 +17,7 @@
       (-> (block-url experiment_id block) (redirect :see-other))
       (not-found "No available blocks")))
   (GET "/:experiment_id/blocks/:block_id" [experiment_id :<< as-int
-                                            block_id :<< as-int]
+                                           block_id :<< as-int]
     ; Render block as html
     ; the querystring will usually have the fields: assignmentId, hitId, turkSubmitTo, workerId
     ; the Amazon Mechanical Turk frame will give us the following variables:
@@ -45,7 +45,7 @@
   (POST "/:experiment_id/blocks/:block_id" [experiment_id :<< as-int
                                             block_id :<< as-int
                                             :as {{:strings [WorkerId AssignmentId]
-                                                       :or {WorkerId "WORKER_ID_NOT_AVAILABLE"}} :query-params
+                                                  :or {WorkerId "WORKER_ID_NOT_AVAILABLE"}} :query-params
                                                  body :body
                                                  headers :headers}]
     ; Save response

@@ -2,9 +2,8 @@
   (:require [com.formious.db :as db])
   (:import [java.time ZonedDateTime]))
 
-(defrecord Experiment
-  ; Int String Int String ZonedDateTime
-  [id name administrator_id html created])
+; Int String Int String ZonedDateTime
+(defrecord Experiment [id name administrator_id html created])
 
 (defn row->Experiment
   [row]

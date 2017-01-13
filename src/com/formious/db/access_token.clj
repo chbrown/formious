@@ -9,7 +9,6 @@
   [^Int length]
   (repeatedly length #(rand-nth ALPHABET)))
 
-
 (defrecord AccessToken [^Int id
                         ^String token
                         ^String relation

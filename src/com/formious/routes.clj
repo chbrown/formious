@@ -104,15 +104,16 @@
           (println "found access-token" access-token)
           (-> "Authenticated successfully"
               response
-              (set "administrator_token" (:token access-token) :path "/"
-                                                               :max-age (* 60 60 24 31)))) ; 31 days in seconds
+              (set "administrator_token" (:token access-token)
+                   :path "/"
+                   :max-age (* 60 60 24 31)))) ; 31 days in seconds
         ; we serve the login page from GET as well as failed login POSTs
         ; Unauthorized(Challenge("Basic", "Admin Realm"))
         {:status 403
          :body "You must login first"})))
 
-    (POST "/mturk/externalSubmit"
-      {params :query-params body :body}
+  (POST "/mturk/externalSubmit"
+    {params :query-params body :body}
       ; This is a testing filler for the MTurk production / sandbox final POST, which
       ; will point to https://www.mturk.com/mturk/externalSubmit for production HITs,
       ; or https://workersandbox.mturk.com/mturk/externalSubmit for sandbox HITs. The
@@ -121,10 +122,10 @@
       ; empty string, and so missing final post backs will hit this endpoint.
       ; only assignmentId is required
       ; maybe fail on null block_id?
-      (let [{:strings [workerId assignmentId block_id] :or {workerId "WORKER_ID_NOT_AVAILABLE" block_id 0}} params
-            participant (participant/find-or-create-by-worker-id workerId nil nil)]
-        (response/create participant.id, block_id, body, assignmentId)
-        (response "Your responses have been submitted and saved.")))
+    (let [{:strings [workerId assignmentId block_id] :or {workerId "WORKER_ID_NOT_AVAILABLE" block_id 0}} params
+          participant (participant/find-or-create-by-worker-id workerId nil nil)]
+      (response/create participant.id, block_id, body, assignmentId)
+      (response "Your responses have been submitted and saved.")))
 
   (ANY "/echo" request
     ; case class RequestInfo(httpVersion: String, method: String, uri: String, headers: Map[String, String], remoteAddress: String)
@@ -152,7 +153,7 @@
     (case (:content-type headers)
      ; Parse csv-like input flexibly and write out json to response
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        (-> body excel/first-sheet-as-maps)
+      (-> body excel/first-sheet-as-maps)
       ; "application/json" parse(body).getOrElse(Json.Null).asArray.get
       ; default: csv
       (-> body io/reader csv/as-maps))) ; Header("Content-Type", "application/json"))

@@ -18,9 +18,7 @@
 
 (defn- row->map
   [row]
-  (into {}
-    (for [cell row]
-      {(.getColumnIndex cell) (cell-string cell)})))
+  (into {} (for [cell row] {(.getColumnIndex cell) (cell-string cell)})))
 
 (defn sheet-as-maps
   [^XSSFSheet sheet]
