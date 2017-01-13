@@ -1,5 +1,6 @@
 (ns com.formious.db.response
-  (:require [com.formious.db :as db])
+  (:require [com.formious.db :as db]
+            [clojure.data.json :as json])
   (:import [java.time ZonedDateTime]))
 
 ; Int Int Int JsonObject Option[String] ZonedDateTime
@@ -9,7 +10,7 @@
   [row]
   (-> row
       (update :data json/read-str)
-      (update :created .toZonedDateTime)
+      (update :created #(.toZonedDateTime %))
       (map->Response)))
 
 (defn find-by-id
@@ -21,11 +22,11 @@
 (defn insert!
   ; (participant_id: Int, block_id: Int, data: String = "{}", assignment_id: Option[String] = None)
   [row]
-  (->> row (db/insert! "response") row->AWSAccountAdministrator))
+  (->> row (db/insert! "response") row->Response))
 
 (defn whereParticipant
   [participant_id]
-  (map row->AWSAccount (db/query ["SELECT * FROM response WHERE participant_id = ?" participant_id])))
+  (map row->Response (db/query ["SELECT * FROM response WHERE participant_id = ?" participant_id])))
 
 ; (defn allWhere(limit: Int,
 ;                experiment_id: Option[Int],

@@ -6,23 +6,23 @@
 
 (defn- random-string
   "return alphaDecimal of given length"
-  [^Int length]
+  [^Integer length]
   (repeatedly length #(rand-nth ALPHABET)))
 
-(defrecord AccessToken [^Int id
+(defrecord AccessToken [^Integer id
                         ^String token
                         ^String relation
-                        ^Int foreign_id
+                        ^Integer foreign_id
                         ^ZonedDateTime expires
                         ^ZonedDateTime redacted
                         ^ZonedDateTime created])
 
 (defn row->AccessToken
   [{:keys [id token relation foreign_id expires redacted created]}]
-  (Template. id token relation foreign_id
-             (some-> expires .toZonedDateTime)
-             (some-> redacted .toZonedDateTime)
-             (.toZonedDateTime created)))
+  (AccessToken. id token relation foreign_id
+                (some-> expires #(.toZonedDateTime %))
+                (some-> redacted #(.toZonedDateTime %))
+                (.toZonedDateTime created)))
 
 (defn blank
   []
@@ -34,13 +34,13 @@
        (map row->AccessToken)))
 
 (defn insert!
-  ; row keys: ^String token ^String relation ^Int foreign_id expires redacted
+  ; row keys: ^String token ^String relation ^Integer foreign_id expires redacted
   [row]
   (-> (db/insert! "access_token" row) row->AccessToken))
 
 (defn- createRandom
-  [^String relation ^Int foreign_id {:keys [length expires redacted] :or {length 40}}]
-  (create (random-string length), relation, foreign_id, expires, redacted))
+  [^String relation ^Integer foreign_id {:keys [length expires redacted] :or {length 40}}]
+  (insert! (random-string length), relation, foreign_id, expires, redacted))
 
 (defn find-or-create
   ; TODO: convert to upsert

@@ -2,8 +2,11 @@
   (:require [com.formious.common :refer [no-content created]]
             [com.formious.db.experiment :as Experiment]
             [com.formious.db.block :as Block]
+            [com.formious.db.participant :as Participant]
+            [com.formious.db.response :as Response]
             [clojure.string :as string]
             [clostache.parser :refer [render render-resource]]
+            [compojure.coercions :refer [as-int]]
             [compojure.core :refer [GET PATCH POST PUT DELETE context defroutes]]))
 
 (defn- block-url
@@ -13,7 +16,7 @@
 (defroutes routes
   (GET "/:experiment_id" [experiment_id :<< as-int]
     ; Redirect to first block of experiment
-    (if-let [block (Block/next experiment_id)]
+    (if-let [block (Block/next-in-experiment experiment_id)]
       (-> (block-url experiment_id block) (redirect :see-other))
       (not-found "No available blocks")))
   (GET "/:experiment_id/blocks/:block_id" [experiment_id :<< as-int
@@ -27,7 +30,7 @@
     ; &turkSubmitTo=https://www.mturk.com
     ; &workerId=AZ3456EXAMPLE
     (let [experiment (Experiment/find-by-id experiment_id)
-          block (Block/find experiment_id block_id)
+          block (Block/find-by-id experiment_id block_id)
           blockTemplateHtml (or (some-> block :template_id templates/find :html) "")
           ; context: the current state to render the template with
           ; Supply "experiment_id" and "block_id" in the blockContext
@@ -44,7 +47,7 @@
 
   (POST "/:experiment_id/blocks/:block_id" [experiment_id :<< as-int
                                             block_id :<< as-int
-                                            :as {{:strings [WorkerId AssignmentId]
+                                            :as {{:strs [WorkerId AssignmentId]
                                                   :or {WorkerId "WORKER_ID_NOT_AVAILABLE"}} :query-params
                                                  body :body
                                                  headers :headers}]
@@ -58,9 +61,9 @@
     (let [ipAddress (:x-real-ip headers)
           userAgent (:user-agent headers)
           requestedWith (:x-requested-with headers)
-          participant (participants/findOrCreateByWorkerId workerId, ipAddress, userAgent)
-          response (responses/create participant.id, block_id, postData, assignmentIdOption)]
-      (if-let [block (Block/next experiment_id, block_id, participant.id)]
+          participant (Participant/find-or workerId, ipAddress, userAgent)
+          response (Response/insert! participant.id, block_id, postData, assignmentIdOption)]
+      (if-let [block (Block/next-in-experiment experiment_id, block_id, participant.id)]
         (let [resp (redirect (block-url experiment_id block))]
           (if (string/includes? requestedWith "XMLHttpRequest")
             (no-content resp)

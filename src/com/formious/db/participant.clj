@@ -7,16 +7,16 @@
 
 (defn row->Participant
   [row]
-  (map->Participant (update row :created .toZonedDateTime)))
+  (map->Participant (update row :created #(.toZonedDateTime %))))
 
 (defn all
   []
-  (map row->AWSAccount (db/query "SELECT * FROM participant ORDER BY id ASC")))
+  (map row->Participant (db/query "SELECT * FROM participant ORDER BY id ASC")))
 
 (defn insert!
   ; (aws_worker_id: String, ip_address: Option[String], user_agent: Option[String])
   [row]
-  (->> row (db/insert! "participant") row->AWSAccountAdministrator))
+  (->> row (db/insert! "participant") row->Participant))
 
 (defn find-by-id
   [id]
@@ -31,7 +31,7 @@
 (defn find-or-create-by-worker-id
   [aws_worker_id & {:keys [ip_address user_agent]}]
   (if-let [participants (db/query ["SELECT * FROM participant WHERE aws_worker_id = ?" aws_worker_id])]
-    (-> participants first row->AWSAccount)
+    (-> participants first row->Participant)
     (insert! {:aws_worker_id aws_worker_id :ip_address ip_address :user_agent user_agent})))
 
 (defn find-or-create

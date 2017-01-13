@@ -5,12 +5,13 @@
             [com.formious.db.administrator :as Administrator]
             [com.formious.db.participant :as Participant]
             [com.formious.db.response :as Response]
+            [com.formious.routes.api :as api]
             [rum.core :as rum]
             [clojure.instant :as instant]
             [ring.util.response :refer [resource-response content-type get-header set-cookie]]
             [clojure.set :as set]
             [clojure.string :as string]
-            [compojure.core :refer [GET HEAD PATCH POST PUT DELETE defroutes]]
+            [compojure.core :refer [GET HEAD PATCH POST PUT DELETE defroutes context]]
             [compojure.route :as route]))
 
 ; from olhado/urllib.cljs
@@ -78,7 +79,7 @@
 
   (GET "/responses*"
     {params :query-params}
-    (let [{:strings [token experiment_id]} params]
+    (let [{:strs [token experiment_id]} params]
       ;paramOption("accept") :: headerOption("accept")
       ; GET /experiments/:experiment_id/responses?token=ABCDEF12345
       ; Requires authorization, but only by access token.
@@ -89,13 +90,13 @@
         (do
           ; yay, authorization granted
           (println "authorized experiments /" experiment_id "via token" token)
-          (response/extended-responses experiment_id))
+          (Response/extended-responses experiment_id))
         ; Unauthorized(Challenge("Basic", "Admin Realm")) ; "Invalid access token"
         {:status 403
          :body "You must login first"})))
 
   (POST "/login" {body :body}
-    (let [{:strings [email password]} body]
+    (let [{:strs [email password]} body]
       ; Try to login as user with email and password
       ; TODO: make artificially slow to deflect brute force attacks
       ; setTimeout(function() { ... }, 500)
@@ -122,9 +123,9 @@
       ; empty string, and so missing final post backs will hit this endpoint.
       ; only assignmentId is required
       ; maybe fail on null block_id?
-    (let [{:strings [workerId assignmentId block_id] :or {workerId "WORKER_ID_NOT_AVAILABLE" block_id 0}} params
+    (let [{:strs [workerId assignmentId block_id] :or {workerId "WORKER_ID_NOT_AVAILABLE" block_id 0}} params
           participant (participant/find-or-create-by-worker-id workerId nil nil)]
-      (response/create participant.id, block_id, body, assignmentId)
+      (Response/insert! participant.id, block_id, body, assignmentId)
       (response "Your responses have been submitted and saved.")))
 
   (ANY "/echo" request

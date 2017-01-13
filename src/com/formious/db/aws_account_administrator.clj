@@ -7,7 +7,7 @@
 
 (defn row->AWSAccountAdministrator
   [row]
-  (map->AWSAccountAdministrator (update row :created .toZonedDateTime)))
+  (map->AWSAccountAdministrator (update row :created #(.toZonedDateTime %))))
 
 (defn all
   []

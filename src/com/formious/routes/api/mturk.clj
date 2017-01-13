@@ -9,7 +9,7 @@
 (defroutes routes
   ;case POST -> Root / "GetAccountBalance" =>
   ; POST /api/mturk/?aws_account_id=number&environment='production'|'sandbox'
-  (POST "/" {{:strings [aws_account_id environment]} :query-params
+  (POST "/" {{:strs [aws_account_id environment]} :query-params
              body :body}
     ; The querystring should contain the aws_account.id and the target MTurk environment.
     ; `aws_account_id` indicates a record in the AWS Account table, which exposes the

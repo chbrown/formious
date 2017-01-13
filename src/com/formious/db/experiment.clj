@@ -1,22 +1,27 @@
 (ns com.formious.db.experiment
-  (:require [com.formious.db :as db])
+  (:require [com.formious.db :as db]
+            [com.formious.db.access-token :as AccessToken])
   (:import [java.time ZonedDateTime]))
 
 ; Int String Int String ZonedDateTime
 (defrecord Experiment [id name administrator_id html created])
 
+(defn blank
+  []
+  (Experiment. 0 "" nil "" (ZonedDateTime/now)))
+
 (defn row->Experiment
   [row]
-  (map->Experiment (update row :created .toZonedDateTime)))
+  (map->Experiment (update row :created #(.toZonedDateTime %))))
 
 (defn all
   []
-  (map row->AWSAccount (db/query "SELECT * FROM experiment ORDER BY id ASC")))
+  (map row->Experiment (db/query "SELECT * FROM experiment ORDER BY id ASC")))
 
 (defn insert!
   ; (name: String, administrator_id: Int, html: String)
   [row]
-  (->> row (db/insert! "experiment") row->AWSAccountAdministrator))
+  (->> row (db/insert! "experiment") row->Experiment))
 
 (defn find-by-id
   [id]

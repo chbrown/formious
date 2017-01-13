@@ -1,25 +1,26 @@
-(ns com.formious.api.experiments.blocks
+(ns com.formious.routes.api.experiments.blocks
   (:require [com.formious.common :refer [no-content created]]
             [com.formious.db.block :as Block]
+            [compojure.coercions :refer [as-int]]
             [compojure.core :refer [GET PATCH POST PUT DELETE context defroutes]]))
 
 ; /api/experiments/*
 (def routes
   (context "/:experiment_id/blocks" [experiment_id :<< as-int]
-    (GET "/"
+    (GET "/" []
       ; list all of an experiment's blocks
       (Block/all experiment_id))
     (GET "/new" []
-      (Block/empty))
-    (POST "/" {{:strings [template_id, context, view_order, randomize, parent_block_id, quota]} :body}
-      (-> (Block/create experiment_id, template_id, context, view_order, randomize, parent_block_id, quota) (created)))
+      (Block/blank))
+    (POST "/" {{:strs [template_id, context, view_order, randomize, parent_block_id, quota]} :body}
+      (-> (Block/insert! experiment_id, template_id, context, view_order, randomize, parent_block_id, quota) (created)))
     (GET "/:id" [id :<< as-int]
-      (Block/find experiment_id id))
-    (POST "/:id" [id :<< as-int :as {{:strings [template_id, context, view_order, randomize, parent_block_id, quota]} :body}]
-      (Block/update id experiment_id template_id, context, view_order, randomize, parent_block_id, quota)
+      (Block/find-by-id experiment_id id))
+    (POST "/:id" [id :<< as-int :as {{:strs [template_id, context, view_order, randomize, parent_block_id, quota]} :body}]
+      (Block/update! id experiment_id template_id, context, view_order, randomize, parent_block_id, quota)
       (no-content))
     (DELETE "/:id" [id :<< as-int]
-      (Block/delete id experiment_id)
+      (Block/delete! id experiment_id)
       (no-content))
     (GET "/tree" []
       ; Special non-REST method to get all blocks and sort them into a tree.

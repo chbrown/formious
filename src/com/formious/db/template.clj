@@ -2,7 +2,7 @@
   (:require [com.formious.db :as db])
   (:import [java.time ZonedDateTime]))
 
-(defrecord Template [^Int id ^String name ^String html ^ZonedDateTime created])
+(defrecord Template [^Integer id ^String name ^String html ^ZonedDateTime created])
 
 (defn row->Template
   [{:keys [id name html created]}]
@@ -25,9 +25,9 @@
   (->> (db/insert! "template" [(Template. name html)]) first row->Template))
 
 (defn update!
-  [^Int id ^String name ^String html]
+  [^Integer id ^String name ^String html]
   (db/update! "template" {:name name, :html html} ["id = ?" id]))
 
 (defn delete!
-  [^Int id]
+  [^Integer id]
   (db/delete! "template" ["id = ?" id]))

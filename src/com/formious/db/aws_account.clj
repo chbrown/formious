@@ -5,9 +5,13 @@
 ; Int String String String ZonedDateTime
 (defrecord AWSAccount [id name access_key_id secret_access_key created])
 
+(defn blank
+  []
+  (AWSAccount. 0 "" "" "" (ZonedDateTime/now)))
+
 (defn row->AWSAccount
   [row]
-  (map->AWSAccount (update row :created .toZonedDateTime)))
+  (map->AWSAccount (update row :created #(.toZonedDateTime %))))
 
 (defn all
   []
@@ -17,7 +21,7 @@
 (defn insert!
   ; (name: String, access_key_id: String, secret_access_key: String)
   [row]
-  (->> row (db/insert! "aws_account") row->AWSAccountAdministrator))
+  (->> row (db/insert! "aws_account") row->AWSAccount))
 
 (defn find-by-id
   [id]

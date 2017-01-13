@@ -1,5 +1,6 @@
 (ns com.formious.db.administrator
   (:require [com.formious.db :as db]
+            [com.formious.db.access-token :as AccessToken]
             [com.formious.common :as common])
   (:import [java.time ZonedDateTime]))
 
@@ -17,6 +18,10 @@
 ; Int String String ZonedDateTime
 (defrecord Administrator [id email password created])
 
+(defn blank
+  []
+  (Administrator. 0 "" "" (ZonedDateTime/now)))
+
 (defn row->Administrator
   [{:keys [id email password created]}]
   (Administrator. id email password (.toZonedDateTime created)))
@@ -28,13 +33,13 @@
 
 (defn find-by-id
   [id]
-  (-> (db/query ["SELECT * FROM administrator WHERE id = ?", id])
+  (-> (db/query ["SELECT * FROM administrator WHERE id = ?" id])
       first
       row->Administrator))
 
 (defn delete!
   [id]
-  (db/delete! "administrator" ["id = ?", id]))
+  (db/delete! "administrator" ["id = ?" id]))
 
 (defn insert!
   [row]
@@ -50,9 +55,9 @@
 (defn authenticate
   [email password]
   (if-let [administrator (first (db/query ["SELECT * FROM administrator
-                                            WHERE email = ? AND password = ?", email, (hash-with-salt password)]))]
+                                            WHERE email = ? AND password = ?" email (hash-with-salt password)]))]
     ; (println s"Authenticating administrator '${administrator.id}' and with new or existing token")
-    (AccessToken/find-or-create "administrators", administrator.id, 40)))
+    (AccessToken/find-or-create "administrators" (:id administrator) 40)))
 
 ; Get administrator object from token.
 ; @return None if no access token matched or if no administrator is linked to that token
@@ -62,6 +67,6 @@
   (when-let [access-token (db/query ["SELECT * FROM access_token
                                       WHERE token = ?
                                         AND relation = 'administrators'
-                                        AND (expires IS NULL OR expires > NOW())", token])]
+                                        AND (expires IS NULL OR expires > NOW())" token])]
     ; logger.debug(s"Authenticating administrator for token '${accessToken.token}'")
     (find-by-id (-> access-token first :foreign_id))))
