@@ -4,8 +4,11 @@
             [com.formious.db.block :as Block]
             [com.formious.db.participant :as Participant]
             [com.formious.db.response :as Response]
+            [com.formious.db.template :as Template]
             [clojure.string :as string]
+            [clojure.data.json :as json]
             [clostache.parser :refer [render render-resource]]
+            [ring.util.response :refer [not-found redirect content-type]]
             [compojure.coercions :refer [as-int]]
             [compojure.core :refer [GET PATCH POST PUT DELETE context defroutes]]))
 
@@ -31,7 +34,7 @@
     ; &workerId=AZ3456EXAMPLE
     (let [experiment (Experiment/find-by-id experiment_id)
           block (Block/find-by-id experiment_id block_id)
-          blockTemplateHtml (or (some-> block :template_id templates/find :html) "")
+          blockTemplateHtml (or (some-> block :template_id Template/find-by-id :html) "")
           ; context: the current state to render the template with
           ; Supply "experiment_id" and "block_id" in the blockContext
           context (into (:context block) {:experiment_id experiment_id
@@ -61,9 +64,9 @@
     (let [ipAddress (:x-real-ip headers)
           userAgent (:user-agent headers)
           requestedWith (:x-requested-with headers)
-          participant (Participant/find-or workerId, ipAddress, userAgent)
-          response (Response/insert! participant.id, block_id, postData, assignmentIdOption)]
-      (if-let [block (Block/next-in-experiment experiment_id, block_id, participant.id)]
+          participant (Participant/find-or-create-by-worker-id WorkerId :ip_address ipAddress :user_agent userAgent)
+          response (Response/insert! (:id participant) block_id body AssignmentId)]
+      (if-let [block (Block/next-in-experiment experiment_id block_id (:id participant))]
         (let [resp (redirect (block-url experiment_id block))]
           (if (string/includes? requestedWith "XMLHttpRequest")
             (no-content resp)

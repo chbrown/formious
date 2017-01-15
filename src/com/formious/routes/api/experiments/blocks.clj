@@ -13,7 +13,8 @@
     (GET "/new" []
       (Block/blank))
     (POST "/" {{:strs [template_id, context, view_order, randomize, parent_block_id, quota]} :body}
-      (-> (Block/insert! experiment_id, template_id, context, view_order, randomize, parent_block_id, quota) (created)))
+      (-> (Block/insert! experiment_id, template_id, context, view_order, randomize, parent_block_id, quota)
+          (created)))
     (GET "/:id" [id :<< as-int]
       (Block/find-by-id experiment_id id))
     (POST "/:id" [id :<< as-int :as {{:strs [template_id, context, view_order, randomize, parent_block_id, quota]} :body}]

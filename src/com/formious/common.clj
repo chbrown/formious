@@ -4,12 +4,16 @@
             [clojure.string :as string]))
 
 (defn no-content
-  ([] (no-content (response "")))
-  ([resp] (status resp 204)))
+  ([] (no-content ""))
+  ([body] (status (response body) 204)))
 
 (defn created
-  [resp]
-  (status resp 201))
+  [body]
+  (status (response body) 201))
+
+(defn ok
+  [body]
+  (response body))
 
 (defn update-when
   "Like update but only calls f if m contains k"

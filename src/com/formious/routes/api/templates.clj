@@ -1,7 +1,7 @@
 (ns com.formious.routes.api.templates
   (:require [com.formious.common :refer [no-content created]]
             [com.formious.db.template :as Template]
-            [ring.util.response :refer [resource-response content-type header]]
+            [ring.util.response :refer [content-type header]]
             [compojure.coercions :refer [as-int]]
             [compojure.core :refer [GET HEAD PATCH POST PUT DELETE defroutes]]))
 
