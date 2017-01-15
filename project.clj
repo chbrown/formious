@@ -1,5 +1,5 @@
 ; project.clj documentation: https://github.com/technomancy/leiningen/blob/master/sample.project.clj
-(defproject com.formious "0.2.0-SNAPSHOT"
+(defproject com.formious/app "0.2.0-SNAPSHOT"
   :description "Experiment Server"
   :url "https://formious.com/"
   ; "author": "Christopher Brown <io@henrian.com>",
@@ -8,12 +8,14 @@
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/java.jdbc "0.6.1"]
                  [org.postgresql/postgresql "9.4.1212"]
+                 [cheshire "5.7.0"]
                  [org.clojure/data.json "0.2.6"]
+                 [http.async.client "1.2.0"]
                  [markdown-clj "0.9.91"]
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [net.sf.supercsv/super-csv "2.4.0"]
                  [net.sf.supercsv/super-csv-java8 "2.4.0"]
-                 [org.apache.poi/poi-ooxml "3.14"]
+                 [org.apache.poi/poi-ooxml "3.15"]
                  ; clj/web
                  [compojure "1.6.0-beta2"]
                  [ring/ring-core "1.6.0-beta6"]
