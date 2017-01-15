@@ -62,9 +62,9 @@
           (println "found access-token" access-token)
           (-> "Authenticated successfully"
               (response)
-              (set "administrator_token" (:token access-token)
-                   :path "/"
-                   :max-age (* 60 60 24 31)))) ; 31 days in seconds
+              (set-cookie "administrator_token" (:token access-token)
+                          :path "/"
+                          :max-age (* 60 60 24 31)))) ; 31 days in seconds
         ; we serve the login page from GET as well as failed login POSTs
         ; Unauthorized(Challenge("Basic", "Admin Realm"))
         {:status 403
@@ -82,7 +82,10 @@
     ; maybe fail on null block_id?
     (let [{:strs [workerId assignmentId block_id] :or {workerId "WORKER_ID_NOT_AVAILABLE" block_id 0}} params
           participant (Participant/find-or-create-by-worker-id workerId nil nil)]
-      (Response/insert! (:id participant) block_id body assignmentId)
+      (Response/insert! {:participant_id (:id participant)
+                         :block_id block_id
+                         :body body
+                         :assignmentId assignmentId})
       (response "Your responses have been submitted and saved.")))
 
   (ANY "/echo" request

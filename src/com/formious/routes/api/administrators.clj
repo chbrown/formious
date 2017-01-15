@@ -11,13 +11,16 @@
     (->> (Administrator/all) (map #(dissoc % :password)) (ok)))
   (GET "/new" []
     (-> (Administrator/blank) (ok)))
-  (POST "/" {{:strs [email password]} :body}
-    (-> (Administrator/insert! email password) (created)))
+  (POST "/" {body :body}
+    (->> (select-keys body ["email" "password"])
+         (Administrator/insert!)
+         (created)))
   (GET "/:id" [id :<< as-int]
     (-> (Administrator/find-by-id id) (dissoc :password) (ok)))
-  (POST "/:id" [id :<< as-int :as {{:strs [email password]} :body}]
+  (POST "/:id" [id :<< as-int :as {body :body}]
     ; TODO: make the password optional and hash it if it is not empty
-    (Administrator/update! id email password)
+    (->> (select-keys body ["email" "password"])
+         (Administrator/update! id))
     (no-content))
   (DELETE "/:id" [id :<< as-int]
     (Administrator/delete! id)
@@ -29,7 +32,9 @@
       (-> (AWSAccount/all-by-administrator administrator_id) (ok)))
     ; Create administrator-AWS account link
     (POST "/:aws_account_id" [aws_account_id :<< as-int :as {{:strs [priority]} :query-params}]
-      (-> (AWSAccountAdministrator/insert! administrator_id aws_account_id (Long/parseLong priority))
+      (-> (AWSAccountAdministrator/insert! {:administrator_id administrator_id
+                                            :aws_account_id aws_account_id
+                                            :priority (Long/parseLong priority)})
           (created)))
     ; Delete administrator-AWS account link
     (DELETE "/:aws_account_id" [aws_account_id :<< as-int]

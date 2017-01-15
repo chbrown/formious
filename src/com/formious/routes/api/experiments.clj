@@ -12,14 +12,17 @@
     (Experiment/all))
   (GET "/new" []
     (Experiment/blank))
-  (POST "/" {{:strs [name administrator_id html]} :body}
-    (-> (Experiment/insert! name administrator_id html) (created)))
+  (POST "/" {body :body}
+    (->> (select-keys body ["name" "administrator_id" "html"])
+         (Experiment/insert!)
+         (created)))
   (GET "/:id" [id :<< as-int]
     ;Experiment.findOrCreateAccessToken(experiment.id)
     ;NotFound(new Exception("Experiment not found"))
     (Experiment/find-by-id id))
-  (POST "/:id" [id :<< as-int :as {{:strs [name administrator_id html]} :body}]
-    (Experiment/update! id name administrator_id html)
+  (POST "/:id" [id :<< as-int :as {body :body}]
+    (->> (select-keys body ["name" "administrator_id" "html"])
+         (Experiment/update! id))
     (no-content))
   (DELETE "/:id" [id :<< as-int]
     (Experiment/delete! id)

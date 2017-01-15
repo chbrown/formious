@@ -11,9 +11,11 @@
     (let [maxLimit (min (Long/parseLong limit) 1000)]
       (Response/all-where maxLimit experiment_id template_id aws_worker_id)))
   (POST "/" {{:strs [participant_id aws_worker_id]} :query-params
-             {:strs [block_id data assignment_id]} :body}
+             body :body}
     (if-let [participant (Participant/find-or-create participant_id aws_worker_id)]
-      (-> (Response/insert! (:id participant) block_id data assignment_id) (created))
+      (-> (assoc (select-keys body ["block_id" "data" "assignment_id"]) "participant_id" (:id participant))
+          (Response/insert!)
+          (created))
       (not-found "No matching participant found")))
   (GET "/:id" [id :<< as-int]
     (Response/find-by-id id)))

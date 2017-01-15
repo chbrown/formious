@@ -12,13 +12,15 @@
       (Block/all experiment_id))
     (GET "/new" []
       (Block/blank))
-    (POST "/" {{:strs [template_id, context, view_order, randomize, parent_block_id, quota]} :body}
-      (-> (Block/insert! experiment_id, template_id, context, view_order, randomize, parent_block_id, quota)
-          (created)))
+    (POST "/" {body :body}
+      (->> (select-keys body ["template_id" "context" "view_order" "randomize" "parent_block_id" "quota"])
+           (Block/insert!)
+           (created)))
     (GET "/:id" [id :<< as-int]
       (Block/find-by-id experiment_id id))
-    (POST "/:id" [id :<< as-int :as {{:strs [template_id, context, view_order, randomize, parent_block_id, quota]} :body}]
-      (Block/update! id experiment_id template_id, context, view_order, randomize, parent_block_id, quota)
+    (POST "/:id" [id :<< as-int :as {body :body}]
+      (->> (select-keys body ["template_id" "context" "view_order" "randomize" "parent_block_id" "quota"])
+           (Block/update! id experiment_id))
       (no-content))
     (DELETE "/:id" [id :<< as-int]
       (Block/delete! id experiment_id)

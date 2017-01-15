@@ -53,7 +53,7 @@
   (if-let [administrator (first (db/query ["SELECT * FROM administrator
                                             WHERE email = ? AND password = ?" email (hash-with-salt password)]))]
     ; (println s"Authenticating administrator '${administrator.id}' and with new or existing token")
-    (AccessToken/find-or-create "administrators" (:id administrator) 40)))
+    (AccessToken/find-or-create "administrators" (:id administrator) 40 nil)))
 
 ; Get administrator object from token.
 ; @return None if no access token matched or if no administrator is linked to that token

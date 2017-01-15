@@ -12,12 +12,6 @@
   []
   (Block. nil nil nil "{}" 0 false nil nil (ZonedDateTime/now)))
 
-; case class BlockData(template_id: Option[Int], context: String, view_order: Double, randomize: Boolean, parent_block_id: Option[Int], quota: Option[Int])
-
-(defn map->Block
-  [row]
-  (map->Block row))
-
 (defn all
   [experiment_id]
   (->> (db/query ["SELECT * FROM block WHERE experiment_id = ? ORDER BY view_order ASC" experiment_id])
@@ -42,8 +36,8 @@
 
 (defn update!
   ; (id: Int, experiment_id: Int, template_id: Option[Int], context: String, view_order: Double, randomize: Boolean, parent_block_id: Option[Int], quota: Option[Int])
-  [id set-map]
-  (db/update! "block" set-map ["id = ?" id]))
+  [id experiment_id set-map]
+  (db/update! "block" set-map ["id = ? AND experiment_id = ?" id experiment_id]))
 
 (defn delete!
   [id experiment_id]
@@ -239,6 +233,6 @@
     ; 3. brute-force: update them all
     (doseq [block allBlocks]
       ; careful, if block.id is null, this could wreak havoc and lose data!
-      (update! (:id block) (assoc block :experiment_id experiment_id)))
+      (update! (:id block) experiment_id (assoc block :experiment_id experiment_id)))
     ; 4. delete all the other blocks
     (db/delete! "block" ["experiment_id = ? AND NOT (id = ANY(?::integer[]))" experiment_id all-blocks-ids])))

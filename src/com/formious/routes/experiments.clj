@@ -65,8 +65,11 @@
           userAgent (:user-agent headers)
           requestedWith (:x-requested-with headers)
           participant (Participant/find-or-create-by-worker-id WorkerId :ip_address ipAddress :user_agent userAgent)
-          response (Response/insert! (:id participant) block_id body AssignmentId)]
-      (if-let [block (Block/next-in-experiment experiment_id block_id (:id participant))]
+          response (Response/insert! {:participant_id (:id participant)
+                                      :block_id block_id
+                                      :data body
+                                      :assignment_id AssignmentId})]
+      (if-let [block (Block/next-in-experiment experiment_id)]
         (let [resp (redirect (block-url experiment_id block))]
           (if (string/includes? requestedWith "XMLHttpRequest")
             (no-content resp)

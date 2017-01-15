@@ -40,8 +40,8 @@
       seq? (->> value
                 (map-indexed (fn [index item]
                                (for [[sub-key sub-value] item]
-                                 {(str key \. index \. sub-key) sub-value}))
-                             (apply concat)))
+                                 {(str key \. index \. sub-key) sub-value})))
+                (apply concat))
       ;else if (value.toXML) {
       ;; not sure if this is the best approach. I really doubt it.
       ;; Maybe each possible AWS parameter object should inherit some AWSSerializable interace?

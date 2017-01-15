@@ -19,7 +19,7 @@
 
 (defn blank
   []
-  (AccessToken. 0, "", "", 0, nil, nil, (ZonedDateTime/now)))
+  (AccessToken. 0 "" "" 0 nil nil (ZonedDateTime/now)))
 
 (defn all
   []
@@ -33,7 +33,11 @@
 
 (defn- createRandom
   [^String relation ^Integer foreign_id {:keys [length expires redacted] :or {length 40}}]
-  (insert! (random-string length), relation, foreign_id, expires, redacted))
+  (insert! {:token (random-string length)
+            :relation relation
+            :foreign_id foreign_id
+            :expires expires
+            :redacted redacted}))
 
 (defn find-or-create
   ; TODO: convert to upsert
@@ -44,9 +48,11 @@
                                   WHERE relation = ?
                                     AND foreign_id = ?
                                     AND (expires IS NULL OR expires > NOW())
-                                    AND redacted IS NULL" relation, foreign_id]))]
+                                    AND redacted IS NULL" relation foreign_id]))]
     (map->AccessToken row)
-    (insert! (random-string length), relation, foreign_id)))
+    (insert! {:token (random-string length)
+              :relation relation
+              :foreign_id foreign_id})))
 
 (defn update!
   ; row keys: token, relation, foreign_id, expires, redacted
@@ -61,16 +67,16 @@
                     AND relation = ?
                     AND foreign_id = ?
                     AND (expires IS NULL OR expires > NOW())
-                    AND redacted IS NULL" token, relation, foreign_id])
+                    AND redacted IS NULL" token relation foreign_id])
       first
       map->AccessToken))
 
 (defn find-by-id
   [id]
-  (-> (db/query ["SELECT * FROM access_token WHERE id = ?", id])
+  (-> (db/query ["SELECT * FROM access_token WHERE id = ?" id])
       first
       map->AccessToken))
 
 (defn delete!
   [id]
-  (db/delete! "access_token" ["id = ?", id]))
+  (db/delete! "access_token" ["id = ?" id]))
