@@ -14,31 +14,31 @@
 
 ; case class BlockData(template_id: Option[Int], context: String, view_order: Double, randomize: Boolean, parent_block_id: Option[Int], quota: Option[Int])
 
-(defn row->Block
+(defn map->Block
   [row]
-  (-> row (update :created #(.toZonedDateTime %)) map->Block))
+  (map->Block row))
 
 (defn all
   [experiment_id]
   (->> (db/query ["SELECT * FROM block WHERE experiment_id = ? ORDER BY view_order ASC" experiment_id])
-       (map row->Block)))
+       (map map->Block)))
 
 (defn next-in-experiment
   [experiment_id]
   (-> (db/query ["SELECT * FROM block WHERE experiment_id = ? ORDER BY view_order ASC LIMIT 1" experiment_id])
       first
-      row->Block))
+      map->Block))
 
 (defn find-by-id
   [experiment_id id]
   (-> (db/query ["SELECT * FROM block WHERE experiment_id = ? AND id = ?" experiment_id id])
       first
-      row->Block))
+      map->Block))
 
 (defn insert!
   ; (experiment_id: Int, template_id: Option[Int], context: String, view_order: Double, randomize: Boolean, parent_block_id: Option[Int], quota: Option[Int])
   [row]
-  (->> row (db/insert! "block") row->Block))
+  (->> row (db/insert! "block") map->Block))
 
 (defn update!
   ; (id: Int, experiment_id: Int, template_id: Option[Int], context: String, view_order: Double, randomize: Boolean, parent_block_id: Option[Int], quota: Option[Int])

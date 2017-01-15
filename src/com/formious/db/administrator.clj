@@ -22,20 +22,16 @@
   []
   (Administrator. 0 "" "" (ZonedDateTime/now)))
 
-(defn row->Administrator
-  [{:keys [id email password created]}]
-  (Administrator. id email password (.toZonedDateTime created)))
-
 (defn all
   []
   (->> (db/query "SELECT * FROM administrator ORDER BY created DESC")
-       (map row->Administrator)))
+       (map map->Administrator)))
 
 (defn find-by-id
   [id]
   (-> (db/query ["SELECT * FROM administrator WHERE id = ?" id])
       first
-      row->Administrator))
+      map->Administrator))
 
 (defn delete!
   [id]
@@ -45,7 +41,7 @@
   [row]
   (->> (common/update-when row :password hash-with-salt)
        (db/insert! "administrator")
-       row->Administrator))
+       map->Administrator))
 
 (defn update!
   ; Hashes and sets the password if it is not None

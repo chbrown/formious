@@ -5,24 +5,20 @@
 ; Int Option[String] Option[String] math.BigDecimal math.BigDecimal Option[String] Option[String] ZonedDateTime
 (defrecord Participant [id name aws_worker_id aws_bonus_owed aws_bonus_paid ip_address user_agent created])
 
-(defn row->Participant
-  [row]
-  (map->Participant (update row :created #(.toZonedDateTime %))))
-
 (defn all
   []
-  (map row->Participant (db/query "SELECT * FROM participant ORDER BY id ASC")))
+  (map map->Participant (db/query "SELECT * FROM participant ORDER BY id ASC")))
 
 (defn insert!
   ; (aws_worker_id: String, ip_address: Option[String], user_agent: Option[String])
   [row]
-  (->> row (db/insert! "participant") row->Participant))
+  (->> row (db/insert! "participant") map->Participant))
 
 (defn find-by-id
   [id]
   (-> (db/query ["SELECT * FROM participant WHERE id = ?", id])
       first
-      row->Participant))
+      map->Participant))
 
 (defn update!
   [id set-map]
@@ -31,7 +27,7 @@
 (defn find-or-create-by-worker-id
   [aws_worker_id & {:keys [ip_address user_agent]}]
   (if-let [participants (db/query ["SELECT * FROM participant WHERE aws_worker_id = ?" aws_worker_id])]
-    (-> participants first row->Participant)
+    (-> participants first map->Participant)
     (insert! {:aws_worker_id aws_worker_id :ip_address ip_address :user_agent user_agent})))
 
 (defn find-or-create

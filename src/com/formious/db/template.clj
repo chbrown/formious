@@ -4,29 +4,25 @@
 
 (defrecord Template [^Integer id ^String name ^String html ^ZonedDateTime created])
 
-(defn row->Template
-  [{:keys [id name html created]}]
-  (Template. id name html (.toZonedDateTime created)))
-
 (defn blank
   []
   {:name "", :html ""})
 
 (defn all
   []
-  (->> (db/query "SELECT * FROM template ORDER BY id ASC") (map row->Template)))
+  (->> (db/query "SELECT * FROM template ORDER BY id ASC") (map map->Template)))
 
 (defn find-by-id
   [id]
-  (->> (db/query ["SELECT * FROM template WHERE id = ?" id]) first row->Template))
+  (->> (db/query ["SELECT * FROM template WHERE id = ?" id]) first map->Template))
 
 (defn insert!
-  [^String name ^String html]
-  (->> (db/insert! "template" [(Template. name html)]) first row->Template))
+  [row]
+  (->> row (db/insert! "template") first map->Template))
 
 (defn update!
-  [^Integer id ^String name ^String html]
-  (db/update! "template" {:name name, :html html} ["id = ?" id]))
+  [^Integer id set-map]
+  (db/update! "template" set-map ["id = ?" id]))
 
 (defn delete!
   [^Integer id]

@@ -10,24 +10,20 @@
   []
   (Experiment. 0 "" nil "" (ZonedDateTime/now)))
 
-(defn row->Experiment
-  [row]
-  (map->Experiment (update row :created #(.toZonedDateTime %))))
-
 (defn all
   []
-  (map row->Experiment (db/query "SELECT * FROM experiment ORDER BY id ASC")))
+  (map map->Experiment (db/query "SELECT * FROM experiment ORDER BY id ASC")))
 
 (defn insert!
   ; (name: String, administrator_id: Int, html: String)
   [row]
-  (->> row (db/insert! "experiment") row->Experiment))
+  (->> row (db/insert! "experiment") map->Experiment))
 
 (defn find-by-id
   [id]
   (-> (db/query ["SELECT * FROM experiment WHERE id = ?", id])
       first
-      row->Experiment))
+      map->Experiment))
 
 (defn find-or-create-access-token
   [id & {:keys [length expires] :or {length 12}}]

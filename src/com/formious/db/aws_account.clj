@@ -9,25 +9,21 @@
   []
   (AWSAccount. 0 "" "" "" (ZonedDateTime/now)))
 
-(defn row->AWSAccount
-  [row]
-  (map->AWSAccount (update row :created #(.toZonedDateTime %))))
-
 (defn all
   []
   (->> (db/query "SELECT * FROM aws_account ORDER BY id DESC")
-       (map row->AWSAccount)))
+       (map map->AWSAccount)))
 
 (defn insert!
   ; (name: String, access_key_id: String, secret_access_key: String)
   [row]
-  (->> row (db/insert! "aws_account") row->AWSAccount))
+  (->> row (db/insert! "aws_account") map->AWSAccount))
 
 (defn find-by-id
   [id]
   (-> (db/query ["SELECT * FROM aws_account WHERE id = ?", id])
       first
-      row->AWSAccount))
+      map->AWSAccount))
 
 (defn update!
   ; (id: Int, name: String, access_key_id: String, secret_access_key: String)
@@ -41,7 +37,7 @@
 (defn all-by-administrator
   [administrator_id]
   (->> (db/query ["SELECT * FROM aws_account
-                     JOIN aws_account_administrator.aws_account_id = aws_account.id
+                     JOIN aws_account_administrator ON aws_account_administrator.aws_account_id = aws_account.id
                    WHERE aws_account_administrator.administrator_id = ?
                    ORDER BY aws_account_administrator.priority DESC", administrator_id])
-       (map row->AWSAccount)))
+       (map map->AWSAccount)))

@@ -17,13 +17,6 @@
                         ^ZonedDateTime redacted
                         ^ZonedDateTime created])
 
-(defn row->AccessToken
-  [{:keys [id token relation foreign_id expires redacted created]}]
-  (AccessToken. id token relation foreign_id
-                (some-> expires #(.toZonedDateTime %))
-                (some-> redacted #(.toZonedDateTime %))
-                (.toZonedDateTime created)))
-
 (defn blank
   []
   (AccessToken. 0, "", "", 0, nil, nil, (ZonedDateTime/now)))
@@ -31,12 +24,12 @@
 (defn all
   []
   (->> (db/query "SELECT * FROM access_token ORDER BY id ASC")
-       (map row->AccessToken)))
+       (map map->AccessToken)))
 
 (defn insert!
   ; row keys: ^String token ^String relation ^Integer foreign_id expires redacted
   [row]
-  (-> (db/insert! "access_token" row) row->AccessToken))
+  (-> (db/insert! "access_token" row) map->AccessToken))
 
 (defn- createRandom
   [^String relation ^Integer foreign_id {:keys [length expires redacted] :or {length 40}}]
@@ -52,7 +45,7 @@
                                     AND foreign_id = ?
                                     AND (expires IS NULL OR expires > NOW())
                                     AND redacted IS NULL" relation, foreign_id]))]
-    (row->AccessToken row)
+    (map->AccessToken row)
     (insert! (random-string length), relation, foreign_id)))
 
 (defn update!
@@ -70,13 +63,13 @@
                     AND (expires IS NULL OR expires > NOW())
                     AND redacted IS NULL" token, relation, foreign_id])
       first
-      row->AccessToken))
+      map->AccessToken))
 
 (defn find-by-id
   [id]
   (-> (db/query ["SELECT * FROM access_token WHERE id = ?", id])
       first
-      row->AccessToken))
+      map->AccessToken))
 
 (defn delete!
   [id]
