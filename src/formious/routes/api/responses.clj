@@ -1,7 +1,7 @@
-(ns com.formious.routes.api.responses
-  (:require [com.formious.common :refer [created]]
-            [com.formious.db.response :as Response]
-            [com.formious.db.participant :as Participant]
+(ns formious.routes.api.responses
+  (:require [formious.common :refer [created]]
+            [formious.db.response :as Response]
+            [formious.db.participant :as Participant]
             [ring.util.response :refer [not-found]]
             [compojure.coercions :refer [as-int]]
             [compojure.core :refer [GET POST defroutes]]))

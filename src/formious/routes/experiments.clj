@@ -1,10 +1,10 @@
-(ns com.formious.routes.experiments
-  (:require [com.formious.common :refer [no-content created]]
-            [com.formious.db.experiment :as Experiment]
-            [com.formious.db.block :as Block]
-            [com.formious.db.participant :as Participant]
-            [com.formious.db.response :as Response]
-            [com.formious.db.template :as Template]
+(ns formious.routes.experiments
+  (:require [formious.common :refer [no-content created]]
+            [formious.db.experiment :as Experiment]
+            [formious.db.block :as Block]
+            [formious.db.participant :as Participant]
+            [formious.db.response :as Response]
+            [formious.db.template :as Template]
             [clojure.string :as string]
             [clojure.data.json :as json]
             [clostache.parser :refer [render render-resource]]

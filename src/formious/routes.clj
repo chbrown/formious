@@ -1,14 +1,14 @@
-(ns com.formious.routes
-  (:require [com.formious.common :refer [created ok no-content]]
-            [com.formious.db :as db]
-            [com.formious.excel :as excel]
-            [com.formious.csv :as csv]
-            [com.formious.db.administrator :as Administrator]
-            [com.formious.db.participant :as Participant]
-            [com.formious.db.response :as Response]
-            [com.formious.db.access-token :as AccessToken]
-            [com.formious.routes.api :as api]
-            [com.formious.routes.experiments :as experiments]
+(ns formious.routes
+  (:require [formious.common :refer [created ok no-content]]
+            [formious.db :as db]
+            [formious.excel :as excel]
+            [formious.csv :as csv]
+            [formious.db.administrator :as Administrator]
+            [formious.db.participant :as Participant]
+            [formious.db.response :as Response]
+            [formious.db.access-token :as AccessToken]
+            [formious.routes.api :as api]
+            [formious.routes.experiments :as experiments]
             [clojure.set :as set]
             [clojure.java.io :as io]
             [clojure.instant :as instant]
@@ -28,7 +28,19 @@
   [component]
   (str "<!DOCTYPE html>" (rum/render-static-markup component)))
 
-; TODO: figure out why (assoc-in site-defaults [:params :keywordize] true) in core.clj doesn't work
+(rum/defc layout []
+  [:html
+    [:head
+      [:meta {:charset "UTF-8"}]
+      [:title "Formious Admin"]
+      [:link {:href "/favicon.png" :rel "icon" :type "image/png"}]
+      [:link {:href "/build/site.css" :rel "stylesheet" :type "text/css"}]]
+      ; [:script {:dangerouslySetInnerHTML {:__html aws-credentials-js}}]]
+    [:body.admin
+      [:div {:id "app"}]
+      [:script {:src "/build/bundle.js"}]]])
+
+(def layout-html (render-markup (layout)))
 
 (defroutes routes
   (context "/api" [] api/routes)
@@ -92,7 +104,7 @@
     (-> request (dissoc :async-channel) (ok)))
 
   (GET "/info" request
-    (->> (load-properties "META-INF/maven/com.formious/app/pom.properties") (into {}) (ok)))
+    (->> (load-properties "META-INF/maven/formious/app/pom.properties") (into {}) (ok)))
 
   (ANY "/admin/*" []
     ; respond to all /admin/* requests with /ui/index.html
@@ -110,9 +122,10 @@
       ; default: csv
       (-> body io/reader csv/as-maps))) ; Header("Content-Type", "application/json"))
 
-  (route/resources "/") ; attempt to load static resource
-  ; (GET "/*" [] ; wildcard match for all GET requests
-  ;   (content-type (resource-response "public/index.html") "text/html"))
+  ; (route/resources "/") ; attempt to load static resource
+
+  (GET "/*" [] ; wildcard match for all GET requests
+    (content-type (response layout-html) "text/html"))
   ; /*****************************************************************************
   ; *                               catch-all                                    *
   ; *****************************************************************************/

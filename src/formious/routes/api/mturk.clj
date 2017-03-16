@@ -1,7 +1,7 @@
-(ns com.formious.routes.api.mturk
-  (:require [com.formious.common :refer [created]]
-            [com.formious.mturk :as mturk]
-            [com.formious.db.aws-account :as AWSAccount]
+(ns formious.routes.api.mturk
+  (:require [formious.common :refer [created]]
+            [formious.mturk :as mturk]
+            [formious.db.aws-account :as AWSAccount]
             [ring.util.response :refer [response not-found header]]
             [compojure.core :refer [GET POST defroutes]]))
 

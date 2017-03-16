@@ -1,5 +1,5 @@
-(ns com.formious.db.access-token
-  (:require [com.formious.db :as db])
+(ns formious.db.access-token
+  (:require [formious.db :as db])
   (:import [java.time ZonedDateTime]))
 
 (def ^:private ALPHABET "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")

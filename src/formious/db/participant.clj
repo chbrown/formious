@@ -1,5 +1,5 @@
-(ns com.formious.db.participant
-  (:require [com.formious.db :as db])
+(ns formious.db.participant
+  (:require [formious.db :as db])
   (:import [java.time ZonedDateTime]))
 
 ; Int Option[String] Option[String] math.BigDecimal math.BigDecimal Option[String] Option[String] ZonedDateTime

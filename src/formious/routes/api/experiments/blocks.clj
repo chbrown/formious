@@ -1,6 +1,6 @@
-(ns com.formious.routes.api.experiments.blocks
-  (:require [com.formious.common :refer [no-content created]]
-            [com.formious.db.block :as Block]
+(ns formious.routes.api.experiments.blocks
+  (:require [formious.common :refer [no-content created]]
+            [formious.db.block :as Block]
             [compojure.coercions :refer [as-int]]
             [compojure.core :refer [GET PATCH POST PUT DELETE context defroutes]]))
 

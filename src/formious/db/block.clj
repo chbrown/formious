@@ -1,7 +1,7 @@
-(ns com.formious.db.block
-  (:require [com.formious.db :as db]
-            [com.formious.db.response :as Response]
-            [com.formious.common :as common]
+(ns formious.db.block
+  (:require [formious.db :as db]
+            [formious.db.response :as Response]
+            [formious.common :as common]
             [clojure.walk :as walk])
   (:import [java.time ZonedDateTime]))
 

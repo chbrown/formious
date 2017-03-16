@@ -1,5 +1,5 @@
-(ns com.formious.server
-  (:require [com.formious.routes :refer [routes]]
+(ns formious.server
+  (:require [formious.routes :refer [routes]]
             [org.httpkit.server :refer [run-server]]
             [ring.util.request :refer [path-info]]
             [ring.util.response :refer [header]]
@@ -12,8 +12,10 @@
 
 (def custom-site-defaults
   (-> site-defaults
+      ; TODO: figure out why (assoc-in site-defaults [:params :keywordize] true) doesn't do anything
       (assoc-in [:params :keywordize] true) ; this doesn't seem to work... at least not for query params
       (assoc-in [:security :anti-forgery] false))) ; disable this for now - TODO: worry about security later
+
 
 ; cheshire.core/generate-string automatically picks this up inside the wrap-json-response middleware
 (add-encoder java.time.ZonedDateTime (fn [zoned-date-time jsonGenerator] ; encode-ZonedDateTime
@@ -53,6 +55,6 @@
   ; val port = opt[Int]("port", 'p', descr="port to listen on", default=Some(sys.env.getOrElse("PORT", "80").toInt))
   ([] (-main (or (System/getenv "PORT") "1451")))
   ([port]
-   (println "Starting server via com.formious.server/-main")
+   (println "Starting server via formious.server/-main")
    (println (str "Listening on :" port))
    (run-server handler {:port (Integer/parseInt port)})))

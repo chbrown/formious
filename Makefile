@@ -31,4 +31,4 @@ uberjar:
 	lein uberjar
 
 server: uberjar
-	java -jar target/com.formious-*-standalone.jar
+	java -jar target/formious-*-standalone.jar

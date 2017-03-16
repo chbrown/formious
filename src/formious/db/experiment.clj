@@ -1,6 +1,6 @@
-(ns com.formious.db.experiment
-  (:require [com.formious.db :as db]
-            [com.formious.db.access-token :as AccessToken])
+(ns formious.db.experiment
+  (:require [formious.db :as db]
+            [formious.db.access-token :as AccessToken])
   (:import [java.time ZonedDateTime]))
 
 ; Int String Int String ZonedDateTime

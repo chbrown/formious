@@ -1,4 +1,4 @@
-(ns com.formious.db
+(ns formious.db
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.data.json :as json])
   (:import [java.time Instant ZoneId ZonedDateTime]

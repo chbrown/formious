@@ -1,7 +1,7 @@
-(ns com.formious.db.administrator
-  (:require [com.formious.db :as db]
-            [com.formious.db.access-token :as AccessToken]
-            [com.formious.common :as common])
+(ns formious.db.administrator
+  (:require [formious.db :as db]
+            [formious.db.access-token :as AccessToken]
+            [formious.common :as common])
   (:import [java.time ZonedDateTime]))
 
 (def ^:private SALT "rNxROdgCbAkBI2WvZJtH")

@@ -1,8 +1,8 @@
-(ns com.formious.routes.api.administrators
-  (:require [com.formious.common :refer [no-content created ok]]
-            [com.formious.db.administrator :as Administrator]
-            [com.formious.db.aws-account :as AWSAccount]
-            [com.formious.db.aws-account-administrator :as AWSAccountAdministrator]
+(ns formious.routes.api.administrators
+  (:require [formious.common :refer [no-content created ok]]
+            [formious.db.administrator :as Administrator]
+            [formious.db.aws-account :as AWSAccount]
+            [formious.db.aws-account-administrator :as AWSAccountAdministrator]
             [compojure.coercions :refer [as-int]]
             [compojure.core :refer [GET HEAD PATCH POST PUT DELETE defroutes context]]))
 

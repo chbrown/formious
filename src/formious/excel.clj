@@ -1,4 +1,4 @@
-(ns com.formious.excel
+(ns formious.excel
   (:require [clojure.set :as set])
   (:import [java.io InputStream]
            [org.apache.poi.ss.usermodel Cell]

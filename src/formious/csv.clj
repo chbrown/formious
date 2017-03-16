@@ -1,4 +1,4 @@
-(ns com.formious.csv
+(ns formious.csv
   (:require [clojure.set :as set])
   (:import [java.io Reader]
            [org.supercsv.io CsvMapReader]

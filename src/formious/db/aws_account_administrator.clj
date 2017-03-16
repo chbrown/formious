@@ -1,5 +1,5 @@
-(ns com.formious.db.aws-account-administrator
-  (:require [com.formious.db :as db])
+(ns formious.db.aws-account-administrator
+  (:require [formious.db :as db])
   (:import [java.time ZonedDateTime]))
 
 ; Int Int Int Int ZonedDateTime

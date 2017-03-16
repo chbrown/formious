@@ -1,5 +1,5 @@
-(ns com.formious.db.template
-  (:require [com.formious.db :as db])
+(ns formious.db.template
+  (:require [formious.db :as db])
   (:import [java.time ZonedDateTime]))
 
 (defrecord Template [^Integer id ^String name ^String html ^ZonedDateTime created])

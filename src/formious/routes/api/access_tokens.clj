@@ -1,6 +1,6 @@
-(ns com.formious.routes.api.access-tokens
-  (:require [com.formious.common :refer [no-content created ok]]
-            [com.formious.db.access-token :as AccessToken]
+(ns formious.routes.api.access-tokens
+  (:require [formious.common :refer [no-content created ok]]
+            [formious.db.access-token :as AccessToken]
             [compojure.coercions :refer [as-int]]
             [compojure.core :refer [GET HEAD PATCH POST PUT DELETE defroutes context]]))
 

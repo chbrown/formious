@@ -1,4 +1,4 @@
-(ns com.formious.mturk
+(ns formious.mturk
   (:require [clojure.set :as set]
             [http.async.client :as http])
   (:import [java.io InputStream]
@@ -53,6 +53,7 @@
 
 (defn request
   ; the destructured 3rd argument (credentials) matches the column names from the database
+  ; http docs: http://cch1.github.io/http.async.client/doc/index.html
   [params host {:keys [access_key_id secret_access_key]}]
   (let [url (str "https://" host "/")
         timestamp (.toString (java.time.Instant/now))

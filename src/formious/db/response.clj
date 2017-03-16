@@ -1,5 +1,5 @@
-(ns com.formious.db.response
-  (:require [com.formious.db :as db]
+(ns formious.db.response
+  (:require [formious.db :as db]
             [clojure.data.json :as json])
   (:import [java.time ZonedDateTime]))
 
