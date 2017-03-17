@@ -21,9 +21,9 @@
 
 (defn find-by-id
   [id]
-  (-> (db/query ["SELECT * FROM aws_account WHERE id = ?", id])
-      first
-      map->AWSAccount))
+  (some-> (db/query ["SELECT * FROM aws_account WHERE id = ?", id])
+          first
+          map->AWSAccount))
 
 (defn update!
   ; (id: Int, name: String, access_key_id: String, secret_access_key: String)

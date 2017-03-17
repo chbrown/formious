@@ -14,7 +14,7 @@
 
 (defn find-by-id
   [id]
-  (->> (db/query ["SELECT * FROM template WHERE id = ?" id]) first map->Template))
+  (some-> (db/query ["SELECT * FROM template WHERE id = ?" id]) first map->Template))
 
 (defn insert!
   [row]

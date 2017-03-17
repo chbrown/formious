@@ -21,9 +21,9 @@
 
 (defn find-by-id
   [id]
-  (-> (db/query ["SELECT * FROM experiment WHERE id = ?", id])
-      first
-      map->Experiment))
+  (some-> (db/query ["SELECT * FROM experiment WHERE id = ?", id])
+          first
+          map->Experiment))
 
 (defn find-or-create-access-token
   [id & {:keys [length expires] :or {length 12}}]

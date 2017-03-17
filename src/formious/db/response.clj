@@ -8,9 +8,9 @@
 
 (defn find-by-id
   [id]
-  (-> (db/query ["SELECT * FROM response WHERE id = ?" id])
-      first
-      map->Response))
+  (some-> (db/query ["SELECT * FROM response WHERE id = ?" id])
+          first
+          map->Response))
 
 (defn insert!
   ; (participant_id: Int, block_id: Int, data: String = "{}", assignment_id: Option[String] = None)

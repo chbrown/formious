@@ -16,9 +16,9 @@
 
 (defn find-by-id
   [id]
-  (-> (db/query ["SELECT * FROM participant WHERE id = ?", id])
-      first
-      map->Participant))
+  (some-> (db/query ["SELECT * FROM participant WHERE id = ?", id])
+          first
+          map->Participant))
 
 (defn update!
   [id set-map]

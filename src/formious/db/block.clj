@@ -25,9 +25,9 @@
 
 (defn find-by-id
   [experiment_id id]
-  (-> (db/query ["SELECT * FROM block WHERE experiment_id = ? AND id = ?" experiment_id id])
-      first
-      map->Block))
+  (some-> (db/query ["SELECT * FROM block WHERE experiment_id = ? AND id = ?" experiment_id id])
+          first
+          map->Block))
 
 (defn insert!
   ; (experiment_id: Int, template_id: Option[Int], context: String, view_order: Double, randomize: Boolean, parent_block_id: Option[Int], quota: Option[Int])

@@ -73,9 +73,9 @@
 
 (defn find-by-id
   [id]
-  (-> (db/query ["SELECT * FROM access_token WHERE id = ?" id])
-      first
-      map->AccessToken))
+  (some-> (db/query ["SELECT * FROM access_token WHERE id = ?" id])
+          first
+          map->AccessToken))
 
 (defn delete!
   [id]

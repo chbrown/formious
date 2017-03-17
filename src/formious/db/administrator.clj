@@ -29,9 +29,9 @@
 
 (defn find-by-id
   [id]
-  (-> (db/query ["SELECT * FROM administrator WHERE id = ?" id])
-      first
-      map->Administrator))
+  (some-> (db/query ["SELECT * FROM administrator WHERE id = ?" id])
+          first
+          map->Administrator))
 
 (defn delete!
   [id]
