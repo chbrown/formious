@@ -3,7 +3,7 @@
 
 ; Int Int Int Int ZonedDateTime
 (defrecord AWSAccountAdministrator [id aws_account_id administrator_id priority created])
-(def writable-columns )
+(def writable-columns ["aws_account_id" "administrator_id" "priority"])
 
 (defn blank
   []

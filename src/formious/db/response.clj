@@ -4,7 +4,7 @@
 
 ; Int Int Int JsonObject Option[String] ZonedDateTime
 (defrecord Response [id participant_id block_id data assignment_id created])
-(def writable-columns )
+(def writable-columns ["participant_id" "block_id" "data" "assignment_id"])
 
 (defn find-by-id
   [id]
