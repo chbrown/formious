@@ -1,8 +1,8 @@
 (ns formious.csv
   (:require [clojure.set :as set])
-  (:import [java.io Reader]
-           [org.supercsv.io CsvMapReader]
-           [org.supercsv.prefs CsvPreference]))
+  (:import (java.io Reader)
+           (org.supercsv.io CsvMapReader)
+           (org.supercsv.prefs CsvPreference)))
 
 (defn as-maps
   [^Reader reader]

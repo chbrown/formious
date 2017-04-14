@@ -1,9 +1,13 @@
 (ns formious.db.aws-account-administrator
-  (:require [formious.db :as db])
-  (:import [java.time ZonedDateTime]))
+  (:require [formious.db.common :as db :refer [now ->long]]))
 
 ; Int Int Int Int ZonedDateTime
 (defrecord AWSAccountAdministrator [id aws_account_id administrator_id priority created])
+(def writable-columns )
+
+(defn blank
+  []
+  (AWSAccountAdministrator. 0 "" "" 0 (now)))
 
 (defn all
   []
@@ -17,4 +21,5 @@
 
 (defn delete!
   [aws_account_id administrator_id]
-  (db/delete! "aws_account_administrator" ["aws_account_id = ? AND administrator_id = ?" aws_account_id, administrator_id]))
+  (db/delete! "aws_account_administrator" ["aws_account_id = ? AND administrator_id = ?"
+                                           (->long aws_account_id) (->long administrator_id)]))

@@ -1,47 +1,48 @@
 (ns formious.db.block
-  (:require [formious.db :as db]
+  (:require [clojure.walk :as walk]
+            [clojure.tools.logging :as log]
             [formious.db.response :as Response]
-            [formious.common :as common]
-            [clojure.walk :as walk])
-  (:import [java.time ZonedDateTime]))
+            [formious.db.common :as db :refer [now ->long]]))
 
+; (experiment_id: Int, template_id: Option[Int], context: String,
+;   view_order: Double, randomize: Boolean, parent_block_id: Option[Int], quota: Option[Int])
 ; Int Int Option[Int] String Double Boolean Option[Int] Option[Int] ZonedDateTime
 (defrecord Block [id experiment_id template_id context view_order randomize parent_block_id quota created])
+(def writable-columns ["template_id" "context" "view_order" "randomize" "parent_block_id" "quota"])
 
 (defn blank
   []
-  (Block. nil nil nil "{}" 0 false nil nil (ZonedDateTime/now)))
+  (Block. nil nil nil "{}" 0 false nil nil (now)))
 
 (defn all
   [experiment_id]
-  (->> (db/query ["SELECT * FROM block WHERE experiment_id = ? ORDER BY view_order ASC" experiment_id])
+  (->> (db/query ["SELECT * FROM block WHERE experiment_id = ? ORDER BY view_order ASC" (->long experiment_id)])
        (map map->Block)))
 
 (defn next-in-experiment
   [experiment_id]
-  (-> (db/query ["SELECT * FROM block WHERE experiment_id = ? ORDER BY view_order ASC LIMIT 1" experiment_id])
+  (-> (db/query ["SELECT * FROM block WHERE experiment_id = ? ORDER BY view_order ASC LIMIT 1" (->long experiment_id)])
       first
       map->Block))
 
 (defn find-by-id
   [experiment_id id]
-  (some-> (db/query ["SELECT * FROM block WHERE experiment_id = ? AND id = ?" experiment_id id])
+  (some-> (db/query ["SELECT * FROM block WHERE experiment_id = ? AND id = ?" (->long experiment_id) (->long id)])
           first
           map->Block))
 
 (defn insert!
-  ; (experiment_id: Int, template_id: Option[Int], context: String, view_order: Double, randomize: Boolean, parent_block_id: Option[Int], quota: Option[Int])
   [row]
   (->> row (db/insert! "block") map->Block))
 
 (defn update!
   ; (id: Int, experiment_id: Int, template_id: Option[Int], context: String, view_order: Double, randomize: Boolean, parent_block_id: Option[Int], quota: Option[Int])
   [id experiment_id set-map]
-  (db/update! "block" set-map ["id = ? AND experiment_id = ?" id experiment_id]))
+  (db/update! "block" set-map ["id = ? AND experiment_id = ?" (->long id) (->long experiment_id)]))
 
 (defn delete!
   [id experiment_id]
-  (db/delete! "block" ["id = ? AND experiment_id = ?" id experiment_id]))
+  (db/delete! "block" ["id = ? AND experiment_id = ?" (->long id) (->long experiment_id)]))
 
 (defrecord TreeNode [children])
 (defrecord BranchNode [children value])
@@ -229,7 +230,7 @@
     ; now the tree structure is defined on each block, and the 'children' links are no longer needed.
     ;val allBlockIds = allBlocks.map(_.id)
 
-    (println "Updating ${allBlocks.size} blocks")
+    (log/info "Updating" (count allBlocks) "blocks")
     ; 3. brute-force: update them all
     (doseq [block allBlocks]
       ; careful, if block.id is null, this could wreak havoc and lose data!

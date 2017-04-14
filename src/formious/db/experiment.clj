@@ -1,14 +1,14 @@
 (ns formious.db.experiment
-  (:require [formious.db :as db]
-            [formious.db.access-token :as AccessToken])
-  (:import [java.time ZonedDateTime]))
+  (:require [formious.db.access-token :as AccessToken]
+            [formious.db.common :as db :refer [now ->long]]))
 
 ; Int String Int String ZonedDateTime
 (defrecord Experiment [id name administrator_id html created])
+(def writable-columns ["name" "administrator_id" "html"])
 
 (defn blank
   []
-  (Experiment. 0 "" nil "" (ZonedDateTime/now)))
+  (Experiment. 0 "" nil "" (now)))
 
 (defn all
   []
@@ -21,19 +21,19 @@
 
 (defn find-by-id
   [id]
-  (some-> (db/query ["SELECT * FROM experiment WHERE id = ?", id])
+  (some-> (db/query ["SELECT * FROM experiment WHERE id = ?" (->long id)])
           first
           map->Experiment))
 
-(defn find-or-create-access-token
+(defn find-or-create-access-token!
   [id & {:keys [length expires] :or {length 12}}]
-  (AccessToken/find-or-create "experiments" id length expires))
+  (AccessToken/find-or-create! "experiments" (->long id) length expires))
 
 (defn update!
   ; (id: Int, name: String, administrator_id: Int, html: String)
   [id set-map]
-  (db/update! "experiment" set-map ["id = ?" id]))
+  (db/update! "experiment" set-map ["id = ?" (->long id)]))
 
 (defn delete!
   [id]
-  (db/delete! "experiment" ["id = ?", id]))
+  (db/delete! "experiment" ["id = ?" (->long id)]))

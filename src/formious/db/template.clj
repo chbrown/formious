@@ -1,12 +1,13 @@
 (ns formious.db.template
-  (:require [formious.db :as db])
-  (:import [java.time ZonedDateTime]))
+  (:require [formious.db.common :as db :refer [now ->long]]))
 
-(defrecord Template [^Integer id ^String name ^String html ^ZonedDateTime created])
+; ^Integer ^String ^String ^ZonedDateTime
+(defrecord Template [id name html created])
+(def writable-columns ["name" "html"])
 
 (defn blank
   []
-  {:name "", :html ""})
+  (Template. 0 "" "" (now)))
 
 (defn all
   []
@@ -14,16 +15,16 @@
 
 (defn find-by-id
   [id]
-  (some-> (db/query ["SELECT * FROM template WHERE id = ?" id]) first map->Template))
+  (some-> (db/query ["SELECT * FROM template WHERE id = ?" (->long id)]) first map->Template))
 
 (defn insert!
   [row]
   (->> row (db/insert! "template") first map->Template))
 
 (defn update!
-  [^Integer id set-map]
-  (db/update! "template" set-map ["id = ?" id]))
+  [id set-map]
+  (db/update! "template" set-map ["id = ?" (->long id)]))
 
 (defn delete!
-  [^Integer id]
-  (db/delete! "template" ["id = ?" id]))
+  [id]
+  (db/delete! "template" ["id = ?" (->long id)]))

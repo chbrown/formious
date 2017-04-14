@@ -1,13 +1,13 @@
 (ns formious.db.aws-account
-  (:require [formious.db :as db])
-  (:import [java.time ZonedDateTime]))
+  (:require [formious.db.common :as db :refer [now ->long]]))
 
 ; Int String String String ZonedDateTime
 (defrecord AWSAccount [id name access_key_id secret_access_key created])
+(def writable-columns ["name" "access_key_id" "secret_access_key"])
 
 (defn blank
   []
-  (AWSAccount. 0 "" "" "" (ZonedDateTime/now)))
+  (AWSAccount. 0 "" "" "" (now)))
 
 (defn all
   []
@@ -21,23 +21,23 @@
 
 (defn find-by-id
   [id]
-  (some-> (db/query ["SELECT * FROM aws_account WHERE id = ?", id])
+  (some-> (db/query ["SELECT * FROM aws_account WHERE id = ?" (->long id)])
           first
           map->AWSAccount))
 
 (defn update!
   ; (id: Int, name: String, access_key_id: String, secret_access_key: String)
   [id set-map]
-  (db/update! "aws_account" set-map ["id = ?" id]))
+  (db/update! "aws_account" set-map ["id = ?" (->long id)]))
 
 (defn delete!
   [id]
-  (db/delete! "aws_account" ["id = ?", id]))
+  (db/delete! "aws_account" ["id = ?" (->long id)]))
 
 (defn all-by-administrator
   [administrator_id]
   (->> (db/query ["SELECT * FROM aws_account
                      JOIN aws_account_administrator ON aws_account_administrator.aws_account_id = aws_account.id
                    WHERE aws_account_administrator.administrator_id = ?
-                   ORDER BY aws_account_administrator.priority DESC", administrator_id])
+                   ORDER BY aws_account_administrator.priority DESC" administrator_id])
        (map map->AWSAccount)))

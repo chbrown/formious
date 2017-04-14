@@ -1,6 +1,5 @@
 (ns formious.db.access-token
-  (:require [formious.db :as db])
-  (:import [java.time ZonedDateTime]))
+  (:require [formious.db.common :as db :refer [now ->long]]))
 
 (def ^:private ALPHABET "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
 
@@ -9,17 +8,13 @@
   [^Integer length]
   (repeatedly length #(rand-nth ALPHABET)))
 
-(defrecord AccessToken [^Integer id
-                        ^String token
-                        ^String relation
-                        ^Integer foreign_id
-                        ^ZonedDateTime expires
-                        ^ZonedDateTime redacted
-                        ^ZonedDateTime created])
+; ^Integer ^String ^String ^Integer ^ZonedDateTime ^ZonedDateTime ^ZonedDateTime
+(defrecord AccessToken [id token relation foreign_id expires redacted created])
+(def writable-columns ["token" "relation" "foreign_id" "expires" "redacted"])
 
 (defn blank
   []
-  (AccessToken. 0 "" "" 0 nil nil (ZonedDateTime/now)))
+  (AccessToken. 0 "" "" 0 nil nil (now)))
 
 (defn all
   []
@@ -39,7 +34,7 @@
             :expires expires
             :redacted redacted}))
 
-(defn find-or-create
+(defn find-or-create!
   ; TODO: convert to upsert
   ; @param relation   A table name
   ; @param foreign_id Pointer to the "id" column on the table denoted by the "relation" field
@@ -60,7 +55,7 @@
   (db/update! "access_token" set-map ["id = ?" id]))
 
 (defn check
-  ; TODO: generalize this for use in find-or-create (which doesn't use the token)
+  ; TODO: generalize this for use in find-or-create! (which doesn't use the token)
   [token relation foreign_id]
   (-> (db/query ["SELECT * FROM access_token
                   WHERE token = ?
