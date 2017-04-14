@@ -14,6 +14,7 @@
              [templates :as templates]]
             ; root handlers
             [formious.handlers
+             [admin :as admin]
              [root :as root]
              [experiments :as root-experiments]]
             [formious.routes :as routes]
@@ -46,6 +47,29 @@
     (write (ZonedDateTime->String this) out)))
 
 (def route->handler {
+  ; admin-routes
+  ::routes/admin-access-token nil
+  ::routes/admin-access-tokens nil
+  ::routes/admin-administrator nil
+  ::routes/admin-administrators nil
+  ::routes/admin-aws-account nil
+  ::routes/admin-aws-accounts nil
+  ::routes/admin-block nil
+  ::routes/admin-blocks nil
+  ::routes/admin-experiment nil
+  ::routes/admin-experiments nil
+  ::routes/admin-login nil
+  ::routes/admin-mturk nil
+  ::routes/admin-mturk-dashboard nil
+  ::routes/admin-mturk-hit nil
+  ::routes/admin-mturk-hit-new nil
+  ::routes/admin-mturk-hits nil
+  ::routes/admin-mturk-qualification-type nil
+  ::routes/admin-mturk-qualification-type-new nil
+  ::routes/admin-mturk-qualification-types nil
+  ::routes/admin-responses nil
+  ::routes/admin-template admin/render-admin-template
+  ::routes/admin-templates nil
   ; api-routes
   ::routes/api-access-tokens access-tokens/access-tokens
   ::routes/api-access-token access-tokens/access-token
@@ -74,7 +98,7 @@
   ::routes/echo root/echo
   ::routes/info info/info
   ::routes/parse-table root/parse-table
-  ::routes/layout root/generate-layout
+  ::routes/favicon file/favicon
   ::routes/file file/file
   ::routes/default root/catch-all})
 

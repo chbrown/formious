@@ -17,6 +17,7 @@
      (run-resource request# options)))
 
 (defn resource-list
+  "Return map of liberator implementation methods suitable for handling multiple instances of a formious.db/* model"
   [columns all insert!]
   {:available-media-types ["application/json"]
    :allowed-methods [:get :post]
@@ -25,6 +26,7 @@
    :post! #(-> % :request :body (select-keys columns) insert!)})
 
 (defn resource-record
+  "Return map of liberator implementation methods suitable for handling a single instance of a formious.db/* model"
   [columns blank find-by-id update! delete!]
   {:available-media-types ["application/json"]
    :allowed-methods [:get :put]

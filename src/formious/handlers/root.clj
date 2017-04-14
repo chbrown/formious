@@ -9,9 +9,8 @@
             [clojure.java.io :as io]
             [clojure.tools.logging :as log]
             [rum.core :as rum]
-            [formious.views.common :refer [render-page admin-layout-html]]
             [ring.util.request :refer [content-type]]
-            [ring.util.response :as response :refer [response set-cookie]]))
+            [ring.util.response :as response :refer [not-found response set-cookie]]))
 
 (defn echo
   "Return information about the (ring) request as a hash-map"
@@ -90,13 +89,7 @@
       {:status 403
        :body "You must login first"})))
 
-(defn generate-layout
-  [request]
-  (-> (response admin-layout-html)
-      (response/content-type "text/html")))
-
 (defn catch-all
   [request]
-  ; (not-found "Not Found")
   (log/warn "executing catch-all route")
-  (generate-layout request))
+  (not-found (str "No route registered for request:" (dissoc request :async-channel))))

@@ -1,31 +1,31 @@
 (ns formious.routes)
 
 (def ^:private admin-mturk-routes {
-  "/" ::admin-mturk
+  "" ::admin-mturk
   "/dashboard" ::admin-mturk-dashboard
   "/hits" {"" ::admin-mturk-hits
            "/new" ::admin-mturk-hit-new ; TODO: ensure this gets matched first
            ["/" :HITId] ::admin-mturk-hit}
-  "qualification_types" {"" ::admin-mturk-qualification-types
-                         "/new" ::admin-mturk-qualification-type-new ; TODO: ensure this gets matched first
-                         ["/" :HITId] ::admin-mturk-qualification-type}})
+  "/qualification-types" {"" ::admin-mturk-qualification-types
+                          "/new" ::admin-mturk-qualification-type-new ; TODO: ensure this gets matched first
+                          ["/" :HITId] ::admin-mturk-qualification-type}})
 
 (def ^:private admin-routes {
   "login" ::admin-login
-  "access_tokens" {"" ::admin-access-tokens
-                   ["/" :access_token_id] ::admin-access-token}
+  "access-tokens" {"" ::admin-access-tokens
+                   ["/" :id] ::admin-access-token}
   "administrators" {"" ::admin-administrators
-                    ["/" :administrator_id] ::admin-administrator}
+                    ["/" :id] ::admin-administrator}
   "aws-accounts" {"" ::admin-aws-accounts
-                  ["/" :aws_account_id] ::admin-aws-account}
+                  ["/" :id] ::admin-aws-account}
   "experiments" {"" ::admin-experiments
-                 ["/" :experiment_id] ::admin-experiment
-                 "/blocks" ::admin-blocks
-                 ["/blocks/" :block_id] ::admin-block}
-  ["mturk/" :environment "/" :aws_account_id] admin-mturk-routes
+                 ["/" :id] ::admin-experiment
+                 ["/" :experiment-id "/blocks"] {"" ::admin-blocks
+                                                 ["/" :id] ::admin-block}}
+  ["mturk/" :environment "/" :aws-account-id] admin-mturk-routes
   "responses" ::admin-responses
   "templates" {"" ::admin-templates
-               ["/" :template_id] ::admin-template}})
+               ["/" :id] ::admin-template}})
 
 (def ^:private api-routes {
   "access-tokens"  {"" ::api-access-tokens
@@ -60,11 +60,8 @@
   "echo" ::echo ; ANY
   "info" ::info ; GET
   "parse-table" ::parse-table ; POST
-  ; respond to all /admin/* requests with the ui layout html
-  "admin" [[true ::layout]] ; ANY
   ; static resources:
-  ; #{"favicon.png" "favicon.ico"} (fn [_] ; GET
-  ;   (-> "public/favicon.png" resource-response (content-type "image/png")))
+  #{"favicon.png" "favicon.ico"} ::favicon
   "img/" [[true ::file]]
   "build/" [[true ::file]]
   "formious-globals.js" ::file})

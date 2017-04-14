@@ -15,3 +15,14 @@
                {:resource resource}))
   :handle-ok (fn [ctx]
                (ring-response (:resource ctx))))
+
+(defresource favicon
+  :media-type-available? true
+  :allowed-methods [:get]
+  :exists? (fn [ctx]
+             (when-let [resource (resource-response (:path ctx) {:root "public"})]
+               {:resource resource}))
+  :handle-ok (fn [ctx]
+               (-> (resource-response "public/favicon.png")
+                   (content-type "image/png")
+                   (ring-response))))

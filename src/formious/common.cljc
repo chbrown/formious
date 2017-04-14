@@ -12,7 +12,7 @@
 
 (defn path-for
   [handler & params]
-  (let [namespaced-handler (keyword :formious.routes handler)]
+  (let [namespaced-handler (keyword (name :formious.routes) (name handler))]
     (apply bidi/path-for routes namespaced-handler params)))
 
 (defn update-when
@@ -29,6 +29,11 @@
   "contruct a new map with all the keys of the given map m passed through f"
   [f m]
   (into {} (for [[k v] m] {(f k) v})))
+
+(defn elide
+  "Shorten s to length at most n + 3 and append ellipsis if shortened"
+  [s n]
+  (str (subs s n) (when (> (count s) n) "...")))
 
 (defn pluralize
   "Add 's' to singular when array is not 1-long; otherwise return singular unchanged"

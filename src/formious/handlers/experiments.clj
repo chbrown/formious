@@ -9,7 +9,7 @@
             [clojure.data.json :as json]
             [clojure.java.io :as io]
             [rum.core :as rum]
-            [formious.views.common :refer [render-page block-layout]]
+            [formious.views.common :refer [render-static-markup-with-doctype block-layout]]
             [clostache.parser :refer [render render-resource]]
             [ring.util.response :refer [not-found redirect response content-type status]]))
 
@@ -56,7 +56,7 @@
         ; TODO: memoize/cache the layout Handlebars template function
         context-json-string (json/write-str context)] ;.replaceAll("<\/".r, "<\\/")
     (-> (block-layout context-json-string (:html experiment) template-html)
-        (render-page)
+        (render-static-markup-with-doctype)
         (response)
         (content-type "text/html"))))
 
