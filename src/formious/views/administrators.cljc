@@ -1,6 +1,6 @@
 (ns formious.views.administrators
   (:require [rum.core :as rum]
-      [formious.common :refer [path-for ->iso]]))
+            [formious.common :refer [path-for ->iso]]))
 
 (rum/defc AdministratorsLayout
   [children]
@@ -19,13 +19,13 @@
      [:thead [:tr [:th "ID"] [:th "Email"] [:th "Created"] [:th]]]
      [:tbody
       (for [administrator administrators]
-      [:tr {:key (:id administrator)}
-       [:td (:id administrator)]
-       [:td
-        [:Link {:href (str "/admin/administrators/" (:id administrator) "")}
-         (:email administrator)]]
-       [:td [:DateTime {:date (:created administrator)}]]
-       [:td [:button {:ng-click "delete(administrator)"} "Delete"]]])]]]])
+        [:tr {:key (:id administrator)}
+         [:td (:id administrator)]
+         [:td
+          [:Link {:href (str "/admin/administrators/" (:id administrator) "")}
+           (:email administrator)]]
+         [:td [:DateTime {:date (:created administrator)}]]
+         [:td [:button {:ng-click "delete(administrator)"} "Delete"]]])]]]])
 
 (defn- linkAWSAccount
   [account]
@@ -66,11 +66,11 @@
     [:table.lined
      [:thead
       [:tr
-        [:th "Name"]
-        [:th "Access Key ID"]
-        [:th "Priority"]
-        [:th "Created"]
-        [:th]]]
+       [:th "Name"]
+       [:th "Access Key ID"]
+       [:th "Priority"]
+       [:th "Created"]
+       [:th]]]
      [:tbody
       (for [aws_account administrator_aws_accounts]
         [:tr

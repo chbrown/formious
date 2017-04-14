@@ -25,22 +25,22 @@
     [:table
      [:thead
       [:tr
-        [:th "Submitted"]
-        [:th "Blocklist"]
-        [:th]]]
+       [:th "Submitted"]
+       [:th "Blocklist"]
+       [:th]]]
      [:tbody
       (for [{:keys [submitted blocklist others created seen responses bonus_paid bonus_owed password superuser tokens]} participants]
-      [:tr
-       [:td [:DateTime submitted]]
-       [:td blocklist]
-       [:td {:style "max-width: 600px"}
-        [:div {:class "hover-flow"}
-          (str others)]] ; (json/write-str others)]]
-       [:tr [:td "Created"] [:td created]]
-       [:tr [:td "Seen"] [:td seen]]
-       [:tr [:td "Number of Responses"] [:td (:length responses)]]
-       [:tr [:td "Bonus paid"] [:td bonus_paid]]
-       [:tr [:td "Bonus owed"] [:td bonus_owed]]
-       [:tr [:td "Password"] [:td password]]
-       [:tr [:td "Superuser"] [:td superuser]]
-       [:tr [:td "Tokens"] [:td [:div (:each tokens)]]]])]]]])
+        [:tr
+         [:td [:DateTime submitted]]
+         [:td blocklist]
+         [:td {:style "max-width: 600px"}
+          [:div {:class "hover-flow"}
+           (str others)]] ; (json/write-str others)]]
+         [:tr [:td "Created"] [:td created]]
+         [:tr [:td "Seen"] [:td seen]]
+         [:tr [:td "Number of Responses"] [:td (:length responses)]]
+         [:tr [:td "Bonus paid"] [:td bonus_paid]]
+         [:tr [:td "Bonus owed"] [:td bonus_owed]]
+         [:tr [:td "Password"] [:td password]]
+         [:tr [:td "Superuser"] [:td superuser]]
+         [:tr [:td "Tokens"] [:td [:div (:each tokens)]]]])]]]])

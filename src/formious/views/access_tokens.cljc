@@ -40,9 +40,9 @@
   [:div
    [:nav.fixedflow.sub
     [:a.tab {:href (path-for :access_tokens)}
-      "List access tokens"]
+     "List access tokens"]
     [:a.tab {:href (path-for :access_token :id "new")}
-      "New access token"]]
+     "New access token"]]
    children])
 
 (rum/defc AccessTokensEdit

@@ -248,8 +248,8 @@
      [:div.code "function(responses, assignment) " "{"]
      [:div.code {:style "margin-left: 1em"}
       [:textarea.code {:enhance true
-                  :ng-model "$storage.responses_summarizer"
-                  :style "width: 100%; min-height: 100px"}]]
+                       :ng-model "$storage.responses_summarizer"
+                       :style "width: 100%; min-height: 100px"}]]
      [:div.code "}"]]]
    (for [assignment (take (:assignments_limit $storage) assignments)]
      [:section.box

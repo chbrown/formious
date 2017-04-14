@@ -13,8 +13,8 @@
   []
   [:div
    [:div.shadow {:style {:width "200px"
-                        :margin "80px auto"
-                        :backgroundColor "white"}}
+                         :margin "80px auto"
+                         :backgroundColor "white"}}
     [:form {:ng-submit "login(email, password)"
             :style {:padding "10px"}}
      [:h3 "Admin Login"]
@@ -77,8 +77,8 @@
   ;   });
   ; }
   [:select
-    (for [template (:templates state)]
-      [:option {:value (:id template)} (:name template)])])
+   (for [template (:templates state)]
+     [:option {:value (:id template)} (:name template)])])
 
 (rum/defcs TemplateLink
   [state id]
@@ -107,28 +107,28 @@
           [:div.table
            [:table
             [:thead
-              [:tr
-                (for [column columns]
-                    [:th column])]]
+             [:tr
+              (for [column columns]
+                [:th column])]]
             [:tbody
-              (for [value object]
-                [:tr
-                  (for [column columns]
-                    [:td (ObjectDisplay (:column value))])])]]]
-          ; otherwise, it's an array of arbitrary objects
+             (for [value object]
+               [:tr
+                (for [column columns]
+                  [:td (ObjectDisplay (:column value))])])]]]
+            ; otherwise, it's an array of arbitrary objects
           [:div.array
-            (for [value object]
-              (ObjectDisplay value))])
+           (for [value object]
+             (ObjectDisplay value))]))
     (map? object) ; object?
       [:div.object
-        [:table.keyval
-          (for [[key value] object]
-            [:tr
-              [:td key]
-              [:td (ObjectDisplay value)]])]]
+       [:table.keyval
+        (for [[key value] object]
+          [:tr
+           [:td key]
+           [:td (ObjectDisplay value)]])]]
     (number? object)
       [:b.number (str object)]
     (or (= object true) (= object false)) ; (boolean? object)
       [:b.boolean (str object)]
     :else
-      [:span.string (str object)])))
+      [:span.string (str object)]))

@@ -31,10 +31,10 @@
     [:table.fill.padded.striped.lined
      [:thead
       [:tr
-        [:th "Name"]
-        [:th "HTML"]
-        [:th "Created"]
-        [:th]]]
+       [:th "Name"]
+       [:th "HTML"]
+       [:th "Created"]
+       [:th]]]
      [:tbody
       (for [template templates]
         [:tr
