@@ -9,7 +9,7 @@
     [:input {:name "_id"
              :type "text"
              :value "{_id}"
-             :style "width: 250px"}]]
+             :style {:width "250px"}}]]
    [:label
     [:span "Bonus paid"]
     [:input {:name "bonus_paid"
@@ -33,8 +33,8 @@
         [:tr
          [:td [:DateTime submitted]]
          [:td blocklist]
-         [:td {:style "max-width: 600px"}
-          [:div {:class "hover-flow"}
+         [:td {:style {:max-width "600px"}}
+          [:div.hover-flow
            (str others)]] ; (json/write-str others)]]
          [:tr [:td "Created"] [:td created]]
          [:tr [:td "Seen"] [:td seen]]

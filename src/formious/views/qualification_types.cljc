@@ -84,15 +84,14 @@
 (rum/defc QualificationTypeEdit
   []
   [:div
-   [:label {:class "block"
-            :ng-hide "QualificationType.QualificationTypeId"}
+   [:label.block {:ng-hide "QualificationType.QualificationTypeId"}
     [:div
      [:b "Name"]
      [:span {:class "help"}
       "The name of the Qualification type. The type name is used to represent the Qualification to Workers, and to find the type using a Qualification type search."]]
     [:input {:type "text"
              :ng-model "QualificationType.Name"
-             :style "width: 500px"}]]
+             :style {:width "500px"}}]]
    [:label.block
     [:div
      [:b "Description"]
@@ -101,16 +100,15 @@
 
     [:textarea {:ng-model "QualificationType.Description"
                 :rows "2"
-                :style "width: 500px"}]]
-   [:label {:class "block"
-            :ng-hide "QualificationType.QualificationTypeId"}
+                :style {:width "500px"}}]]
+   [:label.block {:ng-hide "QualificationType.QualificationTypeId"}
     [:div
      [:b "Keywords"]
      [:span {:class "help"}
       "One or more words or phrases that describe the Qualification type, separated by commas. The keywords of a type make the type easier to find during a search."]]
     [:input {:type "text"
              :ng-model "QualificationType.Keywords"
-             :style "width: 500px"}]]
+             :style {:width "500px"}}]]
    [:label.block
     [:div
      [:b "Retry Delay (e.g., 60m)"]
@@ -135,16 +133,14 @@
       [:code "Auto Granted"]
       " is checked."]]
     [:span [:i "Not yet implemented."]]]
-   [:label {:class "block"
-            :ng-show "QualificationType.Test"}
+   [:label.block {:ng-show "QualificationType.Test"}
     [:div
      [:b "Test Duration"]
      [:span {:class "help"}
       "The amount of time the Worker has to complete the Qualification test, starting from the time the Worker requests the Qualification. Required if the Test parameter is specified."]]
     [:input {:type "text"
              :ng-model "QualificationType.TestDuration"}]]
-   [:label {:class "block"
-            :ng-show "QualificationType.Test"}
+   [:label.block {:ng-show "QualificationType.Test"}
     [:div
      [:b "AnswerKey"]
      [:span {:class "help"}
@@ -159,8 +155,7 @@
      [:b "Auto Granted"]
      [:span {:class "help"}
       "Specifies whether requests for the Qualification type are granted immediately, without prompting the Worker with a Qualification test."]]]
-   [:label {:class "block"
-            :ng-show "QualificationType.AutoGranted"}
+   [:label.block {:ng-show "QualificationType.AutoGranted"}
     [:div
      [:b "Auto Granted Value"]
      [:span {:class "help"}

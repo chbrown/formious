@@ -49,14 +49,14 @@
       [:div [:b "Email"]]
       [:input {:type "text"
                :defaultValue (:email administrator)
-               :style "width: 200px"}]]
+               :style {:width "200px"}}]]
      [:label.block
       [:div
        [:b "Password"]
        [:span {:class "help"} "Leave blank to keep current password"]]
       [:input {:type "password"
                :defaultValue (:password administrator)
-               :style "width: 200px"}]]
+               :style {:width "200px"}}]]
      [:label.block
       [:div [:b "Created"]]
       [:DateTime (:created administrator)]]

@@ -40,12 +40,12 @@
         "The title of the HIT. A title should be short and describe the kind of task the HIT contains"]]
       [:input {:type "text"
                :ng-model "$storage.Title"
-               :style "width: 500px"}]]
+               :style {:width "500px"}}]]
      [:label.block
       [:div [:b "Description"] [:span {:class "help"} "2000 character max"]]
       [:textarea {:ng-model "$storage.Description"
                   :rows "2"
-                  :style "width: 500px"}]]
+                  :style {:width "500px"}}]]
      [:label.block
       [:div
        [:b "Reward"]
@@ -60,7 +60,7 @@
         "One or more words or phrases that describe the HIT, separated by commas"]]
       [:input {:type "text"
                :ng-model "$storage.Keywords"
-               :style "width: 500px"}]]
+               :style {:width "500px"}}]]
      [:label.block
       [:div
        [:b "Assignment Duration (e.g., 3h)"]
@@ -86,11 +86,10 @@
          [:pre
           {"QualificationRequirement" {"QualificationTypeId" "2F1QJWKUDD8XADTFD2Q0G6UTO95ALH"
                                        "Comparator" "Exists"}}]]]]
-      [:textarea {:json-transform true
-                  :enhance true
-                  :ng-model "$storage.extra"
-                  :class "code"
-                  :style "width: 500px; min-height: 50px;"}]]
+      [:textarea.code {:json-transform true
+                       :enhance true
+                       :ng-model "$storage.extra"
+                       :style {:width "500px" :min-height "50px"}}]]
      [:p]
      [:div {:ng-show "$storage.Operation == 'CreateHIT'"}
       [:h3 "HIT parameters"]
@@ -117,7 +116,7 @@
          "The URL of your web form, to be displayed in a frame in the Worker's web browser. It can have a querystring; Mechanical Turk parses the url and adds new querystring parameters as needed."]]
        [:input {:type "text"
                 :ng-model "$storage.ExternalURL"
-                :style "width: 500px"}]]
+                :style {:width "500px"}}]]
       [:label.block {:ng-show "$storage.Operation == 'CreateHIT'"}
        [:div
         [:b "Frame Height (integer)"]
@@ -130,7 +129,7 @@
      [:label "Preview " [:input {:type "checkbox"
                                  :ng-model "$storage.preview_iframe"}]]]]
    [:div {:ng-if "$storage.preview_iframe && preview_url"}
-    [:pre {:class "hpad"} preview_url]
+    [:pre.hpad preview_url]
     [:section.box
      [:iframe {:src "{preview_url}"
                :scrolling "auto"
@@ -246,10 +245,10 @@
       [:span {:class "help"}
        "A Javascript function from an Array of responses to a serializable object summarizing the responses."]]
      [:div.code "function(responses, assignment) " "{"]
-     [:div.code {:style "margin-left: 1em"}
+     [:div.code {:style {:margin-left "1em"}}
       [:textarea.code {:enhance true
                        :ng-model "$storage.responses_summarizer"
-                       :style "width: 100%; min-height: 100px"}]]
+                       :style {:width "100%" :min-height "100px"}}]]
      [:div.code "}"]]]
    (for [assignment (take (:assignments_limit $storage) assignments)]
      [:section.box

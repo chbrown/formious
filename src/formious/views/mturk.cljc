@@ -5,18 +5,16 @@
   [children]
   [:div
    [:nav.sub.fixedflow
-    [:div {:class "control"}
+    [:div.control
      [:select {:ng-model "aws_account_id"
                :ng-change "changeSetting('aws_account_id', aws_account_id)"
                :ng-options "aws_account.id.toString() as aws_account.name for aws_account in aws_accounts"}]
      [:select {:ng-model "environment"
                :ng-change "changeSetting('environment', environment)"
                :ng-options "environment.name as environment.name for environment in environments"}]]
-    [:span {:ui-sref-active-any "{current: 'admin.mturk.hits'}"
-            :class "tab"}
+    [:span.tab {:ui-sref-active-any "{current: 'admin.mturk.hits'}"}
      [:a {:ui-sref "admin.mturk.hits.table"} "HITs"]]
-    [:span {:ui-sref-active-any "{current: 'admin.mturk.qualification_types'}"
-            :class "tab"}
+    [:span.tab {:ui-sref-active-any "{current: 'admin.mturk.qualification_types'}"}
      [:a {:ui-sref "admin.mturk.qualification_types.table"} "Qualification Types"]]]
    children])
 
@@ -37,7 +35,7 @@
       [:span {:class "help"}
        "The text of the email message to send; up to 4,096 characters"]]
      [:textarea {:ng-model "notification.MessageText"
-                 :style "width: 600px; height: 200px"}]]
+                 :style {:width "600px" :height "200px"}}]]
     [:label
      [:div
       [:b "WorkerId"]
@@ -52,12 +50,11 @@
 (rum/defc MTurkAssignment
   [assignment]
   [:div
-   [:div {:class "hpad"}
+   [:div.hpad
     [:h3 "Assignment: " (:AssignmentId assignment)]
     [:h4 "WorkerId: " (:WorkerId assignment)]]
-   [:section {:class "hpad"
-              :ng-if "$storage.assignments_show_times"}
-    [:table {:class "keyval"}
+   [:section.hpad {:ng-if "$storage.assignments_show_times"}
+    [:table.keyval
      [:tr [:td "AutoApprovalTime"] [:td (:AutoApprovalTime assignment)]]
      [:tr [:td "AcceptTime"] [:td (:AcceptTime assignment)]]
      [:tr [:td "SubmitTime"] [:td (:SubmitTime assignment)]]
@@ -65,7 +62,7 @@
    [:section.hpad
     [:div
      [:b "Status:"]
-     [:span {:class "{assignment.AssignmentStatus}"}
+     [:span {:class (:AssignmentStatus assignment)}
       (:AssignmentStatus assignment)]]
     [:span {:ng-show "assignment.AssignmentStatus == 'Submitted'"}
      [:button {:ng-click "setStatus('ApproveAssignment')"} "Approve"]
@@ -77,8 +74,7 @@
      [:input {:ng-model "RequesterFeedback"
               :placeholder "Requester Feedback"}]
      [:span {:class "help"} "1024 character max"]]]
-   [:section {:class "hpad"
-              :ng-if "$storage.assignments_show_bonus"}
+   [:section.hpad {:ng-if "$storage.assignments_show_bonus"}
     [:b "Bonus:"]
     [:label [:input {:ng-model "bonus.bonus_owed"
                      :placeholder "Amount"}]]
@@ -93,7 +89,7 @@
    [:div {:class "hpad"
           :ng-if "$storage.assignments_show_answer"}
     [:h4 "Assignment Answer"]
-    [:table {:class "keyval"}
+    [:table.keyval
      (for [[key val] (:Answer assignment)]
        [:tr
         [:td {:ng-bind "key"}]

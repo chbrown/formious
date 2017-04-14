@@ -36,18 +36,18 @@
    [:section.hpad [:h3 "Responses"]]
    [:section.hpad.box
     [:form {:ng-submit "refresh()"}
-     [:div {:class "controls"}
-      [:label {:class "control"}
+     [:div.controls
+      [:label.control
        [:div [:b "Template"]]
        [:select {:ng-model "$storage.responses_query.template_id"
                  :ng-options "template.id as template.name for template in templates"}
         [:option {:value true} "-- all --"]]]
-      [:label {:class "control"}
+      [:label.control
        [:div [:b "Experiment"]]
        [:select {:ng-model "$storage.responses_query.experiment_id"
                  :ng-options "experiment.id as experiment.name for experiment in experiments"}
         [:option {:value true} "-- all --"]]]
-      [:div {:class "control"}
+      [:div.control
        [:div [:b "Order"]]
        [:select {:ng-model "$storage.responses_query.order_column"}
         [:option {:value "experiment_id"} "experiment_id"]
@@ -59,7 +59,7 @@
                   :title "smallest first"} "ASC"]
         [:option {:value "DESC"
                   :title "largest first"} "DESC"]]]
-      [:div {:class "control"}
+      [:div.control
        [:div [:b "Limit"]]
        [:input {:ng-model "$storage.responses_query.limit"
                 :type "number"}]]]]]

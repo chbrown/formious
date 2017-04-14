@@ -51,7 +51,7 @@
           [:a {:href (experiment-responses-path experiment)
                :target "_blank"} "Responses"]
           " (" (get experiment :responses_count "N/A") ")"]
-         [:td {:class "nowrap"}
+         [:td.nowrap
           [:a {:href (path-for :experiment :id (:id experiment))
                :target "_blank"} "Public"]]
          [:td [:button {:on-click (fn [_] (delete experiment))} "Delete"]]])]]]])
@@ -63,12 +63,12 @@
   [:div
    [:nav.sub.fixed-flow
     [:span.control "Experiment: " [:b (:name experiment)]]
-    [:div.control {:style "float: right"}
+    [:div.control {:style {:float "right"}}
      [:a {:href (prepare-hit-path experiment)} "Prepare HIT"]
      [:a {:href (experiment-public-path experiment) :target "_blank"} "Public"]
      [:a {:href (experiment-responses-path experiment) :target "_blank"}
       "Responses"]]]
-   [:section {:class "help hpad"}
+   [:section.hpad {:class "help"}
     " An experiment is a list of stimuli that will be presented to the participant in sequence. Each item in the experiment is known as a \"block\", and can be pretty much anything, like a consent form, instructions,adaptive classification task, or group of other blocks."]
    [:section.hpad.box
     [:form {:ng-submit "syncExperiment($event)"}
@@ -76,13 +76,13 @@
       [:div [:b "Experiment name"]]
       [:input {:type "text"
                :ng-model "experiment.name"
-               :style "width: 200px"}]]
+               :style {:width "200px"}}]]
      [:label.block
       [:div [:b "Owner"]]
       [:select {:ng-model "experiment.administrator_id"
                 :ng-options "administrator.id as administrator.email for administrator in administrators"}]]
      [:div.block
-      [:label {:style "float: right"}
+      [:label {:style {:float "right"}}
        [:input {:type "checkbox"
                 :ng-model "$storage.expand_experiment_html"}]
        [:span "Expand"]]
@@ -94,7 +94,7 @@
        [:textarea {:ng-model "experiment.html"
                    :enhance true
                    :class (str "code " (when-not (:expand_experiment_html $storage) "unlimited"))
-                   :style "min-height: 40px; max-height: 100px; width: 100%;"}]]]
+                   :style {:min-height "40px" :max-height "100px" :width "100%"}}]]]
      [:div.block [:button "Save"]]]]
    [:ui-view
     [:section.hpad

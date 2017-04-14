@@ -69,12 +69,12 @@
       [:div [:b "Access Key ID"]]
       [:input {:type "text"
                :ng-model "aws_account.access_key_id"
-               :style "width: 400px"}]]
+               :style {:width "400px"}}]]
      [:label.block
       [:div [:b "Secret Access Key"]]
       [:input {:type "text"
                :ng-model "aws_account.secret_access_key"
-               :style "width: 400px"}]]
+               :style {:width "400px"}}]]
      [:label.block
       [:div [:b "Created"]]
       [:DateTime {:date (:created aws_account)}]]
