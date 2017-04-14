@@ -13,8 +13,8 @@
   3. options should be a proper map"
   [name options]
   `(defn ~name
-    [request#]
-    (run-resource request# options)))
+     [request#]
+     (run-resource request# options)))
 
 (defn resource-list
   [columns all insert!]

@@ -22,20 +22,19 @@
 
 (defn- not-found-component []
   [:div
-    [:h3 "Could not find route"]
-    [:ul
-      [:li [:a {:href "javascript:back"} "back"]]]])
+   [:h3 "Could not find route"]
+   [:ul
+    [:li [:a {:href "javascript:back"} "back"]]]])
 
 (defn not-found-route [params]
   {:component not-found-component
    :load! (fn [] nil)})
 
-
 (rum/defc app [path]
   [:div
-    [:h1 "Hello this is formious"]
-    [:p "Your location is: "
-        [:code path]]])
+   [:h1 "Hello this is formious"]
+   [:p "Your location is: "
+    [:code path]]])
 
 (defonce app-state (atom {:route nil
                           :text "Hello world!"}))
@@ -79,13 +78,13 @@
         route (match-route routes/routes path)]
     ; only intercept...
     (when (and
-            (= (.-tagName el) "A") ; anchor elements
-            (not (str/starts-with? (.-hash el) "#")) ; that aren't hash links
-            (not= (.-target el) "_blank") ; with normal targets
-            (= (.-host el) js/window.location.host) ; to the same host
-            (not (any-modKey? e)) ; without a modifier key
-            (= (.-button e) 0) ; left mouse button
-            (some? route)) ; goes to some route we handle
+           (= (.-tagName el) "A") ; anchor elements
+           (not (str/starts-with? (.-hash el) "#")) ; that aren't hash links
+           (not= (.-target el) "_blank") ; with normal targets
+           (= (.-host el) js/window.location.host) ; to the same host
+           (not (any-modKey? e)) ; without a modifier key
+           (= (.-button e) 0) ; left mouse button
+           (some? route)) ; goes to some route we handle
       (js/history.pushState nil "" path)
       (set-location path)
       (.preventDefault e))))

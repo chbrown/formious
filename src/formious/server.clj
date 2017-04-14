@@ -1,19 +1,21 @@
 (ns formious.server
   (:require [formious.db.common :refer [ZonedDateTime->String]]
             ; api handlers
-            [formious.resources [access-tokens :as access-tokens]
-                                [administrators :as administrators]
-                                [aws-accounts :as aws-accounts]
-                                [blocks :as blocks]
-                                [experiments :as experiments]
-                                [file :as file]
-                                [info :as info]
-                                [mturk :as mturk]
-                                [responses :as responses]
-                                [templates :as templates]]
+            [formious.resources
+             [access-tokens :as access-tokens]
+             [administrators :as administrators]
+             [aws-accounts :as aws-accounts]
+             [blocks :as blocks]
+             [experiments :as experiments]
+             [file :as file]
+             [info :as info]
+             [mturk :as mturk]
+             [responses :as responses]
+             [templates :as templates]]
             ; root handlers
-            [formious.handlers [root :as root]
-                               [experiments :as root-experiments]]
+            [formious.handlers
+             [root :as root]
+             [experiments :as root-experiments]]
             [formious.routes :as routes]
             [formious.middleware.logging :refer [wrap-server-header wrap-checkpoints wrap-logging]]
             [ring.middleware.data.json :refer [wrap-json-request wrap-json-response]]

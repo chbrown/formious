@@ -72,7 +72,7 @@
   (let [{:keys [body headers query-params request-params]} request
         {:keys [experiment-id block-id]} request-params
         {:strs [WorkerId AssignmentId]
-           :or {WorkerId "WORKER_ID_NOT_AVAILABLE"}} query-params
+         :or   {WorkerId "WORKER_ID_NOT_AVAILABLE"}} query-params
         {:keys [x-real-ip user-agent x-requested-with]} headers
         response (save-response! WorkerId AssignmentId block-id body x-real-ip user-agent)]
     (if-let [block (Block/next-in-experiment experiment-id)]

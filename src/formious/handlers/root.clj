@@ -62,7 +62,7 @@
   [request]
   (let [{:keys [query-params body]} request
         {:strs [workerId assignmentId block_id]
-           :or {workerId "WORKER_ID_NOT_AVAILABLE"
+         :or   {workerId "WORKER_ID_NOT_AVAILABLE"
                 block_id 0}} query-params
         participant (Participant/find-or-create-by-worker-id! workerId nil nil)]
     (Response/insert! {:participant_id (:id participant)

@@ -36,4 +36,4 @@
   :put! (fn [ctx]
           (-> ctx :request :body
              ; Ok("Successfully updated block tree")
-             (Block/updateTree))))
+              (Block/updateTree))))

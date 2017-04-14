@@ -3,7 +3,6 @@
             [liberator.core :refer [defresource]]
             [formious.resources.rest :refer [resource-list resource-record]]))
 
-
 (defresource experiments (resource-list Experiment/writable-columns
                                         ; experiments.foreach { experiment =>
                                         ;   Experiment.findOrCreateAccessToken(experiment.id) }

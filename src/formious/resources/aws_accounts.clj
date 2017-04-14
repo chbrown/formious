@@ -3,7 +3,6 @@
             [liberator.core :refer [defresource]]
             [formious.resources.rest :refer [resource-list resource-record]]))
 
-
 (defresource aws-accounts (resource-list AWSAccount/writable-columns
                                          AWSAccount/all
                                          AWSAccount/insert!))
