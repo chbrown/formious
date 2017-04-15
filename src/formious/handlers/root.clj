@@ -9,8 +9,8 @@
             [clojure.java.io :as io]
             [clojure.tools.logging :as log]
             [rum.core :as rum]
-            [ring.util.request :refer [content-type]]
-            [ring.util.response :as response :refer [not-found response set-cookie]]))
+            [ring.util.request :as request :refer [path-info]]
+            [ring.util.response :as response :refer [not-found response resource-response set-cookie]]))
 
 (defn echo
   "Return information about the (ring) request as a hash-map"
@@ -18,6 +18,31 @@
   (-> request
       (dissoc :async-channel)
       (response)))
+
+(defn favicon
+  [_]
+  (-> (resource-response "public/favicon.png")
+      (response/content-type "image/png")))
+
+(defn file
+  [request]
+  (let [path (path-info request)]
+    (or (resource-response path {:root "public"})
+        (not-found path))))
+
+(defn- resource->Properties
+  "Load the given resource as a Properties instance"
+  [resource-name]
+  (with-open [reader (-> resource-name io/resource io/reader)]
+    (doto (java.util.Properties.)
+          (.load reader))))
+
+(defn info
+  ; Load and return a hash-map representation of the project's POM properties
+  [request]
+  (->> (resource->Properties "META-INF/maven/formious/app/pom.properties")
+       (into {})
+       (response)))
 
 (defn login
   "Try to login as user with email and password
@@ -41,7 +66,7 @@
   "Parse tabular input flexibly and write out json to response"
   ; Header("Content-Type", "application/json"))
   [request]
-  (case (content-type request)
+  (case (request/content-type request)
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       (-> request :body excel/first-sheet-as-maps)
     "application/json"

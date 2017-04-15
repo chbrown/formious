@@ -1,21 +1,13 @@
 (ns formious.server
   (:require [formious.db.common :refer [ZonedDateTime->String]]
             ; api handlers
-            [formious.resources
-             [access-tokens :as access-tokens]
-             [administrators :as administrators]
-             [aws-accounts :as aws-accounts]
-             [blocks :as blocks]
-             [experiments :as experiments]
-             [file :as file]
-             [info :as info]
-             [mturk :as mturk]
-             [responses :as responses]
-             [templates :as templates]]
+            [formious.resources :as resources :refer [run]]
+            ; [formious.resources :refer [access-tokens administrators aws-accounts blocks experiments responses templates]]
             ; root handlers
             [formious.handlers
              [admin :as admin]
              [root :as root]
+             [mturk :as mturk]
              [experiments :as root-experiments]]
             [formious.routes :as routes]
             [formious.middleware.logging :refer [wrap-server-header wrap-checkpoints wrap-logging]]
@@ -71,35 +63,35 @@
   ::routes/admin-template admin/render-admin-template
   ::routes/admin-templates nil
   ; api-routes
-  ::routes/api-access-tokens access-tokens/access-tokens
-  ::routes/api-access-token access-tokens/access-token
-  ::routes/api-administrators administrators/administrators
-  ::routes/api-administrator administrators/administrator
-  ::routes/api-aws-accounts aws-accounts/aws-accounts
-  ::routes/api-aws-account aws-accounts/aws-account
-  ::routes/api-experiments experiments/experiments
-  ::routes/api-experiment experiments/experiment
-  ::routes/api-blocks blocks/blocks
-  ::routes/api-block-tree blocks/block-tree
-  ::routes/api-block blocks/block
-  ::routes/api-responses responses/responses
-  ::routes/api-response responses/response
-  ::routes/api-templates templates/templates
-  ::routes/api-template templates/template
-  ::routes/api-mturk mturk/mturk
+  ::routes/api-access-tokens  #(run resources/access-tokens  %)
+  ::routes/api-access-token   #(run resources/access-token   %)
+  ::routes/api-administrators #(run resources/administrators %)
+  ::routes/api-administrator  #(run resources/administrator  %)
+  ::routes/api-aws-accounts   #(run resources/aws-accounts   %)
+  ::routes/api-aws-account    #(run resources/aws-account    %)
+  ::routes/api-experiments    #(run resources/experiments    %)
+  ::routes/api-experiment     #(run resources/experiment     %)
+  ::routes/api-blocks         #(run resources/blocks         %)
+  ::routes/api-block-tree     #(run resources/block-tree     %)
+  ::routes/api-block          #(run resources/block          %)
+  ::routes/api-responses      #(run resources/responses      %)
+  ::routes/api-response       #(run resources/response       %)
+  ::routes/api-templates      #(run resources/templates      %)
+  ::routes/api-template       #(run resources/template       %)
   ; experiment routes
   ::routes/experiment root-experiments/redirect-to-next-block
   ::routes/experiment-get-block root-experiments/render-block
   ::routes/experiment-post-block root-experiments/save-block-and-redirect
   ; base routes
   ::routes/login root/login
+  ::routes/mturk mturk/post
   ::routes/mturk-submit root/mturk-submit
   ::routes/responses root/export-responses
   ::routes/echo root/echo
-  ::routes/info info/info
+  ::routes/info root/info
   ::routes/parse-table root/parse-table
-  ::routes/favicon file/favicon
-  ::routes/file file/file
+  ::routes/favicon root/favicon
+  ::routes/file root/file
   ::routes/default root/catch-all})
 
 (def routes-with-default ["" [routes/routes

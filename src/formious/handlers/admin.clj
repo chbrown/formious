@@ -3,7 +3,7 @@
             [rum.core :as rum]
             [formious.views.common :refer [render-html-with-doctype admin-layout]]
             [formious.views.templates :as templates-views]
-            [formious.resources.templates :as templates-resources]
+            [formious.resources :refer [template]]
             [liberator.core :refer [run-resource]]
             [ring.util.response :refer [not-found redirect response content-type status]]))
 
@@ -17,7 +17,7 @@
 
 (defn render-admin-template
   [request]
-  (let [template (run-resource request (assoc templates-resources/template-options :as-response (fn [d ctx] d)))]
+  (let [template (run-resource request (assoc template :as-response (fn [d ctx] d)))]
     (println "Got template from resource:" (type template) template)
     (-> (templates-views/template template)
         (render-html-with-doctype)
