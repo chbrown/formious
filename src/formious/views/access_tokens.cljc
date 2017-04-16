@@ -46,17 +46,17 @@
    [:label.block
     [:div [:b "Token"]]
     [:input {:type "text"
-             :defaultValue (:token access_token)
+             :default-value (:token access_token)
              :style {:width "100%"}}]]
    [:label.block
     [:div [:b "Relation"]]
     [:input {:type "text"
-             :defaultValue (:relation access_token)
+             :default-value (:relation access_token)
              :style {:width "100%"}}]]
    [:label.block
     [:div [:b "Foreign ID"]]
     [:input {:type "text"
-             :defaultValue (:foreign_id access_token)
+             :default-value (:foreign_id access_token)
              :style {:width "100%"}}]]
    [:label.block
     [:div [:b "Expires"]]

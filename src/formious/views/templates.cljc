@@ -70,22 +70,21 @@
   [{:keys [id name html created] :as record}]
   (layout
    [:div
-    [:code (str record)]
     [:section.hpad {:style {:float "right"}}
      [:button {:on-click (fn [_] (copy id))} "Clone"]]
     [:form.hpad {:on-submit (fn [_] (save id {:name name :html html}))}
      [:label.block
       [:div [:b "Name"]]
       [:input {:type "text"
-               :defaultValue name
+               :default-value name
                :style {:width "100%"}}]]
      [:label.block
       [:div [:b "Created"]]
-      [:DateTime {:date created}]]
+      (->iso created)]
      [:label.block
       [:div [:b "HTML"]]
        ; TODO: enhance textarea
-      [:textarea.code {:defaultValue html
+      [:textarea.code {:default-value html
                        :placeholder "HTML / Handlebars content"
                        :style {:width "100%" :min-height "200px"}}]]
      [:div.block [:button "Save"]]]]))

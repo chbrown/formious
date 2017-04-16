@@ -18,8 +18,12 @@
 ;   https://github.com/clojure-liberator/liberator/issues/6
 
 (defn run
-  [request resource-kvs & {:as options}]
-  (run-resource (merge resource-kvs options)))
+  [request resource-kvs]
+  (run-resource request resource-kvs))
+
+(defn run-raw
+  [request resource-kvs]
+  (run request (assoc resource-kvs :as-response (fn [d ctx] d))))
 
 (def defaults {:available-media-types ["application/json"]
                :initialize-context #(get-in % [:request :route-params])})

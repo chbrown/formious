@@ -9,7 +9,7 @@
   (str "<!DOCTYPE html>" (rum/render-static-markup component)))
 
 (defn render-html-with-doctype
-  "Render static (not marked with React ids & checksums) HTML, complete with DOCTYPE header"
+  "Render React-readable HTML, complete with DOCTYPE header"
   [component]
   (str "<!DOCTYPE html>" (rum/render-html component)))
 

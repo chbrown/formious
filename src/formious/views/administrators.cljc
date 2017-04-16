@@ -48,14 +48,14 @@
      [:label.block
       [:div [:b "Email"]]
       [:input {:type "text"
-               :defaultValue (:email administrator)
+               :default-value (:email administrator)
                :style {:width "200px"}}]]
      [:label.block
       [:div
        [:b "Password"]
        [:span {:class "help"} "Leave blank to keep current password"]]
       [:input {:type "password"
-               :defaultValue (:password administrator)
+               :default-value (:password administrator)
                :style {:width "200px"}}]]
      [:label.block
       [:div [:b "Created"]]
@@ -82,10 +82,10 @@
          [:td [:DateTime {:date (:created aws_account)}]]
          [:td [:button {:ng-click "unlinkAWSAccount(aws_account)"} "Disown"]]])]]
     [:p
-     [:select {:defaultValue (:aws_account_id new_account)}
+     [:select {:default-value (:aws_account_id new_account)}
       (for [aws_account aws_accounts]
         [:option {:value (:id aws_account)} (:name aws_account)])]
-     [:input {:defaultValue (:priority new_account)
+     [:input {:default-value (:priority new_account)
               :type "number"
               :placeholder "priority"}]
      [:button {:on-click (fn [_] (linkAWSAccount new_account))} "Add account"]]]])
