@@ -82,6 +82,7 @@
   #?(:clj (condp instance? x
             java.util.Date (.toInstant ^java.util.Date x)
             java.sql.Timestamp (.toInstant ^java.sql.Timestamp x)
+            java.time.ZonedDateTime (.toInstant ^java.time.ZonedDateTime x)
             String (parse-timestamp x)
             x)
      :cljs (cond
@@ -96,7 +97,7 @@
 
 (defn ->iso
   [d & [option]]
-  (let [iso-string (Instant->iso (->Instant d))]
+  (let [iso-string (-> d ->Instant Instant->iso)]
     (case option
       :date (subs iso-string 0 10)
       :time (subs iso-string 11 19)
