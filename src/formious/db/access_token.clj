@@ -43,16 +43,16 @@
                                   WHERE relation = ?
                                     AND foreign_id = ?
                                     AND (expires IS NULL OR expires > NOW())
-                                    AND redacted IS NULL" relation foreign_id]))]
+                                    AND redacted IS NULL" relation (->long foreign_id)]))]
     (map->AccessToken row)
     (insert! {:token (random-string length)
               :relation relation
-              :foreign_id foreign_id})))
+              :foreign_id (->long foreign_id)})))
 
 (defn update!
   ; row keys: token, relation, foreign_id, expires, redacted
   [id set-map]
-  (db/update! "access_token" set-map ["id = ?" id]))
+  (db/update! "access_token" set-map ["id = ?" (->long id)]))
 
 (defn check
   ; TODO: generalize this for use in find-or-create! (which doesn't use the token)
@@ -62,16 +62,16 @@
                     AND relation = ?
                     AND foreign_id = ?
                     AND (expires IS NULL OR expires > NOW())
-                    AND redacted IS NULL" token relation foreign_id])
+                    AND redacted IS NULL" token relation (->long foreign_id)])
       first
       map->AccessToken))
 
 (defn find-by-id
   [id]
-  (some-> (db/query ["SELECT * FROM access_token WHERE id = ?" id])
+  (some-> (db/query ["SELECT * FROM access_token WHERE id = ?" (->long id)])
           first
           map->AccessToken))
 
 (defn delete!
   [id]
-  (db/delete! "access_token" ["id = ?" id]))
+  (db/delete! "access_token" ["id = ?" (->long id)]))
