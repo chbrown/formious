@@ -33,7 +33,9 @@
 (defn elide
   "Shorten s to length at most n + 3 and append ellipsis if shortened"
   [s n]
-  (str (subs s n) (when (> (count s) n) "...")))
+  (if (> (count s) n)
+    (str (subs s 0 n) "...")
+    s))
 
 (defn pluralize
   "Add 's' to singular when array is not 1-long; otherwise return singular unchanged"
