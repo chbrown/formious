@@ -11,6 +11,7 @@
              [experiments :as root-experiments]]
             [formious.routes :as routes]
             [formious.views.common :refer [admin-layout]]
+            [formious.views.access-tokens :as access-tokens-views]
             [formious.views.templates :as templates-views]
             [formious.middleware.logging :refer [wrap-server-header wrap-checkpoints wrap-logging]]
             [ring.middleware.data.json :refer [wrap-json-request wrap-json-response]]
@@ -42,8 +43,8 @@
 
 (def route->handler {
   ; admin-routes
-  ::routes/admin-access-token nil
-  ::routes/admin-access-tokens nil
+  ::routes/admin-access-token #(admin/run % (comp admin-layout access-tokens-views/access-token) [resources/access-token])
+  ::routes/admin-access-tokens #(admin/run % (comp admin-layout access-tokens-views/access-tokens) [resources/access-tokens])
   ::routes/admin-administrator nil
   ::routes/admin-administrators nil
   ::routes/admin-aws-account nil
