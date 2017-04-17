@@ -10,28 +10,26 @@
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/java.jdbc "0.6.1"]
                  [org.postgresql/postgresql "42.0.0"]
-                 [cheshire "5.7.0"]
                  [org.clojure/data.json "0.2.6"]
                  [http.async.client "1.2.0"]
-                 [markdown-clj "0.9.98"]
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [net.sf.supercsv/super-csv "2.4.0"]
                  [net.sf.supercsv/super-csv-java8 "2.4.0"]
-                 [org.apache.poi/poi-ooxml "3.15"]
+                 [org.apache.poi/poi-ooxml "3.16"]
                  ; [amazonica "0.3.93"]
-                 [com.amazonaws/aws-java-sdk-mechanicalturkrequester "1.11.105" :exclusions [joda-time]]
+                 [com.amazonaws/aws-java-sdk-mechanicalturkrequester "1.11.119" :exclusions [joda-time]]
                  [org.clojure/tools.logging "0.3.1"]
-                 [ch.qos.logback/logback-classic "1.2.1"]
+                 [ch.qos.logback/logback-classic "1.2.3"]
                  ; clj/web
-                 [compojure "1.6.0-beta3"]
-                 [ring/ring-core "1.6.0-RC1"]
-                 [ring/ring-devel "1.6.0-RC1"]
-                 [ring/ring-defaults "0.3.0-beta3"]
-                 [ring/ring-json "0.5.0-beta1"]
+                 [ring/ring-core "1.6.0-RC2"]
+                 [ring/ring-devel "1.6.0-RC2"]
+                 [ring-data.json "0.1.0"]
+                 [liberator "0.14.1"]
                  [http-kit "2.2.0"]
                  ; cljs
                  [bidi "2.0.16"]
-                 [org.clojure/clojurescript "1.9.495"]
+                 ; pin cljs at 1.9.456 until goo.gl/hfcbWu is closed; see also git.io/vS6Fp
+                 [org.clojure/clojurescript "1.9.456"]
                  [org.clojure/core.async "0.3.442"]
                  ; avoid "cljs.core/uuid? being replaced by: cognitect.transit/uuid?" warning:
                  [com.cognitect/transit-cljs "0.8.239"]
@@ -70,9 +68,10 @@
          :port 1451
          :open-browser? false}
   :main formious.server
-  :profiles {:dev {:dependencies [[binaryage/devtools "0.9.2"]
-                                  [figwheel-sidecar "0.5.9"]
-                                  [com.cemerick/piggieback "0.2.1"]]
+  :profiles {:dev {:dependencies [[binaryage/devtools "0.9.3"]
+                                  [figwheel-sidecar "0.5.10"]
+                                  [com.cemerick/piggieback "0.2.1"]
+                                  [org.clojure/tools.namespace "0.3.0-alpha3"]]
                    :ring {:auto-refresh? true}
                    :source-paths ["dev"]
                    :repl-options {; limit output for nREPL dev
