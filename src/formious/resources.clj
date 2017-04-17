@@ -23,7 +23,7 @@
 
 (defn run-raw
   [request resource-kvs]
-  (run request (assoc resource-kvs :as-response (fn [d ctx] d))))
+  (get (run request (assoc resource-kvs :as-response (fn [d ctx] {::body d}))) ::body))
 
 (def defaults {:available-media-types ["application/json"]
                :initialize-context #(get-in % [:request :route-params])})
