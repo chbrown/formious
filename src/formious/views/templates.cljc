@@ -1,5 +1,6 @@
 (ns formious.views.templates
   (:require [rum.core :as rum]
+            [formious.views.common :refer [css-classes datetime table]]
             [formious.common :refer [path-for elide ->iso]]))
 
 (defn- delete
@@ -41,30 +42,21 @@
     [:a.tab {:href (path-for :admin-template :id "new")} "New template"]]
    children])
 
-(defn- table
-  [templates]
-  [:table.fill.padded.striped.lined
-   [:thead
-    [:tr
-     [:th "Name"]
-     [:th "HTML"]
-     [:th "Created"]
-     [:th]]]
-   [:tbody
-    (for [{:keys [id name html created]} templates]
-      [:tr
-       [:td {:title id}
-        [:a {:href (path-for :admin-template :id id)} name]]
-       [:td [:code (elide html 100)]]
-       [:td (->iso created :date)]
-       [:td [:button {:on-click (fn [_] (delete id))} "Delete"]]])]])
+(def columns ["Name" "HTML" "Created" ""])
+
+(defn cells
+  [{:keys [id name html created]}]
+  [[:a {:title id :href (path-for :admin-template :id id)} name]
+   [:code (elide html 100)]
+   (datetime created :date)
+   [:button {:on-click (fn [_] (delete id))} "Delete"]])
 
 (rum/defc templates
   [templates]
   (layout
    [:div
     [:section.hpad [:h3 "Templates"]]
-    [:section.box (table templates)]]))
+    [:section.box (table templates columns cells (:default-table css-classes))]]))
 
 (rum/defc template
   [{:keys [id name html created] :as record}]
