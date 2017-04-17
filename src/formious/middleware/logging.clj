@@ -22,15 +22,25 @@
 
 ; cf. https://github.com/nberger/ring-logger
 
+(defn- redact-in
+  [m ks]
+  (common/assoc-in-when m ks "❌ ")) ; maybe ❌ or … or ⋯
+
 (defn wrap-logging
   "middleware that logs requests and responses"
-  [handler & {:keys [tag body]
-              :or {body false}
+  [handler & {:keys [tag request-redactions response-redactions]
+              :or   {request-redactions [[:async-channel]
+                                         [:headers "user-agent"]
+                                         [:headers "cookie"]
+                                         [:headers "accept"]
+                                         [:headers "accept-language"]
+                                         [:headers "accept-encoding"]]
+                     response-redactions [[:body]]}
               :as options}]
   (fn logging-handler [request]
-    (let [redacted-request (dissoc request :async-channel)]
+    (let [redacted-request (reduce redact-in request request-redactions)]
       (log/debug "📨 ➙  (request)" tag redacted-request))
     (let [response (handler request)]
-      (let [redacted-response (if body response (dissoc response :body))]
+      (let [redacted-response (reduce redact-in response response-redactions)]
         (log/debug "📬  ⬅ (response)" tag redacted-response))
       response)))
