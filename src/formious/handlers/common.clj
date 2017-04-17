@@ -19,3 +19,8 @@
   "Render React-readable HTML, complete with DOCTYPE header"
   [component]
   (str "<!DOCTYPE html>" (rum/render-html component)))
+
+(defn html-response
+  "Wrap body in a ring response map and set the content type to UTF-8 HTML"
+  [body]
+  (response/content-type (response body) "text/html; charset=utf-8"))
