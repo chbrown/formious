@@ -105,6 +105,18 @@
         [root_blocks block_hash] (reduce build-blocks-tree-reducer [[] block_hash] all_blocks)]
     root_blocks))
 
+(defn now
+  "Return the current datetime as a java.time.Instant on the JVM, or a Date instance in JavaScript"
+  []
+  #?(:clj (java.time.Instant/now)
+     :cljs (js/Date.)))
+
+(defn add-duration
+  "Add a duration (specified in milliseconds) to an Instant"
+  [instant milliseconds]
+  #?(:clj (.plusMillis ^java.time.Instant instant milliseconds)
+     :cljs (js/Date. (+ (.getTime instant) milliseconds))))
+
 (defn ->Instant
   [x]
   #?(:clj (condp instance? x
