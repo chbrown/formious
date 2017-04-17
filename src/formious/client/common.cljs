@@ -1,5 +1,6 @@
 (ns formious.client.common
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [formious.common :as common]))
 
 (defn full-location
   "Returns the current full location of the window"
@@ -65,4 +66,4 @@
 
 (def cookie-defaults {:path "/"
                       ; expires one month from now
-                      :expires (Date. (+ (.getTime (Date.)) (* 31 24 60 60 1000)))})
+                      :expires (common/add-duration (common/now) (* 31 24 60 60 1000))})
