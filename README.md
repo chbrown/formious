@@ -10,6 +10,31 @@ In particular, it was originally built to interface with [Amazon Mechanical Turk
     npm install -g formious
     formious
 
+By default, the HTTP server listens on port `1451`.
+
+
+## Cross-platform routing
+
+Routes (URLs) are defined as a single `bidi` structure (a tree) in [`formious.routes/routes`](src/formious/routes.cljc),
+for which all endpoints (leaves) are qualified keywords (qualified with the `formious.routes` namespace).
+
+On the server side, we assign handlers to URLs via a mapping from the `:formious.routes/` keywords to ring handlers.
+A ring handler is simply a function that takes a ring request and, synchronously, returns a ring response.
+
+On the client side, it's a bit more complex, due to partial page loads, nested components, and ubiquitous asynchronousness.
+Here, a URL corresponds to a couple things:
+* one or more components
+  - if more, they will be nested, where the lefter ones will be fed in the result of the righter ones as the first argument.
+  - the rightmost (or only) component needs to know where it gets its data
+* one or more functions that are responsible for fetching the data and updating the global state.
+  - each one of these is handed:
+    + route information
+    + a sort of callback function that can be called multiple times with incrementally updated state.
+
+Questions:
+* should the components ever be called directly by the router?
+  or only triggered via the global state changes as the fetching function(s) update it?
+
 
 ## Deployment
 
