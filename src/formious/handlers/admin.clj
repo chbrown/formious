@@ -1,5 +1,6 @@
 (ns formious.handlers.admin
-  (:require [formious.views.common :refer [render-static-markup-with-doctype render-html-with-doctype admin-layout]]
+  (:require [formious.handlers.common :refer [render-static-markup-with-doctype render-html-with-doctype]]
+            [formious.views.common :refer [admin-layout]]
             [formious.resources :refer [run-raw]]
             [ring.util.response :refer [response content-type]]))
 

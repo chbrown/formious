@@ -3,16 +3,6 @@
             [rum.core :as rum]
             [formious.common :refer [path-for elide ->iso logout]]))
 
-(defn render-static-markup-with-doctype
-  "Render static (not marked with React ids & checksums) HTML, complete with DOCTYPE header"
-  [component]
-  (str "<!DOCTYPE html>" (rum/render-static-markup component)))
-
-(defn render-html-with-doctype
-  "Render React-readable HTML, complete with DOCTYPE header"
-  [component]
-  (str "<!DOCTYPE html>" (rum/render-html component)))
-
 (defn event-value
   "Get the value of the given event's target"
   [event] ; ^js/Event

@@ -5,20 +5,13 @@
             [formious.db.response :as Response]
             [formious.excel :as excel]
             [formious.csv :as csv]
+            [formious.handlers.common :refer [content-type-if-known]]
             [clojure.data.json :as json]
             [clojure.java.io :as io]
             [clojure.tools.logging :as log]
             [rum.core :as rum]
-            [ring.util.mime-type :refer [ext-mime-type]]
             [ring.util.request :as request :refer [path-info]]
             [ring.util.response :as response :refer [not-found response resource-response set-cookie]]))
-
-(defn- content-type-if-known
-  "Add a Content-Type header to response if a mime type can be inferred from path"
-  [response path]
-  (if-let [mime-type (ext-mime-type path)]
-    (response/content-type response mime-type)
-    response))
 
 (defn echo
   "Return information about the (ring) request as a hash-map"

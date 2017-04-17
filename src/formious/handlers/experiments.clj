@@ -9,7 +9,8 @@
             [clojure.data.json :as json]
             [clojure.java.io :as io]
             [rum.core :as rum]
-            [formious.views.common :refer [render-static-markup-with-doctype block-layout]]
+            [formious.handlers.common :refer [render-static-markup-with-doctype]]
+            [formious.views.common :refer [block-layout]]
             [clostache.parser :refer [render render-resource]]
             [ring.util.response :refer [not-found redirect response content-type status]]))
 
