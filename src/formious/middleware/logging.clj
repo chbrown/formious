@@ -29,13 +29,16 @@
 (defn wrap-logging
   "middleware that logs requests and responses"
   [handler & {:keys [tag request-redactions response-redactions]
-              :or   {request-redactions [[:async-channel]
+              :or   {request-redactions [[:remote-addr]
                                          [:headers "user-agent"]
                                          [:headers "cookie"]
+                                         [:headers "connection"]
                                          [:headers "accept"]
                                          [:headers "accept-language"]
-                                         [:headers "accept-encoding"]]
-                     response-redactions [[:body]]}
+                                         [:headers "accept-encoding"]
+                                         [:async-channel]]
+                     response-redactions [[:body]
+                                          [:headers "Last-Modified"]]}
               :as options}]
   (fn logging-handler [request]
     (let [redacted-request (reduce redact-in request request-redactions)]
