@@ -50,7 +50,7 @@
                            :optimizations :simple
                            :pretty-print false}}
                {:id "dev"
-                :figwheel true
+                :figwheel {:on-jsload formious.client.core/figwheel-on-jsload!}
                 :source-paths ["src"]
                 :compiler {:main formious.client.core ; used by figwheel
                            ; figwheel requires these build/out directives:
@@ -73,10 +73,8 @@
                                   [com.cemerick/piggieback "0.2.1"]
                                   [org.clojure/tools.namespace "0.3.0-alpha3"]]
                    :ring {:auto-refresh? true}
-                   :source-paths ["dev"]
-                   :repl-options {; limit output for nREPL dev
-                                  :init (set! *print-length* 100)
-                                  :init-ns user
+                   :source-paths ["src" "dev"]
+                   :repl-options {:init-ns user
                                   ; piggieback enables cljs in nREPL
                                   :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}
              :uberjar {:aot :all
