@@ -4,9 +4,10 @@
             [formious.common :refer [path-for elide ->iso logout]]))
 
 (defn event-value
-  "Get the value of the given event's target"
-  [event] ; ^js/Event
-  (.. event -target -value))
+  "Get the value of the given event's target (element)"
+  [event]
+  #?(:clj event
+     :cljs (.. ^js/Event event -target -value)))
 
 (rum/defc admin-layout
   [children]
