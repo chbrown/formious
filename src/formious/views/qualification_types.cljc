@@ -1,6 +1,8 @@
 (ns formious.views.qualification-types
   (:require [rum.core :as rum]))
 
+(def $storage {:todo "Pull this from global state"})
+
 (rum/defc QualificationTypeTable
   [qualification-types]
   [:div
@@ -82,47 +84,47 @@
          [:td [:button {:ng-click "delete(QualificationType)"} "Delete"]]])]]]])
 
 (rum/defc QualificationTypeEdit
-  []
+  [QualificationType]
   [:div
-   [:label.block {:ng-hide "QualificationType.QualificationTypeId"}
-    [:div
-     [:b "Name"]
-     [:span {:class "help"}
-      "The name of the Qualification type. The type name is used to represent the Qualification to Workers, and to find the type using a Qualification type search."]]
-    [:input {:type "text"
-             :ng-model "QualificationType.Name"
-             :style {:width "500px"}}]]
+   (when-not (:QualificationTypeId QualificationType)
+     [:label.block
+      [:div
+       [:b "Name"]
+       [:span {:class "help"}
+        "The name of the Qualification type. The type name is used to represent the Qualification to Workers, and to find the type using a Qualification type search."]]
+      [:input {:type "text"
+               :ng-model (:Name QualificationType)
+               :style {:width "500px"}}]])
    [:label.block
     [:div
      [:b "Description"]
      [:span {:class "help"}
       "A long description for the Qualification type. On the Amazon Mechanical Turk website, the long description is displayed when a Worker examines a Qualification type. 2000 character maximum."]]
-
-    [:textarea {:ng-model "QualificationType.Description"
+    [:textarea {:ng-model (:Description QualificationType)
                 :rows "2"
                 :style {:width "500px"}}]]
-   [:label.block {:ng-hide "QualificationType.QualificationTypeId"}
-    [:div
-     [:b "Keywords"]
-     [:span {:class "help"}
-      "One or more words or phrases that describe the Qualification type, separated by commas. The keywords of a type make the type easier to find during a search."]]
-    [:input {:type "text"
-             :ng-model "QualificationType.Keywords"
-             :style {:width "500px"}}]]
+   (when-not (:QualificationTypeId QualificationType)
+     [:label.block
+      [:div
+       [:b "Keywords"]
+       [:span {:class "help"}
+        "One or more words or phrases that describe the Qualification type, separated by commas. The keywords of a type make the type easier to find during a search."]]
+      [:input {:type "text"
+               :ng-model "QualificationType.Keywords"
+               :style {:width "500px"}}]])
    [:label.block
     [:div
      [:b "Retry Delay (e.g., 60m)"]
      [:span {:class "help"}
       "The amount of time that a Worker must wait after requesting a Qualification of the Qualification type before the worker can retry the Qualification request."]]
     [:input {:type "text"
-             :ng-model "QualificationType.RetryDelayInSeconds"
+             :ng-model (:RetryDelayInSeconds QualificationType)
              :duration-string true}]]
    [:label.block
     [:div
      [:b "Status"]
      [:span {:class "help"} "The initial status of the Qualification type."]]
-    [:select {:ng-model "QualificationType.QualificationTypeStatus"}
-
+    [:select {:ng-model (:QualificationTypeStatus QualificationType)}
      [:option {:value "Active"} "Active"]
      [:option {:value "Inactive"} "Inactive"]]]
    [:label.block
@@ -133,14 +135,14 @@
       [:code "Auto Granted"]
       " is checked."]]
     [:span [:i "Not yet implemented."]]]
-   [:label.block {:ng-show "QualificationType.Test"}
+   [:label.block {:ng-show (:Test QualificationType)}
     [:div
      [:b "Test Duration"]
      [:span {:class "help"}
       "The amount of time the Worker has to complete the Qualification test, starting from the time the Worker requests the Qualification. Required if the Test parameter is specified."]]
     [:input {:type "text"
-             :ng-model "QualificationType.TestDuration"}]]
-   [:label.block {:ng-show "QualificationType.Test"}
+             :ng-model (:TestDuration QualificationType)}]]
+   [:label.block {:ng-show (:Test QualificationType)}
     [:div
      [:b "AnswerKey"]
      [:span {:class "help"}
@@ -149,18 +151,19 @@
    [:label.block
     [:div
      [:input {:type "checkbox"
-              :ng-model "QualificationType.AutoGranted"
+              :ng-model (:AutoGranted QualificationType)
               :ng-true-value "1"
               :ng-false-value "0"}]
      [:b "Auto Granted"]
      [:span {:class "help"}
       "Specifies whether requests for the Qualification type are granted immediately, without prompting the Worker with a Qualification test."]]]
-   [:label.block {:ng-show "QualificationType.AutoGranted"}
-    [:div
-     [:b "Auto Granted Value"]
-     [:span {:class "help"}
-      "The Qualification value to use for automatically granted Qualifications."]]
-    [:input {:ng-model "QualificationType.AutoGrantedValue"}]]])
+   (when (:AutoGranted QualificationType)
+     [:label.block
+      [:div
+       [:b "Auto Granted Value"]
+       [:span {:class "help"}
+        "The Qualification value to use for automatically granted Qualifications."]]
+      [:input {:ng-model (:AutoGrantedValue QualificationType)}]])])
 
 (rum/defc QualificationTypeNew
   []
@@ -170,6 +173,10 @@
     [:form {:ng-submit "sync($event)"}
      [:ng-include {:src "'/ui/admin/mturk/qualification_types/form.html'"}]
      [:div.block [:button "Submit"]]]]])
+
+(defn deleteQualification
+  [Qualification]
+  (println "TODO: actually delete qualification" Qualification))
 
 (rum/defc QualificationTypeOne
   [QualificationType qualifications]
@@ -186,7 +193,12 @@
    [:section.box
     [:table.fill.padded.striped.lined
      [:thead
-      [:tr [:th "Subject Id"] [:th "Grant Time"] [:th "Integer Value"] [:th "Status"] [:th]]]
+      [:tr
+       [:th "Subject Id"]
+       [:th "Grant Time"]
+       [:th "Integer Value"]
+       [:th "Status"]
+       [:th]]]
      [:tbody
       (for [Qualification qualifications]
         [:tr
@@ -194,20 +206,20 @@
          [:td [:DateTime {:date (:GrantTime Qualification)}]]
          [:td (:IntegerValue Qualification)]
          [:td (:Status Qualification)]
-         [:td [:button {:ng-click "deleteQualification(Qualification)"} "Delete"]]])]]]
+         [:td [:button {:on-click (fn [_] (deleteQualification Qualification))} "Delete"]]])]]]
    [:section.hpad
     [:h3 "Assign Qualification"]
     [:form {:ng-submit "assignQualification($event)"}
      [:label
       [:div [:b "WorkerId"]]
-      [:input {:ng-model "$storage.AssignQualification.WorkerId"}]]
+      [:input {:ng-model (-> $storage :AssignQualification :WorkerId)}]]
      [:label
       [:div [:b "Value"]]
       [:input {:type "number"
-               :ng-model "$storage.AssignQualification.IntegerValue"}]]
+               :ng-model (-> $storage :AssignQualification :IntegerValue)}]]
      [:label
       [:div
        [:input {:type "checkbox"
-                :ng-model "$storage.AssignQualification.SendNotification"}]
+                :ng-model (-> $storage :AssignQualification :SendNotification)}]
        [:b "Send Notification"]]]
      [:button "Submit"]]]])

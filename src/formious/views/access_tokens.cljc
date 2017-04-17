@@ -1,6 +1,6 @@
 (ns formious.views.access-tokens
   (:require [rum.core :as rum]
-            [formious.views.common :refer [css-classes datetime table]]
+            [formious.views.common :refer [css-classes datetime table-container]]
             [formious.common :refer [path-for ->iso]]))
 
 (defn- delete
@@ -16,32 +16,32 @@
    children])
 
 (defn- edit
-  [access_token]
+  [{:keys [id token relation foreign_id expires redacted created] :as access_token}]
   [:form.hpad {:ng-submit "sync($event)"}
    [:label.block
     [:div [:b "Token"]]
     [:input {:type "text"
-             :default-value (:token access_token)
+             :default-value token
              :style {:width "100%"}}]]
    [:label.block
     [:div [:b "Relation"]]
     [:input {:type "text"
-             :default-value (:relation access_token)
+             :default-value relation
              :style {:width "100%"}}]]
    [:label.block
     [:div [:b "Foreign ID"]]
     [:input {:type "text"
-             :default-value (:foreign_id access_token)
+             :default-value foreign_id
              :style {:width "100%"}}]]
    [:label.block
     [:div [:b "Expires"]]
-    [:time (->iso (:expires access_token))]]
+    (datetime expires)]
    [:label.block
     [:div [:b "Redacted"]]
-    [:time (->iso (:redacted access_token))]]
+    (datetime redacted)]
    [:label.block
     [:div [:b "Created"]]
-    [:time (->iso (:created access_token))]]
+    (datetime created)]
    [:div.block [:button "Save"]]])
 
 (def columns ["ID" "Token" "Relation / Foreign ID" "Expires" "Redacted" "Created" ""])
@@ -59,9 +59,11 @@
 (rum/defc access-tokens
   [access_tokens]
   (layout
-   [:div
-    [:section.hpad [:h3 "Access Tokens"]]
-    [:section.box (table access_tokens columns cells (:default-table css-classes))]]))
+   (table-container "Access Tokens" access_tokens columns cells (:default-table css-classes))))
+
+(rum/defc access-tokens-reactive < rum/reactive
+  [access_tokens-atom]
+  (access-tokens (rum/react access_tokens-atom)))
 
 (rum/defc access-token
   [access_token]

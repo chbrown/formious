@@ -1,14 +1,14 @@
 (ns formious.views.aws-accounts
-  (:require [rum.core :as rum]))
+  (:require [rum.core :as rum]
+            [formious.views.common :refer [css-classes datetime table-container]]
+            [formious.common :refer [path-for ->iso]]))
 
-(rum/defc AWSAccountsLayout
+(defn layout
   [children]
   [:div
    [:nav.sub.fixedflow
-    [:a.tab {:ui-sref "admin.aws_accounts.table"}
-     "List AWS Accounts"]
-    [:a.tab {:ui-sref "admin.aws_accounts.edit({id: 'new'})"}
-     "New AWS Account"]]
+    [:a.tab {:href (path-for :admin-aws-accounts)} "List AWS Accounts"]
+    [:a.tab {:href (path-for :admin-aws-account :id "new")} "New AWS Account"]]
    children])
 
 ; .controller('admin.aws_accounts.table', function($scope, AWSAccount) {
@@ -20,29 +20,24 @@
 ;   };
 ; })
 
-(rum/defc AWSAccountsTable
+(defn- delete
+  [id]
+  (println "TODO: actually delete aws_account #" id))
+
+(def columns ["Name" "Access Key ID" "Secret Access Key" "Created" ""])
+
+(defn cells
+  [{:keys [id name access_key_id secret_access_key created]}]
+  [[:a {:href (path-for :admin-aws-account :id id)} name]
+   access_key_id
+   secret_access_key
+   (datetime created :date)
+   [:button {:on-click (fn [_] (delete id))} "Delete"]])
+
+(rum/defc aws-accounts
   [aws_accounts]
-  [:div
-   [:section.hpad [:h3 "AWS Accounts"]]
-   [:section.box
-    [:table.fill.padded.striped.lined
-     [:thead
-      [:tr
-       [:th "Name"]
-       [:th "Access Key ID"]
-       [:th "Secret Access Key"]
-       [:th "Created"]
-       [:th]]]
-     [:tbody
-      (for [aws_account aws_accounts]
-        [:tr
-         [:td
-          [:a {:ui-sref "admin.aws_accounts.edit({id: aws_account.id})"}
-           (:name aws_account)]]
-         [:td (:access_key_id aws_account)]
-         [:td (:secret_access_key aws_account)]
-         [:td [:DateTime {:date (:created aws_account)}]]
-         [:td [:button {:ng-click "delete(aws_account)"} "Delete"]]])]]]])
+  (layout
+   (table-container "AWS Accounts" aws_accounts columns cells (:default-table css-classes))))
 
 ; .controller('admin.aws_accounts.edit', function($scope, $http, $turk, $stateParams, AWSAccount) {
 ;   $scope.aws_account = AWSAccount.get($stateParams);
@@ -55,7 +50,7 @@
 ;   $scope.$on('save', $scope.sync);
 ; });
 
-(rum/defc AWSAccountsEdit
+(rum/defc aws-account
   [aws_account]
   [:div
    [:section.hpad [:h3 "AWS Account: " (:name aws_account)]]
@@ -64,18 +59,18 @@
      [:label.block
       [:div [:b "Name"]]
       [:input {:type "text"
-               :ng-model "aws_account.name"}]]
+               :default-value (:name aws_account)}]]
      [:label.block
       [:div [:b "Access Key ID"]]
       [:input {:type "text"
-               :ng-model "aws_account.access_key_id"
+               :default-value (:access_key_id aws_account)
                :style {:width "400px"}}]]
      [:label.block
       [:div [:b "Secret Access Key"]]
       [:input {:type "text"
-               :ng-model "aws_account.secret_access_key"
+               :default-value (:secret_access_key aws_account)
                :style {:width "400px"}}]]
      [:label.block
       [:div [:b "Created"]]
-      [:DateTime {:date (:created aws_account)}]]
+      (datetime (:created aws_account) :date)]
      [:div.block [:button "Save"]]]]])

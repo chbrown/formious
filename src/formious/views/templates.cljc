@@ -34,6 +34,15 @@
   ; });
   (println "TODO: actually copy template #" id))
 
+(defn template-link
+  [templates id]
+  ; const {id} = this.props;
+  ; fetch(`/api/templates/${id}`).then(template => {
+  ;   this.setState({template});
+  ; });
+  (let [template (->> templates (filter #(= (:id %) id)) first)]
+    [:a {:href (path-for :admin-template :id id)} (:name template)]))
+
 (defn- layout
   [children]
   [:div

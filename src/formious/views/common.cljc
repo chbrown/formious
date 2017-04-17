@@ -9,6 +9,15 @@
   #?(:clj event
      :cljs (.. ^js/Event event -target -value)))
 
+(rum/defc not-found
+  [path]
+  [:div
+   [:h3 "Not Found!"]
+   [:p "Could not find route for path:"]
+   [:code.hpad path]
+   [:p
+    [:a {:href "javascript:back"} "back"]]])
+
 (rum/defc admin-layout
   [children]
   [:html
@@ -134,12 +143,20 @@
      [:p
       [:button "Login"]]]]])
 
+(defn keyval-table
+  [m]
+  [:table.keyval
+   [:tbody
+    (for [[k v] m]
+      [:tr [:td k] [:td v]])]])
+
 (def css-classes {:default-table "fill padded striped lined"})
 
+; (rum/defc datetime < rum/static
 (defn datetime
   "Create a <time> element with full datetime attribute and potentially shortened text content"
   [instant & options]
-  [:time {:datetime (->iso instant)} (apply ->iso instant options)])
+  [:time {:dateTime (->iso instant)} (apply ->iso instant options)])
 
 (defn table
   "Create a <table> element with thead built from columns and tbody built from rows and cells-fn"
@@ -154,3 +171,9 @@
       [:tr
        (for [cell (cells-fn row)]
          [:td cell])])]])
+
+(defn table-container
+  [title rows columns cells-fn & classes]
+  [:div
+   [:section.hpad [:h3 title]]
+   [:section.box (apply table rows columns cells-fn classes)]])

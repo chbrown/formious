@@ -1,31 +1,37 @@
 (ns formious.views.administrators
   (:require [rum.core :as rum]
+            [formious.views.common :refer [css-classes datetime table table-container]]
             [formious.common :refer [path-for ->iso]]))
 
-(rum/defc AdministratorsLayout
+(defn layout
   [children]
   [:div
    [:nav.sub.fixedflow
-    [:NavLink {:to "/administrators"} "List administrators"]
-    [:NavLink {:to "/administrators/new"} "New administrator"]]
+    [:a {:href (path-for :admin-administrators)} "List administrators"]
+    [:a {:href (path-for :admin-administrator :id "new")} "New administrator"]]
    children])
+
+(defn- delete
+  [id]
+  (println "TODO: actually delete administrator #" id))
+
+(def administrators-columns ["ID" "Email" "Created" ""])
+(defn administrators-cells
+  [{:keys [id email created]}]
+  [id
+   [:a {:href (str "/admin/administrators/" id)} email]
+   (datetime created)
+   [:button {:on-click (fn [e] (delete id))} "Delete"]])
 
 (rum/defc AdministratorsTable
   [administrators]
-  [:div
-   [:section.hpad [:h3 "Administrators"]]
-   [:section.box
-    [:table.striped.lined.padded
-     [:thead [:tr [:th "ID"] [:th "Email"] [:th "Created"] [:th]]]
-     [:tbody
-      (for [administrator administrators]
-        [:tr {:key (:id administrator)}
-         [:td (:id administrator)]
-         [:td
-          [:Link {:href (str "/admin/administrators/" (:id administrator) "")}
-           (:email administrator)]]
-         [:td [:DateTime {:date (:created administrator)}]]
-         [:td [:button {:ng-click "delete(administrator)"} "Delete"]]])]]]])
+  (layout
+   (table-container "Administrators" administrators
+                    administrators-columns administrators-cells (:default-table css-classes))))
+
+(defn- save
+  [administrator]
+  (println "TODO: actually save administrator" administrator))
 
 (defn- linkAWSAccount
   [account]
@@ -39,12 +45,25 @@
   ; NotifyUI.addPromise(promise);
   (println "TODO: actually link account" account))
 
+(defn- unlinkAWSAccount
+  [id]
+  (println "TODO: actually unlink account #" id))
+
+(def accounts-columns ["Name" "Access Key ID" "Priority" "Created" ""])
+(defn accounts-cells
+  [{:keys [id name access_key_id priority created] :as aws_account}]
+  [[:a {:href (path-for :admin-aws-account :id id)} name]
+   access_key_id
+   priority
+   (datetime created :date)
+   [:button {:on-click (fn [e] (unlinkAWSAccount id))} "Disown"]])
+
 (rum/defc AdministratorsEdit
   [administrator administrator_aws_accounts aws_accounts new_account]
   [:div
    [:section.hpad [:h3 "Administrator"]]
    [:section.hpad.box
-    [:form {:ng-submit "sync($event)"}
+    [:form {:on-submit (fn [e] (save administrator))}
      [:label.block
       [:div [:b "Email"]]
       [:input {:type "text"
@@ -63,24 +82,7 @@
      [:div.block [:button "Save"]]]]
    [:section.hpad [:h3 "AWS Accounts"]]
    [:section.hpad.box
-    [:table.lined
-     [:thead
-      [:tr
-       [:th "Name"]
-       [:th "Access Key ID"]
-       [:th "Priority"]
-       [:th "Created"]
-       [:th]]]
-     [:tbody
-      (for [aws_account administrator_aws_accounts]
-        [:tr
-         [:td
-          [:a {:href (path-for :aws_account :id (:id aws_account))}
-           (:name aws_account)]]
-         [:td (:access_key_id aws_account)]
-         [:td (:priority aws_account)]
-         [:td [:DateTime {:date (:created aws_account)}]]
-         [:td [:button {:ng-click "unlinkAWSAccount(aws_account)"} "Disown"]]])]]
+    (table aws_accounts accounts-columns accounts-cells "lined")
     [:p
      [:select {:default-value (:aws_account_id new_account)}
       (for [aws_account aws_accounts]

@@ -24,10 +24,8 @@
   [children]
   [:div
    [:nav.sub.fixed-flow
-    [:a.tab {:href (path-for :experiments)}
-     "List experiments"]
-    [:a.tab {:href (path-for :experiments :id "new")}
-     "New experiment"]]
+    [:a.tab {:href (path-for :experiments)} "List experiments"]
+    [:a.tab {:href (path-for :experiments :id "new")} "New experiment"]]
    children])
 
 (rum/defc ExperimentsTable
