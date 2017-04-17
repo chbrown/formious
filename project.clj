@@ -61,12 +61,12 @@
                            :output-dir "resources/public/build/out" ; for temporary/intermediate files only
                            :preloads [devtools.preload]
                            :optimizations :none}}]}
-  :figwheel {:ring-handler formious.server/handler
+  :figwheel {:ring-handler formious.server/reloadable-handler
              :server-port 1451
              :server-ip "127.0.0.1"
              :css-dirs ["resources/public/build"]
              :server-logfile "/tmp/formious-figwheel.log"}
-  :ring {:handler formious.server/handler
+  :ring {:handler formious.server/reloadable-handler
          :port 1451
          :open-browser? false}
   :main formious.server
