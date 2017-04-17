@@ -10,6 +10,7 @@
              [mturk :as mturk]
              [experiments :as root-experiments]]
             [formious.routes :as routes]
+            [formious.views.common :refer [admin-layout]]
             [formious.views.templates :as templates-views]
             [formious.middleware.logging :refer [wrap-server-header wrap-checkpoints wrap-logging]]
             [ring.middleware.data.json :refer [wrap-json-request wrap-json-response]]
@@ -61,8 +62,8 @@
   ::routes/admin-mturk-qualification-type-new nil
   ::routes/admin-mturk-qualification-types nil
   ::routes/admin-responses nil
-  ::routes/admin-template #(admin/run % [templates-views/template] [resources/template])
-  ::routes/admin-templates #(admin/run % [templates-views/templates] [resources/templates])
+  ::routes/admin-template #(admin/run % (comp admin-layout templates-views/template) [resources/template])
+  ::routes/admin-templates #(admin/run % (comp admin-layout templates-views/templates) [resources/templates])
   ; api-routes
   ::routes/api-access-tokens  #(run resources/access-tokens  %)
   ::routes/api-access-token   #(run resources/access-token   %)

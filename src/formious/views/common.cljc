@@ -19,7 +19,7 @@
   (.. event -target -value))
 
 (rum/defc admin-layout
-  []
+  [children]
   [:html
    [:head
     [:meta {:charset "UTF-8"}]
@@ -27,7 +27,7 @@
     [:link {:href "/favicon.png" :rel "icon" :type "image/png"}]
     [:link {:href "/build/site.css" :rel "stylesheet" :type "text/css"}]]
    [:body.admin
-    [:div {:id "app"}]
+    [:div {:id "app"} children]
     [:script {:src "/build/bundle.js"}]]])
 
 (rum/defc block-layout

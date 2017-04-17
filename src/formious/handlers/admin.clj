@@ -11,9 +11,9 @@
 ;       (response/content-type "text/html")))
 
 (defn run
-  [request component-fns resource-maps]
+  [request component-fn resource-maps]
   (let [resources (map #(run-raw request %) resource-maps)]
-    (-> (reduce (fn [args component-fn] (apply component-fn args)) resources (reverse component-fns))
+    (-> (apply component-fn resources)
         (render-html-with-doctype)
         (response)
         (content-type "text/html"))))
