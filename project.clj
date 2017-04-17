@@ -39,9 +39,11 @@
                  [cljs-http "0.1.42"]]
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-figwheel "0.5.9" :exclusions [org.clojure/clojure]]]
-  ; :clean-targets ^{:protect false} [:target-path "resources/public/build/main.js" "resources/public/build/out"]
-  ; :production must be the first cljsbuild specified, since there is no way to select a cljsbuild by name
-  ; in the `lein (uber)jar` command
+  :clean-targets ^{:protect false} [:target-path
+                                    "resources/public/build/bundle.js"
+                                    "resources/public/build/out"]
+  ; :production must be the first cljsbuild specified, since there is
+  ; no way to select a build by name in the `lein (uber)jar` command
   :cljsbuild {:builds
               [{:id "production"
                 :source-paths ["src"]
