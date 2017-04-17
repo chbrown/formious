@@ -133,3 +133,24 @@
                :style {:width "100%"}}]]
      [:p
       [:button "Login"]]]]])
+
+(def css-classes {:default-table "fill padded striped lined"})
+
+(defn datetime
+  "Create a <time> element with full datetime attribute and potentially shortened text content"
+  [instant & options]
+  [:time {:datetime (->iso instant)} (apply ->iso instant options)])
+
+(defn table
+  "Create a <table> element with thead built from columns and tbody built from rows and cells-fn"
+  [rows columns cells-fn & classes]
+  [:table {:class classes}
+   [:thead
+    [:tr
+     (for [column columns]
+       [:th column])]]
+   [:tbody
+    (for [row rows]
+      [:tr
+       (for [cell (cells-fn row)]
+         [:td cell])])]])
