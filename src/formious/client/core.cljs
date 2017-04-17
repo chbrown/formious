@@ -5,6 +5,7 @@
             [cljs.core.async :refer [<!]]
             [cljs-http.client :as http]
             [formious.client.common :refer [full-location parse-json any-modKey?]]
+            [formious.client.state :refer [app-state]]
             [formious.routes :as routes]
             [formious.views.experiments :as experiments]
             ; [formious.views [experiments :as experiments]] ; apparently not supported by CLJS
@@ -20,25 +21,6 @@
 
 (defonce root-element (js/document.getElementById "app"))
 
-(defn- not-found-component []
-  [:div
-   [:h3 "Could not find route"]
-   [:ul
-    [:li [:a {:href "javascript:back"} "back"]]]])
-
-(defn not-found-route [params]
-  {:component not-found-component
-   :load! (fn [] nil)})
-
-(rum/defc app [path]
-  [:div
-   [:h1 "Hello this is formious"]
-   [:p "Your location is: "
-    [:code path]]])
-
-(defonce app-state (atom {:route nil
-                          :text "Hello world!"}))
-
 (defn fetch-experiments
   []
   (when (nil? (:experiments @app-state))
@@ -48,8 +30,9 @@
              (swap! app-state assoc :experiments)))))
 
 ; mapping from routes to [component update-state-fn!]
-(def route->component
-  {::routes/layout [#(experiments/ExperimentsTable (:experiments @app-state)) fetch-experiments]})
+(def route->component {
+  ::routes/layout [#(experiments/ExperimentsTable (:experiments @app-state)) fetch-experiments]
+})
 
 (defn render! []
   ; (println "full-location" (full-location) "router" )
