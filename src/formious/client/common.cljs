@@ -49,7 +49,7 @@
     (if error
       (callback error)
       ; send excel data off to the server to parse
-      (let [xhr (doto (XMLHttpRequest.)
+      (let [xhr (doto (js/XMLHttpRequest.)
                       (.open "POST" "/util/parse-table")
                       (.setRequestHeader "Content-Type" file.type)
                       (.setRequestHeader "X-Filename" file.name))]
@@ -57,7 +57,7 @@
         (set! (.-onload xhr)
               (fn []
                 (if (>= (.-status xhr) 300)
-                  (callback (Error. (.-responseText xhr)))
+                  (callback (js/Error. (.-responseText xhr)))
                   (let [text (.-responseText xhr)
                         content_type (.getResponseHeader xhr "content-type")
                         body (if (str/includes? content_type "application/json") (parse-json text) text)]
