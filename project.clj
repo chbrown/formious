@@ -36,7 +36,8 @@
                  [rum "0.10.8"]
                  [cljs-http "0.1.42"]]
   :plugins [[lein-cljsbuild "1.1.5"]
-            [lein-figwheel "0.5.9" :exclusions [org.clojure/clojure]]]
+            [lein-ring "0.11.0"]
+            [lein-figwheel "0.5.10" :exclusions [org.clojure/clojure]]]
   :clean-targets ^{:protect false} [:target-path
                                     "resources/public/build/bundle.js"
                                     "resources/public/build/out"]
