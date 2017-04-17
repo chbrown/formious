@@ -20,6 +20,32 @@
   [m k f & args]
   (if (contains? m k) (apply update m k f args) m))
 
+(defn update-in-when
+  "Like (update-in m ks f & args) but only calls f and sets the value if (get-in m ks) is not nil"
+  [m [k & ks] f & args]
+  (if (contains? m k)
+    ; alright, we haven't hit a dead end yet...
+    (if ks
+      ; there's more keys to dig into: keep recursing
+      (assoc m k (apply update-in-when (get m k) ks f args))
+      ; we're at the leaf to change: update it
+      (assoc m k (apply f (get m k) args)))
+    ; there's nothing to update: stop
+    m))
+
+(defn assoc-in-when
+  "Like (assoc-in m ks v) but only uses v if (get-in m ks) is not nil"
+  [m [k & ks] v]
+  (if (contains? m k)
+    ; alright, we haven't hit a dead end yet...
+    (if ks
+      ; there's more keys to dig into: keep recursing
+      (assoc m k (assoc-in-when (get m k) ks v))
+      ; we're at the leaf to change: set it
+      (assoc m k v))
+    ; there's nothing to update: stop
+    m))
+
 (defn map-kv
   "Create a new hash by calling (f v) for all kv pairs in m"
   [f m]
