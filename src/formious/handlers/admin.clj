@@ -1,24 +1,19 @@
 (ns formious.handlers.admin
-  (:require [clojure.string :as str]
-            [rum.core :as rum]
-            [formious.views.common :refer [render-html-with-doctype admin-layout]]
-            [formious.views.templates :as templates-views]
-            [formious.resources :refer [run run-raw template]]
-            [liberator.core :refer [run-resource]]
-            [ring.util.response :refer [not-found redirect response content-type status]]))
-
-; (def admin-layout-html (render-page (admin-layout)))
+  (:require [formious.views.common :refer [render-static-markup-with-doctype render-html-with-doctype admin-layout]]
+            [formious.resources :refer [run-raw]]
+            [ring.util.response :refer [response content-type]]))
 
 ; ::routes/layout root/generate-layout
 ; (defn generate-layout
 ;   [request]
-;   (-> (response admin-layout-html)
+;   (-> (render-static-markup-with-doctype (admin-layout))
+;       (response)
 ;       (response/content-type "text/html")))
 
-(defn render-admin-template
-  [request]
-  (-> (run-raw request template)
-      (templates-views/template)
-      (render-html-with-doctype)
-      (response)
-      (content-type "text/html")))
+(defn run
+  [request component-fns resource-maps]
+  (let [resources (map #(run-raw request %) resource-maps)]
+    (-> (reduce (fn [args component-fn] (apply component-fn args)) resources (reverse component-fns))
+        (render-html-with-doctype)
+        (response)
+        (content-type "text/html"))))
