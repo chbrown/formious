@@ -132,12 +132,13 @@
 
 (defn- Instant->iso
   [instant]
-  #?(:clj (.toString ^java.time.Instant instant)
-     :cljs (.toISOString ^js/Date instant)))
+  (when instant
+    #?(:clj (.toString ^java.time.Instant instant)
+       :cljs (.toISOString ^js/Date instant))))
 
 (defn ->iso
   [d & [option]]
-  (let [iso-string (-> d ->Instant Instant->iso)]
+  (when-let [iso-string (-> d ->Instant Instant->iso)]
     (case option
       :date (subs iso-string 0 10)
       :time (subs iso-string 11 19)
