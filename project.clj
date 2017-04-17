@@ -1,5 +1,4 @@
-; project.clj documentation: https://github.com/technomancy/leiningen/blob/master/sample.project.clj
-(defproject formious/app "0.4.0-SNAPSHOT"
+(defproject formious/formious "0.4.0-SNAPSHOT"
   :description "Experiment Server"
   ; "keywords": ["forms", "surveys"],
   ; "homepage": "https://github.com/chbrown/formious",
