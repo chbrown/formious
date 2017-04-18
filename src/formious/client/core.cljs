@@ -1,15 +1,19 @@
 (ns formious.client.core
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [clojure.string :as str]
-            [bidi.bidi :refer [match-route path-for]]
             [cljs.core.async :refer [<!]]
             [cljs-http.client :as http]
+            [formious.common :refer [match-route path-for]]
             [formious.client.common :refer [full-location parse-json any-modKey?]]
             [formious.client.state :refer [app-state]]
             [formious.routes :as routes]
+            [formious.views.common :refer [not-found]]
+            [formious.views.access-tokens :as access-tokens]
             [formious.views.experiments :as experiments]
             ; [formious.views [experiments :as experiments]] ; apparently not supported by CLJS
             [rum.core :as rum]))
+
+(enable-console-print!)
 
 ;; for dev:
 ; (require '[clojure.pprint :refer [pprint]])
@@ -17,40 +21,38 @@
 ;; and:
 ; (in-ns 'formious.client.core)
 
-(enable-console-print!)
+(def route-state (rum/cursor-in app-state [:route]))
 
 (defonce root-element (js/document.getElementById "app"))
 
-(defn fetch-experiments
-  []
-  (when (nil? (:experiments @app-state))
-    (swap! app-state assoc :experiments [])
-    (go (->> (<! (http/get "/api/experiments"))
-             :body
-             (swap! app-state assoc :experiments)))))
+(defn get-and-reset!
+  [url state-cursor]
+  (go (->> (<! (http/get url))
+           :body
+           (reset! state-cursor))))
 
-; mapping from routes to [component update-state-fn!]
+; mapping from routes (qualified keyword endpoints) to [component update-state-fn!] tuples
 (def route->component {
-  ::routes/layout [#(experiments/ExperimentsTable (:experiments @app-state)) fetch-experiments]
+  ::routes/admin-access-tokens (let [access-tokens-atom (rum/cursor-in app-state [:access-tokens])]
+                                 [#(access-tokens/access-tokens-reactive access-tokens-atom)
+                                  #(get-and-reset! "/api/access-tokens" access-tokens-atom)])
 })
 
-(defn render! []
-  ; (println "full-location" (full-location) "router" )
-  (let [route (:route @app-state)
-        [component update-state!] (route->component (:handler route))]
-        ; {:keys [handler route-params]} (bidi/match-route routes path)
-        ; {:keys [component load!]} (handler route-params)]
-    (println "rendering route" route)
-    ; (println "with state" @app-state)
-    (update-state!)
-    (rum/mount (component) root-element)))
-    ; (println "render!" "..." (:route-params route)) ; (:handler route)
+(defn render!
+  "Main attachment point; calls rum/mount"
+  []
+  (println "render! full-location:" (full-location))
+  (if-let [{:keys [handler route-params]} (:route @app-state)]
+    (let [[component-fn update-state!] (route->component handler)]
+      (println "rendering handler" handler "with route-params" route-params) ; "and state" @app-state
+      (update-state!)
+      (rum/mount (component-fn) root-element))
+    (rum/mount (not-found (full-location)) root-element)))
 
-(defn set-location
-  "set-location is called once at root level, on (specific) document 'click' events, and 'popstate' events"
+(defn set-location!
+  "This is called once at root level, then on (specific) document 'click' events and 'popstate' events"
   [path]
-  (let [route (match-route routes/routes path)]
-    (swap! app-state assoc :route route)))
+  (swap! app-state assoc :route (match-route path)))
 
 (defn document-click
   "Listener for all document clicks that filters out all non-inbound/in-app link clicks"
@@ -58,7 +60,7 @@
   (let [el (.-target e)
         href (.getAttribute el "href")
         path (.-pathname el) ; (-> path Uri.parse .getPath)
-        route (match-route routes/routes path)]
+        route (match-route path)]
     ; only intercept...
     (when (and
            (= (.-tagName el) "A") ; anchor elements
@@ -69,16 +71,21 @@
            (= (.-button e) 0) ; left mouse button
            (some? route)) ; goes to some route we handle
       (js/history.pushState nil "" path)
-      (set-location path)
+      (set-location! path)
       (.preventDefault e))))
+
+(defn route-state-watch-fn
+  [key reference old-state new-state]
+  (println "route-state-watch-fn" key old-state new-state)
+  (render!))
 
 (defn init! []
   (println "init!")
-  (set-location (full-location))
+  (set-location! (full-location))
   (js/document.addEventListener "click" document-click)
-  (js/window.addEventListener "popstate" #(set-location (full-location)))
-  ; (add-watch app-state :on-change (fn [_ _ _ _] (println "app-state changed!" @app-state)))
-  (add-watch app-state :on-change (fn [_ _ _ _] (render!)))
+  (js/window.addEventListener "popstate" #(set-location! (full-location)))
+  ; > The watch fn must be a fn of 4 args: a key, the reference, its old-state, its new-state
+  (add-watch route-state :on-change route-state-watch-fn)
   (render!))
 
 (defn figwheel-on-jsload!
