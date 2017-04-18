@@ -60,15 +60,15 @@
                            :output-dir "resources/public/build/out" ; for temporary/intermediate files only
                            :preloads [devtools.preload]
                            :optimizations :none}}]}
-  :figwheel {:ring-handler formious.server/reloadable-handler
+  :figwheel {:ring-handler formious.server.core/reloadable-handler
              :server-port 1451
              :server-ip "127.0.0.1"
              :css-dirs ["resources/public/build"]
              :server-logfile "/tmp/formious-figwheel.log"}
-  :ring {:handler formious.server/reloadable-handler
+  :ring {:handler formious.server.core/reloadable-handler
          :port 1451
          :open-browser? false}
-  :main formious.server
+  :main formious.server.core
   :profiles {:dev {:dependencies [[binaryage/devtools "0.9.3"]
                                   [figwheel-sidecar "0.5.10"]
                                   [com.cemerick/piggieback "0.2.1"]

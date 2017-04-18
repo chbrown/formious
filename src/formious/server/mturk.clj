@@ -1,4 +1,4 @@
-(ns formious.mturk
+(ns formious.server.mturk
   (:require [clojure.set :as set]
             [formious.common :refer [map-kv]]
             [http.async.client :as http])

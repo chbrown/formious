@@ -1,4 +1,4 @@
-(ns formious.middleware.logging
+(ns formious.server.middleware
   (:require [formious.routes :as routes]
             [formious.common :as common]
             [clojure.tools.logging :as log]

@@ -1,11 +1,9 @@
-(ns formious.handlers.root
+(ns formious.server.handlers.root
   (:require [formious.db.access-token :as AccessToken]
             [formious.db.administrator :as Administrator]
             [formious.db.participant :as Participant]
             [formious.db.response :as Response]
-            [formious.excel :as excel]
-            [formious.csv :as csv]
-            [formious.handlers.common :refer [content-type-if-known]]
+            [formious.server.common :refer [content-type-if-known]]
             [clojure.data.json :as json]
             [clojure.java.io :as io]
             [clojure.tools.logging :as log]
@@ -63,18 +61,6 @@
       ; we serve the login page from GET as well as failed login POSTs
       {:status 403
        :body "You must login first"})))
-
-(defn parse-table
-  "Parse tabular input flexibly and write out json to response"
-  ; Header("Content-Type", "application/json"))
-  [request]
-  (case (request/content-type request)
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      (-> request :body excel/first-sheet-as-maps)
-    "application/json"
-      (-> request :body (json/read-str :key-fn keyword) seq)
-    ; default: csv
-    (-> request :body io/reader csv/as-maps)))
 
 (defn mturk-submit
   "This is a testing filler for the MTurk production / sandbox final POST, which

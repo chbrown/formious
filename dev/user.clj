@@ -3,7 +3,7 @@
             [bidi.bidi :as bidi]
             [formious.common :as common]
             [formious.routes :as routes]
-            [formious.mturk :as mturk]
+            [formious.server.mturk :as mturk]
             [clojure.tools.namespace.repl :refer [refresh refresh-all]]))
 
 (println "⭐ Loading /dev/user⭐")

@@ -1,4 +1,4 @@
-(ns formious.resources
+(ns formious.server.resources
   (:require [formious.db.common :refer [->long]]
             [formious.db
              [access-token :as AccessToken]

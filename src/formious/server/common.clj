@@ -1,4 +1,4 @@
-(ns formious.handlers.common
+(ns formious.server.common
   (:require [rum.core :as rum]
             [ring.util.mime-type :refer [ext-mime-type]]
             [ring.util.response :as response :refer [response]]))

@@ -1,19 +1,17 @@
-(ns formious.server
+(ns formious.server.core
   (:require [formious.db.common :refer [ZonedDateTime->String]]
-            ; api handlers
-            [formious.resources :as resources :refer [run]]
-            ; [formious.resources :refer [access-tokens administrators aws-accounts blocks experiments responses templates]]
-            ; root handlers
-            [formious.handlers
+            [formious.server.resources :as resources :refer [run]]
+            [formious.server.handlers
              [admin :as admin]
-             [root :as root]
+             [experiments :as root-experiments]
              [mturk :as mturk]
-             [experiments :as root-experiments]]
+             [root :as root]
+             [table :as table]]
             [formious.routes :as routes]
             [formious.views.common :refer [admin-layout]]
             [formious.views.access-tokens :as access-tokens-views]
             [formious.views.templates :as templates-views]
-            [formious.middleware.logging :refer [wrap-server-header wrap-checkpoints wrap-logging]]
+            [formious.server.middleware :refer [wrap-server-header wrap-checkpoints wrap-logging]]
             [ring.middleware.data.json :refer [wrap-json-request wrap-json-response]]
             [org.httpkit.server :refer [run-server]]
             [bidi.ring :refer [make-handler]]
@@ -92,7 +90,7 @@
   ::routes/responses root/export-responses
   ::routes/echo root/echo
   ::routes/info root/info
-  ::routes/parse-table root/parse-table
+  ::routes/parse-table table/parse-table
   ::routes/favicon root/favicon
   ::routes/file root/file
   ::routes/default root/catch-all})
@@ -132,7 +130,7 @@
   ; val port = opt[Int]("port", 'p', descr="port to listen on", default=Some(sys.env.getOrElse("PORT", "80").toInt))
   ([] (-main (or (System/getenv "PORT") "1451")))
   ([port]
-   (println "Starting server via formious.server/-main")
+   (println "Starting server via formious.server.core/-main")
    ; check for existence of LEIN_JAVA_CMD environment variable to distinguish between
    ; `lein run` calls and `java -jar *-standalone.jar` calls
    (println (str "Listening on :" port))

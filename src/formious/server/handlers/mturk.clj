@@ -1,5 +1,5 @@
-(ns formious.handlers.mturk
-  (:require [formious.mturk :as mturk]
+(ns formious.server.handlers.mturk
+  (:require [formious.server.mturk :as mturk]
             [formious.db.aws-account :as AWSAccount]))
 
 ; POST /api/mturk/GetAccountBalance?aws_account_id=number&environment=production|sandbox

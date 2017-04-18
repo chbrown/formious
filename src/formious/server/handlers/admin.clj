@@ -1,7 +1,7 @@
-(ns formious.handlers.admin
-  (:require [formious.handlers.common :refer [render-static-markup-with-doctype render-html-with-doctype html-response]]
+(ns formious.server.handlers.admin
+  (:require [formious.server.common :refer [render-static-markup-with-doctype render-html-with-doctype html-response]]
             [formious.views.common :refer [admin-layout]]
-            [formious.resources :refer [run-raw]]))
+            [formious.server.resources :refer [run-raw]]))
 
 ; ::routes/layout root/generate-layout
 ; (defn generate-layout
