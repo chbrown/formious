@@ -1,5 +1,6 @@
 (ns formious.db.aws-account
-  (:require [formious.db.common :as db :refer [now ->long]]))
+  (:require [formious.common :refer [now ->long]]
+            [formious.db.common :as db]))
 
 ; Int String String String ZonedDateTime
 (defrecord AWSAccount [id name access_key_id secret_access_key created])

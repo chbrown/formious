@@ -1,5 +1,6 @@
 (ns formious.db.participant
-  (:require [formious.db.common :as db :refer [now ->long]]))
+  (:require [formious.common :refer [->long]]
+            [formious.db.common :as db]))
 
 ; Int Option[String] Option[String] math.BigDecimal math.BigDecimal Option[String] Option[String] ZonedDateTime
 (defrecord Participant [id name aws_worker_id aws_bonus_owed aws_bonus_paid ip_address user_agent created])

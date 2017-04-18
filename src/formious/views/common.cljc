@@ -154,9 +154,17 @@
 
 ; (rum/defc datetime < rum/static
 (defn datetime
-  "Create a <time> element with full datetime attribute and potentially shortened text content"
-  [instant & options]
-  [:time {:dateTime (->iso instant)} (apply ->iso instant options)])
+  "Create a <time> element with full datetime attribute and potentially shortened text content.
+  Returns nil if date is nil."
+  [date & [option]]
+  (when-let [iso-string (some-> date ->iso)] ; Convert to an ISO-8601 string
+    [:time {:dateTime iso-string}
+     (case option
+       ; slice off the first 10 characters (the YYYY-MM-DD part)
+       :date (subs iso-string 0 10)
+       ; slice off the HH:MM:SS part
+       :time (subs iso-string 11 19)
+       iso-string)]))
 
 (defn table
   "Create a <table> element with thead built from columns and tbody built from rows and cells-fn"

@@ -1,5 +1,6 @@
 (ns formious.db.access-token
-  (:require [formious.db.common :as db :refer [now ->long]]))
+  (:require [formious.common :refer [now ->long]]
+            [formious.db.common :as db]))
 
 (def ^:private ALPHABET "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
 

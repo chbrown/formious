@@ -1,7 +1,7 @@
 (ns formious.views.access-tokens
   (:require [rum.core :as rum]
             [formious.views.common :refer [css-classes datetime table-container]]
-            [formious.common :refer [path-for ->iso]]))
+            [formious.common :refer [path-for]]))
 
 (defn- delete
   [id]

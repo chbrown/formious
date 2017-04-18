@@ -1,6 +1,7 @@
 (ns formious.db.experiment
   (:require [formious.db.access-token :as AccessToken]
-            [formious.db.common :as db :refer [now ->long]]))
+            [formious.common :refer [now ->long]]
+            [formious.db.common :as db]))
 
 ; Int String Int String ZonedDateTime
 (defrecord Experiment [id name administrator_id html created])

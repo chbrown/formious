@@ -1,5 +1,6 @@
 (ns formious.db.aws-account-administrator
-  (:require [formious.db.common :as db :refer [now ->long]]))
+  (:require [formious.common :refer [now ->long]]
+            [formious.db.common :as db]))
 
 ; Int Int Int Int ZonedDateTime
 (defrecord AWSAccountAdministrator [id aws_account_id administrator_id priority created])

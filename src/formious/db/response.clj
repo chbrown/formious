@@ -1,6 +1,7 @@
 (ns formious.db.response
   (:require [clojure.data.json :as json]
-            [formious.db.common :as db :refer [now ->long]]))
+            [formious.common :refer [->long]]
+            [formious.db.common :as db]))
 
 ; Int Int Int JsonObject Option[String] ZonedDateTime
 (defrecord Response [id participant_id block_id data assignment_id created])

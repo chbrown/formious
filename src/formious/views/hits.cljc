@@ -1,6 +1,6 @@
 (ns formious.views.hits
   (:require [rum.core :as rum]
-            [formious.common :refer [path-for ->iso]]
+            [formious.common :refer [path-for]]
             [formious.views.common :refer [css-classes datetime keyval-table]]))
 
 (def $storage {:todo "Pull this from global state"})

@@ -1,5 +1,5 @@
 (ns formious.server.resources
-  (:require [formious.db.common :refer [->long]]
+  (:require [formious.common :refer [->long]]
             [formious.db
              [access-token :as AccessToken]
              [administrator :as Administrator]

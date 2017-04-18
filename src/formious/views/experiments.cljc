@@ -1,7 +1,8 @@
 (ns formious.views.experiments
   (:require [rum.core :as rum]
             [formious.routes :as routes]
-            [formious.common :refer [path-for ->iso]]))
+            [formious.views.common :refer [datetime]]
+            [formious.common :refer [path-for]]))
 
 (defn- experiment-responses-path
   [experiment]
@@ -41,7 +42,7 @@
          [:td
           [:a {:href (path-for :experiment :id (:id experiment))}
            (:name experiment)]]
-         [:td (->iso (:created experiment) :date)]
+         [:td (datetime (:created experiment) :date)]
          [:td
           [:a {:href (path-for :administrator :id (:administrator_id experiment))}
            (->> administrators (filter #(= (:administrator_id experiment) (:id %))) first :email)]]

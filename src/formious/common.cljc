@@ -1,7 +1,6 @@
 (ns formious.common
   (:require [bidi.bidi :as bidi]
             [clojure.string :as str]
-            #?(:clj [clojure.instant :refer [parse-timestamp]])
             #?(:cljs [goog.net.cookies])
             [formious.routes :refer [routes]]))
 
@@ -105,44 +104,98 @@
         [root_blocks block_hash] (reduce build-blocks-tree-reducer [[] block_hash] all_blocks)]
     root_blocks))
 
+(defn no-matching-clause-error
+  "Generate error like that thrown by condp when no clause matches and no default expression is provided"
+  [value]
+  #?(:clj (java.lang.IllegalArgumentException. (str "No matching clause: " value))
+     :cljs (js/Error. (str "IllegalArgument: No matching clause: " number))))
+
+(defn ->long
+  "Convert to Long, parsing if needed"
+  [number]
+  #?(:clj (condp instance? number
+            Long number
+            Integer (long number)
+            String (Long/parseLong number))
+     :cljs (cond
+             (number? number) number
+             (string? number) (js/parseInt number 10)
+             ; throw to match condp behavior in :clj branch
+             :else (throw (no-matching-clause-error number)))))
+
 (defn now
-  "Return the current datetime as a java.time.Instant on the JVM, or a Date instance in JavaScript"
+  "Return the current datetime as a java.time.ZonedDateTime on the JVM, or a Date instance in JavaScript"
   []
-  #?(:clj (java.time.Instant/now)
+  #?(:clj (java.time.ZonedDateTime/now)
      :cljs (js/Date.)))
 
-(defn add-duration
-  "Add a duration (specified in milliseconds) to an Instant"
-  [instant milliseconds]
-  #?(:clj (.plusMillis ^java.time.Instant instant milliseconds)
-     :cljs (js/Date. (+ (.getTime instant) milliseconds))))
-
 (defn ->Instant
-  [x]
-  #?(:clj (condp instance? x
-            java.util.Date (.toInstant ^java.util.Date x)
-            java.sql.Timestamp (.toInstant ^java.sql.Timestamp x)
-            java.time.ZonedDateTime (.toInstant ^java.time.ZonedDateTime x)
-            String (parse-timestamp x)
-            x)
+  "In Clojure, coerce several types of Java dates to a java.time.Instant instance.
+  In ClojureScript, coerce to a js/Date instance.
+  Throws IllegalArgumentException if it doesn't recognize type of date."
+  [date]
+  #?(:clj (condp instance? date
+            java.time.Instant date
+            java.sql.Timestamp (.toInstant ^java.sql.Timestamp date)
+            java.util.Date (.toInstant ^java.util.Date date)
+            java.time.ZonedDateTime (.toInstant ^java.time.ZonedDateTime date)
+            String (java.time.Instant/parse date))
      :cljs (cond
-             (instance? js/Date x) x
-             (string? x) (js/Date. x)
-             :else x)))
+             (instance? js/Date date) date
+             (string? date) (js/Date. date)
+             ; throw to match condp behavior in :clj branch
+             :else (throw (no-matching-clause-error date)))))
 
-(defn- Instant->iso
-  [instant]
-  (when instant
-    #?(:clj (.toString ^java.time.Instant instant)
-       :cljs (.toISOString ^js/Date instant))))
+(defn ->ZonedDateTime
+  "Coerce several types of Java dates to a java.time.ZonedDateTime instance (no-op in CLJS).
+  Throws IllegalArgumentException if it doesn't recognize type of date."
+  [date]
+  #?(:clj (condp instance? date
+            java.time.ZonedDateTime date
+            ; TODO: verify that this timezone handling is correct
+            java.time.Instant (.atZone ^java.time.Instant date (java.time.ZoneId/systemDefault))
+            java.sql.Timestamp (->ZonedDateTime (.toInstant ^java.sql.Timestamp date))
+            String (java.time.ZonedDateTime/parse date))))
+
+(defn ->Timestamp
+  "Coerce several types of Java dates to a java.sql.Timestamp instance (no-op in CLJS).
+  Throws IllegalArgumentException if it doesn't recognize type of date."
+  [date]
+  #?(:clj (condp instance? date
+            java.sql.Timestamp date
+            java.time.Instant (java.sql.Timestamp/from ^java.time.Instant date)
+            ; all the others convert to Instant first and then continue as above
+            java.time.ZonedDateTime (-> date ->Instant ->Timestamp)
+            String (-> date ->Instant ->Timestamp))))
 
 (defn ->iso
-  [d & [option]]
-  (when-let [iso-string (-> d ->Instant Instant->iso)]
-    (case option
-      :date (subs iso-string 0 10)
-      :time (subs iso-string 11 19)
-      iso-string)))
+  "Convert most kinds of Java and JavaScript dates instances to a standard ISO-8601 string (using UTC).
+  In Clojure, throws on nil; in ."
+  [date]
+  #?(:clj (condp instance? date
+            String date
+            java.time.Instant (.toString ^java.time.Instant date)
+            ; all the others pass through Instant and then continue as above
+            java.sql.Timestamp (-> date ->Instant ->iso)
+            java.util.Date (-> date ->Instant ->iso)
+            ; ZonedDateTime's toString looks like "2016-07-04T13:41:28.365-05:00[America/Chicago]"
+            ; (.. zdt toOffsetDateTime toString) would probably work just as well, but not be in UTC
+            java.time.ZonedDateTime (-> date ->Instant ->iso))
+     :cljs (cond
+             (string? date) date
+             (instance? js/Date date) (.toISOString ^js/Date date)
+             ; otherwise, convert to Instant first
+             :else (-> date ->Instant ->iso))))
+
+(defn add-duration
+  "Add a duration (specified in milliseconds) to a date"
+  [date milliseconds]
+  #?(:clj (condp instance? date
+            ; both Instant and ZonedDateTime natively support adding milliseconds and returning a copy of the same type
+            java.time.Instant (.plusMillis ^java.time.Instant date milliseconds)
+            ; oddly, though, ZonedDateTime doesn't have such a shortcut function
+            java.time.ZonedDateTime (.plus ^java.time.ZonedDateTime date ^long milliseconds java.time.temporal.ChronoUnit/MILLIS))
+     :cljs (js/Date. (+ (.getTime date) milliseconds))))
 
 (def duration-units [{:unit "d" :seconds 86400}
                      {:unit "h" :seconds 3600}

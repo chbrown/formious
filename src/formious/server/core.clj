@@ -1,5 +1,9 @@
 (ns formious.server.core
-  (:require [formious.db.common :refer [ZonedDateTime->String]]
+  (:require [formious.common :refer [->iso]]
+            [formious.routes :as routes]
+            [formious.views.common :refer [admin-layout]]
+            [formious.views.access-tokens :as access-tokens-views]
+            [formious.views.templates :as templates-views]
             [formious.server.resources :as resources :refer [run]]
             [formious.server.handlers
              [admin :as admin]
@@ -7,10 +11,6 @@
              [mturk :as mturk]
              [root :as root]
              [table :as table]]
-            [formious.routes :as routes]
-            [formious.views.common :refer [admin-layout]]
-            [formious.views.access-tokens :as access-tokens-views]
-            [formious.views.templates :as templates-views]
             [formious.server.middleware :refer [wrap-server-header wrap-checkpoints wrap-logging]]
             [ring.middleware.data.json :refer [wrap-json-request wrap-json-response]]
             [org.httpkit.server :refer [run-server]]
@@ -24,7 +24,6 @@
             [ring.middleware.lint :refer [wrap-lint]]
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.params :refer [wrap-params]])
-  (:import (java.time ZonedDateTime))
   (:gen-class))
 
 ; tell Liberator how to convert records into responses
@@ -35,9 +34,9 @@
     (as-response (into {} this) context)))
 ; tell Liberator how to "write JSON of class java.time.ZonedDateTime"
 (extend-protocol JSONWriter
-  ZonedDateTime
+  java.time.ZonedDateTime
   (-write [this out]
-    (write (ZonedDateTime->String this) out)))
+    (write (->iso this) out)))
 
 (def route->handler {
   ; admin-routes

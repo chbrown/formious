@@ -1,7 +1,7 @@
 (ns formious.views.responses
   (:require [rum.core :as rum]
             [formious.views.common :refer [css-classes datetime]]
-            [formious.common :refer [path-for ->iso]]))
+            [formious.common :refer [path-for]]))
 
 (defn unique-keys
   [maps]

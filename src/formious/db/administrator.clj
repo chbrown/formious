@@ -1,8 +1,8 @@
 (ns formious.db.administrator
-  (:require [formious.common :refer [update-when]]
+  (:require [formious.common :refer [update-when now ->long]]
             [clojure.tools.logging :as log]
             [formious.db.access-token :as AccessToken]
-            [formious.db.common :as db :refer [now ->long]]))
+            [formious.db.common :as db]))
 
 (def ^:private SALT "rNxROdgCbAkBI2WvZJtH")
 

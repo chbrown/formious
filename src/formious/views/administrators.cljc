@@ -1,7 +1,7 @@
 (ns formious.views.administrators
   (:require [rum.core :as rum]
             [formious.views.common :refer [css-classes datetime table table-container]]
-            [formious.common :refer [path-for ->iso]]))
+            [formious.common :refer [path-for]]))
 
 (defn layout
   [children]

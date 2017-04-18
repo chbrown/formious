@@ -1,5 +1,6 @@
 (ns formious.db.template
-  (:require [formious.db.common :as db :refer [now ->long]]))
+  (:require [formious.common :refer [now ->long]]
+            [formious.db.common :as db]))
 
 ; ^Integer ^String ^String ^ZonedDateTime
 (defrecord Template [id name html created])

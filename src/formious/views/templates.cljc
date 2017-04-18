@@ -1,7 +1,7 @@
 (ns formious.views.templates
   (:require [rum.core :as rum]
             [formious.views.common :refer [css-classes datetime table]]
-            [formious.common :refer [path-for elide ->iso]]))
+            [formious.common :refer [path-for elide]]))
 
 (defn- delete
   [id]
@@ -81,7 +81,7 @@
                :style {:width "100%"}}]]
      [:label.block
       [:div [:b "Created"]]
-      (->iso created)]
+      (datetime created)]
      [:label.block
       [:div [:b "HTML"]]
        ; TODO: enhance textarea

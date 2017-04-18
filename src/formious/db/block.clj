@@ -2,7 +2,8 @@
   (:require [clojure.walk :as walk]
             [clojure.tools.logging :as log]
             [formious.db.response :as Response]
-            [formious.db.common :as db :refer [now ->long]]))
+            [formious.common :refer [now ->long]]
+            [formious.db.common :as db]))
 
 ; (experiment_id: Int, template_id: Option[Int], context: String,
 ;   view_order: Double, randomize: Boolean, parent_block_id: Option[Int], quota: Option[Int])
