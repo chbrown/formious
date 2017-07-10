@@ -17,27 +17,29 @@
                  [net.sf.supercsv/super-csv-java8 "2.4.0"]
                  [org.apache.poi/poi-ooxml "3.16"]
                  ; [amazonica "0.3.93"]
-                 [com.amazonaws/aws-java-sdk-mechanicalturkrequester "1.11.128" :exclusions [joda-time]]
-                 [org.clojure/tools.logging "0.3.1"]
+                 [com.amazonaws/aws-java-sdk-mechanicalturkrequester "1.11.160" :exclusions [joda-time]]
+                 [org.clojure/tools.logging "0.4.0"]
                  [ch.qos.logback/logback-classic "1.2.3"]
                  ; clj/web
                  [ring/ring-core "1.6.1"]
                  [ring/ring-devel "1.6.1"]
                  [ring-data.json "0.1.0"]
-                 [liberator "0.14.1"]
+                 [liberator "0.15.1"]
                  [http-kit "2.2.0"]
                  ; cljs
                  [bidi "2.1.1"]
-                 [org.clojure/clojurescript "1.9.562"]
-                 [org.clojure/core.async "0.3.442"]
+                 [org.clojure/clojurescript "1.9.671"]
+                 [org.clojure/core.async "0.3.443"]
                  ; avoid "cljs.core/uuid? being replaced by: cognitect.transit/uuid?" warning:
                  [com.cognitect/transit-cljs "0.8.239"]
                  [rum "0.10.8"]
+                 [era "0.2.0"] ; personal library for datetime processing
+                 [jurl "0.1.1"] ; personal library for URL processing
                  [cljs-http "0.1.43"]]
   :exclusions [org.clojure/data.json]
   :plugins [[lein-cljsbuild "1.1.6"]
             [lein-ring "0.12.0"]
-            [lein-figwheel "0.5.10" :exclusions [org.clojure/clojure]]]
+            [lein-figwheel "0.5.11" :exclusions [org.clojure/clojure]]]
   :clean-targets ^{:protect false} [:target-path
                                     "resources/public/build/bundle.js"
                                     "resources/public/build/out"]
@@ -70,8 +72,8 @@
          :open-browser? false}
   :main formious.server.core
   :profiles {:dev {:dependencies [[binaryage/devtools "0.9.4"]
-                                  [figwheel-sidecar "0.5.10"]
-                                  [com.cemerick/piggieback "0.2.1"]
+                                  [figwheel-sidecar "0.5.11"]
+                                  [com.cemerick/piggieback "0.2.2"]
                                   [org.clojure/tools.namespace "0.3.0-alpha3"]]
                    :ring {:auto-refresh? true}
                    :source-paths ["src" "dev"]
