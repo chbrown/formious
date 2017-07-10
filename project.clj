@@ -9,34 +9,34 @@
   :dependencies [; clj
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/java.jdbc "0.6.1"]
-                 [org.postgresql/postgresql "42.0.0"]
-                 [org.clojure/data.json "0.2.6"]
+                 [org.postgresql/postgresql "42.1.1"]
+                 [chbrown/data.json "0.2.7"]
                  [http.async.client "1.2.0"]
                  [de.ubercode.clostache/clostache "1.4.0"]
                  [net.sf.supercsv/super-csv "2.4.0"]
                  [net.sf.supercsv/super-csv-java8 "2.4.0"]
                  [org.apache.poi/poi-ooxml "3.16"]
                  ; [amazonica "0.3.93"]
-                 [com.amazonaws/aws-java-sdk-mechanicalturkrequester "1.11.119" :exclusions [joda-time]]
+                 [com.amazonaws/aws-java-sdk-mechanicalturkrequester "1.11.128" :exclusions [joda-time]]
                  [org.clojure/tools.logging "0.3.1"]
                  [ch.qos.logback/logback-classic "1.2.3"]
                  ; clj/web
-                 [ring/ring-core "1.6.0-RC2"]
-                 [ring/ring-devel "1.6.0-RC2"]
+                 [ring/ring-core "1.6.1"]
+                 [ring/ring-devel "1.6.1"]
                  [ring-data.json "0.1.0"]
                  [liberator "0.14.1"]
                  [http-kit "2.2.0"]
                  ; cljs
-                 [bidi "2.0.16"]
-                 ; pin cljs at 1.9.456 until goo.gl/hfcbWu is closed; see also git.io/vS6Fp
-                 [org.clojure/clojurescript "1.9.456"]
+                 [bidi "2.1.1"]
+                 [org.clojure/clojurescript "1.9.562"]
                  [org.clojure/core.async "0.3.442"]
                  ; avoid "cljs.core/uuid? being replaced by: cognitect.transit/uuid?" warning:
                  [com.cognitect/transit-cljs "0.8.239"]
                  [rum "0.10.8"]
-                 [cljs-http "0.1.42"]]
-  :plugins [[lein-cljsbuild "1.1.5"]
-            [lein-ring "0.11.0"]
+                 [cljs-http "0.1.43"]]
+  :exclusions [org.clojure/data.json]
+  :plugins [[lein-cljsbuild "1.1.6"]
+            [lein-ring "0.12.0"]
             [lein-figwheel "0.5.10" :exclusions [org.clojure/clojure]]]
   :clean-targets ^{:protect false} [:target-path
                                     "resources/public/build/bundle.js"
@@ -69,7 +69,7 @@
          :port 1451
          :open-browser? false}
   :main formious.server.core
-  :profiles {:dev {:dependencies [[binaryage/devtools "0.9.3"]
+  :profiles {:dev {:dependencies [[binaryage/devtools "0.9.4"]
                                   [figwheel-sidecar "0.5.10"]
                                   [com.cemerick/piggieback "0.2.1"]
                                   [org.clojure/tools.namespace "0.3.0-alpha3"]]
