@@ -10,13 +10,6 @@
   "repository": "git://github.com/chbrown/formious.git",
   "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
   "license": "MIT",
-  "bin": {
-    "formious": "bin/formious"
-  },
-  "scripts": {
-    "start": "node bin/formious",
-    "test": "mocha --recursive test"
-  },
   "dependencies": {
     "angular": "1.4.4",
     "angular-resource": "1.4.4",
@@ -54,14 +47,25 @@
     "optimist": "0.6.1"
   },
   "devDependencies": {
+    "autoprefixer": "^7.1.5",
     "babel": "5.8.21",
     "babelify": "6.1.3",
     "browserify": "11.0.1",
-    "clean-css": "3.3.9",
+    "clean-css": "^4.1.9",
+    "clean-css-cli": "^4.1.10",
     "declarations": "0.1.15",
-    "less": "2.5.1",
+    "less": "^2.7.2",
     "mocha": "2.2.5",
+    "postcss-cli": "^4.1.1",
     "watchify": "3.3.1",
     "watsh": "0.1.0"
+  },
+  "bin": {
+    "formious": "bin/formious"
+  },
+  "scripts": {
+    "start": "node bin/formious",
+    "test": "mocha --recursive test",
+    "compile-css": "lessc ui/site.less | postcss --use autoprefixer | cleancss --format breaks:afterRuleEnds=on -o ui/site.css"
   }
 }

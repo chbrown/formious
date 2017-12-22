@@ -2,11 +2,11 @@ BIN := node_modules/.bin
 
 all: ui/build/bundle.js ui/build/bundle.min.js ui/site.css
 
-$(BIN)/lessc $(BIN)/cleancss $(BIN)/browserify $(BIN)/watsh $(BIN)/tsc:
+$(BIN)/browserify $(BIN)/watsh $(BIN)/tsc:
 	npm install
 
-%.css: %.less $(BIN)/lessc $(BIN)/cleancss
-	$(BIN)/lessc $< | $(BIN)/cleancss --keep-line-breaks --skip-advanced -o $@
+ui/site.css: ui/site.less
+	npm run-script compile-css
 
 # --compilation_level SIMPLE
 %.min.js: %.js
