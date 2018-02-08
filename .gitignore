@@ -1,6 +1,9 @@
+/target/
+pom.xml*
+.lein-*
+.nrepl-port
+# Deployment build
+resources/public/build/
+# IntelliJ config
 .idea/
 *.iml
-.lein-repl-history
-.nrepl-port
-target/
-resources/public/build/
