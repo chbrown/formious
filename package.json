@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "formious-resources",
+  "devDependencies": {
+    "clean-css": "^4.1.9",
+    "clean-css-cli": "^4.1.10",
+    "less": "^2.7.3",
+    "postcss-cli": "^4.1.1"
+  },
+  "scripts": {
+    "compile-css": "lessc resources/site.less | postcss --use autoprefixer | cleancss --format breaks:afterRuleEnds=on -o resources/public/build/site.css"
+  }
+}

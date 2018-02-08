@@ -9,14 +9,11 @@ $(NODE_PATH)/sql-patch:
 $(BREW_PATH)/fswatch:
 	brew install fswatch
 
-$(NODE_PATH)/lessc $(NODE_PATH)/postcss $(NODE_PATH)/cleancss:
-	npm install less postcss-cli autoprefixer clean-css
-
 migrate: $(NODE_PATH)/sql-patch
 	$< migrations/ --database formious --name _migrations
 
-resources/public/build/site.css: resources/site.less $(NODE_PATH)/lessc $(NODE_PATH)/postcss $(NODE_PATH)/cleancss
-	$(NODE_PATH)/lessc $< | $(NODE_PATH)/postcss --use autoprefixer | $(NODE_PATH)/cleancss --keep-line-breaks --skip-advanced -o $@
+resources/public/build/site.css: resources/site.less
+	npm run-script compile-css
 
 dev-css: resources/site.less $(BREW_PATH)/fswatch
 	$(BREW_PATH)/fswatch $< | xargs -I % make resources/public/build/site.css
