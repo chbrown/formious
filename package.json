@@ -5,9 +5,11 @@
     "clean-css": "^4.1.9",
     "clean-css-cli": "^4.1.10",
     "less": "^2.7.3",
-    "postcss-cli": "^4.1.1"
+    "postcss-cli": "^4.1.1",
+    "sql-patch": "1.1.0"
   },
   "scripts": {
-    "compile-css": "lessc resources/site.less | postcss --use autoprefixer | cleancss --format breaks:afterRuleEnds=on -o resources/public/build/site.css"
+    "compile-css": "lessc resources/site.less | postcss --use autoprefixer | cleancss --format breaks:afterRuleEnds=on -o resources/public/build/site.css",
+    "migrate": "sql-patch resources/migrations/ --database formious --name _migrations"
   }
 }

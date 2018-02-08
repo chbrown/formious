@@ -1,12 +1,7 @@
-NODE_PATH := $(shell npm bin)
-
 all: uberjar resources/public/build/site.css # resources/public/build/bundle.js
 
-$(NODE_PATH)/sql-patch:
-	npm install sql-patch
-
-migrate: $(NODE_PATH)/sql-patch
-	$< migrations/ --database formious --name _migrations
+migrate:
+	npm run-script migrate
 
 resources/public/build/site.css: resources/site.less
 	npm run-script compile-css
