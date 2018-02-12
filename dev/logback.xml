@@ -1,7 +1,8 @@
 <configuration debug="false">
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <target>System.err</target>
     <encoder>
-      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %-10contextName %logger{36} - %msg%n</pattern>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger - %msg%n</pattern>
     </encoder>
   </appender>
 
