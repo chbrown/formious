@@ -1,11 +1,11 @@
 (defproject formious/formious "0.4.0-SNAPSHOT"
   :description "Experiment Server"
-  ; "keywords": ["forms", "surveys"],
-  ; "homepage": "https://github.com/chbrown/formious",
-  ; "repository": "git://github.com/chbrown/formious.git",
-  ; "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
-  ; "license": "MIT",
   :url "https://formious.com/"
+  :license {:name "MIT"
+            :url "https://chbrown.github.io/licenses/MIT/#2011-2018"}
+  :pom-addition [:developers [:developer
+                              [:name "Christopher Brown"]
+                              [:email "io@henrian.com"]]]
   :dependencies [; clj
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/java.jdbc "0.6.1"]
