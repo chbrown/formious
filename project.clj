@@ -27,7 +27,7 @@
                  [liberator "0.15.1"]
                  [http-kit "2.2.0"]
                  ; cljs
-                 [bidi "2.1.1"]
+                 [routes "0.5.0"]
                  [org.clojure/clojurescript "1.9.671"]
                  [org.clojure/core.async "0.3.443"]
                  ; avoid "cljs.core/uuid? being replaced by: cognitect.transit/uuid?" warning:
