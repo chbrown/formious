@@ -10,7 +10,7 @@
             [rum.core :as rum]
             [ring.util.mime-type :refer [ext-mime-type]]
             [ring.util.request :as request :refer [path-info]]
-            [ring.util.response :as response :refer [not-found response resource-response set-cookie]]))
+            [ring.util.response :as response :refer [not-found response resource-response]]))
 
 (defn- content-type-if-known
   "Add a Content-Type header to response if a mime type can be inferred from path"
@@ -62,13 +62,8 @@
   (let [{:strs [email password]} (:body request)]
     (if-let [accesstoken (Administrator/authenticate email password)]
       (do
-        (log/info "found accesstoken" accesstoken)
-        (-> "Authenticated successfully"
-            (response)
-            (set-cookie "administrator_token" (:token accesstoken)
-                        :path "/"
-                        ;:expires (era/add (era/now) {:days 30})}) ; 30 days from now
-                        :max-age (* 60 60 24 31)))) ; 31 days in seconds
+        (log/info "found accesstoken" accesstoken "for email" email "with password (not shown)")
+        (assoc (response "Authenticated successfully") :session (:token accesstoken)))
       ; we serve the login page from GET as well as failed login POSTs
       (-> "You must login first"
           (response)

@@ -26,6 +26,8 @@
             [ring.middleware.cookies :refer [wrap-cookies]]
             [ring.middleware.lint :refer [wrap-lint]]
             [ring.middleware.reload :refer [wrap-reload]]
+            [ring.middleware.session.cookie :refer [cookie-store]]
+            [ring.middleware.session :refer [wrap-session]]
             [ring.middleware.params :refer [wrap-params]]))
 
 ; tell Liberator how to convert records into responses
@@ -120,6 +122,9 @@
       (handler (update request :route-params merge route-params))
       (throw (routing-ex-info m request)))))
 
+(def ^:private session-store
+  (cookie-store {:key "tE14SagkpsOXDoa1"}))
+
 (def handler
   ; the topmost wrappers threaded here are the innermost in the stack
   ; the bottom wrapper is the first to receive the request, and the last to process the response.
@@ -132,6 +137,7 @@
       (wrap-json-request :key-fn keyword) ; parse :body on JSON requests as JSON and update :body (add :key-fn keyword if desired)
       (wrap-json-response :escape-unicode false) ; render :body to JSON on responses where (coll? body) (which strings don't, btw)
       (wrap-cookies) ; parses cookies from request; serializes cookies in response (when set-cookie has been used)
+      (wrap-session {:store session-store :cookie-name "administrator_token" :cookie-attrs {:max-age (* 60 60 24 31)}}) ; 31 days in seconds
       (wrap-lint) ; wrap-lint needs to come towards the end of the handlers so the responses are already fixed
       (wrap-logging :tag "outer"))) ; logging should be outermost layer to get the original request and the final response
 
