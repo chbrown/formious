@@ -24,7 +24,7 @@
 (def ^:private resources-routes
   {"accesstokens"   {(oset ["/" :id] "") ::resources/accesstoken}
    "administrators" {(oset ["/" :id] "") ::resources/administrator}
-   ["administrators" :administrator_id "awsaccounts"] {(oset ["/" :awsaccount_id] "") ::resources/administrator_awsaccount}
+   ["administrators" :administrator_id "awsaccounts"] {(oset ["/" :awsaccount_id] "") ::resources/awsaccount_administrator}
    "awsaccounts"    {(oset ["/" :id] "") ::resources/awsaccount}
    "experiments"    {(oset ["/" :id] "") ::resources/experiment}
    ["experiments/" :experiment_id "/blocks"] {(oset ["/" :id] "") ::resources/block}

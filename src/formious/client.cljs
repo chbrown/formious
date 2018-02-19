@@ -159,7 +159,7 @@
 ;   });
 ;   var administrator_id = $stateParams.id;
 ;   $scope.awsaccounts = AWSAccount.query();
-;   $scope.administrator_awsaccounts = AWSAccountAdministrator.query({administrator_id: administrator_id});
+;   $scope.awsaccount_administrators = AWSAccountAdministrator.query({administrator_id: administrator_id});
 ; }
 ; // $scope.$on('save', $scope.sync);
 ; sync() {
@@ -170,6 +170,6 @@
 ; }
 ; unlinkAWSAccount(account) {
 ;   account.$delete(function() {
-;     $scope.administrator_awsaccounts = AWSAccountAdministrator.query({administrator_id: administrator_id});
+;     $scope.awsaccount_administrators = AWSAccountAdministrator.query({administrator_id: administrator_id});
 ;   });
 ; }
