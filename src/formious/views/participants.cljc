@@ -1,5 +1,6 @@
 (ns formious.views.participants
-  (:require [rum.core :as rum]))
+  (:require [rum.core :as rum]
+            [formious.views.common :refer [css-classes datetime table table-container]]))
 
 (rum/defc ParticipantsEdit
   [participants]
@@ -29,9 +30,10 @@
        [:th "Blocklist"]
        [:th]]]
      [:tbody
-      (for [{:keys [submitted blocklist others created seen responses bonus_paid bonus_owed password superuser tokens]} participants]
+      (for [{:keys [submitted blocklist others created seen responses
+                    bonus_paid bonus_owed password superuser tokens]} participants]
         [:tr
-         [:td [:DateTime submitted]]
+         [:td (datetime submitted)]
          [:td blocklist]
          [:td {:style {:max-width "600px"}}
           [:div.hover-flow

@@ -1,7 +1,8 @@
 (ns formious.views.hits
   (:require [rum.core :as rum]
-            [formious.common :refer [path-for]]
-            [formious.views.common :refer [css-classes datetime keyval-table]]))
+            [formious.util :refer [write-json-str]]
+            [formious.routes :as routes :refer [generate-path]]
+            [formious.views.common :refer [Link Help css-classes datetime keyval-table]]))
 
 (def $storage {:todo "Pull this from global state"})
 
@@ -10,11 +11,11 @@
   [:div
    [:section.hpad
     [:h3 "HITs"]
-    [:a {:href (path-for :admin-mturk-hits :id "new")} "Create new HIT"]]
+    [:a {:href (generate-path {:endpoint ::routes/mturk-hit :id "new"})} "Create new HIT"]]
    (when (empty? hits) [:section.hpad [:p "No HITs could be found."]])
    (for [hit hits]
      [:section.hpad.box
-      [:h3 [:a {:href (path-for :admin-mturk-hit :HITId (:HITId hit))} (:Title hit)]]
+      [:h3 [:a {:href (generate-path {:endpoint ::routes/mturk-hit :HITId (:HITId hit)})} (:Title hit)]]
       (keyval-table hit)])])
 
 (rum/defc MTurkHITsNew
@@ -31,56 +32,46 @@
      [:label.block
       [:div
        [:b "Title"]
-       [:span {:class "help"}
-        "The title of the HIT. A title should be short and describe the kind of task the HIT contains"]]
+       (Help "The title of the HIT. A title should be short and describe the kind of task the HIT contains")]
       [:input {:type "text"
                :ng-model (:Title $storage)
                :style {:width "500px"}}]]
      [:label.block
-      [:div [:b "Description"] [:span {:class "help"} "2000 character max"]]
+      [:div [:b "Description"] (Help "2000 character max")]
       [:textarea {:ng-model (:Description $storage)
                   :rows "2"
                   :style {:width "500px"}}]]
      [:label.block
       [:div
        [:b "Reward"]
-       [:span {:class "help"}
-        "The amount of money (in USD) the Requester will pay a Worker for successfully completing the HIT"]]
+       (Help "The amount of money (in USD) the Requester will pay a Worker for successfully completing the HIT")]
       [:input {:type "text"
                :ng-model (:Reward $storage)}]]
      [:label.block
       [:div
        [:b "Keywords"]
-       [:span {:class "help"}
-        "One or more words or phrases that describe the HIT, separated by commas"]]
+       (Help "One or more words or phrases that describe the HIT, separated by commas")]
       [:input {:type "text"
                :ng-model (:Keywords $storage)
                :style {:width "500px"}}]]
      [:label.block
       [:div
        [:b "Assignment Duration (e.g., 3h)"]
-       [:span {:class "help"}
-        "The amount of time that a Worker has to complete the HIT after accepting it"]]
+       (Help "The amount of time that a Worker has to complete the HIT after accepting it")]
       [:input {:type "text"
                :ng-model (:AssignmentDurationInSeconds $storage)
                :duration-string true}]]
      [:label.block
       [:div
        [:b "Auto-approval Delay (e.g., 60m)"]
-       [:span {:class "help"}
-        "The amount of time after a HIT has been submitted before the assignment is automatically approved"]]
+       (Help "The amount of time after a HIT has been submitted before the assignment is automatically approved")]
       [:input {:type "text"
                :ng-model (:AutoApprovalDelayInSeconds $storage)
                :duration-string true}]]
      [:label.block
       [:div
        [:b "Other settings"]
-       [:span {:class "help"}
-        "JSON representation of any other settings to send. This is an object that will be merged with the rest of the payload. E.g., to require Master's qualification in production, use this: "
-        [:code
-         [:pre
-          {"QualificationRequirement" {"QualificationTypeId" "2F1QJWKUDD8XADTFD2Q0G6UTO95ALH"
-                                       "Comparator" "Exists"}}]]]]
+       (Help "JSON representation of any other settings to send. This is an object that will be merged with the rest of the payload. E.g., to require Master's qualification in production, use this: " [:code [:pre (write-json-str {:QualificationRequirement {:QualificationTypeId "2F1QJWKUDD8XADTFD2Q0G6UTO95ALH" :Comparator "Exists"}})]])]
       [:textarea.code {:json-transform true
                        :enhance true
                        :ng-model (:extra $storage)
@@ -91,15 +82,13 @@
         [:label.block
          [:div
           [:b "Max Assignments"]
-          [:span {:class "help"}
-           "The number of times the HIT can be accepted (by different users) and completed before the HIT becomes unavailable. A single user will only be able to complete the HIT once."]]
+          (Help "The number of times the HIT can be accepted (by different users) and completed before the HIT becomes unavailable. A single user will only be able to complete the HIT once.")]
          [:input {:type "number"
                   :ng-model (:MaxAssignments $storage)}]]
         [:label.block
          [:div
           [:b "Lifetime (e.g., 3d)"]
-          [:span {:class "help"}
-           "The amount of time that a HIT can be accepted; after the lifetime expires, the HIT no longer appears in searches"]]
+          (Help "The amount of time that a HIT can be accepted; after the lifetime expires, the HIT no longer appears in searches")]
          [:input {:type "text"
                   :ng-model (:LifetimeInSeconds $storage)
                   :duration-string true}]]
@@ -107,15 +96,14 @@
         [:label.block
          [:div
           [:b "External URL"]
-          [:span {:class "help"}
-           "The URL of your web form, to be displayed in a frame in the Worker's web browser. It can have a querystring; Mechanical Turk parses the url and adds new querystring parameters as needed."]]
+          (Help "The URL of your web form, to be displayed in a frame in the Worker's web browser. It can have a querystring; Mechanical Turk parses the url and adds new querystring parameters as needed.")]
          [:input {:type "text"
                   :ng-model (:ExternalURL $storage)
                   :style {:width "500px"}}]]
         [:label.block
          [:div
           [:b "Frame Height (integer)"]
-          [:span {:class "help"} "The height of the frame, in pixels"]]
+          (Help "The height of the frame, in pixels")]
          [:input {:type "number"
                   :ng-model (:FrameHeight $storage)}]]])
      [:div.block [:button "Submit"]]]]
@@ -142,30 +130,27 @@
     (keyval-table hit)]
    [:section.hpad.box
     [:h3 "ExtendHIT"]
-    [:span {:class "help"}
-     "Extend the duration of this HIT or add assignments to it."]
+    (Help "Extend the duration of this HIT or add assignments to it.")
     [:form {:ng-submit "ExtendHIT($event)"}
      [:label
       [:div
        [:b "Max Assignments Increment"]
-       [:span {:class "help"}
-        "The number of assignments by which to increment the MaxAssignments parameter of the HIT."]]
+       (Help "The number of assignments by which to increment the MaxAssignments parameter of the HIT.")]
       [:input {:type "text"
                :ng-model "extension.MaxAssignmentsIncrement"}]]
      [:label
       [:div
        [:b "Expiration Increment (e.g., 24h)"]
-       [:span {:class "help"}
-        "The amount of time, in seconds, by which to extend the expiration date. If the HIT has not yet expired, this amount is added to the HIT's expiration date. If the HIT has expired, the new expiration date is the current time plus this value."]]
+       (Help "The amount of time, in seconds, by which to extend the expiration date. If the HIT has not yet expired, this amount is added to the HIT's expiration date. If the HIT has expired, the new expiration date is the current time plus this value.")]
       [:input {:type "text"
                :ng-model "extension.ExpirationIncrement"}]]
      [:p [:button "ExtendHIT"]]]]
    [:section.hpad.box
     [:h3 "Import"]
-    [:span {:class "help"}
+    (Help
      "Import data that was submitted to Mechanical Turk directly into the local database."
      [:br]
-     "Because each Assignment has a unique identifier (the AssignmentId field), duplicate imports will be ignored."]
+     "Because each Assignment has a unique identifier (the AssignmentId field), duplicate imports will be ignored.")
     [:p [:form {:ng-submit "import($event)"} [:p [:button "Import"]]]]]
    [:section.hpad.box
     [:h3 "Assign Qualifications"]
@@ -238,8 +223,7 @@
     [:label
      [:div
       [:b "Responses Summarizer"]
-      [:span {:class "help"}
-       "A Javascript function from an Array of responses to a serializable object summarizing the responses."]]
+      (Help "A Javascript function from an Array of responses to a serializable object summarizing the responses.")]
      [:div.code "function(responses, assignment) " "{"]
      [:div.code {:style {:margin-left "1em"}}
       [:textarea.code {:enhance true

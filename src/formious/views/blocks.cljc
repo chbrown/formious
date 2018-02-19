@@ -5,10 +5,10 @@
   [blocks]
   (disj (set (mapcat (comp keys :context) blocks)) "template"))
 
-(rum/defc BlocksTree
+(rum/defc tree
   [blocks]
   (let [parameters (getBlocksParameters blocks)]
-  ; whenever blocks change, we may need to update the parameters list
+    ; whenever blocks change, we may need to update the parameters list
     [:div
      [:table.fill.padded.striped.grid.blocks
       [:thead
@@ -72,7 +72,7 @@
             "Public"]
            [:button {:ng-click "$emit('deleteBlock', block)"} "Delete"]]])]]]))
 
-(rum/defc BlocksTable
+(rum/defc blocks
   []
   [:div
    [:section.hpad.box
@@ -90,13 +90,12 @@
            :checkbox-sequence true
            :style {:font-size "90%"}}]]
    [:nav.fixedflow {:style {:bottom 0 :border-top "1px solid #BBB" :padding "5px" :background-color "#EEE"}}
-    [:ui-view
-     [:button {:ng-click "deleteSelectedBlocks()"} "Delete selection"]
-     [:button {:ng-click "groupSelectedBlocks()"} "Group selection"]
-     [:button {:ng-click "saveTree()"} "Save tree"]
-     [:button {:ng-click "addEmptyBlock()"} "Add empty block"]]]])
+    [:button {:ng-click "deleteSelectedBlocks()"} "Delete selection"]
+    [:button {:ng-click "groupSelectedBlocks()"} "Group selection"]
+    [:button {:ng-click "saveTree()"} "Save tree"]
+    [:button {:ng-click "addEmptyBlock()"} "Add empty block"]]])
 
-(rum/defc BlocksEdit
+(rum/defc block
   []
   [:div
    [:form {:ng-submit "syncBlock($event)"}

@@ -1,11 +1,8 @@
 (ns formious.views.responses
   (:require [rum.core :as rum]
+            [formious.util :refer [unique-keys]]
             [formious.views.common :refer [css-classes datetime]]
-            [formious.common :refer [path-for]]))
-
-(defn unique-keys
-  [maps]
-  (set (mapcat keys maps)))
+            [formious.routes :refer [generate-path]]))
 
 (defn- responses-table
   [responses]
@@ -51,11 +48,11 @@
                 :limit limit}]
     (println "TODO: actually refresh with params:" params)))
 
-(rum/defcs ResponsesTable < (rum/local 0 ::template_id)
-                            (rum/local 0 ::experiment_id)
-                            (rum/local "created" ::order_column)
-                            (rum/local "DESC" ::order_direction)
-                            (rum/local 250 ::limit)
+(rum/defcs responses < (rum/local 0 ::template_id)
+                       (rum/local 0 ::experiment_id)
+                       (rum/local "created" ::order_column)
+                       (rum/local "DESC" ::order_direction)
+                       (rum/local 250 ::limit)
   [state responses templates experiments]
   ; templates = Template.query();
   ; experiments = Experiment.query();

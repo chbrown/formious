@@ -1,61 +1,60 @@
 (ns formious.views.common
   (:require [clojure.string :as str]
             [rum.core :as rum]
-            [formious.common :refer [path-for elide ->iso logout]]))
+            [era.format :as era-format]
+            [formious.store :refer [app-state]]
+            [formious.routes :refer [generate-path]]
+            [formious.util :refer [elide write-json-str]]))
 
 (defn event-value
-  "Get the value of the given event's target (element)"
+  "Get the value of the given event's target"
   [event]
-  #?(:clj event
+  #?(:clj  (do
+             (println "Warning: attempting to extract client-side event on JVM:" event)
+             event)
      :cljs (.. ^js/Event event -target -value)))
 
-(rum/defc not-found
-  [path]
-  [:div
-   [:h3 "Not Found!"]
-   [:p "Could not find route for path:"]
-   [:code.hpad path]
-   [:p
-    [:a {:href "javascript:back"} "back"]]])
+(defn inject-global
+  [k value-js-str]
+  (let [js-str (str "window." k " = " value-js-str ";")]
+    [:script {:dangerouslySetInnerHTML {:__html js-str}}]))
 
-(rum/defc admin-layout
-  [children]
-  [:html
-   [:head
-    [:meta {:charset "UTF-8"}]
-    [:title "Formious Admin"]
-    [:link {:href "/favicon.png" :rel "icon" :type "image/png"}]
-    [:link {:href "/build/site.css" :rel "stylesheet" :type "text/css"}]]
-   [:body.admin
-    [:div {:id "app"} children]
-    [:script {:src "/build/bundle.js"}]]])
+; (defn- mutation-callback
+;   "Listen for childList and subtree changes to el;
+;   Call (on-mutate el) when a change is observed."
+;   [el on-mutation]
+;   (let [callback #(on-mutation el)
+;         raf-callback #(js/window.requestAnimationFrame callback)
+;         options {:childList true :subtree true}]
+;     (doto (js/MutationObserver. raf-callback)
+;           (.observe (clj->js options)))))
 
-(rum/defc block-layout
-  [context-json-str header html]
-  [:html
-   [:head
-    [:meta {:charset "UTF-8"}]
-    [:title "title>Experimental Interface"]
-    [:link {:href "data:;base64,=" :rel "icon" :type "image/x-icon"}]
-    [:script {:src "//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"}]
-    [:script {:src "/public/formious-globals.js"}]
-    [:script {:dangerouslySetInnerHTML {:__html (str "formious.context = " context-json-str ";")}}]]
-   [:body
-    {:dangerouslySetInnerHTML {:__html (str header \newline html)}}]])
+; (defn- get-computed-height
+;   [el]
+;   (let [style (js/window.getComputedStyle el)]
+;     (.-height style)))
 
-(rum/defc AppLayout
-  [children]
-  [:div
-   [:nav.fixedflow
-    [:a {:href (path-for :admin-aws-accounts)} "AWS Accounts"]
-    [:a {:href (path-for :admin-mturk)} "MTurk"]
-    [:a {:href (path-for :admin-administrators)} "Administrators"]
-    [:a {:href (path-for :admin-experiments)} "Experiments"]
-    [:a {:href (path-for :admin-templates)} "Templates"]
-    [:a {:href (path-for :admin-responses)} "Responses"]
-    [:div {:style {:float "right"}}
-     [:button.anchor.tab {:on-click logout} "Logout"]]]
-   children])
+; (rum/defcs FixedFlow < (rum/local "0" ::height)
+;                        {:did-mount (fn [state]
+;                                      (let [c (:rum/react-component state)
+;                                            el (js/React.findDOMNode c)
+;                                            *height (::height state)]
+;                                        ; TODO: this still isn't quite right, since it's measuring
+;                                        ;       both the fixed flow and the copy
+;                                        (mutation-callback el #(reset! *height (get-computed-height %1)))))}
+;   ; This directive is intended to be used with a <nav> element, so that it
+;   ; drops out of flow, in the current position, but creates an empty shadow
+;   ; element to keep its place
+;   ; <nav fixedflow>
+;   ;   <a href="/admin/individuals">Individuals</a>
+;   ;   <a href="/admin/administrators">Administrators</a>
+;   ; </nav>
+;   [state children]
+;   (let [*height (::height state)]
+;     [:div
+;      ; prepare copy (placeholder), which is just a super simple empty shadow element
+;      [:div.flow-copy {:style {:height @*height}}]
+;      children]))
 
 (rum/defcs Help < (rum/local false ::expanded)
   ; <span className="help">This is a long but very useful help message but most often you
@@ -65,83 +64,58 @@
   [state contents]
   (let [summary (elide contents 50)
         expanded-atom (::expanded state)]
-    [:span.help {:on-click (fn [_] (swap! expanded-atom not))}
+    [:span.help {:on-click (fn [_] (println "swap Help" @expanded-atom) (swap! expanded-atom not))}
      (if @expanded-atom
        [:span.full contents]
        [:span.summary {:style {:opacity 0.5}} summary])]))
 
+(declare ObjectDisplay)
+
+(defn- display-seq
+  "Used by polymorphic ObjectDisplay component below."
+  [object]
+  (let [; check for tabular arrays (all of the items are objects with the same keys)
+        ; items_are_objects (every? object? object)
+        ; now check that all the keys are the same
+        items-have-indentical-keys (apply = (map keys object))
+        columns (keys (first object))]
+    (if (and (seq object) items-have-indentical-keys)
+      [:div.table
+       [:table
+        [:thead
+         [:tr
+          (for [column columns]
+            [:th column])]]
+        [:tbody
+         (for [value object]
+           [:tr
+            (for [column columns]
+              [:td (ObjectDisplay (:column value))])])]]]
+        ; otherwise, it's an array of arbitrary objects
+      [:div.array
+       (for [value object]
+         (ObjectDisplay value))])))
+
+(defn- display-map
+  "Used by polymorphic ObjectDisplay component below."
+  [object]
+  [:div.object
+   [:table.keyval
+    (for [[key value] object]
+      [:tr
+       [:td key]
+       [:td (ObjectDisplay value)]])]])
+
 (rum/defc ObjectDisplay
   [object]
   (cond
-    ; (= object js/undefined)
-    ;   [:i.undefined "undefined"]
-    (nil? object)
-      [:b.null "null"]
-    (seq? object)
-      (let [; check for tabular arrays (all of the items are objects with the same keys)
-            ; items_are_objects (every? object? object)
-            ; now check that all the keys are the same
-            items_have_indentical_keys (apply = (map keys object))
-            columns (keys (first object))]
-        (if (and (seq object) items_have_indentical_keys)
-          [:div.table
-           [:table
-            [:thead
-             [:tr
-              (for [column columns]
-                [:th column])]]
-            [:tbody
-             (for [value object]
-               [:tr
-                (for [column columns]
-                  [:td (ObjectDisplay (:column value))])])]]]
-            ; otherwise, it's an array of arbitrary objects
-          [:div.array
-           (for [value object]
-             (ObjectDisplay value))]))
-    (map? object) ; object?
-      [:div.object
-       [:table.keyval
-        (for [[key value] object]
-          [:tr
-           [:td key]
-           [:td (ObjectDisplay value)]])]]
-    (number? object)
-      [:b.number (str object)]
-    (or (= object true) (= object false)) ; (boolean? object)
-      [:b.boolean (str object)]
-    :else
-      [:span.string (str object)]))
-
-(defn- login
-  [email password]
-  ; (js/fetch "/login" {:email email :password password})
-  ; .then(function(res) {$state.go($state.params.to) return res.data.message},
-  ;       function(res) {return res.data.message}))
-  ; NotifyUI.addPromise(promise)
-  (println "TODO: actually login" email password))
-
-(rum/defcs admin-login < (rum/local 0 ::email)
-                         (rum/local 0 ::password)
-  [state]
-  [:div
-   [:div.shadow {:style {:width "200px"
-                         :margin "80px auto"
-                         :background-color "white"}}
-    [:form {:on-submit (fn [_] (login @(::email state) @(::password state)))
-            :style {:padding "10px"}}
-     [:h3 "Admin Login"]
-     [:label
-      [:div "Email"]
-      [:input {:on-change #(swap! (::email state) (event-value %))
-               :style {:width "100%"}}]]
-     [:label
-      [:div "Password"]
-      [:input {:ng-model #(swap! (::password state) (event-value %))
-               :type "password"
-               :style {:width "100%"}}]]
-     [:p
-      [:button "Login"]]]]])
+    #?@(:cljs [(= object js/undefined) [:i.undefined "undefined"]])
+    (nil? object) [:b.null "null"]
+    (seq? object) (display-seq object)
+    (map? object) (display-map object) ; (object? object)
+    (number? object) [:b.number (str object)]
+    (or (true? true) (false? false)) [:b.boolean (str object)] ; (boolean? object)
+    :else [:span.string (str object)]))
 
 (defn keyval-table
   [m]
@@ -152,22 +126,22 @@
 
 (def css-classes {:default-table "fill padded striped lined"})
 
-; (rum/defc datetime < rum/static
-(defn datetime
-  "Create a <time> element with full datetime attribute and potentially shortened text content.
+(defn datetime ; (rum/defc datetime < rum/static
+  "Create a time element with full datetime attribute and potentially shortened text content.
   Returns nil if date is nil."
-  [date & [option]]
-  (when-let [iso-string (some-> date ->iso)] ; Convert to an ISO-8601 string
-    [:time {:dateTime iso-string}
-     (case option
-       ; slice off the first 10 characters (the YYYY-MM-DD part)
-       :date (subs iso-string 0 10)
-       ; slice off the HH:MM:SS part
-       :time (subs iso-string 11 19)
-       iso-string)]))
+  ([date] (datetime date :full))
+  ([date option]
+   (when-let [iso-string (era-format/iso date)] ; Convert to an ISO-8601 string
+     [:time {:date-time iso-string}
+      (case option
+        ; slice off the first 10 characters (the YYYY-MM-DD part)
+        :date (subs iso-string 0 10)
+        ; slice off the HH:MM:SS part
+        :time (subs iso-string 11 19)
+        iso-string)])))
 
 (defn table
-  "Create a <table> element with thead built from columns and tbody built from rows and cells-fn"
+  "Create a table element with thead built from columns and tbody built from rows and cells-fn"
   [rows columns cells-fn & classes]
   [:table {:class classes}
    [:thead
@@ -185,3 +159,15 @@
   [:div
    [:section.hpad [:h3 title]]
    [:section.box (apply table rows columns cells-fn classes)]])
+
+(rum/defc Link < rum/reactive
+  [relative-route children]
+  (let [*route (rum/cursor app-state :route)
+        current-route (rum/react *route)
+        ; nil values in relative-route indicate deletions
+        deleted-keys (keys (filter (comp nil? val) relative-route))
+        href-route (apply dissoc (merge current-route relative-route) deleted-keys)
+        current? (= current-route href-route)]
+    (println "Creating Link" current-route href-route "current?" current? "deleted-keys" deleted-keys)
+    [:a {:class (when current? "current")
+         :href (generate-path href-route)} children]))

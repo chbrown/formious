@@ -1,7 +1,24 @@
 (ns formious.views.templates
   (:require [rum.core :as rum]
-            [formious.views.common :refer [css-classes datetime table]]
-            [formious.common :refer [path-for elide]]))
+            [formious.views.common :refer [css-classes datetime table table-container Link]]
+            [formious.util :refer [elide]]
+            [formious.store :refer [app-state]]
+            [formious.resources :as resources]
+            [formious.routes :refer [generate-path]]))
+
+; (defn findOrCreateTemplate
+;   "If `context` has a template_id field, return an initialized (but not
+;   saturated) Template with `template_id` as the `id`. Otherwise fetch all the
+;   templates and find one where `name` == `context.template` otherwise, create
+;   a new Template with {name: `context.template`} and return it."
+;   [context]
+;   ; presumably, context.template is the desired Template's name
+;   (let [{:keys [template_id template]} context]
+;     (if template_id
+;       (Template. {:id template_id})
+;       (let [templates (Template/query)
+;             template (filter #(= (:template context) (:name %)) templates)]
+;           (or template (Template. {:name template}))))))
 
 (defn- delete
   [id]
@@ -34,58 +51,53 @@
   ; });
   (println "TODO: actually copy template #" id))
 
-(defn template-link
-  [templates id]
-  ; const {id} = this.props;
-  ; fetch(`/api/templates/${id}`).then(template => {
-  ;   this.setState({template});
-  ; });
-  (let [template (->> templates (filter #(= (:id %) id)) first)]
-    [:a {:href (path-for :admin-template :id id)} (:name template)]))
+(defn- template-link
+  [{:keys [id name]}]
+  [:a {:href (generate-path {:endpoint ::resources/template :group :admin :id id})} name])
 
-(defn- layout
+(rum/defc layout
   [children]
   [:div
    [:nav.sub.fixedflow
-    [:a.tab {:href (path-for :admin-templates)} "List templates"]
-    [:a.tab {:href (path-for :admin-template :id "new")} "New template"]]
+    (Link {:id nil} "List templates")
+    (Link {:id "new"} "New template")]
    children])
 
-(def columns ["Name" "HTML" "Created" ""])
+(def ^:private columns
+  ["Name" "HTML" "Created" ""])
 
-(defn cells
+(defn- cells
   [{:keys [id name html created]}]
-  [[:a {:title id :href (path-for :admin-template :id id)} name]
+  [[:a {:title id :href (generate-path {:endpoint ::resources/template :group :admin :id id})} name]
    [:code (elide html 100)]
    (datetime created :date)
    [:button {:on-click (fn [_] (delete id))} "Delete"]])
 
-(rum/defc templates
-  [templates]
-  (layout
-   [:div
-    [:section.hpad [:h3 "Templates"]]
-    [:section.box (table templates columns cells (:default-table css-classes))]]))
+(rum/defc templates < rum/reactive []
+  (let [*templates (rum/cursor app-state ::resources/template)]
+    (table-container "Templates" (vals (rum/react *templates))
+                     columns cells (:default-table css-classes))))
 
-(rum/defc template
-  [{:keys [id name html created] :as record}]
-  (layout
-   [:div
-    [:section.hpad {:style {:float "right"}}
-     [:button {:on-click (fn [_] (copy id))} "Clone"]]
-    [:form.hpad {:on-submit (fn [_] (save id {:name name :html html}))}
-     [:label.block
-      [:div [:b "Name"]]
-      [:input {:type "text"
-               :default-value name
-               :style {:width "100%"}}]]
-     [:label.block
-      [:div [:b "Created"]]
-      (datetime created)]
-     [:label.block
-      [:div [:b "HTML"]]
-       ; TODO: enhance textarea
-      [:textarea.code {:default-value html
-                       :placeholder "HTML / Handlebars content"
-                       :style {:width "100%" :min-height "200px"}}]]
-     [:div.block [:button "Save"]]]]))
+(rum/defc template < rum/reactive []
+  (let [*route (rum/cursor app-state :route)
+        *template (rum/cursor-in app-state [::resources/template (:id (rum/react *route))])
+        {:keys [id name html created] :as template} (rum/react *template)]
+    [:div
+     [:section.hpad {:style {:float "right"}}
+      [:button {:on-click (fn [_] (copy id))} "Clone"]]
+     [:form.hpad {:on-submit (fn [_] (save id {:name name :html html}))}
+      [:label.block
+       [:div [:b "Name"]]
+       [:input {:type "text"
+                :default-value name
+                :style {:width "100%"}}]]
+      [:label.block
+       [:div [:b "HTML"]]
+        ; TODO: enhance textarea
+       [:textarea.code {:default-value html
+                        :placeholder "HTML / Handlebars content"
+                        :style {:width "100%" :min-height "200px"}}]]
+      [:label.block
+       [:div [:b "Created"]]
+       (datetime created)]
+      [:div.block [:button "Save"]]]]))
