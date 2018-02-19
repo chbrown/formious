@@ -5,6 +5,7 @@
             [formious.util :refer [as-long]]
             [formious.resources :as resources]
             [routes.core :as routes]
+            [routes.tools :refer [pattern-listing]]
             [routes.extra :refer [parameterize]]))
 
 ; Oset is a collection of route Patterns that are matched as a set would be,
@@ -14,7 +15,10 @@
   (match-pattern [_ m]
     (some #(routes/match-pattern % m) coll))
   (generate-pattern-path [_ m]
-    (some #(routes/generate-pattern-path % m) coll)))
+    (some #(routes/generate-pattern-path % m) coll))
+  routes.tools/PatternListing
+  (pattern-listing [_ m]
+    (mapcat #(pattern-listing % m) coll)))
 
 (defn- oset
   "Create an Oset instance"
