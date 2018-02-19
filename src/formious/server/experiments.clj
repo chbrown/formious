@@ -1,18 +1,22 @@
-(ns formious.server.handlers.experiments
+(ns formious.server.experiments
   (:require [formious.db.administrator :as Administrator]
             [formious.db.block :as Block]
             [formious.db.experiment :as Experiment]
             [formious.db.participant :as Participant]
             [formious.db.response :as Response]
             [formious.db.template :as Template]
+            [formious.views :refer [BlockPage]]
             [clojure.string :as str]
             [clojure.data.json :as json]
             [clojure.java.io :as io]
             [rum.core :as rum]
-            [formious.server.common :refer [render-static-markup-with-doctype]]
-            [formious.views.common :refer [block-layout]]
             [clostache.parser :refer [render render-resource]]
             [ring.util.response :refer [not-found redirect response content-type status]]))
+
+(defn render-static-markup-with-doctype
+  "Render static (not marked with React ids & checksums) HTML, complete with DOCTYPE header"
+  [component]
+  (str "<!DOCTYPE html>" (rum/render-static-markup component)))
 
 (defn redirect-to-next-block
   "Redirect to next (probably first) block of experiment"
@@ -53,10 +57,9 @@
         context (into (:context block) {:experiment_id experiment-id
                                         :block_id block-id})
         ; TODO: handle errors (maybe add default for missing html, and use it for broken templates)
-        template-html (render blockTemplateHtml context)
-        ; TODO: memoize/cache the layout Handlebars template function
-        context-json-string (json/write-str context)] ;.replaceAll("<\/".r, "<\\/")
-    (-> (block-layout context-json-string (:html experiment) template-html)
+        ; TODO: memoize/cache the layout template
+        template-html (render blockTemplateHtml context)]
+    (-> (BlockPage context (:html experiment) template-html)
         (render-static-markup-with-doctype)
         (response)
         (content-type "text/html"))))

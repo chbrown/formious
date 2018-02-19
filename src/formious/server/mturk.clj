@@ -1,9 +1,6 @@
 (ns formious.server.mturk
-  (:require [clojure.set :as set]
-            [formious.common :refer [map-kv]]
-            [http.async.client :as http])
-  (:import (java.io InputStream)
-           (com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration)
+  (:require [formious.db.awsaccount :as AWSAccount])
+  (:import (com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration)
            (com.amazonaws.auth BasicAWSCredentials
                                AWSStaticCredentialsProvider
                                DefaultAWSCredentialsProviderChain)
@@ -12,14 +9,16 @@
            (javax.crypto Mac)
            (javax.crypto.spec SecretKeySpec)))
 
-(def endpoints {:sandbox "mturk-requester-sandbox.us-east-1.amazonaws.com"
-                :production "mturk-requester.us-east-1.amazonaws.com"})
+(def endpoints
+  {:sandbox "mturk-requester-sandbox.us-east-1.amazonaws.com"
+   :production "mturk-requester.us-east-1.amazonaws.com"})
 
 ; Examples https://github.com/awslabs/mturk-code-samples/tree/master/Java
 
 (defn ^AmazonMTurk create-client
   ([endpoint credentials-provider]
    (-> (AmazonMTurkClientBuilder/standard)
+       ; MTurk is special and has custom endpoints, so we have to use this rather than withRegion
        (.withEndpointConfiguration (AwsClientBuilder$EndpointConfiguration. endpoint "us-east-1"))
        (.withCredentials credentials-provider)
        (.build)))
@@ -37,10 +36,11 @@
 ; val hit = service.createHIT(title description reward
 ;   RequesterService.getBasicFreeTextQuestion("What is the weather like right now in Seattle, WA?"), numAssignments)
 
-; (def clients (map-kv create-client endpoints))
+; (def clients (map-values create-client endpoints))
 
-; (def service-host {:sandbox "mechanicalturk.sandbox.amazonaws.com"
-;                    :production "mechanicalturk.amazonaws.com"})
+; (def service-host
+;   {:sandbox "mechanicalturk.sandbox.amazonaws.com"
+;    :production "mechanicalturk.amazonaws.com"})
 
 ; credentials = Aws::Credentials.new(aws_access_key_id, aws_secret_access_key)
 ; mturk = Aws::MTurk::Client.new(endpoint: endpoint, credentials: credentials)
@@ -113,3 +113,19 @@
 ;         (http/await resp)
 ;         ; (println (http/string resp))
 ;         (http/string resp)))))
+
+; POST /api/mturk/GetAccountBalance?awsaccount_id=number&environment=production|sandbox
+; The querystring should contain the awsaccount id and the target MTurk environment.
+; awsaccount_id indicates a record in the AWS Account table, which contains the
+; AWS Access Key ID and AWS Secret Access Key
+
+(defn post
+  [request]
+  (let [{:keys [request-params query-params]} request
+        {:strs [awsaccount_id environment]} query-params
+        {:keys [operation]} request-params
+        {:keys [access_key_id secret_access_key]} (AWSAccount/find-by-id awsaccount_id)
+        endpoint (get endpoints (keyword environment))]
+    (case operation
+      "GetAccountBalance" (getAccountBalance endpoint access_key_id secret_access_key)
+      (str "Not yet implemented: operation" operation))))

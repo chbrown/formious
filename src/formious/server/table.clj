@@ -1,4 +1,4 @@
-(ns formious.server.handlers.table
+(ns formious.server.table
   (:require [clojure.set :as set]
             [clojure.java.io :as io]
             [clojure.data.json :as json]
@@ -51,9 +51,7 @@
   ; Header("Content-Type", "application/json"))
   [request]
   (case (request/content-type request)
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      (-> request :body first-sheet-as-maps)
-    "application/json"
-      (-> request :body (json/read-str :key-fn keyword) seq)
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" (-> request :body first-sheet-as-maps)
+    "application/json" (-> request :body (json/read-str :key-fn keyword) seq)
     ; default: csv
     (-> request :body io/reader csv-as-maps)))
