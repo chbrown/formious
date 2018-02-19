@@ -54,24 +54,24 @@
                            :optimizations :simple
                            :pretty-print false}}
                {:id "dev"
-                :figwheel {:on-jsload formious.client.core/figwheel-on-jsload!}
+                :figwheel {:on-jsload formious.client/figwheel-on-jsload!}
                 :source-paths ["src"]
-                :compiler {:main formious.client.core ; used by figwheel
+                :compiler {:main formious.client ; used by figwheel
                            ; figwheel requires these build/out directives:
                            :asset-path "/build/out" ; maybe used by figwheel?
                            :output-to "resources/public/build/bundle.js"
                            :output-dir "resources/public/build/out" ; for temporary/intermediate files only
                            :preloads [devtools.preload]
                            :optimizations :none}}]}
-  :figwheel {:ring-handler formious.server.core/reloadable-handler
+  :figwheel {:ring-handler formious.server/reloadable-handler
              :server-port 1451
              :server-ip "127.0.0.1"
              :css-dirs ["resources/public/build"]
              :server-logfile "/tmp/formious-figwheel.log"}
-  :ring {:handler formious.server.core/reloadable-handler
+  :ring {:handler formious.server/reloadable-handler
          :port 1451
          :open-browser? false}
-  :main formious.server.core
+  :main formious.server
   :profiles {:dev {:dependencies [[binaryage/devtools "0.9.9"]
                                   [figwheel-sidecar "0.5.14" :exclusions [org.clojure/tools.nrepl]]
                                   [com.cemerick/piggieback "0.2.2"]
