@@ -1,15 +1,19 @@
 (ns formious.db.response
   (:require [clojure.data.json :as json]
-            [formious.common :refer [->long]]
-            [formious.db.common :as db]))
+            [formious.util :refer [as-long]]
+            [formious.db :as db]))
 
 ; Int Int Int JsonObject Option[String] ZonedDateTime
 (defrecord Response [id participant_id block_id data assignment_id created])
-(def writable-columns ["participant_id" "block_id" "data" "assignment_id"])
+(def writable-columns
+  ["participant_id"
+   "block_id"
+   "data"
+   "assignment_id"])
 
 (defn find-by-id
   [id]
-  (some-> (db/query ["SELECT * FROM response WHERE id = ?" (->long id)])
+  (some-> (db/query ["SELECT * FROM response WHERE id = ?" (as-long id)])
           first
           map->Response))
 

@@ -1,31 +1,41 @@
-(ns formious.db.access-token
-  (:require [formious.common :refer [now ->long]]
-            [formious.db.common :as db]))
-
-(def ^:private ALPHABET "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
-
-(defn- random-string
-  "return alphaDecimal of given length"
-  [^Integer length]
-  (repeatedly length #(rand-nth ALPHABET)))
+(ns formious.db.accesstoken
+  (:require [era.core :refer [now]]
+            [formious.util :refer [as-long random-string]]
+            [formious.db :as db]))
 
 ; ^Integer ^String ^String ^Integer ^ZonedDateTime ^ZonedDateTime ^ZonedDateTime
 (defrecord AccessToken [id token relation foreign_id expires redacted created])
-(def writable-columns ["token" "relation" "foreign_id" "expires" "redacted"])
+(def writable-columns
+  ["token"
+   "relation"
+   "foreign_id"
+   "expires"
+   "redacted"])
+
+(defn query
+  [params]
+  (->> (db/query "SELECT * FROM accesstoken ORDER BY id ASC")
+       (map map->AccessToken)))
+
+(defn find-by-id
+  [id]
+  (some-> (db/query ["SELECT * FROM accesstoken WHERE id = ?" (as-long id)])
+          first
+          map->AccessToken))
 
 (defn blank
   []
-  (AccessToken. 0 "" "" 0 nil nil (now)))
+  (AccessToken. "new" "" "" 0 nil nil (now)))
 
 (defn all
   []
-  (->> (db/query "SELECT * FROM access_token ORDER BY id ASC")
+  (->> (db/query "SELECT * FROM accesstoken ORDER BY id ASC")
        (map map->AccessToken)))
 
 (defn insert!
   ; row keys: ^String token ^String relation ^Integer foreign_id expires redacted
   [row]
-  (-> (db/insert! "access_token" row) map->AccessToken))
+  (-> (db/insert! "accesstoken" row) map->AccessToken))
 
 (defn- createRandom
   [^String relation ^Integer foreign_id {:keys [length expires redacted] :or {length 40}}]
@@ -40,39 +50,39 @@
   ; @param relation   A table name
   ; @param foreign_id Pointer to the "id" column on the table denoted by the "relation" field
   [relation foreign_id length expires]
-  (if-let [row (first (db/query ["SELECT * FROM access_token
+  (if-let [row (first (db/query ["SELECT * FROM accesstoken
                                   WHERE relation = ?
                                     AND foreign_id = ?
                                     AND (expires IS NULL OR expires > NOW())
-                                    AND redacted IS NULL" relation (->long foreign_id)]))]
+                                    AND redacted IS NULL" relation (as-long foreign_id)]))]
     (map->AccessToken row)
     (insert! {:token (random-string length)
               :relation relation
-              :foreign_id (->long foreign_id)})))
+              :foreign_id (as-long foreign_id)})))
 
 (defn update!
   ; row keys: token, relation, foreign_id, expires, redacted
   [id set-map]
-  (db/update! "access_token" set-map ["id = ?" (->long id)]))
+  (db/update! "accesstoken" set-map ["id = ?" (as-long id)]))
 
 (defn check
   ; TODO: generalize this for use in find-or-create! (which doesn't use the token)
   [token relation foreign_id]
-  (-> (db/query ["SELECT * FROM access_token
+  (-> (db/query ["SELECT * FROM accesstoken
                   WHERE token = ?
                     AND relation = ?
                     AND foreign_id = ?
                     AND (expires IS NULL OR expires > NOW())
-                    AND redacted IS NULL" token relation (->long foreign_id)])
+                    AND redacted IS NULL" token relation (as-long foreign_id)])
       first
       map->AccessToken))
 
 (defn find-by-id
   [id]
-  (some-> (db/query ["SELECT * FROM access_token WHERE id = ?" (->long id)])
+  (some-> (db/query ["SELECT * FROM accesstoken WHERE id = ?" (as-long id)])
           first
           map->AccessToken))
 
 (defn delete!
   [id]
-  (db/delete! "access_token" ["id = ?" (->long id)]))
+  (db/delete! "accesstoken" ["id = ?" (as-long id)]))

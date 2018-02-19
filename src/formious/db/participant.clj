@@ -1,10 +1,16 @@
 (ns formious.db.participant
-  (:require [formious.common :refer [->long]]
-            [formious.db.common :as db]))
+  (:require [formious.util :refer [as-long]]
+            [formious.db :as db]))
 
 ; Int Option[String] Option[String] math.BigDecimal math.BigDecimal Option[String] Option[String] ZonedDateTime
 (defrecord Participant [id name aws_worker_id aws_bonus_owed aws_bonus_paid ip_address user_agent created])
-(def writable-columns ["name" "aws_worker_id" "aws_bonus_owed" "aws_bonus_paid" "ip_address" "user_agent"])
+(def writable-columns
+  ["name"
+   "aws_worker_id"
+   "aws_bonus_owed"
+   "aws_bonus_paid"
+   "ip_address"
+   "user_agent"])
 
 (defn all
   []
@@ -17,13 +23,13 @@
 
 (defn find-by-id
   [id]
-  (some-> (db/query ["SELECT * FROM participant WHERE id = ?" (->long id)])
+  (some-> (db/query ["SELECT * FROM participant WHERE id = ?" (as-long id)])
           first
           map->Participant))
 
 (defn update!
   [id set-map]
-  (db/update! "participant" set-map ["id = ?" (->long id)]))
+  (db/update! "participant" set-map ["id = ?" (as-long id)]))
 
 (defn find-or-create-by-worker-id!
   [aws_worker_id & {:keys [ip_address user_agent]}]

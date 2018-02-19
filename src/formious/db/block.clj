@@ -2,14 +2,21 @@
   (:require [clojure.walk :as walk]
             [clojure.tools.logging :as log]
             [formious.db.response :as Response]
-            [formious.common :refer [now ->long]]
-            [formious.db.common :as db]))
+            [era.core :refer [now]]
+            [formious.util :refer [as-long]]
+            [formious.db :as db]))
 
 ; (experiment_id: Int, template_id: Option[Int], context: String,
 ;   view_order: Double, randomize: Boolean, parent_block_id: Option[Int], quota: Option[Int])
 ; Int Int Option[Int] String Double Boolean Option[Int] Option[Int] ZonedDateTime
 (defrecord Block [id experiment_id template_id context view_order randomize parent_block_id quota created])
-(def writable-columns ["template_id" "context" "view_order" "randomize" "parent_block_id" "quota"])
+(def writable-columns
+  ["template_id"
+   "context"
+   "view_order"
+   "randomize"
+   "parent_block_id"
+   "quota"])
 
 (defn blank
   []
@@ -17,18 +24,18 @@
 
 (defn all
   [experiment_id]
-  (->> (db/query ["SELECT * FROM block WHERE experiment_id = ? ORDER BY view_order ASC" (->long experiment_id)])
+  (->> (db/query ["SELECT * FROM block WHERE experiment_id = ? ORDER BY view_order ASC" (as-long experiment_id)])
        (map map->Block)))
 
 (defn next-in-experiment
   [experiment_id]
-  (-> (db/query ["SELECT * FROM block WHERE experiment_id = ? ORDER BY view_order ASC LIMIT 1" (->long experiment_id)])
+  (-> (db/query ["SELECT * FROM block WHERE experiment_id = ? ORDER BY view_order ASC LIMIT 1" (as-long experiment_id)])
       first
       map->Block))
 
 (defn find-by-id
   [experiment_id id]
-  (some-> (db/query ["SELECT * FROM block WHERE experiment_id = ? AND id = ?" (->long experiment_id) (->long id)])
+  (some-> (db/query ["SELECT * FROM block WHERE experiment_id = ? AND id = ?" (as-long experiment_id) (as-long id)])
           first
           map->Block))
 
@@ -39,11 +46,11 @@
 (defn update!
   ; (id: Int, experiment_id: Int, template_id: Option[Int], context: String, view_order: Double, randomize: Boolean, parent_block_id: Option[Int], quota: Option[Int])
   [id experiment_id set-map]
-  (db/update! "block" set-map ["id = ? AND experiment_id = ?" (->long id) (->long experiment_id)]))
+  (db/update! "block" set-map ["id = ? AND experiment_id = ?" (as-long id) (as-long experiment_id)]))
 
 (defn delete!
   [id experiment_id]
-  (db/delete! "block" ["id = ? AND experiment_id = ?" (->long id) (->long experiment_id)]))
+  (db/delete! "block" ["id = ? AND experiment_id = ?" (as-long id) (as-long experiment_id)]))
 
 (defrecord TreeNode [children])
 (defrecord BranchNode [children value])

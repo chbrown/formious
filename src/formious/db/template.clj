@@ -1,14 +1,17 @@
 (ns formious.db.template
-  (:require [formious.common :refer [now ->long]]
-            [formious.db.common :as db]))
+  (:require [era.core :refer [now]]
+            [formious.util :refer [as-long]]
+            [formious.db :as db]))
 
 ; ^Integer ^String ^String ^ZonedDateTime
 (defrecord Template [id name html created])
-(def writable-columns ["name" "html"])
+(def writable-columns
+  ["name"
+   "html"])
 
 (defn blank
   []
-  (Template. 0 "" "" (now)))
+  (Template. "new" "" "" (now)))
 
 (defn all
   []
@@ -16,7 +19,7 @@
 
 (defn find-by-id
   [id]
-  (some-> (db/query ["SELECT * FROM template WHERE id = ?" (->long id)]) first map->Template))
+  (some-> (db/query ["SELECT * FROM template WHERE id = ?" (as-long id)]) first map->Template))
 
 (defn insert!
   [row]
@@ -24,8 +27,8 @@
 
 (defn update!
   [id set-map]
-  (db/update! "template" set-map ["id = ?" (->long id)]))
+  (db/update! "template" set-map ["id = ?" (as-long id)]))
 
 (defn delete!
   [id]
-  (db/delete! "template" ["id = ?" (->long id)]))
+  (db/delete! "template" ["id = ?" (as-long id)]))

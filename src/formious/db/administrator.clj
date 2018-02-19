@@ -1,27 +1,31 @@
 (ns formious.db.administrator
-  (:require [formious.common :refer [update-when now ->long]]
+  (:require [era.core :refer [now]]
+            [formious.util :refer [update-when]]
             [clojure.tools.logging :as log]
-            [formious.db.access-token :as AccessToken]
-            [formious.db.common :as db]))
-
-(def ^:private SALT "rNxROdgCbAkBI2WvZJtH")
+            [formious.db.accesstoken :as AccessToken]
+            [formious.db :as db]))
 
 (defn- hash-with-salt
-  "take a string s, add salt, hash with SHA-256 and return output as hex digest string"
-  [s]
-  (let [message (doto (java.security.MessageDigest/getInstance "SHA-256")
-                      (.update (.getBytes ^String SALT "UTF-8"))
-                      (.update (.getBytes ^String s "UTF-8")))
-        message-bytes (.digest message)]
-    (javax.xml.bind.DatatypeConverter/printHexBinary message-bytes)))
+  "Take a string, add salt, hash with SHA-256 and return output as hex digest string"
+  ([unsalted-string]
+   (hash-with-salt unsalted-string "rNxROdgCbAkBI2WvZJtH"))
+  ([unsalted-string salt]
+   {:pre [(some? unsalted-string)]}
+   (let [message (doto (java.security.MessageDigest/getInstance "SHA-256")
+                       (.update (.getBytes ^String salt "UTF-8"))
+                       (.update (.getBytes ^String unsalted-string "UTF-8")))
+         message-bytes (.digest message)]
+     (javax.xml.bind.DatatypeConverter/printHexBinary message-bytes))))
 
 ; Int String String ZonedDateTime
 (defrecord Administrator [id email password created])
-(def writable-columns ["email" "password"])
+(def writable-columns
+  ["email"
+   "password"])
 
 (defn blank
   []
-  (Administrator. 0 "" "" (now)))
+  (Administrator. "new" "" "" (now)))
 
 (defn all
   []
@@ -51,19 +55,19 @@
 
 (defn authenticate
   [email password]
-  (when-let [administrator (first (db/query ["SELECT * FROM administrator
-                                              WHERE email = ? AND password = ?" email (hash-with-salt password)]))]
-    (log/debug "Authenticating administrator" (:id administrator) "with new or existing token")
-    (AccessToken/find-or-create! "administrators" (:id administrator) 40 nil)))
-
-; Get administrator object from token.
-; @return None if no access token matched or if no administrator is linked to that token
+  (when (and (some? email) (some? password))
+    (when-let [administrator (first (db/query ["SELECT * FROM administrator
+                                                WHERE email = ? AND password = ?" email (hash-with-salt password)]))]
+      (log/debug "Authenticating administrator" (:id administrator) "with new or existing token")
+      (AccessToken/find-or-create! "administrators" (:id administrator) 40 nil))))
 
 (defn from-token
+  "Get administrator object from token.
+  return nil if no access token matched or if no administrator is linked to that token"
   [token]
-  (when-let [access-token (db/query ["SELECT * FROM access_token
+  (when-let [accesstoken (db/query ["SELECT * FROM accesstoken
                                       WHERE token = ?
                                         AND relation = 'administrators'
                                         AND (expires IS NULL OR expires > NOW())" token])]
-    (log/debug "Authenticating administrator for token" (:token access-token))
-    (find-by-id (-> access-token first :foreign_id))))
+    (log/debug "Authenticating administrator for token" (:token accesstoken))
+    (find-by-id (-> accesstoken first :foreign_id))))
