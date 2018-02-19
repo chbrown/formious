@@ -75,6 +75,7 @@
   :profiles {:dev {:dependencies [[binaryage/devtools "0.9.9"]
                                   [figwheel-sidecar "0.5.14" :exclusions [org.clojure/tools.nrepl]]
                                   [com.cemerick/piggieback "0.2.2"]
+                                  [fancy "0.1.0"]
                                   [org.clojure/tools.namespace "0.3.0-alpha3"]]
                    :ring {:auto-refresh? true}
                    :source-paths ["src" "dev"]
