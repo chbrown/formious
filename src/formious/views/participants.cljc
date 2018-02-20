@@ -1,6 +1,6 @@
 (ns formious.views.participants
   (:require [rum.core :as rum]
-            [formious.views.common :refer [css-classes datetime table table-container]]))
+            [formious.views.common :refer [datetime keyval-table table]]))
 
 (rum/defc ParticipantsEdit
   [participants]

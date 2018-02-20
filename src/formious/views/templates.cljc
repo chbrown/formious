@@ -1,6 +1,6 @@
 (ns formious.views.templates
   (:require [rum.core :as rum]
-            [formious.views.common :refer [css-classes datetime table table-container Link]]
+            [formious.views.common :refer [datetime table table-container Link]]
             [formious.util :refer [elide]]
             [formious.store :refer [app-state]]
             [formious.resources :as resources]
@@ -63,10 +63,7 @@
     (Link {:id "new"} "New template")]
    children])
 
-(def ^:private columns
-  ["Name" "HTML" "Created" ""])
-
-(defn- cells
+(defn- template->cells
   [{:keys [id name html created]}]
   [[:a {:title id :href (generate-path {:endpoint ::resources/template :group :admin :id id})} name]
    [:code (elide html 100)]
@@ -74,9 +71,12 @@
    [:button {:on-click (fn [_] (delete id))} "Delete"]])
 
 (rum/defc templates < rum/reactive []
-  (let [*templates (rum/cursor app-state ::resources/template)]
-    (table-container "Templates" (vals (rum/react *templates))
-                     columns cells (:default-table css-classes))))
+  (let [*templates (rum/cursor app-state ::resources/template)
+        templates (vals (rum/react *templates))]
+    (table-container
+     "Templates"
+     ["Name" "HTML" "Created" ""]
+     (map template->cells templates))))
 
 (rum/defc template < rum/reactive []
   (let [*route (rum/cursor app-state :route)

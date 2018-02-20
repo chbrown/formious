@@ -124,8 +124,6 @@
     (for [[k v] m]
       [:tr [:td k] [:td v]])]])
 
-(def css-classes {:default-table "fill padded striped lined"})
-
 (defn datetime ; (rum/defc datetime < rum/static
   "Create a time element with full datetime attribute and potentially shortened text content.
   Returns nil if date is nil."
@@ -141,24 +139,30 @@
         iso-string)])))
 
 (defn table
-  "Create a table element with thead built from columns and tbody built from rows and cells-fn"
-  [rows columns cells-fn & classes]
-  [:table {:class classes}
-   [:thead
-    [:tr
-     (for [column columns]
-       [:th column])]]
-   [:tbody
-    (for [row rows]
-      [:tr
-       (for [cell (cells-fn row)]
-         [:td cell])])]])
+  "Create a <table> element with:
+  * <thead> built from `columns` (seq of hiccup forms)
+  * <tbody> built from `rows` (seq of seqs of hiccup forms)"
+  ([columns rows]
+   (table columns rows {}))
+  ([columns rows attributes]
+   [:table attributes
+    [:thead
+     [:tr
+      (for [column columns]
+        [:th column])]]
+    [:tbody
+     (for [row rows]
+       [:tr
+        (for [cell row]
+          [:td cell])])]]))
 
 (defn table-container
-  [title rows columns cells-fn & classes]
-  [:div
-   [:section.hpad [:h3 title]]
-   [:section.box (apply table rows columns cells-fn classes)]])
+  ([title columns rows]
+   (table-container title columns rows {:class "fill padded striped lined"}))
+  ([title columns rows table-attributes]
+   [:div
+    [:section.hpad [:h3 title]]
+    [:section.box (table columns rows table-attributes)]]))
 
 (rum/defc Link < rum/reactive
   [relative-route children]

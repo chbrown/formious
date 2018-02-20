@@ -1,6 +1,6 @@
 (ns formious.views.accesstokens
   (:require [rum.core :as rum]
-            [formious.views.common :refer [Link css-classes datetime table-container]]
+            [formious.views.common :refer [Link datetime table-container]]
             [formious.resources :as resources]
             [formious.routes :refer [generate-path]]))
 
@@ -45,10 +45,7 @@
     (datetime created)]
    [:div.block [:button "Save"]]])
 
-(def ^:private columns
-  ["ID" "Token" "Relation / Foreign ID" "Expires" "Redacted" "Created" ""])
-
-(defn- cells
+(defn- accesstoken->cells
   [{:keys [id token relation foreign_id expires redacted created]}]
   [[:a {:href (generate-path {:endpoint ::resources/accesstoken :id id})} id]
    token
@@ -61,7 +58,10 @@
 (rum/defc accesstokens
   [accesstokens]
   (layout
-   (table-container "Access Tokens" accesstokens columns cells (:default-table css-classes))))
+   (table-container
+    "Access Tokens"
+    ["ID" "Token" "Relation / Foreign ID" "Expires" "Redacted" "Created" ""]
+    (map accesstoken->cells accesstokens))))
 
 (rum/defc accesstokens-reactive < rum/reactive
   [accesstokens-atom]

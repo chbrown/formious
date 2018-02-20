@@ -1,6 +1,6 @@
 (ns formious.views.awsaccounts
   (:require [rum.core :as rum]
-            [formious.views.common :refer [Link css-classes datetime table-container]]
+            [formious.views.common :refer [Link datetime table-container]]
             [formious.store :refer [app-state]]
             [formious.resources :as resources]
             [formious.routes :refer [generate-path]]))
@@ -26,9 +26,7 @@
   [id]
   (println "TODO: actually delete awsaccount #" id))
 
-(def columns ["Name" "Access Key ID" "Secret Access Key" "Created" ""])
-
-(defn cells
+(defn- awsaccount->cells
   [{:keys [id name access_key_id secret_access_key created]}]
   [[:a {:href (generate-path {:endpoint ::resources/awsaccount :group :admin :id id})} name]
    access_key_id
@@ -37,8 +35,12 @@
    [:button {:on-click (fn [_] (delete id))} "Delete"]])
 
 (rum/defc awsaccounts < rum/reactive []
-  (let [*awsaccounts (rum/cursor app-state ::resources/awsaccount)]
-    (table-container "AWS Accounts" (vals (rum/react *awsaccounts)) columns cells (:default-table css-classes))))
+  (let [*awsaccounts (rum/cursor app-state ::resources/awsaccount)
+        awsaccounts (vals (rum/react *awsaccounts))]
+    (table-container
+     "AWS Accounts"
+     ["Name" "Access Key ID" "Secret Access Key" "Created" ""]
+     (map awsaccount->cells awsaccounts))))
 
 (defn on-awsaccount-save
   []

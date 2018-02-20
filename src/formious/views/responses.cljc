@@ -1,14 +1,14 @@
 (ns formious.views.responses
   (:require [rum.core :as rum]
             [formious.util :refer [unique-keys]]
-            [formious.views.common :refer [css-classes datetime]]
+            [formious.views.common :refer [datetime]]
             [formious.routes :refer [generate-path]]))
 
 (defn- responses-table
   [responses]
   (let [context-keys (unique-keys (map :context responses))
         value-keys (unique-keys (map :value responses))]
-    [:table {:class (:default-table css-classes)}
+    [:table {:class "fill padded striped lined"}
      [:thead
       [:tr
        [:th "Response ID"]

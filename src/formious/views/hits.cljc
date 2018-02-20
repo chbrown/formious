@@ -2,7 +2,7 @@
   (:require [rum.core :as rum]
             [formious.util :refer [write-json-str]]
             [formious.routes :as routes :refer [generate-path]]
-            [formious.views.common :refer [Link Help css-classes datetime keyval-table]]))
+            [formious.views.common :refer [Link Help datetime keyval-table]]))
 
 (def $storage {:todo "Pull this from global state"})
 

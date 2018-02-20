@@ -1,6 +1,6 @@
 (ns formious.views.administrators
   (:require [rum.core :as rum]
-            [formious.views.common :refer [Link Help css-classes datetime table table-container]]
+            [formious.views.common :refer [Link Help datetime table table-container]]
             [formious.store :refer [app-state]]
             [formious.resources :as resources]
             [formious.routes :refer [generate-path]]))
@@ -17,9 +17,7 @@
   [id]
   (println "TODO: actually delete administrator #" id))
 
-(def administrators-columns
-  ["ID" "Email" "Created" ""])
-(defn administrators-cells
+(defn- administrator->cells
   [{:keys [id email created]}]
   [id
    [:a {:href (generate-path {:endpoint ::resources/administrator :group :admin :id id})} email]
@@ -27,9 +25,12 @@
    [:button {:on-click (fn [e] (delete id))} "Delete"]])
 
 (rum/defc administrators < rum/reactive []
-  (let [*administrators (rum/cursor app-state ::resources/administrator)]
-    (table-container "Administrators" (vals (rum/react *administrators))
-                     administrators-columns administrators-cells (:default-table css-classes))))
+  (let [*administrators (rum/cursor app-state ::resources/administrator)
+        administrators (vals (rum/react *administrators))]
+    (table-container
+     "Administrators"
+     ["ID" "Email" "Created" ""]
+     (map administrator->cells administrators))))
 
 (defn- save
   [administrator]
@@ -50,9 +51,7 @@
   [id]
   (println "TODO: actually unlink account #" id))
 
-(def ^:private accounts-columns
-  ["Name" "Access Key ID" "Priority" "Created" ""])
-(defn- accounts-cells
+(defn- awsaccount->cells
   [{:keys [id name access_key_id priority created] :as awsaccount}]
   [[:a {:href (generate-path {:endpoint ::resources/awsaccount :id id})} name]
    access_key_id
@@ -90,7 +89,8 @@
        [:div.block [:button "Save"]]]]
      [:section.hpad [:h3 "AWS Accounts"]]
      [:section.hpad.box
-      (table awsaccounts accounts-columns accounts-cells "lined")
+      (table ["Name" "Access Key ID" "Priority" "Created" ""]
+             (map awsaccount->cells awsaccounts) {:class "lined"})
       [:p
        [:select {:default-value (:awsaccount_id new-account)}
         (for [awsaccount awsaccounts]
