@@ -30,7 +30,7 @@
     (component-fn)))
 
 (defn render!
-  "Main attachment point; calls rum/mount"
+  "Main attachment point; calls rum/hydrate"
   []
   (let [{:keys [endpoint] :as route} @*route
         route-params (dissoc route :endpoint)]
@@ -38,7 +38,7 @@
     (-> (if endpoint
           (find-component endpoint route-params)
           (views/not-found (full-location)))
-        (rum/mount root-element))))
+        (rum/hydrate root-element))))
 
 (defn- any-modKey?
   "Returns true if the given KeyEvent is flagged for alt/ctrl/meta(=super)/shift key state"

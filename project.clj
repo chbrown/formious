@@ -33,7 +33,7 @@
                  [org.clojure/core.async "0.4.474"]
                  ; avoid "cljs/uuid? being replaced by: cognitect.transit/uuid?" warning:
                  [com.cognitect/transit-cljs "0.8.243"]
-                 [rum "0.11.1"]
+                 [rum "0.11.2"]
                  [era "0.2.3"] ; personal library for datetime processing
                  [jurl "0.1.1"] ; personal library for URL processing
                  [cljs-http "0.1.44"]]
