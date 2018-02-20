@@ -2,6 +2,25 @@
   (:require [rum.core :as rum]
             [formious.views.common :refer [datetime keyval-table table]]))
 
+(defn- participant-row
+  [{:keys [submitted blocklist created seen responses
+           bonus_paid bonus_owed password superuser tokens]}]
+  [:tr
+   [:td (datetime submitted)]
+   [:td blocklist]
+   ; "other data" cell
+   [:td {:style {:max-width "600px"}}
+    [:div.hover-flow
+     (keyval-table
+      {"Created"             created
+       "Seen"                seen
+       "Number of Responses" (count responses)
+       "Bonus paid"          bonus_paid
+       "Bonus owed"          bonus_owed
+       "Password"            password
+       "Superuser"           superuser
+       "Tokens"              tokens})]]])
+
 (rum/defc ParticipantsEdit
   [participants]
   [:div
@@ -29,20 +48,4 @@
        [:th "Submitted"]
        [:th "Blocklist"]
        [:th]]]
-     [:tbody
-      (for [{:keys [submitted blocklist others created seen responses
-                    bonus_paid bonus_owed password superuser tokens]} participants]
-        [:tr
-         [:td (datetime submitted)]
-         [:td blocklist]
-         [:td {:style {:max-width "600px"}}
-          [:div.hover-flow
-           (str others)]] ; (json/write-str others)]]
-         [:tr [:td "Created"] [:td created]]
-         [:tr [:td "Seen"] [:td seen]]
-         [:tr [:td "Number of Responses"] [:td (:length responses)]]
-         [:tr [:td "Bonus paid"] [:td bonus_paid]]
-         [:tr [:td "Bonus owed"] [:td bonus_owed]]
-         [:tr [:td "Password"] [:td password]]
-         [:tr [:td "Superuser"] [:td superuser]]
-         [:tr [:td "Tokens"] [:td [:div (:each tokens)]]]])]]]])
+     [:tbody (map participant-row participants)]]]])
