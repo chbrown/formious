@@ -1,4 +1,4 @@
-(ns formious.client.table
+(ns formious.client.util
   (:require [clojure.string :as str]
             [formious.util :refer [read-json-str]]))
 
@@ -9,6 +9,8 @@
   `file`: File (a native browser File object, as provided by an input[type=file]'s files[i] property)
   `callback`: (error: Error, data?: Uint8Array) => void"
   [file callback]
+  {:pre [(instance? js/File file)
+         (fn? callback)]}
   (let [reader (js/FileReader.)]
     (set! (.-onerror reader) callback)
     ; callback with an arraybufferview as basic bytes / chars
@@ -19,6 +21,7 @@
   "Return a map like {:status 200 :body <...>} from the contents
   of the (presumably fulfilled) XMLHttpRequest instance, `xhr`."
   [xhr]
+  {:pre [(instance? js/XMLHttpRequest xhr)]}
   (let [status (.-status xhr)
         content-type (.getResponseHeader xhr "Content-Type")
         ; parse response as JSON if the content-type header contains "application/json"
@@ -26,12 +29,12 @@
                (str/includes? content-type "application/json") (read-json-str))]
     {:status status :body body}))
 
-(defn- send-parse-table-xhr
-  [data content-type filename callback]
+(defn- send-xhr
+  [method url data headers callback]
   (let [xhr (doto (js/XMLHttpRequest.)
-                  (.open "POST" "/util/parse-table")
-                  (.setRequestHeader "Content-Type" content-type)
-                  (.setRequestHeader "X-Filename" filename))]
+                  (.open method url))]
+    (for [[k v] headers]
+      (.setRequestHeader xhr k v))
     (set! (.-onerror xhr) callback)
     (set! (.-onload xhr) (fn []
                            (let [{:keys [status body]} (parse-xhr-response xhr)]
@@ -51,4 +54,6 @@
                      (if error
                        (callback error)
                        ; send excel data off to the server to parse
-                       (send-parse-table-xhr data (.-type file) (.-name file) callback)))))
+                       (send-xhr "POST" "/util/parse-table"
+                                 data {"Content-Type" (.-type file)
+                                       "X-Filename"   (.-name file)} callback)))))
