@@ -85,34 +85,6 @@
   ([n population]
    (str/join (repeatedly n #(rand-nth population)))))
 
-;; tree-structure tools (functionality akin to clojure.walk, but specialized for our data structures)
-
-(defn- node?
-  "Returns true if `node`'s children (if it has any) are all nodes.
-  The given `node` must be a map."
-  [node]
-  {:pre [(map? node)]}
-  (every? node? (:children node)))
-
-(defn filter-recursively
-  "Recursively filter through the `nodes` tree,
-  retaining only the nodes for which (pred node) returns true."
-  [nodes pred]
-  {:pre [(every? node? nodes) (ifn? pred)]}
-  (map #(update % :children filter-recursively pred) (filter pred nodes)))
-
-(defn map-recursively
-  "Recursively map the `nodes` tree, replacing each node with (f node)."
-  [nodes f]
-  {:pre [(every? node? nodes) (ifn? f)]}
-  (map #(update % :children map-recursively f) nodes))
-
-(defn search
-  "Return a lazy sequence of all nodes in the `nodes` tree for which (pred node) returns true."
-  [nodes pred]
-  {:pre [(every? node? nodes) (ifn? pred)]}
-  (filter pred (tree-seq node? :children nodes)))
-
 ;; string parsing
 
 (defn- ex-no-matching-clause
