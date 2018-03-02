@@ -9,7 +9,9 @@ var url = require('url');
 
 var adapt = require('../lib/adapt');
 var db = require('../db');
-var models = require('../models');
+var AccessToken = require('../models/AccessToken');
+var Block = require('../models/Block');
+var Participant = require('../models/Participant');
 
 var _cached_block_template; // a Handlebars template function
 function getBlockTemplate(callback) {
@@ -125,7 +127,7 @@ R.post(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    models.Participant.addResponse({
+    Participant.addResponse({
       aws_worker_id: aws_worker_id,
       ip_address: req.headers['x-real-ip'] || req.client.remoteAddress,
       user_agent: req.headers['user-agent'],
@@ -135,9 +137,9 @@ R.post(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, function(req, res, m) {
     }, function(err, participant /*, responses*/) {
       if (err) return res.die(err);
 
-      models.Block.nextBlockId(experiment_id, block_id, participant.id, function(err, next_block_id) {
+      Block.nextBlockId(experiment_id, block_id, participant.id, function(err, next_block_id) {
         if (err) return res.die(err);
-        logger.info('models.Block.nextBlockId: %j', next_block_id);
+        logger.info('Block.nextBlockId: %j', next_block_id);
 
         // http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ExternalQuestionArticle.html
         // sadly, this redirect_to doesn't work. Hopefully the user will have a proper
@@ -174,7 +176,7 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
   var experiment_id = m[1];
 
   var urlObj = url.parse(req.url, true);
-  models.AccessToken.check(urlObj.query.token, 'experiments', experiment_id, function(err) {
+  AccessToken.check(urlObj.query.token, 'experiments', experiment_id, function(err) {
     if (err) return res.die(err);
 
     // yay, authorization granted

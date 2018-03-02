@@ -3,14 +3,11 @@ var async = require('async');
 var logger = require('loge').logger;
 var Router = require('regex-router');
 
-var models = require('../../../models');
+var Block = require('../../../models/Block');
 var db = require('../../../db');
 var tree = require('../../../lib/tree');
 
 var R = new Router();
-
-var blocks_columns = ['id', 'experiment_id', 'template_id', 'context',
-  'view_order', 'created', 'randomize', 'parent_block_id', 'quota'];
 
 /** GET /api/experiments/:experiment_id/blocks
 list all of an experiment's blocks */
@@ -74,7 +71,7 @@ R.post(/\/api\/experiments\/(\d+)\/blocks\/(\d+)$/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, blocks_columns);
+    var fields = _.pick(data, Block.columns);
 
     db.Update('blocks')
     .setEqual(fields)
@@ -112,7 +109,7 @@ R.get(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
   .execute(function(err, all_blocks) {
     if (err) return res.die(err);
 
-    var root_blocks = models.Block.shapeTree(all_blocks);
+    var root_blocks = Block.shapeTree(all_blocks);
     res.json(root_blocks);
   });
 });
@@ -135,7 +132,7 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
       }
     });
     async.each(new_blocks, function(block, callback) {
-      var fields = _.pick(block, blocks_columns);
+      var fields = _.pick(block, Block.columns);
 
       db.InsertOne('blocks')
       .set(fields)
@@ -169,7 +166,7 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
 
       // 3. brute-force update them all
       async.each(all_blocks, function(block, callback) {
-        var fields = _.pick(block, blocks_columns);
+        var fields = _.pick(block, Block.columns);
 
 
         db.Update('blocks')

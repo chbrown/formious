@@ -1,6 +1,6 @@
 var Router = require('regex-router');
 var Cookies = require('cookies');
-var models = require('../../models');
+var Administrator = require('../../models/Administrator');
 
 var R = new Router();
 
@@ -18,7 +18,7 @@ function prerouter(req, res) {
   // non-administrators
   var cookies = new Cookies(req, res);
   var token = cookies.get('administrator_token');
-  models.Administrator.fromToken(token, function(err, administrator) {
+  Administrator.fromToken(token, function(err, administrator) {
     if (err) {
       res.status(401).die('Authorization failed; you must login first.');
     }

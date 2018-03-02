@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var Router = require('regex-router');
 
-var models = require('../../models');
+var Administrator = require('../../models/Administrator');
 var db = require('../../db');
 
 var R = new Router();
@@ -32,7 +32,7 @@ R.post(/^\/api\/administrators$/, function(req, res) {
     if (err) return res.die(err);
 
     // .add is like .insert, but hashes the password.
-    models.Administrator.add(data.email, data.password, function(err, administrator) {
+    Administrator.add(data.email, data.password, function(err, administrator) {
       if (err) return res.die(err);
       res.status(201).json(administrator);
     });
@@ -59,7 +59,7 @@ R.post(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var administrator = new models.Administrator({id: m[1]});
+    var administrator = new Administrator({id: m[1]});
     // Administrator#update is like db.Update('administrators') but hashes the password if it is not ''
     administrator.update(data.email, data.password, function(err) {
       if (err) return res.die(err);

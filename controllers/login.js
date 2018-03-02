@@ -3,7 +3,7 @@ var Cookies = require('cookies');
 var moment = require('moment');
 
 var logger = require('loge').logger;
-var models = require('../models');
+var Administrator = require('../models/Administrator');
 
 // router & actions for logging in
 var R = new Router();
@@ -16,7 +16,7 @@ R.post(/^\/login$/, function(req, res) {
 
     // artificially slow to deflect brute force attacks
     setTimeout(function() {
-      models.Administrator.authenticate(fields.email, fields.password, function(err, token) {
+      Administrator.authenticate(fields.email, fields.password, function(err, token) {
         if (err) {
           // we serve the login page from GET as well as failed login POSTs
           res.status(401);

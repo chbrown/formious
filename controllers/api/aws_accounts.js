@@ -1,10 +1,9 @@
 var _ = require('lodash');
 var Router = require('regex-router');
 var db = require('../../db');
+var AWSAccount = require('../../models/AWSAccount');
 
 var R = new Router();
-
-var aws_accounts_columns = ['name', 'access_key_id', 'secret_access_key'];
 
 /** GET /api/aws_accounts
 List all AWS accounts. */
@@ -29,7 +28,7 @@ R.post(/^\/api\/aws_accounts$/, function(req, res) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, aws_accounts_columns);
+    var fields = _.pick(data, AWSAccount.columns);
 
     db.InsertOne('aws_accounts')
     .set(fields)
@@ -58,7 +57,7 @@ R.post(/^\/api\/aws_accounts\/(\d+)/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, aws_accounts_columns);
+    var fields = _.pick(data, AWSAccount.columns);
 
     db.Update('aws_accounts')
     .setEqual(fields)

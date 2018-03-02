@@ -1,13 +1,12 @@
 var async = require('async');
 var _ = require('lodash');
 var Router = require('regex-router');
+
 var db = require('../../../db');
 var lib_util = require('../../../lib/util');
-var logger = require('loge').logger;
+var Experiment = require('../../../models/Experiment');
 
 var R = new Router();
-
-var experiments_columns = ['name', 'administrator_id', 'html'];
 
 R.any(/^\/api\/experiments\/(\d+)\/blocks/, require('./blocks'));
 
@@ -22,7 +21,7 @@ function ensureAccessToken(experiment, callback) {
     });
   }
 
-  // models.AccessToken.findOrCreate('experiments', experiment.id, {length: 10}, function(err, access_token) {
+  // AccessToken.findOrCreate('experiments', experiment.id, {length: 10}, function(err, access_token) {
   db.InsertOne('access_tokens')
   .set({
     token: lib_util.randomString(10),
@@ -65,7 +64,7 @@ R.post(/^\/api\/experiments$/, function(req, res) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, experiments_columns);
+    var fields = _.pick(data, Experiment.columns);
 
     db.InsertOne('experiments')
     .set(fields)
@@ -112,7 +111,7 @@ R.post(/^\/api\/experiments\/(\d+)/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, experiments_columns);
+    var fields = _.pick(data, Experiment.columns);
 
     db.Update('experiments')
     .setEqual(fields)

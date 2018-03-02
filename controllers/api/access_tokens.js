@@ -1,11 +1,9 @@
 var _ = require('lodash');
 var db = require('../../db');
-var models = require('../../models');
+var AccessToken = require('../../models/AccessToken');
 var Router = require('regex-router');
 
 var R = new Router();
-
-var access_tokens_columns = ['token', 'relation', 'foreign_id', 'expires', 'redacted', 'created'];
 
 /** GET /api/access_tokens
 List all access tokens. */
@@ -30,7 +28,7 @@ R.post(/^\/api\/access_tokens$/, function(req, res) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, access_tokens_columns);
+    var fields = _.pick(data, AccessToken.columns);
 
     db.InsertOne('access_tokens')
     .set(fields)
@@ -60,7 +58,7 @@ R.post(/^\/api\/access_tokens\/(\d+)/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, access_tokens_columns);
+    var fields = _.pick(data, AccessToken.columns);
 
     db.Update('access_tokens')
     .setEqual(fields)

@@ -2,9 +2,18 @@ var _ = require('lodash');
 var db = require('../db');
 var lib_util = require('../lib/util');
 
-// ['token', 'relation', 'foreign_id', 'expires', 'redacted', 'created']
-
 class AccessToken {
+  static get columns() {
+    return [
+      'token',
+      'relation',
+      'foreign_id',
+      'expires',
+      'redacted',
+      'created',
+    ];
+  }
+
   static check(token, relation, foreign_id, callback) {
     var select = db.Select('access_tokens')
     .whereEqual({token: token, relation: relation})

@@ -1,4 +1,4 @@
-var models = require('../models');
+var Participant = require('../models/Participant');
 var Router = require('regex-router');
 
 var R = new Router();
@@ -23,7 +23,7 @@ R.post(/^\/mturk\/externalSubmit/, function(req, res) {
     var block_id = data.block_id || null;
     delete data.block_id;
 
-    models.Participant.addResponse({
+    Participant.addResponse({
       aws_worker_id: aws_worker_id,
       ip_address: req.headers['x-real-ip'] || req.client.remoteAddress,
       user_agent: req.headers['user-agent'],

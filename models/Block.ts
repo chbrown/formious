@@ -22,6 +22,20 @@ interface BlockRow {
 }
 
 class Block {
+  static get columns(): string[] {
+    return [
+      'id',
+      'experiment_id',
+      'template_id',
+      'context',
+      'view_order',
+      'created',
+      'randomize',
+      'parent_block_id',
+      'quota',
+    ];
+  }
+
   /**
   shapeTree takes a list of blocks and returns a subset of that list, but where
   all given blocks can be found within the tree structure of each block in that list.

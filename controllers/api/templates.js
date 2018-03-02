@@ -1,10 +1,9 @@
 var _ = require('lodash');
 var Router = require('regex-router');
 var db = require('../../db');
+var Template = require('../../models/Template');
 
 var R = new Router();
-
-var templates_columns = ['name', 'html'];
 
 /** GET /api/templates
 List all templates. */
@@ -29,7 +28,7 @@ R.post(/^\/api\/templates$/, function(req, res) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, templates_columns);
+    var fields = _.pick(data, Template.columns);
 
     db.InsertOne('templates')
     .set(fields)
@@ -65,7 +64,7 @@ R.post(/^\/api\/templates\/(\d+)/, function(req, res, m) {
   req.readData(function(err, data) {
     if (err) return res.die(err);
 
-    var fields = _.pick(data, templates_columns);
+    var fields = _.pick(data, Template.columns);
 
     db.Update('templates')
     .setEqual(fields)
