@@ -12,7 +12,7 @@ R.any(/^\/api\/mturk/, require('./mturk'));
 R.any(/^\/api\/responses/, require('./responses'));
 R.any(/^\/api\/templates/, require('./templates'));
 
-module.exports = function(req, res) {
+function prerouter(req, res) {
   // handle auth and forward. this is the checkpoint for all admin-level
   // requests, and should return 401 (to be handled by the client) for all
   // non-administrators
@@ -30,3 +30,5 @@ module.exports = function(req, res) {
     }
   });
 };
+
+module.exports = prerouter;

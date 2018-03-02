@@ -10,11 +10,14 @@ http.ServerResponse.prototype.die = function(error) {
   return this.text(message);
 };
 
-module.exports = http.createServer(function(req, res) {
+var server = http.createServer(function(req, res) {
   logger.debug('%s %s', req.method, req.url);
   controllers(req, res);
-})
-.on('listening', function() {
-  var address = this.address();
+});
+
+server.on('listening', function() {
+  var address = server.address();
   logger.info('server listening on http://%s:%d', address.address, address.port);
 });
+
+module.exports = server;
