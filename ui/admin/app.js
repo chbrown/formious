@@ -4,6 +4,7 @@ import {h, create, diff, patch} from 'virtual-dom';
 import {Url} from 'urlobject';
 import {Request} from 'httprequest';
 import {NotifyUI} from 'notify-ui';
+import {CookieMonster} from 'cookiemonster';
 
 // angular.js libraries:
 import angular from 'angular';
@@ -596,6 +597,7 @@ app.controller('admin', function($scope, $state, $http) {
   };
 
   $scope.logout = function() {
+    var cookies = new CookieMonster(document);
     cookies.del('administrator_token', {path: '/'});
     NotifyUI.add('Deleted administrator token');
     $state.go('.', {}, {reload: true});
