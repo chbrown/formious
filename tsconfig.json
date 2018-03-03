@@ -4,9 +4,6 @@
     "target": "ES6"
   },
   "files": [
-    "node_modules/declarations/async/async.d.ts",
-    "node_modules/declarations/lodash/lodash.d.ts",
-    "node_modules/declarations/node/node.d.ts",
     "models/Blocks.ts"
   ]
 }
