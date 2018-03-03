@@ -4,14 +4,57 @@ var path = require('path');
 var async = require('async');
 var handlebars = require('handlebars');
 var {logger} = require('loge');
+var streaming = require('streaming');
+var sv = require('sv');
 var Router = require('regex-router');
 var url = require('url');
 
-var adapt = require('../lib/adapt');
 var db = require('../db');
 var AccessToken = require('../models/AccessToken');
 var Block = require('../models/Block');
 var Participant = require('../models/Participant');
+
+/**
+Return a WritableStream, which we will generally pipe into res, and then
+successively write() to, eventually calling end(), or pipe to from another stream.
+
+Handles ?accept= querystring values as well as Accept: headers, deferring to
+the querystring, and defaults to line-delimited JSON
+
+TODO: refactor into http-enhanced, somehow.
+*/
+function createAdaptiveTransform(accept) {
+  // set empty content_type and no-op stream
+  var content_type = null;
+  // set default to streaming.json.Stringifier() so that we don't trip up on
+  // "TypeError: Invalid non-string/buffer chunk" errors when trying to write
+  // an object to the default writer
+  var writable_stream = new streaming.json.Stringifier();
+  // now check that header against the accept values we support
+  if (accept.match(/application\/json;\s*boundary=(NL|LF|EOL)/)) {
+    content_type = 'application/json; boundary=LF';
+    writable_stream = new streaming.json.Stringifier();
+  }
+  else if (accept.match(/application\/json/)) {
+    content_type = 'application/json';
+    writable_stream = new streaming.json.ArrayStringifier();
+  }
+  else if (accept.match(/text\/csv/)) {
+    content_type = 'text/csv; charset=utf-8';
+    writable_stream = new sv.Stringifier({peek: 100});
+  }
+  else if (accept.match(/text\/plain/)) {
+    content_type = 'text/plain; charset=utf-8';
+    writable_stream = new sv.Stringifier({peek: 100});
+  }
+  else {
+    // new streaming.Sink({objectMode: true});
+    // res.status(406).error(error, req.headers);
+    logger.info('Cannot find writer for Accept value: %j; using default', accept);
+  }
+  writable_stream.content_type = content_type;
+  return writable_stream;
+}
 
 var _cached_block_template; // a Handlebars template function
 function getBlockTemplate(callback) {
@@ -190,7 +233,7 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
       if (err) return res.die(err);
 
       var accept = urlObj.query.accept || req.headers.accept || 'application/json; boundary=LF';
-      var writer = adapt.createTransform(accept);
+      var writer = createAdaptiveTransform(accept);
       if (writer.content_type) {
         res.setHeader('Content-Type', writer.content_type);
       }
