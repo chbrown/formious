@@ -4,7 +4,6 @@ import {app, sendTurkRequest} from '../app';
 import {Url} from 'urlobject';
 import {CookieMonster} from 'cookiemonster';
 import {NotifyUI} from 'notify-ui';
-import {toArray} from 'tarry';
 
 const cookie_defaults = {
   path: '/',
@@ -297,7 +296,6 @@ app
 
   $scope.import = function() {
     var promises = $scope.assignments.map(assignment => {
-      // toArray(doc.querySelectorAll('Assignment')).map(Assignment => {
       var params = _.assign({
         value: _.pick(assignment, 'HITId', 'AutoApprovalTime', 'AcceptTime', 'SubmitTime', 'ApprovalTime'),
         assignment_id: assignment.AssignmentId,
