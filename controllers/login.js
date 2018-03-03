@@ -2,7 +2,7 @@ var Router = require('regex-router');
 var Cookies = require('cookies');
 var moment = require('moment');
 
-var logger = require('loge').logger;
+var {logger} = require('loge');
 var Administrator = require('../models/Administrator');
 
 // router & actions for logging in

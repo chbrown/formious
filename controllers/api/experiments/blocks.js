@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var async = require('async');
-var logger = require('loge').logger;
+var {logger} = require('loge');
 var Router = require('regex-router');
 
 var Block = require('../../../models/Block');

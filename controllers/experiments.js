@@ -3,7 +3,7 @@ var fs = require('fs');
 var path = require('path');
 var async = require('async');
 var handlebars = require('handlebars');
-var logger = require('loge').logger;
+var {logger} = require('loge');
 var Router = require('regex-router');
 var url = require('url');
 

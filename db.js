@@ -1,4 +1,4 @@
-var logger = require('loge').logger;
+var {logger} = require('loge');
 var sqlcmd = require('sqlcmd-pg');
 
 // the DB_PORT_5432_* values come from docker
