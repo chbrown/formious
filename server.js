@@ -7,13 +7,14 @@ var loge = require('loge');
 var controllers = require('./controllers');
 var db = require('./db');
 
-http.ServerResponse.prototype.die = function(error) {
+function dieResponse(error) {
   if (this.statusCode == 200) {
     this.statusCode = 500;
   }
   var message = error ? error.stack : 'Failure';
   return this.text(message);
-};
+}
+http.ServerResponse.prototype.die = dieResponse;
 
 var server = http.createServer(function(req, res) {
   loge.logger.debug('%s %s', req.method, req.url);
