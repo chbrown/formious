@@ -5,18 +5,16 @@
   <link href="data:;base64,=" rel="icon" type="image/x-icon">
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script>
-    /*jslint browser: true */ /*globals $ */
-    var formious = {};
-    formious.add = function(response) {
+    function formiousAdd(response) {
       return $.ajax({
         method: 'POST',
         url: window.location,
         contentType: 'application/json',
         data: JSON.stringify(response),
       });
-    };
-    formious.advance = function(response) {
-      var jqXHR = formious.add(response).always(function() {
+    }
+    function formiousAdvance(response) {
+      var jqXHR = formiousAdd(response).always(function() {
         // the server will respond to the header "x-requested-with': XMLHttpRequest"
         // by responding with the status code 200, so that the browser does
         // not gloss over the redirect.
@@ -29,7 +27,8 @@
           alert('Error: please inform the administrator that the experiment server is down. ' + message);
         }
       });
-    };
+    }
+    var formious = {add: formiousAdd, advance: formiousAdvance};
     formious.context = {{{context}}};
   </script>
 </head>
