@@ -7,7 +7,7 @@ import {NotifyUI} from 'notify-ui';
 
 const cookie_defaults = {
   path: '/',
-  expires: new Date(new Date().getTime() + 31*24*60*60*1000), // one month from now
+  expires: new Date(new Date().getTime() + 31 * 24 * 60 * 60 * 1000), // one month from now
 };
 
 function nodesToJSON(nodes) {
@@ -127,7 +127,7 @@ class QualificationType {
     sendTurkRequest(data, callback);
   }
   static update(data, callback) {
-    data = _.pick(data, [
+    var picked_data = _.pick(data, [
       'QualificationTypeId',
       'RetryDelayInSeconds',
       'QualificationTypeStatus',
@@ -138,14 +138,14 @@ class QualificationType {
       'AutoGranted',
       'AutoGrantedValue',
     ]);
-    if (data.QualificationTypeId === undefined) {
+    if (picked_data.QualificationTypeId === undefined) {
       setTimeout(() => callback(new Error('The QualificationTypeId parameter is required')), 0);
     }
-    if (data.AutoGranted === 0) {
-      delete data.AutoGrantedValue;
+    if (picked_data.AutoGranted === 0) {
+      delete picked_data.AutoGrantedValue;
     }
-    _.defaults(data, {Operation: 'UpdateQualificationType'});
-    sendTurkRequest(data, callback);
+    _.defaults(picked_data, {Operation: 'UpdateQualificationType'});
+    sendTurkRequest(picked_data, callback);
   }
 }
 
@@ -188,9 +188,9 @@ app
     MaxAssignments: 20,
     Reward: 0.05,
     Keywords: 'research,science',
-    AssignmentDurationInSeconds: 2*60*60, // 2h
-    LifetimeInSeconds: 12*60*60, // 12h
-    AutoApprovalDelayInSeconds: 2*24*60*60, // 2d
+    AssignmentDurationInSeconds: 2 * 60 * 60, // 2h
+    LifetimeInSeconds: 12 * 60 * 60, // 12h
+    AutoApprovalDelayInSeconds: 2 * 24 * 60 * 60, // 2d
     // experiment/show may send over ExternalURL and Title query params
     ExternalURL: $state.params.ExternalURL || '/experiments/MISSING',
     FrameHeight: 550,
@@ -236,7 +236,7 @@ app
         hitId: '0PREVIEWPREVIEWPREVIEWPREVIEW9',
         workerId: 'A1234TESTING',
         // turkSubmitTo is normally https://workersandbox.mturk.com or https://www.mturk.com
-        turkSubmitTo: ''
+        turkSubmitTo: '',
       });
       $scope.preview_url = $sce.trustAsResourceUrl(url.toString());
     }
@@ -342,7 +342,6 @@ app
     });
     NotifyUI.addPromise(promise);
   };
-
 })
 .directive('assignment', function($state, $localStorage, $turk, Response) {
   return {
@@ -355,7 +354,7 @@ app
       scope.$storage = $localStorage;
       var responses = Response.query({aws_worker_id: scope.assignment.WorkerId}, function() {
         var transform_functionBody = $localStorage.responses_summarizer || 'return responses;';
-        var transform_function = new Function('responses', 'assignment', transform_functionBody);
+        var transform_function = new Function('responses', 'assignment', transform_functionBody); // eslint-disable-line no-new-func
 
         var transformed_responses = transform_function(angular.copy(responses), angular.copy(scope.assignment));
 
@@ -386,7 +385,7 @@ app
         });
         NotifyUI.addPromise(promise);
       };
-    }
+    },
   };
 })
 .controller('admin.mturk.dashboard', function($scope, $localStorage, $state, $turk) {
@@ -418,7 +417,7 @@ app
       PageNumber: 1,
       MustBeRequestable: false,
       MustBeOwnedByCaller: true,
-    }
+    },
   }).SearchQualificationTypes;
 
   $scope.refresh = () => {
@@ -456,7 +455,7 @@ app
       QualificationTypeStatus: 'Active',
       AutoGranted: false,
       AutoGrantedValue: 1,
-    }
+    },
   }).QualificationType;
 
   $scope.sync = function() {
@@ -525,8 +524,7 @@ app
     // $scope.$storage.AssignQualification.QualificationTypeId = $state.params.QualificationTypeId;
     QualificationType.update($scope.QualificationType, (err) => {
       if (err) throw err;
-      NotifyUI.add(`Updated Qualification Type.`);
+      NotifyUI.add('Updated Qualification Type.');
     });
   };
-
 });

@@ -64,7 +64,7 @@ function renderObject(object) {
           h('table', [
             h('thead', thead_children),
             h('tbody', tbody_children),
-          ])
+          ]),
         ]);
       }
     }
@@ -75,7 +75,7 @@ function renderObject(object) {
   else if (typeof object === 'object') {
     var object_children = _.map(object, function(value, key) {
       return h('tr', [
-        h('td', key), h('td', renderObject(value))
+        h('td', key), h('td', renderObject(value)),
       ]);
     });
     return h('div.object', h('table.keyval', object_children));
@@ -104,7 +104,7 @@ app.directive('uiSrefActiveAny', function($state) {
         }
       }
       scope.$on('$stateChangeSuccess', updateSrefActiveAny);
-    }
+    },
   };
 });
 
@@ -143,7 +143,7 @@ app.directive('object', function() {
         var object = angular.copy(newVal);
         component.update(object);
       }, true);
-    }
+    },
   };
 });
 
@@ -208,7 +208,7 @@ app.factory('$turk', function($q) {
 app.service('Cache', function($q, $localStorage) {
   var cache = $localStorage.$default({cache: {}}).cache;
   // 1 hour expiration
-  var max_age = 60*60*1000;
+  var max_age = 60 * 60 * 1000;
 
   this.get = function(key, fetchFunction) {
     // key is some string that refers to a cache wrapper object:
@@ -281,7 +281,7 @@ app.directive('jsonarea', function() {
           scope.raw = angular.toJson(ngModel.$modelValue, true);
         }
       };
-    }
+    },
   };
 });
 
@@ -616,16 +616,14 @@ app.factory('RecursionHelper', function($compile) {
      * @returns An object containing the linking functions.
      */
     compile: function(element, link) {
-      // Normalize the link parameter
-      if (angular.isFunction(link)) {
-        link = { post: link };
-      }
+      // Normalize the link parameter and extract pre/post
+      var {pre = null, post} = angular.isFunction(link) ? {post: link} : link;
 
       // Break the recursion loop by removing the contents
       var contents = element.contents().remove();
       var compiledContents;
       return {
-        pre: (link && link.pre) ? link.pre : null,
+        pre,
         /**
          * Compiles and re-adds the contents
          */
@@ -640,12 +638,12 @@ app.factory('RecursionHelper', function($compile) {
           });
 
           // Call the post-linking function, if any
-          if (link && link.post) {
+          if (post) {
             link.post.apply(null, arguments);
           }
-        }
+        },
       };
-    }
+    },
   };
 });
 
@@ -659,7 +657,7 @@ app.directive('selectTemplate', function(Template) {
     replace: true,
     link: function(scope) {
       scope.templates = Template.query();
-    }
+    },
   };
 });
 
@@ -673,7 +671,7 @@ app.directive('aTemplate', function(Template) {
     replace: true,
     link: function(scope) {
       scope.template = Template.get({id: scope.id});
-    }
+    },
   };
 });
 
@@ -687,8 +685,8 @@ app.directive('durationString', function() {
     restrict: 'A',
     require: 'ngModel',
     link: function(scope, el, attrs, ngModel) {
-      ngModel.$formatters.push((seconds) => {
-        seconds = Number(seconds);
+      ngModel.$formatters.push((inputSeconds) => {
+        var seconds = Number(inputSeconds);
         var parts = [];
         if (seconds > units.d) {
           var d = seconds / units.d | 0;
@@ -723,6 +721,6 @@ app.directive('durationString', function() {
           return duration.asSeconds();
         }
       });
-    }
+    },
   };
 });

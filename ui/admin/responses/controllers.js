@@ -8,7 +8,7 @@ app
       order_column: 'created',
       order_direction: 'DESC',
       limit: 250,
-    }
+    },
   });
   $scope.templates = Template.query();
   $scope.experiments = Experiment.query();
@@ -24,9 +24,20 @@ app
     };
     $scope.responses = Response.query(params, function() {
       $scope.context_keys = _.chain($scope.responses)
-        .pluck('context').map(_.keys).flatten().uniq().without('$$hashKey').value();
+      .pluck('context')
+      .map(_.keys)
+      .flatten()
+      .uniq()
+      .without('$$hashKey')
+      .value();
+
       $scope.value_keys = _.chain($scope.responses)
-        .pluck('value').map(_.keys).flatten().uniq().without('$$hashKey').value();
+      .pluck('value')
+      .map(_.keys)
+      .flatten()
+      .uniq()
+      .without('$$hashKey')
+      .value();
     });
   };
   $scope.$watch('$storage.responses_query', _.debounce($scope.refresh, 500), true);

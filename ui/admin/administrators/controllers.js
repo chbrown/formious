@@ -12,8 +12,7 @@ app
     NotifyUI.addPromise(promise);
   };
 })
-.controller('admin.administrators.edit', function($scope, $http, $window, $stateParams,
-    Administrator, AWSAccount, AWSAccountAdministrator) {
+.controller('admin.administrators.edit', function($scope, $http, $window, $stateParams, Administrator, AWSAccount, AWSAccountAdministrator) {
   $scope.administrator = Administrator.get($stateParams);
 
   var administrator_id = $stateParams.id;

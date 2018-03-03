@@ -16,10 +16,11 @@ app
   };
 })
 .controller('admin.experiments.edit', function($scope, $state, $localStorage,
-    Experiment, Template, Administrator) {
+  Experiment, Template, Administrator) {
   $scope.$storage = $localStorage.$default({expand_experiment_html: false});
 
-  var experiment = $scope.experiment = Experiment.get({id: $state.params.experiment_id});
+  var experiment = Experiment.get({id: $state.params.experiment_id});
+  $scope.experiment = experiment;
   // $scope.aws_accounts = AWSAccount.query();
   $scope.administrators = Administrator.query();
   $scope.templates = Template.query();

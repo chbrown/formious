@@ -27,7 +27,7 @@ export var misc_js_plugins = angular.module('misc-js-plugins', [])
       var content = full_el.text().trim();
       var summary = content.slice(0, 50) + ((content.length > 50) ? '...' : '');
       summary_el.text(summary);
-    }
+    },
   };
 })
 .directive('jsonTransform', function() {
@@ -59,10 +59,14 @@ export var misc_js_plugins = angular.module('misc-js-plugins', [])
         // signature: angular.toJson(obj, [pretty]);
         return angular.toJson(value, true);
       });
-      ngModel.$parsers.push(function(value) {
+      ngModel.$parsers.push(function(stringValue) {
         // we'll interpret the empty string as 'null'
-        if (value === '') {
+        var value;
+        if (stringValue === '') {
           value = null;
+        }
+        else {
+          value = stringValue;
         }
 
         try {
@@ -75,6 +79,6 @@ export var misc_js_plugins = angular.module('misc-js-plugins', [])
           // return undefined;
         }
       });
-    }
+    },
   };
 });

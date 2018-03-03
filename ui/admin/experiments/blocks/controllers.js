@@ -42,19 +42,13 @@ class Node {
   }
 }
 
-function pluralize(singular, array) {
-  if (array.length == 1) {
-    return singular;
-  }
-  return singular + 's';
-}
-
 app
 .controller('admin.experiments.edit.blocks', function($scope, $q, $http, $localStorage, $state,
   Template, Block, parseTabularFile) {
   $scope.$storage = $localStorage;
   $scope.templates = Template.query();
-  var root = $scope.root = {children: []};
+  var root = {children: []};
+  $scope.root = root;
 
   // Block.queryTree({experiment_id: $state.params.experiment_id}).then(function(blocks) {});
   $http.get(`/api/experiments/${$state.params.experiment_id}/blocks/tree`).then(res => {
@@ -108,8 +102,8 @@ app
       // 2. remove the selection from the current tree
       // compute the new_children as children without selected_blocks
       var new_children = block.children
-        .filter(child_block => !selected_blocks.includes(child_block))
-        .map(transformFunction);
+      .filter(child_block => !selected_blocks.includes(child_block))
+      .map(transformFunction);
       if (block === parent_block) {
         // 3. create new block with the selected blocks as its children, and add
         // it to the designated parent block
@@ -122,7 +116,8 @@ app
       }
       return Object.assign({}, block, {children: new_children});
     }
-    root = $scope.root = transformFunction(root);
+    root = transformFunction(root);
+    $scope.root = root;
   };
 
   $scope.addEmptyBlock = () => {
@@ -271,6 +266,6 @@ app
       // Use the compile function from the RecursionHelper,
       // And return the linking function(s) which it returns
       return RecursionHelper.compile(element, this.link);
-    }
+    },
   };
 });
