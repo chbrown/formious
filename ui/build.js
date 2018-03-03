@@ -4,12 +4,16 @@
 import 'babel/polyfill';
 
 // handmade autofill (just as bad? or worse.)
-Array.prototype.includes = function(searchElement, fromIndex) {
-  if (fromIndex) {
-    return this.slice(fromIndex).indexOf(searchElement) !== -1;
-  }
-  return this.indexOf(searchElement) !== -1;
-};
+if (!Array.prototype.includes) {
+  Object.defineProperty(Array.prototype, 'includes', {
+    value: function(searchElement, fromIndex) {
+      if (fromIndex) {
+        return this.slice(fromIndex).indexOf(searchElement) !== -1;
+      }
+      return this.indexOf(searchElement) !== -1;
+    },
+  });
+}
 
 // import the app first
 import './admin/app';
