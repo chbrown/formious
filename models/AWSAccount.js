@@ -4,8 +4,8 @@ class AWSAccount {
       'name',
       'access_key_id',
       'secret_access_key',
-    ];
+    ]
   }
 }
 
-module.exports = AWSAccount;
+module.exports = AWSAccount

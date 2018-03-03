@@ -1,34 +1,34 @@
-var Router = require('regex-router');
-var Cookies = require('cookies');
-var Administrator = require('../../models/Administrator');
+var Router = require('regex-router')
+var Cookies = require('cookies')
+var Administrator = require('../../models/Administrator')
 
-var R = new Router();
+var R = new Router()
 
-R.any(/^\/api\/access_tokens/, require('./access_tokens'));
-R.any(/^\/api\/administrators/, require('./administrators'));
-R.any(/^\/api\/aws_accounts/, require('./aws_accounts'));
-R.any(/^\/api\/experiments/, require('./experiments'));
-R.any(/^\/api\/mturk/, require('./mturk'));
-R.any(/^\/api\/responses/, require('./responses'));
-R.any(/^\/api\/templates/, require('./templates'));
+R.any(/^\/api\/access_tokens/, require('./access_tokens'))
+R.any(/^\/api\/administrators/, require('./administrators'))
+R.any(/^\/api\/aws_accounts/, require('./aws_accounts'))
+R.any(/^\/api\/experiments/, require('./experiments'))
+R.any(/^\/api\/mturk/, require('./mturk'))
+R.any(/^\/api\/responses/, require('./responses'))
+R.any(/^\/api\/templates/, require('./templates'))
 
 function prerouter(req, res) {
   // handle auth and forward. this is the checkpoint for all admin-level
   // requests, and should return 401 (to be handled by the client) for all
   // non-administrators
-  var cookies = new Cookies(req, res);
-  var token = cookies.get('administrator_token');
+  var cookies = new Cookies(req, res)
+  var token = cookies.get('administrator_token')
   Administrator.fromToken(token, function(err, administrator) {
     if (err) {
-      res.status(401).die('Authorization failed; you must login first.');
+      res.status(401).die('Authorization failed; you must login first.')
     }
     else {
       // authentication succeeded! they're in. go wild.
       // attach administrator object to the request payload
-      req.administrator = administrator;
-      R.route(req, res);
+      req.administrator = administrator
+      R.route(req, res)
     }
-  });
+  })
 }
 
-module.exports = prerouter;
+module.exports = prerouter

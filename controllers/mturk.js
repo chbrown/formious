@@ -1,7 +1,7 @@
-var Participant = require('../models/Participant');
-var Router = require('regex-router');
+var Participant = require('../models/Participant')
+var Router = require('regex-router')
 
-var R = new Router();
+var R = new Router()
 
 /**
 POST /mturk/externalSubmit
@@ -16,12 +16,12 @@ empty string, and so missing final post backs will hit this endpoint.
 R.post(/^\/mturk\/externalSubmit/, function(req, res) {
   // readData uses the querystring for GET data
   req.readData(function(err, data) {
-    var aws_worker_id = data.workerId || 'WORKER_ID_NOT_AVAILABLE';
-    delete data.workerId;
+    var aws_worker_id = data.workerId || 'WORKER_ID_NOT_AVAILABLE'
+    delete data.workerId
 
     // potentially null block_id
-    var block_id = data.block_id || null;
-    delete data.block_id;
+    var block_id = data.block_id || null
+    delete data.block_id
 
     Participant.addResponse({
       aws_worker_id: aws_worker_id,
@@ -31,11 +31,11 @@ R.post(/^\/mturk\/externalSubmit/, function(req, res) {
       block_id: block_id,
       value: data,
     }, function(err) {
-      if (err) return res.die(err);
+      if (err) return res.die(err)
 
-      res.text('Your responses have been submitted and saved.');
-    });
-  });
-});
+      res.text('Your responses have been submitted and saved.')
+    })
+  })
+})
 
-module.exports = R.route.bind(R);
+module.exports = R.route.bind(R)

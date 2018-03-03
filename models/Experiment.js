@@ -4,8 +4,8 @@ class Experiment {
       'name',
       'administrator_id',
       'html',
-    ];
+    ]
   }
 }
 
-module.exports = Experiment;
+module.exports = Experiment

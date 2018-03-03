@@ -19,16 +19,16 @@ export var misc_js_plugins = angular.module('misc-js-plugins', [])
     transclude: true,
     scope: {},
     link: function(scope, el) {
-      var summary_el = el.children().eq(0);
-      var full_el = el.children().eq(1);
-      scope.expanded = false;
+      var summary_el = el.children().eq(0)
+      var full_el = el.children().eq(1)
+      scope.expanded = false
 
-      // var content = el.text().trim();
-      var content = full_el.text().trim();
-      var summary = content.slice(0, 50) + ((content.length > 50) ? '...' : '');
-      summary_el.text(summary);
+      // var content = el.text().trim()
+      var content = full_el.text().trim()
+      var summary = content.slice(0, 50) + ((content.length > 50) ? '...' : '')
+      summary_el.text(summary)
     },
-  };
+  }
 })
 .directive('jsonTransform', function() {
   /** parser/serializer to edit a JSON object within a textarea or input[type=text] */
@@ -39,46 +39,46 @@ export var misc_js_plugins = angular.module('misc-js-plugins', [])
       // set up communicating from DOM to model
       el.on('blur keyup change', function() {
         scope.$apply(function() {
-          ngModel.$setViewValue(el.val());
+          ngModel.$setViewValue(el.val())
           // if we wanted to read from page's html before from the model, we'd
           // run this function at the link level (but usually we want the model)
-        });
-      });
+        })
+      })
       // set up communicating from model to DOM
       ngModel.$render = function() {
-        el.val(ngModel.$viewValue);
+        el.val(ngModel.$viewValue)
         // this would trigger a textarea to resizeToFit, for example. kind of awkward, though.
-        el[0].dispatchEvent(new Event('input'));
-      };
+        el[0].dispatchEvent(new Event('input'))
+      }
 
       // set up translations
       ngModel.$formatters.push(function(value) {
         if (value === null) {
-          return '';
+          return ''
         }
-        // signature: angular.toJson(obj, [pretty]);
-        return angular.toJson(value, true);
-      });
+        // signature: angular.toJson(obj, [pretty])
+        return angular.toJson(value, true)
+      })
       ngModel.$parsers.push(function(stringValue) {
         // we'll interpret the empty string as 'null'
-        var value;
+        var value
         if (stringValue === '') {
-          value = null;
+          value = null
         }
         else {
-          value = stringValue;
+          value = stringValue
         }
 
         try {
-          ngModel.$setValidity('json', true);
+          ngModel.$setValidity('json', true)
           // angular uses an unwrapped JSON.parse, so it'll throw on failure
-          return angular.fromJson(value);
+          return angular.fromJson(value)
         }
         catch (exc) {
-          ngModel.$setValidity('json', false);
-          // return undefined;
+          ngModel.$setValidity('json', false)
+          // return undefined
         }
-      });
+      })
     },
-  };
-});
+  }
+})

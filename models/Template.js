@@ -3,8 +3,8 @@ class Template {
     return [
       'name',
       'html',
-    ];
+    ]
   }
 }
 
-module.exports = Template;
+module.exports = Template

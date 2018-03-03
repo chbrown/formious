@@ -1,32 +1,32 @@
-import _ from 'lodash';
-import angular from 'angular';
-import {app, sendTurkRequest} from '../app';
-import {Url} from 'urlobject';
-import {CookieMonster} from 'cookiemonster';
-import {NotifyUI} from 'notify-ui';
+import _ from 'lodash'
+import angular from 'angular'
+import {app, sendTurkRequest} from '../app'
+import {Url} from 'urlobject'
+import {CookieMonster} from 'cookiemonster'
+import {NotifyUI} from 'notify-ui'
 
 const cookie_defaults = {
   path: '/',
   expires: new Date(new Date().getTime() + 31 * 24 * 60 * 60 * 1000), // one month from now
-};
+}
 
 function nodesToJSON(nodes) {
   var pairs = _.map(nodes, function(node) {
     if (node.children && node.children.length > 0) {
-      return [node.tagName, nodesToJSON(node.children)];
+      return [node.tagName, nodesToJSON(node.children)]
     }
     else {
-      var value = node.textContent;
+      var value = node.textContent
       if (/^-?[0-9]*\.[0-9]+$/.test(value)) {
-        value = parseFloat(value);
+        value = parseFloat(value)
       }
       else if (/^-?[0-9]+$/.test(value)) {
-        value = parseInt(value, 10);
+        value = parseInt(value, 10)
       }
-      return [node.tagName, value];
+      return [node.tagName, value]
     }
-  });
-  return _.zipObject(pairs);
+  })
+  return _.zipObject(pairs)
 }
 
 function parseAnswer(answer_escaped) {
@@ -62,25 +62,25 @@ function parseAnswer(answer_escaped) {
         feedback_general: "I would love to see the answers between questions.",
       }
   */
-  var answer_xml = answer_escaped.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-  var answer_doc = new DOMParser().parseFromString(answer_xml, 'text/xml');
+  var answer_xml = answer_escaped.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+  var answer_doc = new DOMParser().parseFromString(answer_xml, 'text/xml')
   var pairs = _.map(answer_doc.querySelectorAll('Answer'), function(Answer) {
-    var key = Answer.querySelector('QuestionIdentifier').textContent;
+    var key = Answer.querySelector('QuestionIdentifier').textContent
     // TODO: handle other types of values besides FreeText
-    var value = Answer.querySelector('FreeText').textContent;
-    return [key, value];
-  });
-  return _.zipObject(pairs);
+    var value = Answer.querySelector('FreeText').textContent
+    return [key, value]
+  })
+  return _.zipObject(pairs)
 }
 
 function createExternalQuestionString(ExternalURL, FrameHeight) {
-  var xmlns = 'http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2006-07-14/ExternalQuestion.xsd';
-  var doc = document.implementation.createDocument(xmlns, 'ExternalQuestion');
-  var ExternalURL_el = doc.documentElement.appendChild(doc.createElement('ExternalURL'));
-  ExternalURL_el.textContent = ExternalURL;
-  var FrameHeight_el = doc.documentElement.appendChild(doc.createElement('FrameHeight'));
-  FrameHeight_el.textContent = FrameHeight;
-  return new XMLSerializer().serializeToString(doc);
+  var xmlns = 'http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2006-07-14/ExternalQuestion.xsd'
+  var doc = document.implementation.createDocument(xmlns, 'ExternalQuestion')
+  var ExternalURL_el = doc.documentElement.appendChild(doc.createElement('ExternalURL'))
+  ExternalURL_el.textContent = ExternalURL
+  var FrameHeight_el = doc.documentElement.appendChild(doc.createElement('FrameHeight'))
+  FrameHeight_el.textContent = FrameHeight
+  return new XMLSerializer().serializeToString(doc)
 }
 
 class QualificationType {
@@ -88,43 +88,43 @@ class QualificationType {
     _.defaults(data, {
       Operation: 'SearchQualificationTypes',
       MustBeOwnedByCaller: true,
-    });
-    sendTurkRequest(data, callback);
+    })
+    sendTurkRequest(data, callback)
   }
   static get(data, callback) {
     if (data.QualificationTypeId === undefined) {
-      setTimeout(() => callback(new Error('The QualificationTypeId parameter is required')), 0);
+      setTimeout(() => callback(new Error('The QualificationTypeId parameter is required')), 0)
     }
     _.defaults(data, {
       Operation: 'GetQualificationType',
-    });
-    sendTurkRequest(data, callback);
+    })
+    sendTurkRequest(data, callback)
   }
   static assign(data, callback) {
     if (data.QualificationTypeId === undefined) {
-      setTimeout(() => callback(new Error('The QualificationTypeId parameter is required')), 0);
+      setTimeout(() => callback(new Error('The QualificationTypeId parameter is required')), 0)
     }
     if (data.WorkerId === undefined) {
-      setTimeout(() => callback(new Error('The WorkerId parameter is required')), 0);
+      setTimeout(() => callback(new Error('The WorkerId parameter is required')), 0)
     }
     _.defaults(data, {
       Operation: 'AssignQualification',
       IntegerValue: 1,
       SendNotification: false,
-    });
-    sendTurkRequest(data, callback);
+    })
+    sendTurkRequest(data, callback)
   }
   static revoke(data, callback) {
     if (data.QualificationTypeId === undefined) {
-      setTimeout(() => callback(new Error('The QualificationTypeId parameter is required')), 0);
+      setTimeout(() => callback(new Error('The QualificationTypeId parameter is required')), 0)
     }
     if (data.SubjectId === undefined) {
-      setTimeout(() => callback(new Error('The SubjectId parameter is required')), 0);
+      setTimeout(() => callback(new Error('The SubjectId parameter is required')), 0)
     }
     _.defaults(data, {
       Operation: 'RevokeQualification',
-    });
-    sendTurkRequest(data, callback);
+    })
+    sendTurkRequest(data, callback)
   }
   static update(data, callback) {
     var picked_data = _.pick(data, [
@@ -137,39 +137,39 @@ class QualificationType {
       'TestDurationInSeconds',
       'AutoGranted',
       'AutoGrantedValue',
-    ]);
+    ])
     if (picked_data.QualificationTypeId === undefined) {
-      setTimeout(() => callback(new Error('The QualificationTypeId parameter is required')), 0);
+      setTimeout(() => callback(new Error('The QualificationTypeId parameter is required')), 0)
     }
     if (picked_data.AutoGranted === 0) {
-      delete picked_data.AutoGrantedValue;
+      delete picked_data.AutoGrantedValue
     }
-    _.defaults(picked_data, {Operation: 'UpdateQualificationType'});
-    sendTurkRequest(picked_data, callback);
+    _.defaults(picked_data, {Operation: 'UpdateQualificationType'})
+    sendTurkRequest(picked_data, callback)
   }
 }
 
 app
 .controller('admin.mturk', function($scope, $state, AWSAccount) {
   // TODO: improve interface between cookies and $state
-  var cookies = new CookieMonster(document, cookie_defaults);
+  var cookies = new CookieMonster(document, cookie_defaults)
   // environment
   if ($state.params.environment === '' && cookies.get('environment')) {
-    $state.go('.', {environment: cookies.get('environment')});
+    $state.go('.', {environment: cookies.get('environment')})
   }
-  $scope.environment = $state.params.environment;
-  $scope.environments = [{name: 'production'}, {name: 'sandbox'}, {name: 'local'}];
+  $scope.environment = $state.params.environment
+  $scope.environments = [{name: 'production'}, {name: 'sandbox'}, {name: 'local'}]
   // aws accounts
   if ($state.params.aws_account_id === '' && cookies.get('aws_account_id')) {
-    $state.go('.', {aws_account_id: cookies.get('aws_account_id')});
+    $state.go('.', {aws_account_id: cookies.get('aws_account_id')})
   }
-  $scope.aws_account_id = $state.params.aws_account_id;
-  $scope.aws_accounts = AWSAccount.query();
+  $scope.aws_account_id = $state.params.aws_account_id
+  $scope.aws_accounts = AWSAccount.query()
   // change watcher called from the view/template
   $scope.changeSetting = function(key, value) {
-    cookies.set(key, value);
-    $state.go('.', _.object([key], [value]));
-  };
+    cookies.set(key, value)
+    $state.go('.', _.object([key], [value]))
+  }
 })
 .controller('admin.mturk.hits.table', function($scope, $state, $turk) {
   $turk({
@@ -177,8 +177,8 @@ app
     SortDirection: 'Descending',
     PageSize: 100,
   }).then(function(document) {
-    $scope.hits = _.map(document.querySelectorAll('HIT'), HIT => nodesToJSON(HIT.children));
-  });
+    $scope.hits = _.map(document.querySelectorAll('HIT'), HIT => nodesToJSON(HIT.children))
+  })
 })
 .controller('admin.mturk.hits.new', function($scope, $http, $location, $sce, $state, $localStorage, $turk) {
   $scope.$storage = $localStorage.$default({
@@ -195,10 +195,10 @@ app
     ExternalURL: $state.params.ExternalURL || '/experiments/MISSING',
     FrameHeight: 550,
     preview_iframe: false,
-  });
+  })
 
   $scope.sync = function() {
-    var Question = createExternalQuestionString($scope.$storage.ExternalURL, $scope.$storage.FrameHeight);
+    var Question = createExternalQuestionString($scope.$storage.ExternalURL, $scope.$storage.FrameHeight)
     var data = {
       Operation: $scope.$storage.Operation,
       Title: $scope.$storage.Title,
@@ -213,22 +213,22 @@ app
       AssignmentDurationInSeconds: $scope.$storage.AssignmentDurationInSeconds,
       LifetimeInSeconds: $scope.$storage.LifetimeInSeconds,
       AutoApprovalDelayInSeconds: $scope.$storage.AutoApprovalDelayInSeconds,
-    };
-    _.extend(data, $scope.$storage.extra);
+    }
+    _.extend(data, $scope.$storage.extra)
     var promise = $turk(data).then(function(document) {
-      var HITId = document.querySelector('HITId').textContent;
-      // var HITTypeId = document.querySelector('HITTypeId').textContent;
-      $state.go('admin.mturk.hits.edit', {HITId: HITId});
-      return `Created HIT: ${HITId}`;
-    });
-    NotifyUI.addPromise(promise);
-  };
+      var HITId = document.querySelector('HITId').textContent
+      // var HITTypeId = document.querySelector('HITTypeId').textContent
+      $state.go('admin.mturk.hits.edit', {HITId: HITId})
+      return `Created HIT: ${HITId}`
+    })
+    NotifyUI.addPromise(promise)
+  }
 
   // AWS adds four parameters: assignmentId, hitId, workerId, and turkSubmitTo
   //   turkSubmitTo is the host, not the full path
   $scope.$watch('$storage.ExternalURL', function(ExternalURL) {
     if (ExternalURL !== '') {
-      var url = Url.parse(ExternalURL);
+      var url = Url.parse(ExternalURL)
       _.extend(url.query, {
         // Once assigned, assignmentId is a 30-character alphadecimal mess
         // assignmentId: 'ASSIGNMENT_ID_NOT_AVAILABLE',
@@ -237,13 +237,13 @@ app
         workerId: 'A1234TESTING',
         // turkSubmitTo is normally https://workersandbox.mturk.com or https://www.mturk.com
         turkSubmitTo: '',
-      });
-      $scope.preview_url = $sce.trustAsResourceUrl(url.toString());
+      })
+      $scope.preview_url = $sce.trustAsResourceUrl(url.toString())
     }
     else {
-      $scope.preview_url = null;
+      $scope.preview_url = null
     }
-  });
+  })
 })
 .controller('admin.mturk.hits.edit', function($scope, $localStorage, $state, $q, $turk, Response) {
   $scope.$storage = $localStorage.$default({
@@ -253,18 +253,18 @@ app
       IntegerValue: 1,
       SendNotification: 1,
     },
-  });
+  })
 
-  var HITId = $state.params.HITId;
+  var HITId = $state.params.HITId
 
   $turk({
     Operation: 'GetHIT',
     HITId,
   }).then(function(document) {
     // document is a Document instance with GetHITResponse as its root element
-    var HIT = document.querySelector('HIT');
-    $scope.hit = nodesToJSON(HIT.children);
-  });
+    var HIT = document.querySelector('HIT')
+    $scope.hit = nodesToJSON(HIT.children)
+  })
 
   $turk({
     Operation: 'GetAssignmentsForHIT',
@@ -275,11 +275,11 @@ app
   }).then(document => {
     // document is a Document instance, with GetAssignmentsForHITResponse as its root element
     $scope.assignments = _.map(document.querySelectorAll('Assignment'), Assignment => {
-      var assignment_json = nodesToJSON(Assignment.children);
-      assignment_json.Answer = parseAnswer(assignment_json.Answer);
-      return assignment_json;
-    });
-  });
+      var assignment_json = nodesToJSON(Assignment.children)
+      assignment_json.Answer = parseAnswer(assignment_json.Answer)
+      return assignment_json
+    })
+  })
 
   $scope.ExtendHIT = function() {
     var promise = $turk({
@@ -288,11 +288,11 @@ app
       MaxAssignmentsIncrement: $scope.extension.MaxAssignmentsIncrement,
       ExpirationIncrement: $scope.extension.ExpirationIncrement,
     }).then(ExtendHITResponse => {
-      console.log('ExtendHITResponse', ExtendHITResponse);
-      return 'Extended';
-    });
-    NotifyUI.addPromise(promise, 'Extending HIT');
-  };
+      console.log('ExtendHITResponse', ExtendHITResponse)
+      return 'Extended'
+    })
+    NotifyUI.addPromise(promise, 'Extending HIT')
+  }
 
   $scope.import = function() {
     var promises = $scope.assignments.map(assignment => {
@@ -302,32 +302,32 @@ app
         // block_id isn't required, but if it's provided, it had better be an actual stim!
         block_id: assignment.Answer.block_id,
         aws_worker_id: assignment.WorkerId,
-      }, assignment.Answer);
-      console.log('assignment params', params);
+      }, assignment.Answer)
+      console.log('assignment params', params)
 
-      var response = new Response(params);
+      var response = new Response(params)
       return response.$save().then(res => {
-        return {response: res};
+        return {response: res}
       }, res => {
         // err.message.match(/duplicate key value violates unique constraint/))
-        return {error: `Error: ${res.toString()}`};
-      });
-    });
+        return {error: `Error: ${res.toString()}`}
+      })
+    })
     var promise = $q.all(promises).then(results => {
-      var errors = results.filter(result => result.error);
-      return `Imported ${results.length - errors.length} out of ${results.length} assignments (${errors.length} duplicates)`;
-    });
-    NotifyUI.addPromise(promise, 'Importing assignments');
-  };
+      var errors = results.filter(result => result.error)
+      return `Imported ${results.length - errors.length} out of ${results.length} assignments (${errors.length} duplicates)`
+    })
+    NotifyUI.addPromise(promise, 'Importing assignments')
+  }
 
   QualificationType.query({}, (err, document) => {
-    if (err) throw err;
+    if (err) throw err
     $scope.QualificationTypes = _.map(document.querySelectorAll('QualificationType'),
-      QualificationType => nodesToJSON(QualificationType.children));
-  });
+      QualificationType => nodesToJSON(QualificationType.children))
+  })
 
   $scope.assignQualifications = () => {
-    var AssignQualification = $scope.$storage.AssignQualification;
+    var AssignQualification = $scope.$storage.AssignQualification
     var promises = $scope.assignments.map(assignment => {
       return $turk({
         Operation: 'AssignQualification',
@@ -335,13 +335,13 @@ app
         WorkerId: assignment.WorkerId,
         IntegerValue: AssignQualification.IntegerValue,
         SendNotification: AssignQualification.SendNotification,
-      });
-    });
+      })
+    })
     var promise = $q.all(promises).then((results) => {
-      return `Sent ${results.length} AssignQualification requests`;
-    });
-    NotifyUI.addPromise(promise);
-  };
+      return `Sent ${results.length} AssignQualification requests`
+    })
+    NotifyUI.addPromise(promise)
+  }
 })
 .directive('assignment', function($state, $localStorage, $turk, Response) {
   return {
@@ -351,15 +351,15 @@ app
       assignment: '=',
     },
     link: function(scope) {
-      scope.$storage = $localStorage;
+      scope.$storage = $localStorage
       var responses = Response.query({aws_worker_id: scope.assignment.WorkerId}, function() {
-        var transform_functionBody = $localStorage.responses_summarizer || 'return responses;';
-        var transform_function = new Function('responses', 'assignment', transform_functionBody); // eslint-disable-line no-new-func
+        var transform_functionBody = $localStorage.responses_summarizer || 'return responses;'
+        var transform_function = new Function('responses', 'assignment', transform_functionBody) // eslint-disable-line no-new-func
 
-        var transformed_responses = transform_function(angular.copy(responses), angular.copy(scope.assignment));
+        var transformed_responses = transform_function(angular.copy(responses), angular.copy(scope.assignment))
 
-        scope.responses = transformed_responses;
-      });
+        scope.responses = transformed_responses
+      })
 
       scope.blockWorker = function(Reason) {
         var promise = $turk({
@@ -367,12 +367,12 @@ app
           WorkerId: scope.assignment.WorkerId,
           Reason: Reason,
         }).then(function(document) {
-          var xml = new XMLSerializer().serializeToString(document);
-          console.log('BlockWorker response', xml);
-          return xml;
-        });
-        NotifyUI.addPromise(promise);
-      };
+          var xml = new XMLSerializer().serializeToString(document)
+          console.log('BlockWorker response', xml)
+          return xml
+        })
+        NotifyUI.addPromise(promise)
+      }
 
       scope.setStatus = function(Operation) {
         // Operation should start with one of 'Approve' | 'Reject' | 'ApproveRejected'
@@ -381,12 +381,12 @@ app
           AssignmentId: scope.assignment.AssignmentId,
           RequesterFeedback: scope.RequesterFeedback,
         }).then(() => {
-          return 'Set status successfully';
-        });
-        NotifyUI.addPromise(promise);
-      };
+          return 'Set status successfully'
+        })
+        NotifyUI.addPromise(promise)
+      }
     },
-  };
+  }
 })
 .controller('admin.mturk.dashboard', function($scope, $localStorage, $state, $turk) {
   $scope.NotifyWorkers = function() {
@@ -396,16 +396,16 @@ app
       MessageText: $scope.notification.MessageText,
       WorkerId: $scope.notification.WorkerId,
     }).then(document => {
-      var xml = new XMLSerializer().serializeToString(document);
-      console.log(xml);
-    });
-  };
+      var xml = new XMLSerializer().serializeToString(document)
+      console.log(xml)
+    })
+  }
 
   $turk({
     Operation: 'GetAccountBalance',
   }).then(document => {
-    $scope.AvailableBalance = nodesToJSON(document.querySelector('AvailableBalance').children);
-  });
+    $scope.AvailableBalance = nodesToJSON(document.querySelector('AvailableBalance').children)
+  })
 })
 .controller('admin.mturk.qualification_types.table', ($scope, $localStorage, $turk, $timeout) => {
   $scope.SearchQualificationTypes = $localStorage.$default({
@@ -418,35 +418,35 @@ app
       MustBeRequestable: false,
       MustBeOwnedByCaller: true,
     },
-  }).SearchQualificationTypes;
+  }).SearchQualificationTypes
 
   $scope.refresh = () => {
-    var data = $scope.SearchQualificationTypes;
+    var data = $scope.SearchQualificationTypes
     if (data.Query === '') {
-      data.Query = null;
+      data.Query = null
     }
     QualificationType.query(data, function(err, document) {
-      if (err) throw err;
+      if (err) throw err
       // document is a Document instance.
       $timeout(() => {
         $scope.QualificationTypes = _.map(document.querySelectorAll('QualificationType'),
-          QualificationType => nodesToJSON(QualificationType.children));
-      });
-    });
-  };
+          QualificationType => nodesToJSON(QualificationType.children))
+      })
+    })
+  }
 
-  $scope.refresh();
+  $scope.refresh()
 
   $scope.delete = (QualificationType) => {
     var promise = $turk({
       Operation: 'DisposeQualificationType',
       QualificationTypeId: QualificationType.QualificationTypeId,
     }).then(() => {
-      $scope.QualificationTypes.splice($scope.QualificationTypes.indexOf(QualificationType), 1);
-      return `Deleted QualificationType: ${QualificationType.QualificationTypeId}`;
-    });
-    NotifyUI.addPromise(promise);
-  };
+      $scope.QualificationTypes.splice($scope.QualificationTypes.indexOf(QualificationType), 1)
+      return `Deleted QualificationType: ${QualificationType.QualificationTypeId}`
+    })
+    NotifyUI.addPromise(promise)
+  }
 })
 .controller('admin.mturk.qualification_types.new', function($scope, $http, $state, $location, $localStorage, $turk) {
   $scope.QualificationType = $localStorage.$default({
@@ -456,7 +456,7 @@ app
       AutoGranted: false,
       AutoGrantedValue: 1,
     },
-  }).QualificationType;
+  }).QualificationType
 
   $scope.sync = function() {
     var data = {
@@ -471,13 +471,13 @@ app
       AnswerKey: $scope.QualificationType.AnswerKey,
       AutoGranted: $scope.QualificationType.AutoGranted,
       AutoGrantedValue: $scope.QualificationType.AutoGranted ? $scope.QualificationType.AutoGrantedValue : undefined,
-    };
+    }
     var promise = $turk(data).then(function(res) {
-      var QualificationTypeId = res.querySelector('QualificationTypeId').textContent;
-      return `Created QualificationType: ${QualificationTypeId}`;
-    });
-    NotifyUI.addPromise(promise);
-  };
+      var QualificationTypeId = res.querySelector('QualificationTypeId').textContent
+      return `Created QualificationType: ${QualificationTypeId}`
+    })
+    NotifyUI.addPromise(promise)
+  }
 })
 .controller('admin.mturk.qualification_types.edit', function($scope, $state, $localStorage, $turk) {
   $scope.$storage = $localStorage.$default({
@@ -485,12 +485,12 @@ app
       IntegerValue: 1,
       SendNotification: 1,
     },
-  });
+  })
 
   QualificationType.get({QualificationTypeId: $state.params.QualificationTypeId}, (err, document) => {
-    if (err) throw err;
-    $scope.QualificationType = nodesToJSON(document.querySelector('QualificationType').children);
-  });
+    if (err) throw err
+    $scope.QualificationType = nodesToJSON(document.querySelector('QualificationType').children)
+  })
 
   $turk({
     Operation: 'GetQualificationsForQualificationType',
@@ -500,31 +500,31 @@ app
     PageNumber: 1,
   }).then(function(document) {
     $scope.Qualifications = _.map(document.querySelectorAll('Qualification'),
-      Qualification => nodesToJSON(Qualification.children));
-  });
+      Qualification => nodesToJSON(Qualification.children))
+  })
 
   $scope.assignQualification = () => {
-    $scope.$storage.AssignQualification.QualificationTypeId = $state.params.QualificationTypeId;
+    $scope.$storage.AssignQualification.QualificationTypeId = $state.params.QualificationTypeId
     QualificationType.assign($scope.$storage.AssignQualification, (err) => {
-      if (err) throw err;
-      NotifyUI.add(`Assigned Qualification Type to ${$scope.$storage.AssignQualification.WorkerId}.`);
-    });
-  };
+      if (err) throw err
+      NotifyUI.add(`Assigned Qualification Type to ${$scope.$storage.AssignQualification.WorkerId}.`)
+    })
+  }
 
   $scope.deleteQualification = (Qualification) => {
-    $scope.$storage.AssignQualification.QualificationTypeId = $state.params.QualificationTypeId;
+    $scope.$storage.AssignQualification.QualificationTypeId = $state.params.QualificationTypeId
     QualificationType.revoke({SubjectId: Qualification.SubjectId, QualificationTypeId: $state.params.QualificationTypeId}, (err) => {
-      if (err) throw err;
-      $scope.Qualifications.splice($scope.Qualifications.indexOf(Qualification), 1);
-      NotifyUI.add(`Revoked Qualification Type from ${Qualification.SubjectId}.`);
-    });
-  };
+      if (err) throw err
+      $scope.Qualifications.splice($scope.Qualifications.indexOf(Qualification), 1)
+      NotifyUI.add(`Revoked Qualification Type from ${Qualification.SubjectId}.`)
+    })
+  }
 
   $scope.sync = () => {
-    // $scope.$storage.AssignQualification.QualificationTypeId = $state.params.QualificationTypeId;
+    // $scope.$storage.AssignQualification.QualificationTypeId = $state.params.QualificationTypeId
     QualificationType.update($scope.QualificationType, (err) => {
-      if (err) throw err;
-      NotifyUI.add('Updated Qualification Type.');
-    });
-  };
-});
+      if (err) throw err
+      NotifyUI.add('Updated Qualification Type.')
+    })
+  }
+})
