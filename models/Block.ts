@@ -1,9 +1,8 @@
 import _ = require('lodash');
 import async = require('async');
-import {logger} from 'loge';
 
-var db = require('../db');
-var tree = require('../lib/tree');
+const db = require('../db');
+const tree = require('../lib/tree');
 
 interface BlockRow {
   id: number;
@@ -41,11 +40,11 @@ class Block {
   all given blocks can be found within the tree structure of each block in that list.
   */
   static shapeTree(blocks: BlockRow[]): BlockRow[] {
-    var block_hash: {[index: number]: BlockRow} = _.object(blocks.map(block => {
+    const block_hash: {[index: number]: BlockRow} = _.object(blocks.map(block => {
       block.children = [];
       return [block.id, block];
     }));
-    var root_blocks: BlockRow[] = [];
+    const root_blocks: BlockRow[] = [];
     blocks.forEach(block => {
       if (block.parent_block_id) {
         // block_hash and root blocks contents are linked by reference, so order doesn't matter here
@@ -81,11 +80,11 @@ class Block {
         AS participant_responses ON participant_responses.block_id = blocks.id
       WHERE blocks.experiment_id = $2
       ORDER BY view_order ASC
-    `, [participant_id, experiment_id], (err, blocks: BlockRow[]) => {
+    `, [participant_id, experiment_id], (err: Error, blocks: BlockRow[]) => {
       if (err) return callback(err);
 
       // should id = null?
-      var root = {
+      const root = {
         id: null,
         randomize: false,
         children: Block.shapeTree(blocks),
@@ -95,12 +94,11 @@ class Block {
       }
 
       // we need to get the parent_block_id of the most_recent block
-      var most_recent_block = findBlock(block_id);
+      const most_recent_block = findBlock(block_id);
       if (most_recent_block === undefined) {
         // not funny. that block doesn't exist in this experiment.
         return callback(new Error(`Block with id=${block_id} cannot be found.`));
       }
-      // var current_parent_block_id = most_recent_block.parent_block_id;
 
       // 1. get the path of block ids (only ids, since we mutate the tree when
       //    pruning) from the parent of the most recent block to the root.
@@ -108,23 +106,23 @@ class Block {
       Returns a list from nearest to root, e.g.:
           [parent_of_most_recent, grandparent_of_most_recent, ..., null]
       */
-      function findPath(block_id: number): BlockRow[] {
-        var block = findBlock(block_id);
+      function findPath(current_block_id: number): BlockRow[] {
+        const block = findBlock(current_block_id);
         if (block.parent_block_id) {
           return [block].concat(findPath(block.parent_block_id));
         }
         return [block, root];
       }
-      var current_path = findPath(most_recent_block.parent_block_id);
+      const current_path = findPath(most_recent_block.parent_block_id);
 
       // 2. travel upward until we find a parent that has incomplete children,
       //    marking blocks for completion as needed
       async.whilst(() => {
-        var next_parent_block = current_path[0];
+        const next_parent_block = current_path[0];
         if (next_parent_block === root) {
           return false;
         }
-        var completed_children = next_parent_block.children.filter(block => !!block.completed);
+        const completed_children = next_parent_block.children.filter(block => !!block.completed);
 
         if (completed_children.length == next_parent_block.children.length) {
           return true;
@@ -134,32 +132,29 @@ class Block {
           return true;
         }
         return false;
-      }, callback => {
+      }, whilstCallback => {
         // okay, we're done with that block, shift it off
-        var block = current_path.shift();
+        const block = current_path.shift();
         // mark it completed locally, so that parent blocks will see it's been completed
         block.completed = new Date(); // doesn't really matter what date, actually
         // and then persist the completion, too
         db.InsertOne('responses')
         .set({
-          participant_id: participant_id,
+          participant_id,
           block_id: block.id,
           // value: null,
         })
-        .execute(callback);
+        .execute(whilstCallback);
       }, error => {
         if (error) return callback(error);
         // ok, current_path is either empty or current_path[0] is the next block we should do
-        var next_parent_block = current_path[0];
+        const initial_next_parent_block = current_path[0];
 
         // 3. recurse downward and randomize as needed. this is async since we
         // may need to query past responses when randomizing
-        // var next_parent_block = next_parent_block;
-        // var next_block_id = findNextBlock(next_parent_block);
-        // async.whilst(() => {
         (function next(next_parent_block: BlockRow) {
-          nextChildBlock(next_parent_block, (error, next_block) => {
-            if (error) return callback(error);
+          nextChildBlock(next_parent_block, (ncbError, next_block) => {
+            if (ncbError) return callback(ncbError);
 
             // if there are no more blocks to do, next_block will be null
             if (next_block === null) {
@@ -173,14 +168,14 @@ class Block {
               next(next_block);
             }
           });
-        })(next_parent_block);
+        })(initial_next_parent_block);
       });
     });
   }
 }
 
 function nextChildBlock(parent_block: BlockRow, callback: (error: Error, block?: BlockRow) => void) {
-  var incomplete_child_blocks = parent_block.children.filter(block => !block.completed);
+  const incomplete_child_blocks = parent_block.children.filter(block => !block.completed);
   // if next_parent_block was `root` all the children might be completed
   if (incomplete_child_blocks.length === 0) {
     // so, we've completed all there is to complete!
@@ -188,37 +183,37 @@ function nextChildBlock(parent_block: BlockRow, callback: (error: Error, block?:
   }
   if (parent_block.randomize) {
     if (parent_block.quota !== null) {
-      var incomplete_child_block_ids = incomplete_child_blocks.map(block => block.id);
+      const incomplete_child_block_ids = incomplete_child_blocks.map(block => block.id);
       // find the next candidate that has the fewest completions
       db.Select('responses')
       .add('block_id, COUNT(id)::int')
       .where('block_id = ANY(?)', incomplete_child_block_ids)
       .groupBy('block_id')
-      .execute((error: Error, counts: {block_id: number, count: number}[]) => {
+      .execute((error: Error, counts: Array<{block_id: number, count: number}>) => {
         if (error) return callback(error);
-        var block_counts: {[index: number]: number} = _.zipObject(counts.map(count => [count.block_id, count.count]));
+        const block_counts: {[index: number]: number} = _.zipObject(counts.map(count => [count.block_id, count.count]));
         // it's possible there are no responses for any of the candidate blocks
         incomplete_child_blocks.forEach(block => {
           block.responses = block_counts[block.id] || 0;
         });
-        var minimum_count: number = _.min(incomplete_child_blocks.map(block => block.responses));
-        var candidate_child_blocks = incomplete_child_blocks.filter(block => block.responses == minimum_count);
+        const minimum_count: number = _.min(incomplete_child_blocks.map(block => block.responses));
+        const candidate_child_blocks = incomplete_child_blocks.filter(block => block.responses == minimum_count);
         //
-        var next_block = _.sample(candidate_child_blocks);
+        const next_block = _.sample(candidate_child_blocks);
         callback(null, next_block);
       });
     }
     else {
       setImmediate(() => {
         // _.sample called with a single argument returns a single item, not a list
-        var next_block = _.sample(incomplete_child_blocks);
+        const next_block = _.sample(incomplete_child_blocks);
         callback(null, next_block);
       });
     }
   }
   else {
     setImmediate(() => {
-      var next_block = _.first(incomplete_child_blocks);
+      const next_block = _.first(incomplete_child_blocks);
       callback(null, next_block);
     });
   }
