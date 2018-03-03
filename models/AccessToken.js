@@ -1,4 +1,3 @@
-var _ = require('lodash');
 var db = require('../db');
 var lib_util = require('../lib/util');
 
@@ -39,11 +38,8 @@ class AccessToken {
     length: Number (defaults to 40)
     expires: Date || null
   callback: function(err, access_token_object: Object)
-
   */
   static findOrCreate(relation, foreign_id, options, callback) {
-    options = _.assign({length: 40, expires: null}, options);
-
     db.SelectOne('access_tokens')
     .whereEqual({relation: relation, foreign_id: foreign_id})
     .where('(expires IS NULL OR expires > NOW())')
@@ -56,13 +52,13 @@ class AccessToken {
         return callback(null, access_token);
       }
 
-      var token = lib_util.randomString(options.length);
+      var token = lib_util.randomString(options.length || 40);
       db.InsertOne('access_tokens')
       .set({
         token: token,
         relation: relation,
         foreign_id: foreign_id,
-        expires: options.expires,
+        expires: options.expires || null,
       })
       .returning('*')
       .execute(callback);

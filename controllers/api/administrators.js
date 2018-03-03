@@ -45,9 +45,9 @@ Show existing administrator. */
 R.get(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
   db.SelectOne('administrators')
   .whereEqual({id: m[1]})
-  .execute(function(err, administrator) {
+  .execute(function(err, full_administrator) {
     if (err) return res.die(err);
-    administrator = _.omit(administrator, 'password');
+    var administrator = _.omit(full_administrator, 'password');
     res.json(administrator);
   });
 });

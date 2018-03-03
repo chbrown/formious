@@ -23,7 +23,7 @@ R.post(/\/util\/parse-table/, function(req, res) {
   }
   else {
     // prepare transforms
-    var parser = (content_type == 'application/json') ? new streaming.json.Parser() : new sv.Parser();
+    var parser = content_type == 'application/json' ? new streaming.json.Parser() : new sv.Parser();
     var stringifier = new streaming.json.ArrayStringifier();
     // set headers
     res.setHeader('content-type', 'application/json');

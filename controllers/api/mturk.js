@@ -18,8 +18,7 @@ API operation to call.
 R.post(/^\/api\/mturk\?/, function(req, res) {
   var urlObj = url.parse(req.url, true);
   var aws_account_id = urlObj.query.aws_account_id || null;
-  var environment = (urlObj.query.environment == 'production') ?
-    turk.Environment.production : turk.Environment.sandbox;
+  var environment = urlObj.query.environment == 'production' ? turk.Environment.production : turk.Environment.sandbox;
 
   req.readData(function(err, data) {
     if (err) return res.die(err);

@@ -27,21 +27,21 @@ server.on('listening', function() {
 
 function main() {
   var argvparser = optimist
-    .usage('formious --port 1451 -v')
-    .describe({
-      hostname: 'hostname to listen on',
-      port: 'port to listen on',
-      help: 'print this help message',
-      verbose: 'print extra output',
-      version: 'print version',
-    })
-    .boolean(['help', 'verbose', 'version'])
-    .alias({verbose: 'v'})
-    .default({
-      hostname: process.env.HOSTNAME || '127.0.0.1',
-      port: parseInt(process.env.PORT) || 80,
-      verbose: process.env.DEBUG !== undefined,
-    });
+  .usage('formious --port 1451 -v')
+  .describe({
+    hostname: 'hostname to listen on',
+    port: 'port to listen on',
+    help: 'print this help message',
+    verbose: 'print extra output',
+    version: 'print version',
+  })
+  .boolean(['help', 'verbose', 'version'])
+  .alias({verbose: 'v'})
+  .default({
+    hostname: process.env.HOSTNAME || '127.0.0.1',
+    port: parseInt(process.env.PORT, 10) || 80,
+    verbose: process.env.DEBUG !== undefined,
+  });
 
   var argv = argvparser.argv;
   loge.logger.level = argv.verbose ? loge.Level.debug : loge.Level.info;

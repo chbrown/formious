@@ -68,11 +68,8 @@ class Administrator {
   callback signature: function(err, user || null)
   */
   static fromToken(token, callback) {
-    if (!token) {
-      token = '';
-    }
     db.Select('access_tokens')
-    .where('token = ?', token)
+    .where('token = ?', token || '')
     .where('relation = ?', 'administrators')
     .where('(expires IS NULL OR expires > NOW())')
     .execute(function(err, rows) {

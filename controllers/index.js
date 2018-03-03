@@ -20,13 +20,13 @@ var UI_ROOT = path.join(__dirname, '..', 'ui');
 
 R.get(/^\/ui\/([^?]+)(\?|$)/, function(req, res, m) {
   send(req, m[1], {root: UI_ROOT})
-    .on('error', function(err) {
-      res.die(err.status || 500, 'send error: ' + err.message);
-    })
-    .on('directory', function() {
-      res.status(404).die('No resource at: ' + req.url);
-    })
-    .pipe(res);
+  .on('error', function(err) {
+    res.die(err.status || 500, 'send error: ' + err.message);
+  })
+  .on('directory', function() {
+    res.status(404).die('No resource at: ' + req.url);
+  })
+  .pipe(res);
 });
 
 R.get(/^\/info$/, function(req, res) {

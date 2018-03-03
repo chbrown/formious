@@ -29,6 +29,6 @@ function prerouter(req, res) {
       R.route(req, res);
     }
   });
-};
+}
 
 module.exports = prerouter;

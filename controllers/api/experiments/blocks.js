@@ -160,7 +160,9 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
       tree.recursiveEach(root_blocks, function(block) {
         all_blocks.push(block);
       });
-      var all_blocks_ids = all_blocks.map(function(block) { return block.id; });
+      var all_blocks_ids = all_blocks.map(function(block) {
+        return block.id;
+      });
 
       logger.info('Updating %d blocks', all_blocks.length);
 
@@ -173,7 +175,7 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
         .setEqual(fields)
         .whereEqual({
           // careful, if block.id is null/undefined, this could wreak havoc!
-          id: block.id || 0
+          id: block.id || 0,
         })
         .execute(callback);
       }, function(err) {

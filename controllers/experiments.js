@@ -163,7 +163,6 @@ R.post(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, function(req, res, m) {
           res.redirect(redirect_to);
         }
       });
-
     });
   });
 });
