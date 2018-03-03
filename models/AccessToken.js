@@ -1,5 +1,4 @@
 var db = require('../db');
-var lib_util = require('../lib/util');
 
 class AccessToken {
   static get columns() {
@@ -11,6 +10,15 @@ class AccessToken {
       'redacted',
       'created',
     ];
+  }
+
+  static randomString(length) {
+    var store = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    var result = '';
+    for (var i = 0; i < length; i++) {
+      result += store[Math.random() * store.length | 0];
+    }
+    return result;
   }
 
   static check(token, relation, foreign_id, callback) {
@@ -52,7 +60,7 @@ class AccessToken {
         return callback(null, access_token);
       }
 
-      var token = lib_util.randomString(options.length || 40);
+      var token = AccessToken.randomString(options.length || 40);
       db.InsertOne('access_tokens')
       .set({
         token: token,

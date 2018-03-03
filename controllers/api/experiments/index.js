@@ -3,7 +3,7 @@ var _ = require('lodash');
 var Router = require('regex-router');
 
 var db = require('../../../db');
-var lib_util = require('../../../lib/util');
+var AccessToken = require('../../../models/AccessToken');
 var Experiment = require('../../../models/Experiment');
 
 var R = new Router();
@@ -24,7 +24,7 @@ function ensureAccessToken(experiment, callback) {
   // AccessToken.findOrCreate('experiments', experiment.id, {length: 10}, function(err, access_token) {
   db.InsertOne('access_tokens')
   .set({
-    token: lib_util.randomString(10),
+    token: AccessToken.randomString(10),
     relation: 'experiments',
     foreign_id: experiment.id,
     // expires: experiment.expires,
