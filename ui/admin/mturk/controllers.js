@@ -1,4 +1,3 @@
-/*jslint browser: true, esnext: true */
 import _ from 'lodash';
 import angular from 'angular';
 import {app, sendTurkRequest} from '../app';

@@ -1,4 +1,3 @@
-/*jslint esnext: true */
 import _ from 'lodash';
 import {app} from '../app';
 

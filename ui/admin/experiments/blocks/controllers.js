@@ -1,4 +1,3 @@
-/*jslint esnext: true */
 import _ from 'lodash';
 import {app} from '../../app';
 import {NotifyUI} from 'notify-ui';
@@ -31,8 +30,6 @@ class Node {
   }
 
   /**
-  jslint complains about the *, but it's fine.
-
   This is a search function, and doesn't copy anything, because it doesn't change anything.
   */
   static* recursiveSearch(nodes, predicateFunction) {

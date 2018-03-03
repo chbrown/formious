@@ -1,4 +1,3 @@
-/*jslint esnext: true */
 import {app} from '../app';
 import {NotifyUI} from 'notify-ui';
 

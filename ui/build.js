@@ -1,5 +1,3 @@
-/*jslint esnext: true */
-
 // required for generators
 import 'babel/polyfill';
 

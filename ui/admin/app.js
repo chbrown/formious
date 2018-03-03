@@ -1,4 +1,3 @@
-/*jslint browser: true, esnext: true */
 import _ from 'lodash';
 import moment from 'moment';
 import {h, create, diff, patch} from 'virtual-dom';
