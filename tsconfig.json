@@ -4,6 +4,6 @@
     "target": "ES6"
   },
   "files": [
-    "models/Blocks.ts"
+    "models/Block.ts"
   ]
 }
