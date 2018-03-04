@@ -4,6 +4,32 @@
     "target": "ES6"
   },
   "files": [
-    "models/Block.ts"
+    "controllers/api/access_tokens.ts",
+    "controllers/api/administrators.ts",
+    "controllers/api/aws_accounts.ts",
+    "controllers/api/experiments/blocks.ts",
+    "controllers/api/experiments/index.ts",
+    "controllers/api/index.ts",
+    "controllers/api/mturk.ts",
+    "controllers/api/responses.ts",
+    "controllers/api/templates.ts",
+    "controllers/experiments.ts",
+    "controllers/index.ts",
+    "controllers/login.ts",
+    "controllers/mturk.ts",
+    "controllers/util.ts",
+    "db.ts",
+    "lib/excel.ts",
+    "lib/flat.ts",
+    "lib/tree.ts",
+    "models/AccessToken.ts",
+    "models/Administrator.ts",
+    "models/AWSAccount.ts",
+    "models/Block.ts",
+    "models/Experiment.ts",
+    "models/Participant.ts",
+    "models/Template.ts",
+    "server.ts",
+    "test/flat.ts"
   ]
 }
