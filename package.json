@@ -32,7 +32,7 @@
     "regex-router": "2.0.0",
     "send": "0.16.2",
     "sql-patch": "1.1.0",
-    "sqlcmd-pg": "3.0.0",
+    "sqlcmd-pg": "3.0.1",
     "streaming": "1.1.0",
     "sv": "0.4.2",
     "textarea": "0.2.0",
