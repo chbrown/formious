@@ -5,15 +5,24 @@ import Cookies from 'cookies'
 import * as httpUtil from '../../http-util'
 import Administrator from '../../models/Administrator'
 
+// sub-controllers
+import access_tokens from './access_tokens'
+import administrators from './administrators'
+import aws_accounts from './aws_accounts'
+import experiments from './experiments'
+import mturk from './mturk'
+import responses from './responses'
+import templates from './templates'
+
 const R = new Router()
 
-R.any(/^\/api\/access_tokens/, require('./access_tokens'))
-R.any(/^\/api\/administrators/, require('./administrators'))
-R.any(/^\/api\/aws_accounts/, require('./aws_accounts'))
-R.any(/^\/api\/experiments/, require('./experiments'))
-R.any(/^\/api\/mturk/, require('./mturk'))
-R.any(/^\/api\/responses/, require('./responses'))
-R.any(/^\/api\/templates/, require('./templates'))
+R.any(/^\/api\/access_tokens/, access_tokens)
+R.any(/^\/api\/administrators/, administrators)
+R.any(/^\/api\/aws_accounts/, aws_accounts)
+R.any(/^\/api\/experiments/, experiments)
+R.any(/^\/api\/mturk/, mturk)
+R.any(/^\/api\/responses/, responses)
+R.any(/^\/api\/templates/, templates)
 
 function prerouter(req: IncomingMessage, res: ServerResponse) {
   // handle auth and forward. this is the checkpoint for all admin-level

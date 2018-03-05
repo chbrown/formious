@@ -90,7 +90,7 @@ export default class Block {
         AS participant_responses ON participant_responses.block_id = blocks.id
       WHERE blocks.experiment_id = $2
       ORDER BY view_order ASC
-    `, [participant_id, experiment_id], (err: Error, blocks: BlockRow[]) => {
+    `, [participant_id, experiment_id], (err, blocks: BlockRow[]) => {
       if (err) return callback(err)
 
       // should id = null?
@@ -127,7 +127,7 @@ export default class Block {
 
       // 2. travel upward until we find a parent that has incomplete children,
       //    marking blocks for completion as needed
-      async.whilst(() => {
+      async.whilst<Error>(() => {
         const next_parent_block = current_path[0]
         if (next_parent_block === root) {
           return false
@@ -155,8 +155,8 @@ export default class Block {
           // value: null,
         })
         .execute(whilstCallback)
-      }, (error: Error) => {
-        if (error) return callback(error)
+      }, (err) => {
+        if (err) return callback(err)
         // ok, current_path is either empty or current_path[0] is the next block we should do
         const initial_next_parent_block = current_path[0];
 
@@ -199,8 +199,8 @@ function nextChildBlock(parent_block: BlockRow, callback: (error: Error, block?:
       .add('block_id, COUNT(id)::int')
       .where('block_id = ANY(?)', incomplete_child_block_ids)
       .groupBy('block_id')
-      .execute((error: Error, counts: Array<{block_id: number, count: number}>) => {
-        if (error) return callback(error)
+      .execute((err, counts: Array<{block_id: number, count: number}>) => {
+        if (err) return callback(err)
         const block_counts: {[index: number]: number} = _.zipObject(counts.map(count => [count.block_id, count.count]))
         // it's possible there are no responses for any of the candidate blocks
         incomplete_child_blocks.forEach(block => {

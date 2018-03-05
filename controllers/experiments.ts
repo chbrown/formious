@@ -29,7 +29,7 @@ function createAdaptiveTransform(accept: string): stream.Transform & {contentTyp
   // set empty contentType and no-op stream
   let contentType: string
   // set default to streaming/json.Stringifier() so that we don't trip up on
-  // "TypeError: Invalid non-string/buffer chunk" errors when trying to write
+  // "TypeError: Invalid non-string/buffer chunk" exceptions when trying to write
   // an object to the default writer
   let writableStream: stream.Transform = new streamingJSON.Stringifier()
   // now check that header against the accept values we support
@@ -167,19 +167,17 @@ R.post(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, (req, res, m) => {
   const experiment_id = parseInt(m[1], 10)
   const block_id = parseInt(m[2], 10)
   const urlObj = url.parse(req.url, true)
-  const aws_worker_id = urlObj.query.workerId.toString() || 'WORKER_ID_NOT_AVAILABLE'
+  const aws_worker_id = httpUtil.asString(urlObj.query.workerId) || 'WORKER_ID_NOT_AVAILABLE'
 
   httpUtil.readData(req, (err, value) => {
     if (err) return httpUtil.writeError(res, err)
 
-    Participant.addResponse({
-      aws_worker_id,
-      ip_address: httpUtil.readIPAddress(req),
-      user_agent: httpUtil.readUserAgent(req),
-    }, {
-      block_id,
-      value,
-    }, (err, participant /*, responses*/) => {
+    const ip_address = httpUtil.readIPAddress(req)
+    const user_agent = httpUtil.readUserAgent(req)
+
+    Participant.addResponse({aws_worker_id, ip_address, user_agent},
+                            {block_id, value},
+                            (err, participant /*, responses*/) => {
       if (err) return httpUtil.writeError(res, err)
 
       Block.nextBlockId(experiment_id, block_id, participant.id, (err, next_block_id) => {
@@ -221,7 +219,8 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, (req, res, m) => {
   const experiment_id = m[1]
 
   const urlObj = url.parse(req.url, true)
-  AccessToken.check(urlObj.query.token.toString(), 'experiments', experiment_id, (err) => {
+  const token = httpUtil.asString(urlObj.query.token)
+  AccessToken.check(token, 'experiments', experiment_id, (err) => {
     if (err) return httpUtil.writeError(res, err)
 
     // yay, authorization granted

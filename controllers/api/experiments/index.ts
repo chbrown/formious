@@ -8,11 +8,14 @@ import AccessToken from '../../../models/AccessToken'
 import Administrator from '../../../models/Administrator'
 import Experiment from '../../../models/Experiment'
 
+// sub-controllers
+import blocks from './blocks'
+
 type ExperimentWithAccessToken = Experiment & {access_token?: string}
 
 const R = new Router()
 
-R.any(/^\/api\/experiments\/(\d+)\/blocks/, require('./blocks'))
+R.any(/^\/api\/experiments\/(\d+)\/blocks/, blocks)
 
 /**
 Take a pre-joined (with access_tokens) row from the experiments table and insert

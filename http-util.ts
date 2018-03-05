@@ -43,8 +43,8 @@ export function readData(req: IncomingMessage,
   }
 }
 
-function asString(value: string | string[] | undefined,
-                  separator = ','): string {
+export function asString(value: string | string[] | undefined,
+                         separator = ','): string {
   if (value === undefined) {
     return undefined
   }

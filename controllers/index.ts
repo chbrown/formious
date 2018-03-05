@@ -4,6 +4,13 @@ import Router from 'regex-router'
 
 import * as httpUtil from '../http-util'
 
+// sub-controllers
+import api from './api'
+import experiments from './experiments'
+import login from './login'
+import mturk from './mturk'
+import util from './util'
+
 const R = new Router()
 
 R.get(/^\/(admin|$)/, (req, res) => {
@@ -12,11 +19,11 @@ R.get(/^\/(admin|$)/, (req, res) => {
 })
 
 // attach controllers
-R.any(/^\/api/, require('./api'))
-R.any(/^\/experiments/, require('./experiments'))
-R.any(/^\/login/, require('./login'))
-R.any(/^\/mturk/, require('./mturk'))
-R.any(/^\/util/, require('./util'))
+R.any(/^\/api/, api)
+R.any(/^\/experiments/, experiments)
+R.any(/^\/login/, login)
+R.any(/^\/mturk/, mturk)
+R.any(/^\/util/, util)
 
 const UI_ROOT = path.join(__dirname, '..', 'ui')
 
