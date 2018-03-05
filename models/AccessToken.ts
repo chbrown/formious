@@ -1,6 +1,6 @@
-var db = require('../db')
+import db from '../db'
 
-class AccessToken {
+export default class AccessToken {
   static get columns() {
     return [
       'token',
@@ -73,5 +73,3 @@ class AccessToken {
     })
   }
 }
-
-module.exports = AccessToken

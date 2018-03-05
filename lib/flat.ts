@@ -21,14 +21,13 @@ function _flatten(obj, root, result) {
   }
 }
 
-function flatten(obj) {
+export function flatten(obj) {
   var result = {}
   _flatten(obj, '', result)
   return result
 }
-exports.flatten = flatten
 
-function unflatten(map) {
+export function unflatten(map) {
   // map will be an Object with basic data types for its values
   var result = {}
   for (var pointer in map) {
@@ -62,4 +61,3 @@ function unflatten(map) {
   }
   return result
 }
-exports.unflatten = unflatten

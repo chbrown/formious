@@ -1,18 +1,47 @@
-var crypto = require('crypto')
+import {createHash} from 'crypto'
 
-var db = require('../db')
-var AccessToken = require('./AccessToken')
+import db from '../db'
+import AccessToken from './AccessToken'
 
 var salt = 'rNxROdgCbAkBI2WvZJtH'
 
 function sha256(string) {
-  var shasum = crypto.createHash('sha256')
+  var shasum = createHash('sha256')
   shasum.update(salt, 'utf8')
   shasum.update(string, 'utf8')
   return shasum.digest('hex')
 }
 
-class Administrator {
+export interface AdministratorData {
+  id?: string
+  email?: string
+  password?: string
+  created?: Date
+}
+
+export default class Administrator {
+  id?: string
+  email?: string
+  password?: string
+  created?: Date
+
+  constructor(administrator: AdministratorData) {
+    const {id, email, password, created} = administrator
+    this.id = id
+    this.email = email
+    this.password = password
+    this.created = created
+  }
+
+  static get columns() {
+    return [
+      'id',
+      'email',
+      'password',
+      'created',
+    ]
+  }
+
   static add(email, password, callback) {
     db.InsertOne('administrators')
     .set({
@@ -90,5 +119,3 @@ class Administrator {
     })
   }
 }
-
-module.exports = Administrator

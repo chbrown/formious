@@ -1,9 +1,11 @@
-var _ = require('lodash')
-var db = require('../../db')
-var AccessToken = require('../../models/AccessToken')
-var Router = require('regex-router')
+import * as _ from 'lodash'
+import Router from 'regex-router'
 
-var R = new Router()
+import db from '../../db'
+import * as httpUtil from '../../http-util'
+import AccessToken from '../../models/AccessToken'
+
+const R = new Router()
 
 /** GET /api/access_tokens
 List all access tokens. */
@@ -11,22 +13,23 @@ R.get(/^\/api\/access_tokens$/, function(req, res) {
   db.Select('access_tokens')
   .orderBy('id ASC')
   .execute(function(err, access_tokens) {
-    if (err) return res.die(err)
-    res.json(access_tokens)
+    if (err) return httpUtil.writeError(res, err)
+
+    httpUtil.writeJson(res, access_tokens)
   })
 })
 
 /** GET /api/access_tokens/new
 Generate blank access token. */
 R.get(/^\/api\/access_tokens\/new$/, function(req, res) {
-  res.json({})
+  httpUtil.writeJson(res, {})
 })
 
 /** POST /api/access_tokens
 Create new access token. */
 R.post(/^\/api\/access_tokens$/, function(req, res) {
-  req.readData(function(err, data) {
-    if (err) return res.die(err)
+  httpUtil.readData(req, (err, data) => {
+    if (err) return httpUtil.writeError(res, err)
 
     var fields = _.pick(data, AccessToken.columns)
 
@@ -34,8 +37,10 @@ R.post(/^\/api\/access_tokens$/, function(req, res) {
     .set(fields)
     .returning('*')
     .execute(function(err, access_token) {
-      if (err) return res.die(err)
-      res.status(201).json(access_token)
+      if (err) return httpUtil.writeError(res, err)
+
+      res.statusCode = 201
+      httpUtil.writeJson(res, access_token)
     })
   })
 })
@@ -46,17 +51,17 @@ R.get(/^\/api\/access_tokens\/(\d+)$/, function(req, res, m) {
   db.SelectOne('access_tokens')
   .whereEqual({id: m[1]})
   .execute(function(err, access_token) {
-    if (err) return res.die(err)
+    if (err) return httpUtil.writeError(res, err)
 
-    res.json(access_token)
+    httpUtil.writeJson(res, access_token)
   })
 })
 
 /** POST /api/access_tokens/:id
 Update existing access token. */
 R.post(/^\/api\/access_tokens\/(\d+)/, function(req, res, m) {
-  req.readData(function(err, data) {
-    if (err) return res.die(err)
+  httpUtil.readData(req, function(err, data) {
+    if (err) return httpUtil.writeError(res, err)
 
     var fields = _.pick(data, AccessToken.columns)
 
@@ -64,8 +69,10 @@ R.post(/^\/api\/access_tokens\/(\d+)/, function(req, res, m) {
     .setEqual(fields)
     .whereEqual({id: m[1]})
     .execute(function(err) {
-      if (err) return res.die(err)
-      res.status(204).end() // 204 No Content
+      if (err) return httpUtil.writeError(res, err)
+
+      res.statusCode = 204
+      res.end() // 204 No Content
     })
   })
 })
@@ -76,9 +83,11 @@ R.delete(/^\/api\/access_tokens\/(\d+)$/, function(req, res, m) {
   db.Delete('access_tokens')
   .whereEqual({id: m[1]})
   .execute(function(err) {
-    if (err) return res.die(err)
-    res.status(204).end()
+    if (err) return httpUtil.writeError(res, err)
+
+    res.statusCode = 204
+    res.end()
   })
 })
 
-module.exports = R.route.bind(R)
+export default R.route.bind(R)

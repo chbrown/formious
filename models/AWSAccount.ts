@@ -1,4 +1,4 @@
-class AWSAccount {
+export default class AWSAccount {
   static get columns() {
     return [
       'name',
@@ -7,5 +7,3 @@ class AWSAccount {
     ]
   }
 }
-
-module.exports = AWSAccount

@@ -1,4 +1,4 @@
-class Template {
+export default class Template {
   static get columns() {
     return [
       'name',
@@ -6,5 +6,3 @@ class Template {
     ]
   }
 }
-
-module.exports = Template

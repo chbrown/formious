@@ -1,10 +1,11 @@
-var _ = require('lodash')
-var Router = require('regex-router')
+import * as _ from 'lodash'
+import Router from 'regex-router'
 
-var Administrator = require('../../models/Administrator')
-var db = require('../../db')
+import db from '../../db'
+import * as httpUtil from '../../http-util'
+import Administrator from '../../models/Administrator'
 
-var R = new Router()
+const R = new Router()
 
 /** GET /api/administrators
 List all administrators. */
@@ -12,8 +13,9 @@ R.get(/^\/api\/administrators$/, function(req, res) {
   db.Select('administrators')
   .orderBy('created DESC')
   .execute(function(err, administrators) {
-    if (err) return res.die(err)
-    res.json(administrators)
+    if (err) return httpUtil.writeError(res, err)
+
+    httpUtil.writeJson(res, administrators)
   })
 })
 
@@ -21,20 +23,22 @@ R.get(/^\/api\/administrators$/, function(req, res) {
 
 Generate blank administrator. */
 R.get(/^\/api\/administrators\/new$/, function(req, res) {
-  res.json({created: new Date()})
+  httpUtil.writeJson(res, {created: new Date()})
 })
 
 /** POST /api/administrators
 
 Create new administrator. */
 R.post(/^\/api\/administrators$/, function(req, res) {
-  req.readData(function(err, data) {
-    if (err) return res.die(err)
+  httpUtil.readData(req, function(err, data) {
+    if (err) return httpUtil.writeError(res, err)
 
     // .add is like .insert, but hashes the password.
     Administrator.add(data.email, data.password, function(err, administrator) {
-      if (err) return res.die(err)
-      res.status(201).json(administrator)
+      if (err) return httpUtil.writeError(res, err)
+
+      res.statusCode = 201
+      httpUtil.writeJson(res, administrator)
     })
   })
 })
@@ -46,9 +50,10 @@ R.get(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
   db.SelectOne('administrators')
   .whereEqual({id: m[1]})
   .execute(function(err, full_administrator) {
-    if (err) return res.die(err)
+    if (err) return httpUtil.writeError(res, err)
+
     var administrator = _.omit(full_administrator, 'password')
-    res.json(administrator)
+    httpUtil.writeJson(res, administrator)
   })
 })
 
@@ -56,14 +61,16 @@ R.get(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
 
 Update existing administrator. */
 R.post(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
-  req.readData(function(err, data) {
-    if (err) return res.die(err)
+  httpUtil.readData(req, function(err, data) {
+    if (err) return httpUtil.writeError(res, err)
 
     var administrator = new Administrator({id: m[1]})
     // Administrator#update is like db.Update('administrators') but hashes the password if it is not ''
     administrator.update(data.email, data.password, function(err) {
-      if (err) return res.die(err)
-      res.status(204).end() // 204 No Content
+      if (err) return httpUtil.writeError(res, err)
+
+      res.statusCode = 204
+      res.end() // 204 No Content
     })
   })
 })
@@ -75,8 +82,10 @@ R.delete(/^\/api\/administrators\/(\d+)$/, function(req, res, m) {
   db.Delete('administrators')
   .whereEqual({id: m[1]})
   .execute(function(err) {
-    if (err) return res.die(err)
-    res.status(204).end()
+    if (err) return httpUtil.writeError(res, err)
+
+    res.statusCode = 204
+    res.end()
   })
 })
 
@@ -91,8 +100,9 @@ R.get(/^\/api\/administrators\/(\d+)\/aws_accounts$/, function(req, res, m) {
   .where('aws_account_administrators.administrator_id = ?', m[1])
   .orderBy('aws_account_administrators.priority DESC')
   .execute(function(err, rows) {
-    if (err) return res.die(err)
-    res.json(rows)
+    if (err) return httpUtil.writeError(res, err)
+
+    httpUtil.writeJson(res, rows)
   })
 })
 
@@ -100,7 +110,7 @@ R.get(/^\/api\/administrators\/(\d+)\/aws_accounts$/, function(req, res, m) {
 
 Create administrator-AWS account link */
 R.post(/^\/api\/administrators\/(\d+)\/aws_accounts\/(\d+)$/, function(req, res, m) {
-  req.readData(function(err, data) {
+  httpUtil.readData(req, function(err, data) {
     db.InsertOne('aws_account_administrators')
     .set({
       administrator_id: m[1],
@@ -108,8 +118,10 @@ R.post(/^\/api\/administrators\/(\d+)\/aws_accounts\/(\d+)$/, function(req, res,
       priority: data.priority,
     })
     .execute(function(err, aws_account_administrator) {
-      if (err) return res.die(err)
-      res.status(201).json(aws_account_administrator)
+      if (err) return httpUtil.writeError(res, err)
+
+      res.statusCode = 201
+      httpUtil.writeJson(res, aws_account_administrator)
     })
   })
 })
@@ -122,10 +134,12 @@ R.delete(/^\/api\/administrators\/(\d+)\/aws_accounts\/(\d+)$/, function(req, re
   .where('administrator_id = ?', m[1])
   .where('aws_account_id = ?', m[2])
   .execute(function(err) {
-    if (err) return res.die(err)
-    // res.json({message: 'Disowned AWS account.'})
-    res.status(204).end()
+    if (err) return httpUtil.writeError(res, err)
+
+    // httpUtil.writeJson(res, {message: 'Disowned AWS account.'})
+    res.statusCode = 204
+    res.end()
   })
 })
 
-module.exports = R.route.bind(R)
+export default R.route.bind(R)

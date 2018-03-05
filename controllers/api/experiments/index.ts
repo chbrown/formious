@@ -1,12 +1,14 @@
-var async = require('async')
-var _ = require('lodash')
-var Router = require('regex-router')
+import * as async from 'async'
+import * as _ from 'lodash'
+import Router from 'regex-router'
 
-var db = require('../../../db')
-var AccessToken = require('../../../models/AccessToken')
-var Experiment = require('../../../models/Experiment')
+import db from '../../../db'
+import * as httpUtil from '../../../http-util'
+import AccessToken from '../../../models/AccessToken'
+import Administrator from '../../../models/Administrator'
+import Experiment from '../../../models/Experiment'
 
-var R = new Router()
+const R = new Router()
 
 R.any(/^\/api\/experiments\/(\d+)\/blocks/, require('./blocks'))
 
@@ -46,14 +48,15 @@ R.get(/^\/api\/experiments$/, function(req, res) {
     'LEFT OUTER JOIN (SELECT experiment_id, COUNT(responses.id) AS responses_count FROM responses JOIN blocks ON blocks.id = responses.block_id GROUP BY experiment_id) AS responses ON responses.experiment_id = experiments.id',
     "LEFT OUTER JOIN access_tokens ON access_tokens.relation = 'experiments' AND access_tokens.foreign_id = experiments.id AND (access_tokens.expires < NOW() OR access_tokens.expires IS NULL) AND access_tokens.redacted IS NULL",
   ].join(' '))
-  .add(['experiments.*', 'responses_count', 'access_tokens.token AS access_token'])
+  .add('experiments.*', 'responses_count', 'access_tokens.token AS access_token')
   .orderBy('created DESC')
   .execute(function(err, experiments) {
-    if (err) return res.die(err)
+    if (err) return httpUtil.writeError(res, err)
 
     async.map(experiments, ensureAccessToken, function(err, experiments) {
-      if (err) return res.die(err)
-      res.json(experiments)
+      if (err) return httpUtil.writeError(res, err)
+
+      httpUtil.writeJson(res, experiments)
     })
   })
 })
@@ -61,8 +64,8 @@ R.get(/^\/api\/experiments$/, function(req, res) {
 /** POST /api/experiments
 Create new experiment. */
 R.post(/^\/api\/experiments$/, function(req, res) {
-  req.readData(function(err, data) {
-    if (err) return res.die(err)
+  httpUtil.readData(req, function(err, data) {
+    if (err) return httpUtil.writeError(res, err)
 
     var fields = _.pick(data, Experiment.columns)
 
@@ -70,8 +73,10 @@ R.post(/^\/api\/experiments$/, function(req, res) {
     .set(fields)
     .returning('*')
     .execute(function(err, experiment) {
-      if (err) return res.die(err)
-      res.status(201).json(experiment)
+      if (err) return httpUtil.writeError(res, err)
+
+      res.statusCode = 201
+      httpUtil.writeJson(res, experiment)
     })
   })
 })
@@ -79,8 +84,9 @@ R.post(/^\/api\/experiments$/, function(req, res) {
 /** GET /api/experiments/new
 Generate blank experiment. */
 R.get(/^\/api\/experiments\/new$/, function(req, res) {
-  res.json({
-    administrator_id: req.administrator.id,
+  var contextAdministrator = req['administrator'] as Administrator
+  httpUtil.writeJson(res, {
+    administrator_id: contextAdministrator.id,
     html: '',
   })
 })
@@ -92,15 +98,15 @@ R.get(/^\/api\/experiments\/(\d+)$/, function(req, res, m) {
     'experiments',
     "LEFT OUTER JOIN access_tokens ON access_tokens.relation = 'experiments' AND access_tokens.foreign_id = experiments.id AND (access_tokens.expires < NOW() OR access_tokens.expires IS NULL) AND access_tokens.redacted IS NULL",
   ].join(' '))
-  .add(['experiments.*', 'access_tokens.token AS access_token'])
+  .add('experiments.*', 'access_tokens.token AS access_token')
   .whereEqual({'experiments.id': m[1]})
   .execute(function(err, experiment) {
-    if (err) return res.die(err)
+    if (err) return httpUtil.writeError(res, err)
 
     ensureAccessToken(experiment, function(err, experiment) {
-      if (err) return res.die(err)
+      if (err) return httpUtil.writeError(res, err)
 
-      res.json(experiment)
+      httpUtil.writeJson(res, experiment)
     })
   })
 })
@@ -108,8 +114,8 @@ R.get(/^\/api\/experiments\/(\d+)$/, function(req, res, m) {
 /** POST /api/experiments/:id
 Update existing experiment */
 R.post(/^\/api\/experiments\/(\d+)/, function(req, res, m) {
-  req.readData(function(err, data) {
-    if (err) return res.die(err)
+  httpUtil.readData(req, function(err, data) {
+    if (err) return httpUtil.writeError(res, err)
 
     var fields = _.pick(data, Experiment.columns)
 
@@ -117,8 +123,10 @@ R.post(/^\/api\/experiments\/(\d+)/, function(req, res, m) {
     .setEqual(fields)
     .whereEqual({id: m[1]})
     .execute(function(err) {
-      if (err) return res.die(err)
-      res.status(204).end() // 204 No Content
+      if (err) return httpUtil.writeError(res, err)
+
+      res.statusCode = 204
+      res.end() // 204 No Content
     })
   })
 })
@@ -129,9 +137,11 @@ R.delete(/^\/api\/experiments\/(\d+)$/, function(req, res, m) {
   db.Delete('experiments')
   .whereEqual({id: m[1]})
   .execute(function(err) {
-    if (err) return res.die(err)
-    res.status(204).end()
+    if (err) return httpUtil.writeError(res, err)
+
+    res.statusCode = 204
+    res.end()
   })
 })
 
-module.exports = R.route.bind(R)
+export default R.route.bind(R)

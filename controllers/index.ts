@@ -1,8 +1,10 @@
-var path = require('path')
-var send = require('send')
-var Router = require('regex-router')
+import * as path from 'path'
+import * as send from 'send'
+import Router from 'regex-router'
 
-var R = new Router()
+import * as httpUtil from '../http-util'
+
+const R = new Router()
 
 R.get(/^\/(admin|$)/, function(req, res) {
   req.url = '/ui/index.html'
@@ -21,10 +23,11 @@ var UI_ROOT = path.join(__dirname, '..', 'ui')
 R.get(/^\/ui\/([^?]+)(\?|$)/, function(req, res, m) {
   send(req, m[1], {root: UI_ROOT})
   .on('error', function(err) {
-    res.die(err.status || 500, 'send error: ' + err.message)
+    httpUtil.writeError(res, err)
   })
   .on('directory', function() {
-    res.status(404).die('No resource at: ' + req.url)
+    res.statusCode = 404
+    httpUtil.writeError(res, new Error('No resource at: ' + req.url))
   })
   .pipe(res)
 })
@@ -39,20 +42,20 @@ R.get(/^\/info$/, function(req, res) {
     author: package_json.author,
     license: package_json.license,
   }
-  res.json(info)
+  httpUtil.writeJson(res, info)
 })
 
 R.get(/^\/echo$/, function(req, res) {
-  res.json({
+  httpUtil.writeJson(res, {
     httpVersion: req.httpVersion,
     url: req.url,
     method: req.method,
     headers: req.headers,
     trailers: req.trailers,
-    client: {
-      remoteAddress: req.client.remoteAddress,
+    connection: {
+      remoteAddress: req.connection.remoteAddress,
     },
   })
 })
 
-module.exports = R.route.bind(R)
+export default R.route.bind(R)

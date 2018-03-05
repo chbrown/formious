@@ -1,9 +1,10 @@
-/*globals describe, it*/
-var assert = require('assert')
-var flat = require('../lib/flat')
+import {deepEqual} from 'assert'
+import 'mocha'
+
+import {flatten, unflatten} from '../lib/flat'
 
 describe('flat tests', function() {
-  var customer_deep = {
+  var deepCustomer = {
     customer: {
       firstname: 'Chris',
       lastname: 'Brown',
@@ -16,7 +17,7 @@ describe('flat tests', function() {
     age: 23,
   }
 
-  var customer_flat = {
+  var flatCustomer = {
     'customer.firstname': 'Chris',
     'customer.lastname': 'Brown',
     'purchases[0]': 'Crackers',
@@ -26,12 +27,12 @@ describe('flat tests', function() {
   }
 
   it('flatten() should produce prototypical flattening', function() {
-    var flattened = flat.flatten(customer_deep)
-    assert.deepEqual(flattened, customer_flat)
+    var flattened = flatten(deepCustomer)
+    deepEqual(flattened, flatCustomer)
   })
 
   it('unflatten() should produce the deep object', function() {
-    var unflattened = flat.unflatten(customer_flat)
-    assert.deepEqual(unflattened, customer_deep)
+    var unflattened = unflatten(flatCustomer)
+    deepEqual(unflattened, deepCustomer)
   })
 })

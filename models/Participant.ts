@@ -1,6 +1,6 @@
-var db = require('../db')
+import db from '../db'
 
-class Participant {
+export default class Participant {
   static findOrCreate(participant, callback) {
     db.SelectOne('participants')
     .whereEqual({aws_worker_id: participant.aws_worker_id})
@@ -48,5 +48,3 @@ class Participant {
     })
   }
 }
-
-module.exports = Participant

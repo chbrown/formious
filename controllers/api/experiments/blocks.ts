@@ -1,13 +1,14 @@
-var _ = require('lodash')
-var async = require('async')
-var {logger} = require('loge')
-var Router = require('regex-router')
+import * as _ from 'lodash'
+import * as async from 'async'
+import {logger} from 'loge'
+import Router from 'regex-router'
 
-var Block = require('../../../models/Block')
-var db = require('../../../db')
-var tree = require('../../../lib/tree')
+import db from '../../../db'
+import * as httpUtil from '../../../http-util'
+import {recursiveEach} from '../../../lib/tree'
+import Block from '../../../models/Block'
 
-var R = new Router()
+const R = new Router()
 
 /** GET /api/experiments/:experiment_id/blocks
 list all of an experiment's blocks */
@@ -16,17 +17,17 @@ R.get(/\/api\/experiments\/(\d+)\/blocks$/, function(req, res, m) {
   .whereEqual({experiment_id: m[1]})
   .orderBy('view_order')
   .execute(function(err, blocks) {
-    if (err) return res.die(err)
+    if (err) return httpUtil.writeError(res, err)
 
-    res.json(blocks)
+    httpUtil.writeJson(res, blocks)
   })
 })
 
 /** POST /api/experiments/:experiment_id/blocks
 Create new block */
 R.post(/\/api\/experiments\/(\d+)\/blocks$/, function(req, res, m) {
-  req.readData(function(err, data) {
-    if (err) return res.die(err)
+  httpUtil.readData(req, function(err, data) {
+    if (err) return httpUtil.writeError(res, err)
 
     var fields = {
       experiment_id: m[1],
@@ -39,9 +40,10 @@ R.post(/\/api\/experiments\/(\d+)\/blocks$/, function(req, res, m) {
     .set(fields)
     .returning('*')
     .execute(function(err, block) {
-      if (err) return res.die(err)
+      if (err) return httpUtil.writeError(res, err)
 
-      res.status(201).json(block)
+      res.statusCode = 201
+      httpUtil.writeJson(res, block)
     })
   })
 })
@@ -50,7 +52,7 @@ R.post(/\/api\/experiments\/(\d+)\/blocks$/, function(req, res, m) {
 Create blank block */
 R.get(/\/api\/experiments\/(\d+)\/blocks\/new$/, function(req, res, m) {
   // blank block
-  res.json({experiment_id: m[1]})
+  httpUtil.writeJson(res, {experiment_id: m[1]})
 })
 
 /** GET /api/experiments/:experiment_id/blocks/:block_id
@@ -59,8 +61,9 @@ R.get(/\/api\/experiments\/(\d+)\/blocks\/(\d+)$/, function(req, res, m) {
   db.SelectOne('blocks')
   .whereEqual({experiment_id: m[1], id: m[2]})
   .execute(function(err, block) {
-    if (err) return res.die(err)
-    res.json(block)
+    if (err) return httpUtil.writeError(res, err)
+
+    httpUtil.writeJson(res, block)
   })
 })
 
@@ -68,8 +71,8 @@ R.get(/\/api\/experiments\/(\d+)\/blocks\/(\d+)$/, function(req, res, m) {
 Update existing block
 */
 R.post(/\/api\/experiments\/(\d+)\/blocks\/(\d+)$/, function(req, res, m) {
-  req.readData(function(err, data) {
-    if (err) return res.die(err)
+  httpUtil.readData(req, function(err, data) {
+    if (err) return httpUtil.writeError(res, err)
 
     var fields = _.pick(data, Block.columns)
 
@@ -77,9 +80,11 @@ R.post(/\/api\/experiments\/(\d+)\/blocks\/(\d+)$/, function(req, res, m) {
     .setEqual(fields)
     .whereEqual({experiment_id: m[1], id: m[2]})
     .execute(function(err) {
-      if (err) return res.die(err)
+      if (err) return httpUtil.writeError(res, err)
+
       // 204 No content
-      res.status(204).end()
+      res.statusCode = 204
+      res.end()
     })
   })
 })
@@ -91,8 +96,10 @@ R.delete(/\/api\/experiments\/(\d+)\/blocks\/(\d+)$/, function(req, res, m) {
   db.Delete('blocks')
   .whereEqual({experiment_id: m[1], id: m[2]})
   .execute(function(err) {
-    if (err) return res.die(err)
-    res.status(204).end() // 204 No content
+    if (err) return httpUtil.writeError(res, err)
+
+    res.statusCode = 204
+    res.end() // 204 No content
   })
 })
 
@@ -107,10 +114,10 @@ R.get(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
   .whereEqual({experiment_id: experiment_id})
   .orderBy('view_order')
   .execute(function(err, all_blocks) {
-    if (err) return res.die(err)
+    if (err) return httpUtil.writeError(res, err)
 
     var root_blocks = Block.shapeTree(all_blocks)
-    res.json(root_blocks)
+    httpUtil.writeJson(res, root_blocks)
   })
 })
 
@@ -121,12 +128,12 @@ Special non-REST method to store a tree structure of blocks and in a tree struct
 */
 R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
   var experiment_id = m[1]
-  req.readData(function(err, root_blocks) {
-    if (err) return res.die(err)
+  httpUtil.readData(req, function(err, root_blocks) {
+    if (err) return httpUtil.writeError(res, err)
 
     // 1. instantiate the missing blocks so that they have id's we can use when flattening
     var new_blocks = []
-    tree.recursiveEach(root_blocks, function(block) {
+    recursiveEach(root_blocks, function(block) {
       if (block.id === undefined) {
         new_blocks.push(block)
       }
@@ -145,11 +152,12 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
         callback()
       })
     }, function(err) {
-      if (err) return res.die(err)
+      if (err) return httpUtil.writeError(res, err)
+
       root_blocks.forEach(function(root_block) {
         root_block.parent_block_id = null
       })
-      tree.recursiveEach(root_blocks, function(block) {
+      recursiveEach(root_blocks, function(block) {
         block.children.forEach(function(child_block) {
           child_block.parent_block_id = block.id
         })
@@ -157,7 +165,7 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
       // now the tree structure is defined on each block, and the 'children' links are no longer needed.
       // 2. flatten the root_blocks-based tree into a flat Array of blocks
       var all_blocks = []
-      tree.recursiveEach(root_blocks, function(block) {
+      recursiveEach(root_blocks, function(block) {
         all_blocks.push(block)
       })
       var all_blocks_ids = all_blocks.map(function(block) {
@@ -170,7 +178,6 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
       async.each(all_blocks, function(block, callback) {
         var fields = _.pick(block, Block.columns)
 
-
         db.Update('blocks')
         .setEqual(fields)
         .whereEqual({
@@ -179,20 +186,20 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, function(req, res, m) {
         })
         .execute(callback)
       }, function(err) {
-        if (err) return res.die(err)
+        if (err) return httpUtil.writeError(res, err)
 
         // delete all other blocks
         db.Delete('blocks')
         .whereEqual({experiment_id: experiment_id})
         .where('NOT (id = ANY(?::integer[]))', all_blocks_ids)
         .execute(function(err) {
-          if (err) return res.die(err)
+          if (err) return httpUtil.writeError(res, err)
 
-          res.json({message: 'Successfully updated block tree'})
+          httpUtil.writeJson(res, {message: 'Successfully updated block tree'})
         })
       })
     })
   })
 })
 
-module.exports = R.route.bind(R)
+export default R.route.bind(R)

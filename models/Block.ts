@@ -1,10 +1,10 @@
-import _ = require('lodash')
-import async = require('async')
+import * as _ from 'lodash'
+import * as async from 'async'
 
-const db = require('../db')
-const tree = require('../lib/tree')
+import db from '../db'
+import {recursiveFind} from '../lib/tree'
 
-interface BlockRow {
+export interface BlockRow {
   id: number
   // experiment_id?: number
   template_id?: number
@@ -20,7 +20,7 @@ interface BlockRow {
   responses?: number
 }
 
-class Block {
+export default class Block {
   static get columns(): string[] {
     return [
       'id',
@@ -90,7 +90,7 @@ class Block {
         children: Block.shapeTree(blocks),
       }
       function findBlock(id: number): BlockRow {
-        return tree.recursiveFind([root], block => block.id === id)
+        return recursiveFind([root], block => block.id === id)
       }
 
       // we need to get the parent_block_id of the most_recent block
@@ -218,5 +218,3 @@ function nextChildBlock(parent_block: BlockRow, callback: (error: Error, block?:
     })
   }
 }
-
-export = Block

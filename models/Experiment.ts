@@ -1,4 +1,4 @@
-class Experiment {
+export default class Experiment {
   static get columns() {
     return [
       'name',
@@ -7,5 +7,3 @@ class Experiment {
     ]
   }
 }
-
-module.exports = Experiment

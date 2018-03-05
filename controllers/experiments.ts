@@ -1,18 +1,20 @@
-var _ = require('lodash')
-var fs = require('fs')
-var path = require('path')
-var async = require('async')
-var handlebars = require('handlebars')
-var {logger} = require('loge')
-var streaming = require('streaming')
-var sv = require('sv')
-var Router = require('regex-router')
-var url = require('url')
+import * as _ from 'lodash'
+import * as fs from 'fs'
+import * as path from 'path'
+import * as async from 'async'
+import * as stream from 'stream'
+import * as handlebars from 'handlebars'
+import {logger} from 'loge'
+import * as streamingJSON from 'streaming/json'
+import * as sv from 'sv'
+import Router from 'regex-router'
+import * as url from 'url'
 
-var db = require('../db')
-var AccessToken = require('../models/AccessToken')
-var Block = require('../models/Block')
-var Participant = require('../models/Participant')
+import db from '../db'
+import * as httpUtil from '../http-util'
+import AccessToken from '../models/AccessToken'
+import Block from '../models/Block'
+import Participant from '../models/Participant'
 
 /**
 Return a WritableStream, which we will generally pipe into res, and then
@@ -20,40 +22,38 @@ successively write() to, eventually calling end(), or pipe to from another strea
 
 Handles ?accept= querystring values as well as Accept: headers, deferring to
 the querystring, and defaults to line-delimited JSON
-
-TODO: refactor into http-enhanced, somehow.
 */
-function createAdaptiveTransform(accept) {
-  // set empty content_type and no-op stream
-  var content_type = null
-  // set default to streaming.json.Stringifier() so that we don't trip up on
+function createAdaptiveTransform(accept: string): stream.Transform & {contentType: string} {
+  // set empty contentType and no-op stream
+  let contentType: string
+  // set default to streaming/json.Stringifier() so that we don't trip up on
   // "TypeError: Invalid non-string/buffer chunk" errors when trying to write
   // an object to the default writer
-  var writable_stream = new streaming.json.Stringifier()
+  let writableStream: stream.Transform = new streamingJSON.Stringifier()
   // now check that header against the accept values we support
-  if (accept.match(/application\/json;\s*boundary=(NL|LF|EOL)/)) {
-    content_type = 'application/json; boundary=LF'
-    writable_stream = new streaming.json.Stringifier()
+  if (/application\/json;\s*boundary=(NL|LF|EOL)/.test(accept)) {
+    contentType = 'application/json; boundary=LF'
+    writableStream = new streamingJSON.Stringifier()
   }
-  else if (accept.match(/application\/json/)) {
-    content_type = 'application/json'
-    writable_stream = new streaming.json.ArrayStringifier()
+  else if (/application\/json/.test(accept)) {
+    contentType = 'application/json'
+    writableStream = new streamingJSON.ArrayStringifier()
   }
-  else if (accept.match(/text\/csv/)) {
-    content_type = 'text/csv; charset=utf-8'
-    writable_stream = new sv.Stringifier({peek: 100})
+  else if (/text\/csv/.test(accept)) {
+    contentType = 'text/csv; charset=utf-8'
+    writableStream = new sv.Stringifier({peek: 100})
   }
-  else if (accept.match(/text\/plain/)) {
-    content_type = 'text/plain; charset=utf-8'
-    writable_stream = new sv.Stringifier({peek: 100})
+  else if (/text\/plain/.test(accept)) {
+    contentType = 'text/plain; charset=utf-8'
+    writableStream = new sv.Stringifier({peek: 100})
   }
   else {
     // new streaming.Sink({objectMode: true})
-    // res.status(406).error(error, req.headers)
+    //res.statusCode = 406
+    //return httpUtil.writeError(res, error)
     logger.info('Cannot find writer for Accept value: %j; using default', accept)
   }
-  writable_stream.content_type = content_type
-  return writable_stream
+  return Object.assign(writableStream, {contentType})
 }
 
 var _cached_block_template // a Handlebars template function
@@ -71,7 +71,7 @@ function getBlockTemplate(callback) {
   }
 }
 
-var R = new Router()
+const R = new Router()
 
 /** the Amazon Mechanical Turk frame will give us the following variables:
 
@@ -92,14 +92,14 @@ R.get(/^\/experiments\/(\d+)(\?|$)/, function(req, res, m) {
   .where('experiment_id = ?', experiment_id)
   .orderBy('view_order ASC')
   .execute(function(err, block) {
-    if (err) return res.die(err)
-    if (!block) return res.die('No available blocks')
+    if (err) return httpUtil.writeError(res, err)
+    if (!block) return httpUtil.writeError(res, new Error('No available blocks'))
 
     var urlObj = url.parse(req.url, true)
     urlObj.pathname = '/experiments/' + experiment_id + '/blocks/' + block.id
     var block_url = url.format(urlObj)
 
-    res.redirect(block_url)
+    httpUtil.writeRedirect(res, block_url)
   })
 })
 
@@ -121,7 +121,7 @@ R.get(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, function(req, res, m) {
       db.SelectOne('templates').whereEqual({id: results.block.template_id}).execute(callback)
     }],
   }, function(err, results) {
-    if (err) return res.die(err)
+    if (err) return httpUtil.writeError(res, err)
 
     // block_globals is given to all blocks, in case they want the values.
     // it's mostly metadata, compared to the states.
@@ -145,14 +145,14 @@ R.get(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, function(req, res, m) {
     }
 
     getBlockTemplate(function(err, block_template) {
-      if (err) return res.die(err)
+      if (err) return httpUtil.writeError(res, err)
 
       var block_html = block_template({
         context: JSON.stringify(context).replace(/<\//g, '<\\/'),
         header: results.experiment.html,
         html: rendered_html,
       })
-      res.html(block_html)
+      httpUtil.writeHtml(res, block_html)
     })
   })
 })
@@ -167,21 +167,21 @@ R.post(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, function(req, res, m) {
   var urlObj = url.parse(req.url, true)
   var aws_worker_id = urlObj.query.workerId || 'WORKER_ID_NOT_AVAILABLE'
 
-  req.readData(function(err, data) {
-    if (err) return res.die(err)
+  httpUtil.readData(req, function(err, data) {
+    if (err) return httpUtil.writeError(res, err)
 
     Participant.addResponse({
       aws_worker_id: aws_worker_id,
-      ip_address: req.headers['x-real-ip'] || req.client.remoteAddress,
+      ip_address: req.headers['x-real-ip'] || req.connection.remoteAddress,
       user_agent: req.headers['user-agent'],
     }, {
       block_id: block_id,
       value: data,
     }, function(err, participant /*, responses*/) {
-      if (err) return res.die(err)
+      if (err) return httpUtil.writeError(res, err)
 
       Block.nextBlockId(experiment_id, block_id, participant.id, function(err, next_block_id) {
-        if (err) return res.die(err)
+        if (err) return httpUtil.writeError(res, err)
         logger.info('Block.nextBlockId: %j', next_block_id)
 
         // http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ExternalQuestionArticle.html
@@ -190,7 +190,8 @@ R.post(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, function(req, res, m) {
         // var redirect_to = urlObj.query.turkSubmitTo + '/mturk/externalSubmit?assignmentId=' + urlObj.query.assignmentId
         if (next_block_id === null) {
           // meaning, there are no more blocks to complete
-          return res.text('You have already completed all available blocks in this experiment.')
+
+          return httpUtil.writeText(res, 'You have already completed all available blocks in this experiment.')
         }
 
         // only change the path part of the url
@@ -203,7 +204,7 @@ R.post(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, function(req, res, m) {
           res.end()
         }
         else {
-          res.redirect(redirect_to)
+          httpUtil.writeRedirect(res, redirect_to)
         }
       })
     })
@@ -219,7 +220,7 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
 
   var urlObj = url.parse(req.url, true)
   AccessToken.check(urlObj.query.token, 'experiments', experiment_id, function(err) {
-    if (err) return res.die(err)
+    if (err) return httpUtil.writeError(res, err)
 
     // yay, authorization granted
 
@@ -230,12 +231,12 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
     .whereEqual({experiment_id: experiment_id})
     .orderBy('responses.id DESC')
     .execute(function(err, responses) {
-      if (err) return res.die(err)
+      if (err) return httpUtil.writeError(res, err)
 
-      var accept = urlObj.query.accept || req.headers.accept || 'application/json; boundary=LF'
+      var accept = String(urlObj.query.accept) || req.headers.accept || 'application/json; boundary=LF'
       var writer = createAdaptiveTransform(accept)
-      if (writer.content_type) {
-        res.setHeader('Content-Type', writer.content_type)
+      if (writer.contentType) {
+        res.setHeader('Content-Type', writer.contentType)
       }
       writer.pipe(res)
       responses.forEach(function(response) {
@@ -258,4 +259,4 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, function(req, res, m) {
   })
 })
 
-module.exports = R.route.bind(R)
+export default R.route.bind(R)

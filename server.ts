@@ -1,32 +1,24 @@
-var path = require('path')
-var optimist = require('optimist')
+import * as path from 'path'
+import * as optimist from 'optimist'
 
-var http = require('http-enhanced')
-var loge = require('loge')
+import * as http from 'http'
+import {logger, Level} from 'loge'
+import {executePatches} from 'sql-patch'
 
-var controllers = require('./controllers')
-var db = require('./db')
+import controllers from './controllers'
+import db from './db'
 
-function dieResponse(error) {
-  if (this.statusCode == 200) {
-    this.statusCode = 500
-  }
-  var message = error ? error.stack : 'Failure'
-  return this.text(message)
-}
-http.ServerResponse.prototype.die = dieResponse
-
-var server = http.createServer(function(req, res) {
-  loge.logger.debug('%s %s', req.method, req.url)
+export const server = http.createServer(function(req, res) {
+  logger.debug('%s %s', req.method, req.url)
   controllers(req, res)
 })
 
 server.on('listening', function() {
   var address = server.address()
-  loge.logger.info('server listening on http://%s:%d', address.address, address.port)
+  logger.info('server listening on http://%s:%d', address.address, address.port)
 })
 
-function main() {
+export function main() {
   var argvparser = optimist
   .usage('formious --port 1451 -v')
   .describe({
@@ -45,7 +37,7 @@ function main() {
   })
 
   var argv = argvparser.argv
-  loge.logger.level = argv.verbose ? loge.Level.debug : loge.Level.info
+  logger.level = argv.verbose ? Level.debug : Level.info
 
   if (argv.help) {
     argvparser.showHelp()
@@ -58,7 +50,7 @@ function main() {
       if (err) throw err
 
       var migrations_dirpath = path.join(__dirname, 'migrations')
-      db.executePatches('_migrations', migrations_dirpath, function(err) {
+      executePatches(db, '_migrations', migrations_dirpath, function(err) {
         if (err) throw err
 
         server.listen(argv.port, argv.hostname)
@@ -67,5 +59,4 @@ function main() {
   }
 }
 
-module.exports = server
-module.exports.main = main
+export default server

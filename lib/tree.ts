@@ -1,21 +1,19 @@
-var _ = require('lodash')
+import * as _ from 'lodash'
 
-function recursiveFilter(nodes, predicateFunction) {
+export function recursiveFilter(nodes, predicateFunction) {
   return nodes.filter(predicateFunction).map(function(node) {
     return _.assign({}, node, {children: recursiveFilter(node.children, predicateFunction)})
   })
 }
-exports.recursiveFilter = recursiveFilter
 
-function recursiveTransform(nodes, transformFunction) {
+export function recursiveTransform(nodes, transformFunction) {
   return nodes.map(function(node) {
     return _.assign({}, transformFunction(node),
       {children: recursiveTransform(node.children, transformFunction)})
   })
 }
-exports.recursiveTransform = recursiveTransform
 
-function recursiveSearch(nodes, predicateFunction) {
+export function recursiveSearch(nodes, predicateFunction) {
   var results = []
   for (var i = 0; i < nodes.length; i++) {
     var node = nodes[i]
@@ -26,12 +24,11 @@ function recursiveSearch(nodes, predicateFunction) {
   }
   return results
 }
-exports.recursiveSearch = recursiveSearch
 
 /**
 Returns the first result.
 */
-function recursiveFind(nodes, predicateFunction) {
+export function recursiveFind(nodes, predicateFunction) {
   for (var i = 0; i < nodes.length; i++) {
     var node = nodes[i]
     if (predicateFunction(node)) {
@@ -43,15 +40,13 @@ function recursiveFind(nodes, predicateFunction) {
     }
   }
 }
-exports.recursiveFind = recursiveFind
 
 /**
 depth-first recursion helper
 */
-function recursiveEach(nodes, fn) {
+export function recursiveEach(nodes, fn) {
   nodes.forEach(function(node) {
     fn(node)
     recursiveEach(node.children, fn)
   })
 }
-exports.recursiveEach = recursiveEach

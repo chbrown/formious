@@ -1,9 +1,11 @@
-var _ = require('lodash')
-var Router = require('regex-router')
-var db = require('../../db')
-var Template = require('../../models/Template')
+import * as _ from 'lodash'
+import Router from 'regex-router'
 
-var R = new Router()
+import db from '../../db'
+import * as httpUtil from '../../http-util'
+import Template from '../../models/Template'
+
+const R = new Router()
 
 /** GET /api/templates
 List all templates. */
@@ -11,22 +13,23 @@ R.get(/^\/api\/templates$/, function(req, res) {
   db.Select('templates')
   .orderBy('id ASC')
   .execute(function(err, templates) {
-    if (err) return res.die(err)
-    res.json(templates)
+    if (err) return httpUtil.writeError(res, err)
+
+    httpUtil.writeJson(res, templates)
   })
 })
 
 /** GET /api/templates/new
 Generate blank template. */
 R.get(/^\/api\/templates\/new$/, function(req, res) {
-  res.json({html: '', created: new Date()})
+  httpUtil.writeJson(res, {html: '', created: new Date()})
 })
 
 /** POST /api/templates
 Create new template. */
 R.post(/^\/api\/templates$/, function(req, res) {
-  req.readData(function(err, data) {
-    if (err) return res.die(err)
+  httpUtil.readData(req, function(err, data) {
+    if (err) return httpUtil.writeError(res, err)
 
     var fields = _.pick(data, Template.columns)
 
@@ -37,11 +40,13 @@ R.post(/^\/api\/templates$/, function(req, res) {
       if (err) {
         if (err.message && err.message.match(/duplicate key value violates unique constraint/)) {
           // 303 is a "See other" and SHOULD include a Location header
-          return res.status(303).die('Template already exists')
+          res.statusCode = 303
+          return httpUtil.writeError(res, new Error('Template already exists'))
         }
-        return res.die(err)
+        return httpUtil.writeError(res, err)
       }
-      res.status(201).json(template)
+      res.statusCode = 201
+      httpUtil.writeJson(res, template)
     })
   })
 })
@@ -52,17 +57,18 @@ R.get(/^\/api\/templates\/(\d+)$/, function(req, res, m) {
   db.SelectOne('templates')
   .whereEqual({id: m[1]})
   .execute(function(err, template) {
-    if (err) return res.die(err)
+    if (err) return httpUtil.writeError(res, err)
+
     res.setHeader('Cache-Control', 'max-age=5')
-    res.json(template)
+    httpUtil.writeJson(res, template)
   })
 })
 
 /** POST /api/templates/:id
 Update existing template. */
 R.post(/^\/api\/templates\/(\d+)/, function(req, res, m) {
-  req.readData(function(err, data) {
-    if (err) return res.die(err)
+  httpUtil.readData(req, function(err, data) {
+    if (err) return httpUtil.writeError(res, err)
 
     var fields = _.pick(data, Template.columns)
 
@@ -70,8 +76,10 @@ R.post(/^\/api\/templates\/(\d+)/, function(req, res, m) {
     .setEqual(fields)
     .whereEqual({id: m[1]})
     .execute(function(err) {
-      if (err) return res.die(err)
-      res.status(204).end() // 204 No Content
+      if (err) return httpUtil.writeError(res, err)
+
+      res.statusCode = 204
+      res.end() // 204 No Content
     })
   })
 })
@@ -82,9 +90,11 @@ R.delete(/^\/api\/templates\/(\d+)$/, function(req, res, m) {
   db.Delete('templates')
   .whereEqual({id: m[1]})
   .execute(function(err) {
-    if (err) return res.die(err)
-    res.status(204).end()
+    if (err) return httpUtil.writeError(res, err)
+
+    res.statusCode = 204
+    res.end()
   })
 })
 
-module.exports = R.route.bind(R)
+export default R.route.bind(R)

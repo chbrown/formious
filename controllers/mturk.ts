@@ -1,7 +1,9 @@
-var Participant = require('../models/Participant')
-var Router = require('regex-router')
+import Participant from '../models/Participant'
+import Router from 'regex-router'
 
-var R = new Router()
+import * as httpUtil from '../http-util'
+
+const R = new Router()
 
 /**
 POST /mturk/externalSubmit
@@ -15,7 +17,7 @@ empty string, and so missing final post backs will hit this endpoint.
 */
 R.post(/^\/mturk\/externalSubmit/, function(req, res) {
   // readData uses the querystring for GET data
-  req.readData(function(err, data) {
+  httpUtil.readData(req, function(err, data) {
     var aws_worker_id = data.workerId || 'WORKER_ID_NOT_AVAILABLE'
     delete data.workerId
 
@@ -25,17 +27,17 @@ R.post(/^\/mturk\/externalSubmit/, function(req, res) {
 
     Participant.addResponse({
       aws_worker_id: aws_worker_id,
-      ip_address: req.headers['x-real-ip'] || req.client.remoteAddress,
+      ip_address: req.headers['x-real-ip'] || req.connection.remoteAddress,
       user_agent: req.headers['user-agent'],
     }, {
       block_id: block_id,
       value: data,
     }, function(err) {
-      if (err) return res.die(err)
+      if (err) return httpUtil.writeError(res, err)
 
-      res.text('Your responses have been submitted and saved.')
+      httpUtil.writeText(res, 'Your responses have been submitted and saved.')
     })
   })
 })
 
-module.exports = R.route.bind(R)
+export default R.route.bind(R)

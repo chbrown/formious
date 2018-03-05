@@ -1,31 +1,33 @@
-var _ = require('lodash')
-var Router = require('regex-router')
-var db = require('../../db')
-var Participant = require('../../models/Participant')
-var url = require('url')
+import * as _ from 'lodash'
+import * as url from 'url'
+import Router from 'regex-router'
 
-var R = new Router()
+import db from '../../db'
+import * as httpUtil from '../../http-util'
+import Participant from '../../models/Participant'
+
+const R = new Router()
 
 /**
 GET /api/responses
 */
 R.get(/^\/api\/responses(\?|$)/, function(req, res) {
   var urlObj = url.parse(req.url, true)
+  var limitString = String(urlObj.query.limit) || '250'
 
   // set a maximum limit at 1000, but default it to 250
-  var limit = Math.min(urlObj.query.limit || 250, 1000)
+  var limit = Math.min(parseInt(limitString, 10), 1000)
 
   var select = db.Select('responses, participants, blocks')
   .where('participants.id = responses.participant_id')
   .where('blocks.id = responses.block_id')
-  .add([
+  .add(
     '*',
     // 'id' and 'created' from the other tables conflict with responses
     'responses.id AS id',
     'responses.created AS created',
     // count how many responses there are in all (i.e., outside the LIMIT)
-    'COUNT(responses.id) OVER() AS count',
-  ])
+    'COUNT(responses.id) OVER() AS count')
   .orderBy('responses.created DESC')
   .limit(limit)
 
@@ -40,8 +42,9 @@ R.get(/^\/api\/responses(\?|$)/, function(req, res) {
   }
 
   select.execute(function(err, responses) {
-    if (err) return res.die(err)
-    res.json(responses)
+    if (err) return httpUtil.writeError(res, err)
+
+    httpUtil.writeJson(res, responses)
   })
 })
 
@@ -52,8 +55,9 @@ R.get(/^\/api\/responses\/(\d+)$/, function(req, res, m) {
   db.SelectOne('responses')
   .whereEqual({id: m[1]})
   .execute(function(err, response) {
-    if (err) return res.die(err)
-    res.json(response)
+    if (err) return httpUtil.writeError(res, err)
+
+    httpUtil.writeJson(res, response)
   })
 })
 
@@ -61,19 +65,19 @@ R.get(/^\/api\/responses\/(\d+)$/, function(req, res, m) {
 POST /api/responses
 */
 R.post(/^\/api\/responses$/, function(req, res) {
-  req.readData(function(err, data) {
-    if (err) return res.die(err)
+  httpUtil.readData(req, function(err, data) {
+    if (err) return httpUtil.writeError(res, err)
 
     var response = _.pick(data, ['participant_id', 'block_id', 'value', 'assignment_id'])
 
     Participant.addResponse({
       aws_worker_id: data.aws_worker_id,
     }, response, function(err, participant, response) {
-      if (err) return res.die(err)
+      if (err) return httpUtil.writeError(res, err)
 
-      res.json(response)
+      httpUtil.writeJson(res, response)
     })
   })
 })
 
-module.exports = R.route.bind(R)
+export default R.route.bind(R)

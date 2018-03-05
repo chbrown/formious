@@ -1,10 +1,10 @@
-var {logger} = require('loge')
-var sqlcmd = require('sqlcmd-pg')
+import {logger} from 'loge'
+import {Connection} from 'sqlcmd-pg'
 
 // the DB_PORT_5432_* values come from docker
-var db = new sqlcmd.Connection({
+const db = new Connection({
   host: process.env.DB_PORT_5432_TCP_ADDR || '127.0.0.1',
-  port: process.env.DB_PORT_5432_TCP_PORT || '5432',
+  port: parseInt(process.env.DB_PORT_5432_TCP_PORT || '5432', 10),
   user: 'postgres',
   database: 'formious',
 })
@@ -15,4 +15,4 @@ db.on('log', function(ev) {
   logger[ev.level].apply(logger, args)
 })
 
-module.exports = db
+export default db

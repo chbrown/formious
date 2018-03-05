@@ -1,8 +1,10 @@
-var Router = require('regex-router')
-var Cookies = require('cookies')
-var Administrator = require('../../models/Administrator')
+import Router from 'regex-router'
+import * as Cookies from 'cookies'
 
-var R = new Router()
+import * as httpUtil from '../../http-util'
+import Administrator from '../../models/Administrator'
+
+const R = new Router()
 
 R.any(/^\/api\/access_tokens/, require('./access_tokens'))
 R.any(/^\/api\/administrators/, require('./administrators'))
@@ -20,7 +22,8 @@ function prerouter(req, res) {
   var token = cookies.get('administrator_token')
   Administrator.fromToken(token, function(err, administrator) {
     if (err) {
-      res.status(401).die('Authorization failed; you must login first.')
+      res.statusCode = 401
+      return httpUtil.writeError(res, new Error('Authorization failed; you must login first.'))
     }
     else {
       // authentication succeeded! they're in. go wild.
@@ -31,4 +34,4 @@ function prerouter(req, res) {
   })
 }
 
-module.exports = prerouter
+export default prerouter

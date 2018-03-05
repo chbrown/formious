@@ -18,7 +18,6 @@
     "controllers/login.ts",
     "controllers/mturk.ts",
     "controllers/util.ts",
-    "db.ts",
     "lib/excel.ts",
     "lib/flat.ts",
     "lib/tree.ts",
@@ -29,7 +28,9 @@
     "models/Experiment.ts",
     "models/Participant.ts",
     "models/Template.ts",
-    "server.ts",
-    "test/flat.ts"
+    "test/flat.ts",
+    "db.ts",
+    "http-util.ts",
+    "server.ts"
   ]
 }
