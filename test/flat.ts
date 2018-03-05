@@ -3,8 +3,8 @@ import 'mocha'
 
 import {flatten, unflatten} from '../lib/flat'
 
-describe('flat tests', function() {
-  var deepCustomer = {
+describe('flat tests', () => {
+  const deepCustomer = {
     customer: {
       firstname: 'Chris',
       lastname: 'Brown',
@@ -17,7 +17,7 @@ describe('flat tests', function() {
     age: 23,
   }
 
-  var flatCustomer = {
+  const flatCustomer = {
     'customer.firstname': 'Chris',
     'customer.lastname': 'Brown',
     'purchases[0]': 'Crackers',
@@ -26,13 +26,13 @@ describe('flat tests', function() {
     'age': 23,
   }
 
-  it('flatten() should produce prototypical flattening', function() {
-    var flattened = flatten(deepCustomer)
+  it('flatten() should produce prototypical flattening', () => {
+    const flattened = flatten(deepCustomer)
     deepEqual(flattened, flatCustomer)
   })
 
-  it('unflatten() should produce the deep object', function() {
-    var unflattened = unflatten(flatCustomer)
+  it('unflatten() should produce the deep object', () => {
+    const unflattened = unflatten(flatCustomer)
     deepEqual(unflattened, deepCustomer)
   })
 })

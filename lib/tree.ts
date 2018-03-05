@@ -1,22 +1,28 @@
-import * as _ from 'lodash'
+interface Node {
+  children?: Node[]
+}
 
-export function recursiveFilter(nodes, predicateFunction) {
-  return nodes.filter(predicateFunction).map(function(node) {
-    return _.assign({}, node, {children: recursiveFilter(node.children, predicateFunction)})
+export function recursiveFilter<T extends Node>(nodes: T[],
+                                                predicateFunction: (node: T) => boolean): T[] {
+  return nodes.filter(predicateFunction).map((node) => {
+    return Object.assign(node, {children: recursiveFilter(node.children, predicateFunction)})
   })
 }
 
-export function recursiveTransform(nodes, transformFunction) {
-  return nodes.map(function(node) {
-    return _.assign({}, transformFunction(node),
-      {children: recursiveTransform(node.children, transformFunction)})
+export function recursiveTransform<S extends Node,
+                                   T extends Node>(nodes: S[],
+                                                   transformFunction: (node: S) => T): T[] {
+  return nodes.map(node => {
+    return Object.assign(transformFunction(node),
+                         {children: recursiveTransform(node.children, transformFunction)})
   })
 }
 
-export function recursiveSearch(nodes, predicateFunction) {
-  var results = []
-  for (var i = 0; i < nodes.length; i++) {
-    var node = nodes[i]
+export function recursiveSearch<T extends Node>(nodes: T[],
+                                                predicateFunction: (node: T) => boolean): T[] {
+  const results: T[] = []
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i]
     if (predicateFunction(node)) {
       results.push(node)
     }
@@ -28,13 +34,15 @@ export function recursiveSearch(nodes, predicateFunction) {
 /**
 Returns the first result.
 */
-export function recursiveFind(nodes, predicateFunction) {
-  for (var i = 0; i < nodes.length; i++) {
-    var node = nodes[i]
+export function recursiveFind<T extends Node>(nodes: T[],
+                                              predicateFunction: (node: T) => boolean): T {
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i]
     if (predicateFunction(node)) {
       return node
     }
-    var children_result = recursiveFind(node.children, predicateFunction)
+    const children = node.children as T[]
+    const children_result = recursiveFind<T>(children, predicateFunction)
     if (children_result) {
       return children_result
     }
@@ -44,8 +52,9 @@ export function recursiveFind(nodes, predicateFunction) {
 /**
 depth-first recursion helper
 */
-export function recursiveEach(nodes, fn) {
-  nodes.forEach(function(node) {
+export function recursiveEach<T extends Node>(nodes: T[],
+                                              fn: (node: T) => void): void {
+  nodes.forEach(node => {
     fn(node)
     recursiveEach(node.children, fn)
   })

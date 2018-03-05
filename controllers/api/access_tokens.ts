@@ -9,10 +9,10 @@ const R = new Router()
 
 /** GET /api/access_tokens
 List all access tokens. */
-R.get(/^\/api\/access_tokens$/, function(req, res) {
+R.get(/^\/api\/access_tokens$/, (req, res) => {
   db.Select('access_tokens')
   .orderBy('id ASC')
-  .execute(function(err, access_tokens) {
+  .execute((err, access_tokens) => {
     if (err) return httpUtil.writeError(res, err)
 
     httpUtil.writeJson(res, access_tokens)
@@ -21,22 +21,22 @@ R.get(/^\/api\/access_tokens$/, function(req, res) {
 
 /** GET /api/access_tokens/new
 Generate blank access token. */
-R.get(/^\/api\/access_tokens\/new$/, function(req, res) {
+R.get(/^\/api\/access_tokens\/new$/, (req, res) => {
   httpUtil.writeJson(res, {})
 })
 
 /** POST /api/access_tokens
 Create new access token. */
-R.post(/^\/api\/access_tokens$/, function(req, res) {
+R.post(/^\/api\/access_tokens$/, (req, res) => {
   httpUtil.readData(req, (err, data) => {
     if (err) return httpUtil.writeError(res, err)
 
-    var fields = _.pick(data, AccessToken.columns)
+    const fields = _.pick(data, AccessToken.columns)
 
     db.InsertOne('access_tokens')
     .set(fields)
     .returning('*')
-    .execute(function(err, access_token) {
+    .execute((err, access_token) => {
       if (err) return httpUtil.writeError(res, err)
 
       res.statusCode = 201
@@ -47,10 +47,10 @@ R.post(/^\/api\/access_tokens$/, function(req, res) {
 
 /** GET /api/access_tokens/:id
 Show existing access token. */
-R.get(/^\/api\/access_tokens\/(\d+)$/, function(req, res, m) {
+R.get(/^\/api\/access_tokens\/(\d+)$/, (req, res, m) => {
   db.SelectOne('access_tokens')
   .whereEqual({id: m[1]})
-  .execute(function(err, access_token) {
+  .execute((err, access_token) => {
     if (err) return httpUtil.writeError(res, err)
 
     httpUtil.writeJson(res, access_token)
@@ -59,16 +59,16 @@ R.get(/^\/api\/access_tokens\/(\d+)$/, function(req, res, m) {
 
 /** POST /api/access_tokens/:id
 Update existing access token. */
-R.post(/^\/api\/access_tokens\/(\d+)/, function(req, res, m) {
-  httpUtil.readData(req, function(err, data) {
+R.post(/^\/api\/access_tokens\/(\d+)/, (req, res, m) => {
+  httpUtil.readData(req, (err, data) => {
     if (err) return httpUtil.writeError(res, err)
 
-    var fields = _.pick(data, AccessToken.columns)
+    const fields = _.pick(data, AccessToken.columns)
 
     db.Update('access_tokens')
     .setEqual(fields)
     .whereEqual({id: m[1]})
-    .execute(function(err) {
+    .execute((err) => {
       if (err) return httpUtil.writeError(res, err)
 
       res.statusCode = 204
@@ -79,10 +79,10 @@ R.post(/^\/api\/access_tokens\/(\d+)/, function(req, res, m) {
 
 /** DELETE /api/access_tokens/:id
 Delete existing access token. */
-R.delete(/^\/api\/access_tokens\/(\d+)$/, function(req, res, m) {
+R.delete(/^\/api\/access_tokens\/(\d+)$/, (req, res, m) => {
   db.Delete('access_tokens')
   .whereEqual({id: m[1]})
-  .execute(function(err) {
+  .execute((err) => {
     if (err) return httpUtil.writeError(res, err)
 
     res.statusCode = 204

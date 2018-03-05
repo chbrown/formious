@@ -25,9 +25,9 @@ A is 1-like for everything but the ones place (where it is 0-like),
   so we adjust char codes by 64 and then subtract one at the end.
 */
 function excelColumnIndex(column: string): number {
-  var index = 0
-  for (var place = 0; place < column.length; place++) {
-    var unit = column.charCodeAt(column.length - place - 1) - 64
+  let index = 0
+  for (let place = 0; place < column.length; place++) {
+    const unit = column.charCodeAt(column.length - place - 1) - 64
     index += unit * Math.pow(26, place)
   }
   return index - 1
@@ -39,26 +39,28 @@ One list of strings for each row in the provided Excel file.
 Headers are not treated specially.
 */
 export function parseSheetXml(sharedStrings_xml: string, sheet_xml: string): string[][] {
-  var sharedStrings_doc = new xmldom.DOMParser().parseFromString(sharedStrings_xml).documentElement
-  var select = xpath.useNamespaces({main: sharedStrings_doc.namespaceURI})
+  const sharedStrings_doc = new xmldom.DOMParser().parseFromString(sharedStrings_xml).documentElement
+  const select = xpath.useNamespaces({main: sharedStrings_doc.namespaceURI})
   // sharedStrings is an Array of strings, which Excel references from another sheet,
   // instead of storing those strings in the main sheet. Weird, but that's how it works.
-  var sharedStrings = select('//main:si/main:t/text()', sharedStrings_doc).map(String)
+  const sharedStrings = select('//main:si/main:t/text()', sharedStrings_doc).map(String)
   // logger.info('sharedStrings: %j', sharedStrings)
 
-  var sheet_doc = new xmldom.DOMParser().parseFromString(sheet_xml).documentElement
+  const sheet_doc = new xmldom.DOMParser().parseFromString(sheet_xml).documentElement
 
   // Excel does not use empty <c></c> elements for empty cells, so we have to use the r attribute indexing
-  var table: string[][] = []
-  select('//main:sheetData/main:row/main:c', sheet_doc).forEach(function(c) {
-    var cell_data = select('main:v/text()[1]', c)[0].data
+  const table: string[][] = []
+  const cells = select('//main:sheetData/main:row/main:c', sheet_doc)
+  cells.forEach((c: Element) => {
+    const cell_value = select('main:v/text()[1]', c)[0] as CharacterData
+    const cell_data = cell_value.data
     // the t="s" attribute instructs us that the cell is a reference to shared strings
-    var value = c.getAttribute('t') == 's' ? sharedStrings[cell_data] : cell_data
+    const value = c.getAttribute('t') == 's' ? sharedStrings[Number(cell_data)] : cell_data
 
-    var coordinates = c.getAttribute('r')
-    var m = coordinates.match(/^([A-Z]+)([0-9]+)$/)
-    var col = excelColumnIndex(m[1])
-    var row = parseInt(m[2], 10) - 1
+    const coordinates = c.getAttribute('r')
+    const m = coordinates.match(/^([A-Z]+)([0-9]+)$/)
+    const col = excelColumnIndex(m[1])
+    const row = parseInt(m[2], 10) - 1
 
     // initialize the row if needed
     if (table[row] === undefined) {
@@ -74,10 +76,10 @@ Read the first sheet from an XLSX (Microsoft Excel file) into a list of lists of
 */
 export function parseZip(xlsxBuffer: string | Buffer): string[][] {
   try {
-    var zip = new JSZip(xlsxBuffer)
+    const zip = new JSZip(xlsxBuffer)
 
-    var sharedStrings_xml = zip.file('xl/sharedStrings.xml').asText()
-    var sheet1_xml = zip.file('xl/worksheets/sheet1.xml').asText()
+    const sharedStrings_xml = zip.file('xl/sharedStrings.xml').asText()
+    const sheet1_xml = zip.file('xl/worksheets/sheet1.xml').asText()
 
     return parseSheetXml(sharedStrings_xml, sheet1_xml)
   }
@@ -88,10 +90,10 @@ export function parseZip(xlsxBuffer: string | Buffer): string[][] {
 
 export function parseXlsx(xlsxBuffer: Buffer) {
   try {
-    var workbook = xlsx.read(xlsxBuffer)
+    const workbook = xlsx.read(xlsxBuffer)
 
-    var worksheet = workbook.Sheets[workbook.SheetNames[0]]
-    var json = xlsx.utils.sheet_to_json(worksheet)
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+    const json = xlsx.utils.sheet_to_json(worksheet)
 
     return json
   }

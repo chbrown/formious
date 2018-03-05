@@ -10,8 +10,8 @@ const db = new Connection({
 })
 
 // attach local logger to sqlcmd.Connection log events
-db.on('log', function(ev) {
-  var args = [ev.format].concat(ev.args)
+db.on('log', (ev) => {
+  const args = [ev.format].concat(ev.args)
   logger[ev.level].apply(logger, args)
 })
 

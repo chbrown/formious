@@ -1,10 +1,22 @@
 import db from '../db'
 
+import Response from './Response'
+
 export default class Participant {
-  static findOrCreate(participant, callback) {
+  id?: number
+  name?: string
+  aws_worker_id?: string
+  aws_bonus_owed?: number
+  aws_bonus_paid?: number
+  ip_address?: string
+  user_agent?: string
+  created?: Date
+
+  static findOrCreate(participant: Participant,
+                      callback: (error: Error, participant?: Participant) => void): void {
     db.SelectOne('participants')
     .whereEqual({aws_worker_id: participant.aws_worker_id})
-    .execute(function(err, existing_participant) {
+    .execute((err, existing_participant) => {
       if (err) return callback(err)
 
       if (existing_participant) {
@@ -29,18 +41,18 @@ export default class Participant {
     value: Object, // optional
     assignment_id: String, // optional
   }
-
-  callback: function(error: Error, participant?: Participant, responses?: Response[])
   */
-  static addResponse(participant, response, callback) {
-    Participant.findOrCreate({aws_worker_id: participant.aws_worker_id}, function(err, participant) {
+  static addResponse(participant: Participant,
+                     response: Response,
+                     callback: (error: Error, participant?: Participant, response?: Response) => void): void {
+    Participant.findOrCreate({aws_worker_id: participant.aws_worker_id}, (err, participant) => {
       if (err) return callback(err)
 
       response.participant_id = participant.id
       db.InsertOne('responses')
       .set(response)
       .returning('*')
-      .execute(function(err, response) {
+      .execute((err, response: Response) => {
         if (err) return callback(err)
 
         callback(err, participant, response)

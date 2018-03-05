@@ -11,14 +11,14 @@ const R = new Router()
 /**
 GET /api/responses
 */
-R.get(/^\/api\/responses(\?|$)/, function(req, res) {
-  var urlObj = url.parse(req.url, true)
-  var limitString = String(urlObj.query.limit) || '250'
+R.get(/^\/api\/responses(\?|$)/, (req, res) => {
+  const urlObj = url.parse(req.url, true)
+  const limitString = String(urlObj.query.limit) || '250'
 
   // set a maximum limit at 1000, but default it to 250
-  var limit = Math.min(parseInt(limitString, 10), 1000)
+  const limit = Math.min(parseInt(limitString, 10), 1000)
 
-  var select = db.Select('responses, participants, blocks')
+  let select = db.Select('responses, participants, blocks')
   .where('participants.id = responses.participant_id')
   .where('blocks.id = responses.block_id')
   .add(
@@ -41,7 +41,7 @@ R.get(/^\/api\/responses(\?|$)/, function(req, res) {
     select = select.whereEqual({aws_worker_id: urlObj.query.aws_worker_id})
   }
 
-  select.execute(function(err, responses) {
+  select.execute((err, responses) => {
     if (err) return httpUtil.writeError(res, err)
 
     httpUtil.writeJson(res, responses)
@@ -51,10 +51,10 @@ R.get(/^\/api\/responses(\?|$)/, function(req, res) {
 /**
 GET /api/responses/:id
 */
-R.get(/^\/api\/responses\/(\d+)$/, function(req, res, m) {
+R.get(/^\/api\/responses\/(\d+)$/, (req, res, m) => {
   db.SelectOne('responses')
   .whereEqual({id: m[1]})
-  .execute(function(err, response) {
+  .execute((err, response) => {
     if (err) return httpUtil.writeError(res, err)
 
     httpUtil.writeJson(res, response)
@@ -64,15 +64,16 @@ R.get(/^\/api\/responses\/(\d+)$/, function(req, res, m) {
 /**
 POST /api/responses
 */
-R.post(/^\/api\/responses$/, function(req, res) {
-  httpUtil.readData(req, function(err, data) {
+R.post(/^\/api\/responses$/, (req, res) => {
+  httpUtil.readData(req, (err, data) => {
     if (err) return httpUtil.writeError(res, err)
 
-    var response = _.pick(data, ['participant_id', 'block_id', 'value', 'assignment_id'])
+    const {participant_id, block_id, value, assignment_id} = data
+    const response = {participant_id, block_id, value, assignment_id}
 
     Participant.addResponse({
       aws_worker_id: data.aws_worker_id,
-    }, response, function(err, participant, response) {
+    }, response, (err, participant, response) => {
       if (err) return httpUtil.writeError(res, err)
 
       httpUtil.writeJson(res, response)

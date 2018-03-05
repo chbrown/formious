@@ -16,24 +16,24 @@ AWS Access Key ID and AWS Secret Access Key
 The POST should contain, minimally, an "Operation" field, indicating the MTurk
 API operation to call.
 */
-R.post(/^\/api\/mturk\?/, function(req, res) {
-  var urlObj = url.parse(req.url, true)
-  var aws_account_id = urlObj.query.aws_account_id || null
-  var environment = urlObj.query.environment == 'production' ? turk.Environment.production : turk.Environment.sandbox
+R.post(/^\/api\/mturk\?/, (req, res) => {
+  const urlObj = url.parse(req.url, true)
+  const aws_account_id = urlObj.query.aws_account_id || null
+  const environment = urlObj.query.environment == 'production' ? turk.Environment.production : turk.Environment.sandbox
 
-  httpUtil.readData(req, function(err, data) {
+  httpUtil.readData(req, (err, data) => {
     if (err) return httpUtil.writeError(res, err)
 
     db.SelectOne('aws_accounts')
     .whereEqual({id: aws_account_id})
-    .execute(function(err, aws_account) {
+    .execute((err, aws_account) => {
       if (err) return httpUtil.writeError(res, err)
       if (!aws_account) return httpUtil.writeError(res, new Error('AWS Account Not Found'))
 
-      var account = new turk.Account(aws_account.access_key_id, aws_account.secret_access_key)
-      var connection = account.createConnection(environment)
+      const account = new turk.Account(aws_account.access_key_id, aws_account.secret_access_key)
+      const connection = account.createConnection(environment)
 
-      connection.post(data, function(err, xml) {
+      connection.post(data, (err, xml) => {
         if (err) return httpUtil.writeError(res, err)
 
         res.setHeader('Content-Type', 'text/xml')

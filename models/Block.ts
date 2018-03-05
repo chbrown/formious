@@ -21,6 +21,16 @@ export interface BlockRow {
 }
 
 export default class Block {
+  id: number
+  experiment_id: number
+  template_id?: number
+  context: any
+  view_order: number
+  created: Date
+  randomize: boolean
+  parent_block_id?: number
+  quota?: number
+
   static get columns(): string[] {
     return [
       'id',
@@ -84,13 +94,13 @@ export default class Block {
       if (err) return callback(err)
 
       // should id = null?
-      const root = {
+      const root: BlockRow = {
         id: null,
         randomize: false,
         children: Block.shapeTree(blocks),
       }
       function findBlock(id: number): BlockRow {
-        return recursiveFind([root], block => block.id === id)
+        return recursiveFind<BlockRow>([root], block => block.id === id)
       }
 
       // we need to get the parent_block_id of the most_recent block
@@ -145,7 +155,7 @@ export default class Block {
           // value: null,
         })
         .execute(whilstCallback)
-      }, error => {
+      }, (error: Error) => {
         if (error) return callback(error)
         // ok, current_path is either empty or current_path[0] is the next block we should do
         const initial_next_parent_block = current_path[0];

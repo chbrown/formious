@@ -1,15 +1,15 @@
 /**
 Flatten and unflatten json
 */
-function _flatten(obj, root, result) {
-  for (var key in obj) {
-    var value = obj[key]
-    var path
+function _flatten(obj: any, root: any, result: any) {
+  for (let key in obj) {
+    const value = obj[key]
+    let path
     if (Array.isArray(obj)) {
-      path = root + '[' + key + ']'
+      path = `${root}[${key}]`
     }
     else {
-      path = root ? root + '.' + key : key
+      path = root ? `${root}.${key}` : key
     }
 
     if (value instanceof Object) {
@@ -21,23 +21,23 @@ function _flatten(obj, root, result) {
   }
 }
 
-export function flatten(obj) {
-  var result = {}
+export function flatten(obj: any) {
+  const result: any = {}
   _flatten(obj, '', result)
   return result
 }
 
-export function unflatten(map) {
+export function unflatten(map: any) {
   // map will be an Object with basic data types for its values
-  var result = {}
-  for (var pointer in map) {
+  const result: any = {}
+  for (let pointer in map) {
     // delimiters can be either periods or [ ] braces
-    var index_regex = /(?:^|\.)(\w+)|(\[\d+\])/g
+    const index_regex = /(?:^|\.)(\w+)|(\[\d+\])/g
     // traverse
-    var cursor = result
-    var parent_index = null
-    var index
-    var m
+    let cursor = result
+    let parent_index = null
+    let index
+    let m
     while (m = index_regex.exec(pointer)) { // eslint-disable-line no-cond-assign
       // objects match as m[1], arrays match as m[2]
       if (m[2]) {

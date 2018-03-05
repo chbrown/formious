@@ -43,6 +43,25 @@ export function readData(req: IncomingMessage,
   }
 }
 
+function asString(value: string | string[] | undefined,
+                  separator = ','): string {
+  if (value === undefined) {
+    return undefined
+  }
+  if (Array.isArray(value)) {
+    return value.join(separator)
+  }
+  return value
+}
+
+export function readIPAddress(req: IncomingMessage): string {
+  return asString(req.headers['x-real-ip']) || req.connection.remoteAddress
+}
+
+export function readUserAgent(req: IncomingMessage): string {
+  return asString(req.headers['user-agent'])
+}
+
 export function writeJson(res: ServerResponse, value: any): ServerResponse {
   res.setHeader('Content-Type', 'application/json')
   res.end(JSON.stringify(value))
@@ -74,6 +93,6 @@ export function writeRedirect(res: ServerResponse, location: string): ServerResp
     res.statusCode = 302
   }
   res.setHeader('Location', location)
-  res.end('Redirecting to: ' + location)
+  res.end(`Redirecting to: ${location}`)
   return res
 }

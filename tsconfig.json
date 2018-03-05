@@ -27,6 +27,7 @@
     "models/Block.ts",
     "models/Experiment.ts",
     "models/Participant.ts",
+    "models/Response.ts",
     "models/Template.ts",
     "test/flat.ts",
     "db.ts",

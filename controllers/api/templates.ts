@@ -9,10 +9,10 @@ const R = new Router()
 
 /** GET /api/templates
 List all templates. */
-R.get(/^\/api\/templates$/, function(req, res) {
+R.get(/^\/api\/templates$/, (req, res) => {
   db.Select('templates')
   .orderBy('id ASC')
-  .execute(function(err, templates) {
+  .execute((err, templates) => {
     if (err) return httpUtil.writeError(res, err)
 
     httpUtil.writeJson(res, templates)
@@ -21,22 +21,22 @@ R.get(/^\/api\/templates$/, function(req, res) {
 
 /** GET /api/templates/new
 Generate blank template. */
-R.get(/^\/api\/templates\/new$/, function(req, res) {
+R.get(/^\/api\/templates\/new$/, (req, res) => {
   httpUtil.writeJson(res, {html: '', created: new Date()})
 })
 
 /** POST /api/templates
 Create new template. */
-R.post(/^\/api\/templates$/, function(req, res) {
-  httpUtil.readData(req, function(err, data) {
+R.post(/^\/api\/templates$/, (req, res) => {
+  httpUtil.readData(req, (err, data) => {
     if (err) return httpUtil.writeError(res, err)
 
-    var fields = _.pick(data, Template.columns)
+    const fields = _.pick(data, Template.columns)
 
     db.InsertOne('templates')
     .set(fields)
     .returning('*')
-    .execute(function(err, template) {
+    .execute((err, template) => {
       if (err) {
         if (err.message && err.message.match(/duplicate key value violates unique constraint/)) {
           // 303 is a "See other" and SHOULD include a Location header
@@ -53,10 +53,10 @@ R.post(/^\/api\/templates$/, function(req, res) {
 
 /** GET /api/templates/:id
 Show existing template. */
-R.get(/^\/api\/templates\/(\d+)$/, function(req, res, m) {
+R.get(/^\/api\/templates\/(\d+)$/, (req, res, m) => {
   db.SelectOne('templates')
   .whereEqual({id: m[1]})
-  .execute(function(err, template) {
+  .execute((err, template) => {
     if (err) return httpUtil.writeError(res, err)
 
     res.setHeader('Cache-Control', 'max-age=5')
@@ -66,16 +66,16 @@ R.get(/^\/api\/templates\/(\d+)$/, function(req, res, m) {
 
 /** POST /api/templates/:id
 Update existing template. */
-R.post(/^\/api\/templates\/(\d+)/, function(req, res, m) {
-  httpUtil.readData(req, function(err, data) {
+R.post(/^\/api\/templates\/(\d+)/, (req, res, m) => {
+  httpUtil.readData(req, (err, data) => {
     if (err) return httpUtil.writeError(res, err)
 
-    var fields = _.pick(data, Template.columns)
+    const fields = _.pick(data, Template.columns)
 
     db.Update('templates')
     .setEqual(fields)
     .whereEqual({id: m[1]})
-    .execute(function(err) {
+    .execute((err) => {
       if (err) return httpUtil.writeError(res, err)
 
       res.statusCode = 204
@@ -86,10 +86,10 @@ R.post(/^\/api\/templates\/(\d+)/, function(req, res, m) {
 
 /** DELETE /api/templates/:id
 Delete existing template. */
-R.delete(/^\/api\/templates\/(\d+)$/, function(req, res, m) {
+R.delete(/^\/api\/templates\/(\d+)$/, (req, res, m) => {
   db.Delete('templates')
   .whereEqual({id: m[1]})
-  .execute(function(err) {
+  .execute((err) => {
     if (err) return httpUtil.writeError(res, err)
 
     res.statusCode = 204

@@ -8,18 +8,26 @@ import {executePatches} from 'sql-patch'
 import controllers from './controllers'
 import db from './db'
 
-export const server = http.createServer(function(req, res) {
+export const server = http.createServer((req, res) => {
   logger.debug('%s %s', req.method, req.url)
   controllers(req, res)
 })
 
-server.on('listening', function() {
-  var address = server.address()
+server.on('listening', () => {
+  const address = server.address()
   logger.info('server listening on http://%s:%d', address.address, address.port)
 })
 
+interface CLIArgv {
+  hostname: string
+  port: string
+  help: boolean
+  verbose: boolean
+  version: boolean
+}
+
 export function main() {
-  var argvparser = optimist
+  const argvparser = optimist
   .usage('formious --port 1451 -v')
   .describe({
     hostname: 'hostname to listen on',
@@ -36,7 +44,7 @@ export function main() {
     verbose: process.env.DEBUG !== undefined,
   })
 
-  var argv = argvparser.argv
+  const argv: CLIArgv = argvparser.argv
   logger.level = argv.verbose ? Level.debug : Level.info
 
   if (argv.help) {
@@ -46,14 +54,14 @@ export function main() {
     console.log(require('./package').version)
   }
   else {
-    db.createDatabaseIfNotExists(function(err) {
+    db.createDatabaseIfNotExists((err) => {
       if (err) throw err
 
-      var migrations_dirpath = path.join(__dirname, 'migrations')
-      executePatches(db, '_migrations', migrations_dirpath, function(err) {
+      const migrations_dirpath = path.join(__dirname, 'migrations')
+      executePatches(db, '_migrations', migrations_dirpath, (err) => {
         if (err) throw err
 
-        server.listen(argv.port, argv.hostname)
+        server.listen(parseInt(argv.port, 10), argv.hostname)
       })
     })
   }
