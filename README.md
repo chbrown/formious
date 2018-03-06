@@ -39,11 +39,12 @@ This repo is automatically built as a docker container on Docker Hub at [`chbrow
 * The `-e VIRTUAL_HOST=formious.com` argument tells nginx-proxy to forward `formious.com` requests to this container. You would use a different hostname here, since I own `formious.com`.
 * The `--link db:db` exposes to the database container, named `db`, to the formious application, under the alias `db`.
 
-To update, pull the latest image and remove the running container:
+To update, pull the latest image, remove the running container, then enter the same `docker run` command as above:
 
-    docker pull chbrown/formious && docker rm -f app
-
-Then enter the same `docker run` command as before.
+    docker pull chbrown/formious && \
+      docker rm -f app && \
+      docker run -d -e VIRTUAL_HOST=formious.com --link db:db \
+        --restart always --name app chbrown/formious
 
 
 ## License

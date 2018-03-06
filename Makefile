@@ -21,8 +21,3 @@ dev: $(BIN)/watsh $(BIN)/watchify
     $(BIN)/watsh 'make ui/site.css' ui/site.less & \
     $(BIN)/watchify ui/build.js -t babelify -o ui/build/bundle.js -v & \
     wait)
-
-deploy:
-	docker pull chbrown/formious && \
-    docker rm -f app && \
-    docker run -d -e VIRTUAL_HOST=formious.com --link db:db --restart always --name app chbrown/formious
