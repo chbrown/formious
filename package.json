@@ -27,7 +27,7 @@
     "moment": "2.10.6",
     "ng-upload": "0.1.0",
     "ngstorage": "0.3.7",
-    "notify-ui": "0.1.4",
+    "notify-ui": "0.2.0",
     "optimist": "0.6.1",
     "regex-router": "2.0.0",
     "send": "0.16.2",
