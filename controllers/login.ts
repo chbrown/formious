@@ -1,6 +1,5 @@
 import Router from 'regex-router'
 import Cookies from 'cookies'
-import * as moment from 'moment'
 import {logger} from 'loge'
 
 import * as httpUtil from '../http-util'
@@ -8,6 +7,8 @@ import Administrator from '../models/Administrator'
 
 // router & actions for logging in
 const R = new Router()
+
+const oneMonthMilliseconds = 30 * 24 * 60 * 60 * 1000 // = 2.592e+9
 
 /** POST /login
 Try to login as user with email and password */
@@ -27,10 +28,11 @@ R.post(/^\/login$/, (req, res) => {
         const message = 'Authenticated successfully'
         logger.info('%s; token = %s', message, token)
 
+        const oneMonthFromNow = new Date(new Date().getTime() + oneMonthMilliseconds)
         const cookies = new Cookies(req, res)
         cookies.set('administrator_token', token, {
           path: '/',
-          expires: moment().add(1, 'month').toDate(),
+          expires: oneMonthFromNow,
         })
 
         httpUtil.writeJson(res, {message})
