@@ -1,5 +1,7 @@
 # formious
 
+[![latest version published to npm](https://badge.fury.io/js/formious.svg)](https://www.npmjs.com/package/formious)
+
 Formious is a [node.js](http://nodejs.org/) experiment server. It fills a niche somewhere above Google Forms, SurveyMonkey, or Qualtrics, but below a full-fledged web application. It provides an opinionated way of presenting stimuli to a participant, which requires more technical knowledge than the previously mentioned form services, but allows much greater flexibility in the construction and presentation of the form questions.
 
 In particular, it was originally built to interface with [Amazon Mechanical Turk](https://requester.mturk.com/). In addition to serving as the backend for External Questions, it also provides an alternate interface to parts of the AWS MT interface available via the [API](http://aws.amazon.com/mturk/).
@@ -49,4 +51,5 @@ To update, pull the latest image, remove the running container, then enter the s
 
 ## License
 
-Copyright 2011–2015 Christopher Brown. [MIT Licensed](http://chbrown.github.io/licenses/MIT/#2011-2015).
+Copyright 2011–2015 Christopher Brown.
+[MIT Licensed](https://chbrown.github.io/licenses/MIT/#2011-2015).
