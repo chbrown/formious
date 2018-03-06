@@ -1,4 +1,4 @@
-import {logger} from 'loge'
+import {logger, Level} from 'loge'
 import {Connection} from 'sqlcmd-pg'
 
 // the DB_PORT_5432_* values come from docker
@@ -9,10 +9,25 @@ const db = new Connection({
   database: 'formious',
 })
 
+interface LogEvent {
+  level: string
+  format: string
+  args?: any[]
+}
+
+function normalize(value: any): any {
+  if (typeof value === 'string') {
+    return value.replace(/\s{2,}/g, ' ')
+  }
+  return value
+}
+
 // attach local logger to sqlcmd.Connection log events
-db.on('log', (ev) => {
-  const args = [ev.format].concat(ev.args)
-  logger[ev.level].apply(logger, args)
+db.on('log', (ev: LogEvent) => {
+  const {level, format, args} = ev
+  // normalize each value in args, most of which will be SQL strings
+  const normalizedArgs = (args || []).map(normalize)
+  logger.log(Level[level], [format, ...normalizedArgs])
 })
 
 export default db
