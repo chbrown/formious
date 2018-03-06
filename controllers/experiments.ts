@@ -132,6 +132,22 @@ R.get(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, (req, res, m) => {
     // it's mostly metadata, compared to the states.
     const urlObj = url.parse(req.url, true)
 
+    // check if we somehow requested a parent (non-leaf) block (with no template)
+    if (!results.template) {
+      // in which case, we must stop and redirect
+      const aws_worker_id = httpUtil.asString(urlObj.query.workerId) || 'WORKER_ID_NOT_AVAILABLE'
+      return Participant.findOrCreate({aws_worker_id}, (err, participant) => {
+        if (err) return httpUtil.writeError(res, err)
+
+        return Block.nextBlockId(experiment_id, parseInt(block_id, 10), participant.id, (err, next_block_id) => {
+          if (err) return httpUtil.writeError(res, err)
+
+          const pathname = `/experiments/${experiment_id}/blocks/${next_block_id}`
+          httpUtil.writeRelativeRedirect(res, req, {pathname})
+        })
+      })
+    }
+
     // context: the current state to render the template with
     // urlObj.query will usually have the fields: assignmentId, hitId, turkSubmitTo, workerId
     const context = {...results.block.context, ...urlObj.query, experiment_id, block_id}

@@ -79,7 +79,9 @@ export default class Block {
   callback(null, block_id: Number) // no error
   callback(null, null)             // no more blocks in experiment
   */
-  static nextBlockId(experiment_id: number, block_id: number, participant_id: number,
+  static nextBlockId(experiment_id: number | string,
+                     block_id: number,
+                     participant_id: number | string,
                      callback: (error: Error, block_id?: number) => void) {
     // this query is fast in the database (like 3ms) but can take much longer in javascript (like 25ms)
     // if we're requesting the whole block row, with its bulky context, so we
