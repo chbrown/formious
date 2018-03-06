@@ -13,6 +13,15 @@ In particular, it was originally built to interface with [Amazon Mechanical Turk
     formious
 
 
+## Build steps
+
+The `scripts` field in `package.json` defines the build steps.
+
+* The `prepare` stage runs the TypeScript compiler, because the compiled output is not kept under version control.
+* The `prepack-*` stages are for static client-side requirements, like `.css` and `bundle.js`.
+* The `prepack` stage runs the various `prepack-*` stages.
+
+
 ## Deployment
 
 We'll deploy to a Digital Ocean droplet.
