@@ -133,7 +133,7 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, (req, res, m) => {
 
     // 1. instantiate the missing blocks so that they have id's we can use when flattening
     const newBlocks: BlockRow[] = []
-    recursiveEach<BlockRow>(rootBlocks, (block) => {
+    recursiveEach(rootBlocks, (block) => {
       if (block.id === undefined) {
         newBlocks.push(block)
       }
@@ -157,7 +157,7 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, (req, res, m) => {
       rootBlocks.forEach((root_block) => {
         root_block.parent_block_id = null
       })
-      recursiveEach<BlockRow>(rootBlocks, (block) => {
+      recursiveEach(rootBlocks, (block) => {
         block.children.forEach((child_block) => {
           child_block.parent_block_id = block.id
         })
@@ -165,7 +165,7 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, (req, res, m) => {
       // now the tree structure is defined on each block, and the 'children' links are no longer needed.
       // 2. flatten the rootBlocks-based tree into a flat Array of blocks
       const all_blocks: BlockRow[] = []
-      recursiveEach<BlockRow>(rootBlocks, (block) => {
+      recursiveEach(rootBlocks, (block) => {
         all_blocks.push(block)
       })
       const all_blocks_ids = all_blocks.map((block) => block.id)

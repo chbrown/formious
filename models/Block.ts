@@ -100,7 +100,7 @@ export default class Block {
         children: Block.shapeTree(blocks),
       }
       function findBlock(id: number): BlockRow {
-        return recursiveFind<BlockRow>([root], block => block.id === id)
+        return recursiveFind([root], block => block.id === id)
       }
 
       // we need to get the parent_block_id of the most_recent block
