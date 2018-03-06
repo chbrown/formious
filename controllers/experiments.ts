@@ -99,7 +99,7 @@ R.get(/^\/experiments\/(\d+)(\?|$)/, (req, res, m) => {
     urlObj.pathname = `/experiments/${experiment_id}/blocks/${block.id}`
     const block_url = url.format(urlObj)
 
-    httpUtil.writeRedirect(res, block_url)
+    httpUtil.writeRedirect(res, block_url, 302)
   })
 })
 
@@ -190,22 +190,12 @@ R.post(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, (req, res, m) => {
         // const redirect_to = `${urlObj.query.turkSubmitTo}/mturk/externalSubmit?assignmentId=${urlObj.query.assignmentId}`
         if (next_block_id === null) {
           // meaning, there are no more blocks to complete
-
           return httpUtil.writeText(res, 'You have already completed all available blocks in this experiment.')
         }
 
         // only change the path part of the url
-        urlObj.pathname = `/experiments/${experiment_id}/blocks/${next_block_id}`
-        const redirect_to = url.format(urlObj)
-
-        const ajax = req.headers['x-requested-with'] == 'XMLHttpRequest'
-        if (ajax) {
-          res.setHeader('Location', redirect_to)
-          res.end()
-        }
-        else {
-          httpUtil.writeRedirect(res, redirect_to)
-        }
+        const pathname = `/experiments/${experiment_id}/blocks/${next_block_id}`
+        httpUtil.writeRelativeRedirect(res, req, {pathname})
       })
     })
   })

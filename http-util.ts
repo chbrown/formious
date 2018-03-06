@@ -1,4 +1,4 @@
-import {parse as parseUrl} from 'url'
+import {parse as parseUrl, format as formatUrl, Url} from 'url'
 import {parse as parseQuerystring} from 'querystring'
 import {IncomingMessage, ServerResponse} from 'http'
 import {readToEnd} from 'streaming'
@@ -88,11 +88,23 @@ export function writeError(res: ServerResponse, error: Error): ServerResponse {
   return writeText(res, message)
 }
 
-export function writeRedirect(res: ServerResponse, location: string): ServerResponse {
-  if (res.statusCode == 200) {
-    res.statusCode = 302
-  }
+export function writeRedirect(res: ServerResponse,
+                              location: string,
+                              statusCode: number = 302): ServerResponse {
+  res.statusCode = statusCode
   res.setHeader('Location', location)
   res.end(`Redirecting to: ${location}`)
   return res
+}
+
+export function writeRelativeRedirect(res: ServerResponse,
+                                      req: IncomingMessage,
+                                      partialUrlObj: Url): ServerResponse {
+  const urlObj = parseUrl(req.url, true)
+  const location = formatUrl({...urlObj, ...partialUrlObj})
+  // check whether the request originated from the client code (ajax)
+  const ajax = asString(req.headers['x-requested-with']) == 'XMLHttpRequest'
+  // in ajax mode, return a statusCode of 200, so that the client code
+  // can implement custom handling of the redirect header
+  return writeRedirect(res, location, ajax ? 200 : 302)
 }
