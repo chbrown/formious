@@ -43,13 +43,19 @@ export function readData(req: IncomingMessage,
   }
 }
 
-export function asString(value: string | string[] | undefined,
+export function asString(value: string | string[] | number | null | undefined,
                          separator = ','): string {
   if (value === undefined) {
     return undefined
   }
+  if (value === null) {
+    return null
+  }
   if (Array.isArray(value)) {
     return value.join(separator)
+  }
+  if (typeof value == 'number') {
+    return value.toString()
   }
   return value
 }
