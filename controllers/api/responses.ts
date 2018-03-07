@@ -13,7 +13,7 @@ GET /api/responses
 */
 R.get(/^\/api\/responses(\?|$)/, (req, res) => {
   const urlObj = url.parse(req.url, true)
-  const limitString = String(urlObj.query.limit) || '250'
+  const limitString = httpUtil.asString(urlObj.query.limit) || '250'
 
   // set a maximum limit at 1000, but default it to 250
   const limit = Math.min(parseInt(limitString, 10), 1000)

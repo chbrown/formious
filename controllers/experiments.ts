@@ -240,7 +240,7 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, (req, res, m) => {
     .execute((err, responses) => {
       if (err) return httpUtil.writeError(res, err)
 
-      const accept = String(urlObj.query.accept) || req.headers.accept || 'application/json; boundary=LF'
+      const accept = httpUtil.asString(urlObj.query.accept) || req.headers.accept || 'application/json; boundary=LF'
       const writer = createAdaptiveTransform(accept)
       if (writer.contentType) {
         res.setHeader('Content-Type', writer.contentType)

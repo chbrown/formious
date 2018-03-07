@@ -56,12 +56,12 @@ export default class AccessToken {
   }
 
   /**
-  relation: String (a table name, I would hope)
-  foreign_id: Number (pointer to the "id" column on the table denoted by the "relation" field)
-  options:
-    length: Number (defaults to 40)
-    expires: Date || null
-  */
+   * @param relation - A table name, presumably
+   * @param foreign_id - Value of the `id PRIMARY KEY` column on the table
+   *        denoted by {@link relation}
+   * @param [options.length=40] - The length of the token to create (if needed)
+   * @param [options.expires=null] - When the created token should expire
+   */
   static findOrCreate(relation: string,
                       foreign_id: string,
                       options: AccessTokenOptions,

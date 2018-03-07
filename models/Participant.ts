@@ -31,18 +31,10 @@ export default class Participant {
   }
 
   /**
-  participant: {
-    aws_worker_id: String, // required
-    ip_address: String, // optional
-    user_agent: String, // optional
-  }
-  response: {
-    block_id: Number, // optional
-    value: Object, // optional
-    assignment_id: String, // optional
-  }
-  */
-  static addResponse(participant: Participant,
+   * Find or create a Participant matching the subset of fields provided in
+   * {@link participant}, and insert a corresponding Response row in the database.
+   */
+  static addResponse(participant: Participant & {aws_worker_id: string},
                      response: Response,
                      callback: (error: Error, participant?: Participant, response?: Response) => void): void {
     Participant.findOrCreate({aws_worker_id: participant.aws_worker_id}, (err, participant) => {
