@@ -26,7 +26,7 @@
       <div><b>Expiration Increment (e.g., 24h)</b>
         <span class="help">The amount of time, in seconds, by which to extend the expiration date. If the HIT has not yet expired, this amount is added to the HIT's expiration date. If the HIT has expired, the new expiration date is the current time plus this value.</span>
       </div>
-      <input type="text" ng-model="extension.ExpirationIncrement">
+      <input type="text" ng-model="extension.ExpirationIncrementInSeconds" duration-string>
     </label>
     <p><button>ExtendHIT</button></p>
   </form>

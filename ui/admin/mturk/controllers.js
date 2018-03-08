@@ -115,37 +115,51 @@ class QualificationType {
     sendTurkRequest(data, callback)
   }
   static revoke(data, callback) {
-    if (data.QualificationTypeId === undefined) {
+    var {
+      Operation = 'RevokeQualification',
+      SubjectId,
+      QualificationTypeId,
+      Reason,
+    } = data
+    if (QualificationTypeId === undefined) {
       setTimeout(() => callback(new Error('The QualificationTypeId parameter is required')), 0)
     }
-    if (data.SubjectId === undefined) {
+    if (SubjectId === undefined) {
       setTimeout(() => callback(new Error('The SubjectId parameter is required')), 0)
     }
-    _.defaults(data, {
-      Operation: 'RevokeQualification',
-    })
-    sendTurkRequest(data, callback)
+    sendTurkRequest({Operation, SubjectId, QualificationTypeId, Reason}, callback)
   }
   static update(data, callback) {
-    var picked_data = _.pick(data, [
-      'QualificationTypeId',
-      'RetryDelayInSeconds',
-      'QualificationTypeStatus',
-      'Description',
-      'Test',
-      'AnswerKey',
-      'TestDurationInSeconds',
-      'AutoGranted',
-      'AutoGrantedValue',
-    ])
-    if (picked_data.QualificationTypeId === undefined) {
+    var {
+      Operation = 'UpdateQualificationType',
+      QualificationTypeId,
+      RetryDelayInSeconds,
+      QualificationTypeStatus,
+      Description,
+      Test,
+      AnswerKey,
+      TestDurationInSeconds,
+      AutoGranted,
+      AutoGrantedValue,
+    } = data
+    if (QualificationTypeId === undefined) {
       setTimeout(() => callback(new Error('The QualificationTypeId parameter is required')), 0)
     }
-    if (picked_data.AutoGranted === 0) {
-      delete picked_data.AutoGrantedValue
+    if (AutoGranted === 0) {
+      AutoGrantedValue = undefined
     }
-    _.defaults(picked_data, {Operation: 'UpdateQualificationType'})
-    sendTurkRequest(picked_data, callback)
+    sendTurkRequest({
+      Operation,
+      QualificationTypeId,
+      RetryDelayInSeconds,
+      QualificationTypeStatus,
+      Description,
+      Test,
+      AnswerKey,
+      TestDurationInSeconds,
+      AutoGranted,
+      AutoGrantedValue,
+    }, callback)
   }
 }
 
@@ -199,20 +213,31 @@ app
 
   $scope.sync = function() {
     var Question = createExternalQuestionString($scope.$storage.ExternalURL, $scope.$storage.FrameHeight)
+    var {
+      Operation,
+      Title,
+      Description,
+      MaxAssignments,
+      Reward,
+      Keywords,
+      AssignmentDurationInSeconds,
+      LifetimeInSeconds,
+      AutoApprovalDelayInSeconds,
+    } = $scope.$storage
     var data = {
-      Operation: $scope.$storage.Operation,
-      Title: $scope.$storage.Title,
-      Description: $scope.$storage.Description,
-      MaxAssignments: $scope.$storage.MaxAssignments,
+      Operation,
+      Title,
+      Description,
+      MaxAssignments,
       Reward: {
-        Amount: $scope.$storage.Reward,
+        Amount: Reward,
         CurrencyCode: 'USD',
       },
-      Keywords: $scope.$storage.Keywords,
-      Question: Question,
-      AssignmentDurationInSeconds: $scope.$storage.AssignmentDurationInSeconds,
-      LifetimeInSeconds: $scope.$storage.LifetimeInSeconds,
-      AutoApprovalDelayInSeconds: $scope.$storage.AutoApprovalDelayInSeconds,
+      Keywords,
+      Question,
+      AssignmentDurationInSeconds,
+      LifetimeInSeconds,
+      AutoApprovalDelayInSeconds,
     }
     _.extend(data, $scope.$storage.extra)
     var promise = $turk(data).then(function(document) {
@@ -282,11 +307,12 @@ app
   })
 
   $scope.ExtendHIT = function() {
+    var {MaxAssignmentsIncrement, ExpirationIncrementInSeconds} = $scope.extension
     var promise = $turk({
       Operation: 'ExtendHIT',
       HITId,
-      MaxAssignmentsIncrement: $scope.extension.MaxAssignmentsIncrement,
-      ExpirationIncrement: $scope.extension.ExpirationIncrement,
+      MaxAssignmentsIncrement,
+      ExpirationIncrementInSeconds,
     }).then(ExtendHITResponse => {
       console.log('ExtendHITResponse', ExtendHITResponse)
       return 'Extended'
@@ -296,8 +322,9 @@ app
 
   $scope.import = function() {
     var promises = $scope.assignments.map(assignment => {
+      const {HITId, AutoApprovalTime, AcceptTime, SubmitTime, ApprovalTime} = assignment
       var params = _.assign({
-        value: _.pick(assignment, 'HITId', 'AutoApprovalTime', 'AcceptTime', 'SubmitTime', 'ApprovalTime'),
+        value: {HITId, AutoApprovalTime, AcceptTime, SubmitTime, ApprovalTime},
         assignment_id: assignment.AssignmentId,
         // block_id isn't required, but if it's provided, it had better be an actual stim!
         block_id: assignment.Answer.block_id,
