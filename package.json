@@ -77,7 +77,7 @@
     "prepack": "npm run prepack-css && npm run prepack-js",
     "dev": "tsc --watch & watchify ui/build.js -t babelify -o ui/build/bundle.js -v & PORT=1451 nodemon bin/formious",
     "start": "node bin/formious",
-    "test": "mocha --recursive test",
+    "test": "mocha",
     "clean": "tsc -d --listEmittedFiles | grep '^TSFILE: ' | sed 's/^TSFILE: //' | xargs rm -v"
   }
 }
