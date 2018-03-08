@@ -24,7 +24,6 @@
     "jszip": "^2.6.1",
     "lodash": "3.10.0",
     "loge": "1.0.5",
-    "moment": "2.10.6",
     "ng-upload": "0.1.0",
     "ngstorage": "0.3.7",
     "notify-ui": "0.2.0",

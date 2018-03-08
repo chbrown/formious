@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import moment from 'moment'
 import {h, create, diff, patch} from 'virtual-dom'
 import {Url} from 'urlobject'
 import {Request} from 'httprequest'
@@ -675,52 +674,82 @@ app.directive('aTemplate', function(Template) {
   }
 })
 
-app.directive('durationString', function() {
-  var units = {
-    d: 86400,
-    h: 3600,
-    m: 60,
+var SECONDS_PER_MINUTE = 60
+var SECONDS_PER_HOUR = SECONDS_PER_MINUTE * 60 // 3600
+var SECONDS_PER_DAY = SECONDS_PER_HOUR * 24 // 86400
+var SECONDS_PER_WEEK = SECONDS_PER_DAY * 7 // 604800
+
+function secondsPerUnit(unitString) {
+  if (/^(weeks?|wks?|w)$/i.test(unitString)) {
+    return SECONDS_PER_WEEK
   }
+  if (/^(days?|d)$/i.test(unitString)) {
+    return SECONDS_PER_DAY
+  }
+  if (/^(hours?|hrs?|h)$/i.test(unitString)) {
+    return SECONDS_PER_HOUR
+  }
+  if (/^(minutes?|mins?|m)$/i.test(unitString)) {
+    return SECONDS_PER_MINUTE
+  }
+  if (/^(seconds?|secs?|s)$/i.test(unitString)) {
+    return 1
+  }
+  if (/^(milliseconds?|millis?|ms)$/i.test(unitString)) {
+    return 0.001
+  }
+  return 0
+}
+
+function formatDuration(inputValue) {
+  var seconds = Number(inputValue)
+  var parts = []
+  if (seconds > SECONDS_PER_DAY) {
+    var d = seconds / SECONDS_PER_DAY | 0
+    parts.push(`${d}d`)
+    seconds -= d * SECONDS_PER_DAY
+  }
+  if (seconds > SECONDS_PER_HOUR) {
+    var h = seconds / SECONDS_PER_HOUR | 0
+    parts.push(`${h}h`)
+    seconds -= h * SECONDS_PER_HOUR
+  }
+  if (seconds > SECONDS_PER_MINUTE) {
+    var m = seconds / SECONDS_PER_MINUTE | 0
+    parts.push(`${m}m`)
+    seconds -= m * SECONDS_PER_MINUTE
+  }
+  if (seconds > 0) {
+    parts.push(`${seconds}s`)
+  }
+  return parts.join(' ')
+}
+
+/**
+Take a string, return a number.
+
+e.g., "5h" -> 5*60*60, the number of seconds in five hours
+*/
+function parseDuration(inputString) {
+  var matches = inputString.match(/\d+\w/g)
+  if (matches !== null) {
+    var seconds = 0
+    matches.forEach((match) => {
+      var [, valueString, unitString] = match.match(/(\d+)(\w)/)
+      seconds += parseInt(valueString, 10) * secondsPerUnit(unitString)
+    })
+    return seconds
+  }
+  return -1
+}
+
+app.directive('durationString', function() {
   return {
     restrict: 'A',
     require: 'ngModel',
     link: function(scope, el, attrs, ngModel) {
-      ngModel.$formatters.push((inputSeconds) => {
-        var seconds = Number(inputSeconds)
-        var parts = []
-        if (seconds > units.d) {
-          var d = seconds / units.d | 0
-          parts.push(`${d}d`)
-          seconds -= d * units.d
-        }
-        if (seconds > units.h) {
-          var h = seconds / units.h | 0
-          parts.push(`${h}h`)
-          seconds -= h * units.h
-        }
-        if (seconds > units.m) {
-          var m = seconds / units.m | 0
-          parts.push(`${m}m`)
-          seconds -= m * units.m
-        }
-        if (seconds > 0) {
-          parts.push(`${seconds}s`)
-        }
-        return parts.join(' ')
-      })
-      ngModel.$parsers.push((string) => {
-        // take a string, return a number
-        // e.g., "5h" -> 5*60*60, the number of seconds in five hours
-        var matches = string.match(/\d+\w/g)
-        if (matches !== null) {
-          var duration = moment.duration(0)
-          matches.forEach((match) => {
-            var parts = match.match(/(\d+)(\w)/)
-            duration.add(parseInt(parts[1], 10), parts[2])
-          })
-          return duration.asSeconds()
-        }
-      })
+      ngModel.$formatters.push(formatDuration)
+      ngModel.$parsers.push(parseDuration)
     },
   }
 })
