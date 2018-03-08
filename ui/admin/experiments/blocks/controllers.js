@@ -70,8 +70,9 @@ app
 
   $scope.$on('collapseBlock', function(ev, collapsed_block) {
     // 1. find the parent of the collapsed_block
-    var parent_block = Node.recursiveSearch([root],
-      block => block.children.includes(collapsed_block)).next().value
+    var parent_block = Node.recursiveSearch([root], block => {
+      return _.includes(block.children, collapsed_block)
+    }).next().value
     // 2. add the collapsed_block's children to the parent
     parent_block.children = parent_block.children.concat(collapsed_block.children)
     // 3. remove the collapsed_block from the parent
@@ -91,8 +92,9 @@ app
     // 1. if the selected blocks all have the same parent block, group them
     //   inside it, otherwise, group them inside the root block.
     var original_parent_blocks = selected_blocks.map(selected_block => {
-      return Node.recursiveSearch([root],
-        block => block.children.includes(selected_block)).next().value
+      return Node.recursiveSearch([root], block => {
+        return _.includes(block.children, selected_block)
+      }).next().value
     })
     // determine if all the items in original_parent_blocks are the same
     var common_parent = original_parent_blocks.every(parent_block => parent_block === original_parent_blocks[0])
@@ -102,7 +104,9 @@ app
       // 2. remove the selection from the current tree
       // compute the new_children as children without selected_blocks
       var new_children = block.children
-      .filter(child_block => !selected_blocks.includes(child_block))
+      .filter(child_block => {
+        return !_.includes(selected_blocks, child_block)
+      })
       .map(transformFunction)
       if (block === parent_block) {
         // 3. create new block with the selected blocks as its children, and add
