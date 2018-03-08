@@ -2,3 +2,4 @@
 *.d.ts
 !ui/
 ui/build/
+!webpack.config.js

@@ -53,10 +53,13 @@
     "@types/pg": "^6.1.2",
     "@types/send": "^0.14.4",
     "@types/xmldom": "^0.1.29",
+    "ajv": "^6.2.1",
     "autoprefixer": "^7.1.5",
-    "babel": "5.8.21",
-    "babelify": "6.1.3",
-    "browserify": "11.0.1",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-angularjs-annotate": "^0.8.2",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
     "clean-css": "^4.1.9",
     "clean-css-cli": "^4.1.10",
     "less": "^2.7.2",
@@ -64,7 +67,8 @@
     "nodemon": "^1.17.1",
     "postcss-cli": "^4.1.1",
     "typescript": "^2.7.2",
-    "watchify": "3.3.1"
+    "webpack": "^4.1.1",
+    "webpack-cli": "^2.0.10"
   },
   "bin": {
     "formious": "bin/formious"
@@ -72,9 +76,9 @@
   "scripts": {
     "prepare": "tsc",
     "prepack-css": "lessc ui/site.less | postcss --use autoprefixer | cleancss --format breaks:afterRuleEnds=on -o ui/site.css",
-    "prepack-js": "browserify ui/build.js -t babelify | closure-compiler --angular_pass --language_in ECMASCRIPT5 --warning_level QUIET > ui/build/bundle.js",
+    "prepack-js": "NODE_ENV=production webpack",
     "prepack": "npm run prepack-css && npm run prepack-js",
-    "dev": "tsc --watch & watchify ui/build.js -t babelify -o ui/build/bundle.js -v & PORT=1451 nodemon bin/formious",
+    "dev": "tsc --watch & webpack --watch & PORT=1451 nodemon bin/formious",
     "start": "node bin/formious",
     "test": "mocha",
     "clean": "tsc -d --listEmittedFiles | grep '^TSFILE: ' | sed 's/^TSFILE: //' | xargs rm -v"
