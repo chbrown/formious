@@ -73,9 +73,8 @@
   "scripts": {
     "prepare": "tsc",
     "prepack-css": "lessc ui/site.less | postcss --use autoprefixer | cleancss --format breaks:afterRuleEnds=on -o ui/site.css",
-    "prepack-js": "browserify ui/build.js -t babelify -o ui/build/bundle.js",
-    "prepack-min-js": "npm run prepack-js && closure-compiler --angular_pass --language_in ECMASCRIPT5 --warning_level QUIET ui/build/bundle.js > ui/build/bundle.min.js",
-    "prepack": "npm run prepack-css && npm run prepack-min-js",
+    "prepack-js": "browserify ui/build.js -t babelify | closure-compiler --angular_pass --language_in ECMASCRIPT5 --warning_level QUIET > ui/build/bundle.js",
+    "prepack": "npm run prepack-css && npm run prepack-js",
     "dev": "tsc --watch & watchify ui/build.js -t babelify -o ui/build/bundle.js -v & PORT=1451 nodemon bin/formious",
     "start": "node bin/formious",
     "test": "mocha --recursive test",
