@@ -14,12 +14,12 @@
    children])
 
 ; .controller('admin.awsaccounts.table', function($scope, AWSAccount) {
-;   $scope.awsaccounts = AWSAccount.query();
+;   $scope.awsaccounts = AWSAccount.query()
 ;   $scope.delete = function(awsaccount) {
 ;     awsaccount.$delete(function() {
-;       $scope.awsaccounts = AWSAccount.query();
-;     });
-;   };
+;       $scope.awsaccounts = AWSAccount.query()
+;     })
+;   }
 ; })
 
 (defn- delete
@@ -45,7 +45,7 @@
 (defn on-awsaccount-save
   []
   ; $scope.awsaccount.$save()
-  ; NotifyUI.addPromise(promise);
+  ; NotifyUI.addPromise(promise)
   (println "Actually save awsaccount"))
 
 (rum/defc awsaccount < rum/reactive []

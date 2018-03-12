@@ -24,31 +24,31 @@
   [id]
   ; is this really the best way?
   ; var promise = template.$delete().then(function() {
-  ;   $scope.templates.splice($scope.templates.indexOf(template), 1);
-  ;   return 'Deleted';
-  ; });
-  ; NotifyUI.addPromise(promise);
+  ;   $scope.templates.splice($scope.templates.indexOf(template), 1)
+  ;   return 'Deleted'
+  ; })
+  ; NotifyUI.addPromise(promise)
   (println "TODO: actually delete template #" id))
 
 (defn- save
   [id template]
   ; var promise = $scope.template.$save().then(function() {
-  ;   $state.go('.', {id: $scope.template.id}, {notify: false});
-  ;   return 'Saved template';
-  ; });
-  ; NotifyUI.addPromise(promise);
+  ;   $state.go('.', {id: $scope.template.id}, {notify: false})
+  ;   return 'Saved template'
+  ; })
+  ; NotifyUI.addPromise(promise)
   (println "TODO: actually save template #" id template))
 
 ; // the 'save' event is broadcast on rootScope when command+S is pressed
-; $scope.$on('save', $scope.save);
+; $scope.$on('save', $scope.save)
 
 (defn- copy
   [id]
-  ; $state.go('.', {id: 'new'}, {notify: false});
+  ; $state.go('.', {id: 'new'}, {notify: false})
   ; $scope.template = new Template({
   ;   name: $scope.template.name + ' copy',
   ;   html: $scope.template.html,
-  ; });
+  ; })
   (println "TODO: actually copy template #" id))
 
 (defn- template-link

@@ -20,7 +20,7 @@
     [:script {:dangerouslySetInnerHTML {:__html js-str}}]))
 
 ; (defn- mutation-callback
-;   "Listen for childList and subtree changes to el;
+;   "Listen for childList and subtree changes to el.
 ;   Call (on-mutate el) when a change is observed."
 ;   [el on-mutation]
 ;   (let [callback #(on-mutation el)

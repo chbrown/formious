@@ -25,10 +25,10 @@
 (defn- delete
   [experiment]
   ; (.$delete experiment).then(function() {
-  ;     $scope.experiments.splice($scope.experiments.indexOf(experiment), 1);
-  ;     return 'Deleted';
-  ;   });
-  ;   NotifyUI.addPromise(promise);
+  ;     $scope.experiments.splice($scope.experiments.indexOf(experiment), 1)
+  ;     return 'Deleted'
+  ;   })
+  ;   NotifyUI.addPromise(promise)
   (println "TODO: actually delete experiment" (assoc experiment :html "[truncated]")))
 
 (defn layout

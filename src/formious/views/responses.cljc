@@ -38,7 +38,7 @@
          [:td
           (datetime created :date)]])]]))
 
-; $scope.$watch('$storage.responses_query', _.debounce($scope.refresh, 500), true);
+; $scope.$watch('$storage.responses_query', _.debounce($scope.refresh, 500), true)
 (defn refresh
   [experiment_id template_id order_column order_direction limit]
   (let [params {:experiment_id experiment_id
@@ -54,8 +54,8 @@
                        (rum/local "DESC" ::order_direction)
                        (rum/local 250 ::limit)
   [state responses templates experiments]
-  ; templates = Template.query();
-  ; experiments = Experiment.query();
+  ; templates = Template.query()
+  ; experiments = Experiment.query()
   (let [total-response-count (if (empty? responses) 0 (or (:count (first responses)) "N/A"))
         template_id-atom (::template_id state)
         experiment_id-atom (::experiment_id state)
