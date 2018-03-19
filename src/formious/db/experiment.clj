@@ -1,41 +1,26 @@
 (ns formious.db.experiment
-  (:require [formious.db.accesstoken :as AccessToken]
-            [era.core :refer [now]]
+  (:require [formious.db.accesstoken :as accesstoken]
             [formious.util :refer [as-long]]
             [formious.db :as db]))
 
-; Int String Int String ZonedDateTime
-(defrecord Experiment [id name administrator_id html created])
-(def writable-columns
-  ["name"
-   "administrator_id"
-   "html"])
-
-(defn blank
-  []
-  (Experiment. "new" "" nil "" (now)))
-
 (defn all
   []
-  (map map->Experiment (db/query "SELECT * FROM experiment ORDER BY id ASC")))
+  (db/query "SELECT * FROM experiment ORDER BY id ASC"))
 
 (defn insert!
-  ; (name: String, administrator_id: Int, html: String)
   [row]
-  (->> row (db/insert! "experiment") map->Experiment))
+  (db/insert! "experiment" row))
 
 (defn find-by-id
   [id]
-  (some-> (db/query ["SELECT * FROM experiment WHERE id = ?" (as-long id)])
-          first
-          map->Experiment))
+  (first (db/query ["SELECT * FROM experiment WHERE id = ?" (as-long id)])))
 
 (defn find-or-create-accesstoken!
-  [id & {:keys [length expires] :or {length 12}}]
-  (AccessToken/find-or-create! "experiments" (as-long id) length expires))
+  [id & {:keys [length expires]
+         :or   {length 12}}]
+  (accesstoken/find-or-create! "experiments" (as-long id) length expires))
 
 (defn update!
-  ; (id: Int, name: String, administrator_id: Int, html: String)
   [id set-map]
   (db/update! "experiment" set-map ["id = ?" (as-long id)]))
 

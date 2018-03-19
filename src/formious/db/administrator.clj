@@ -1,8 +1,7 @@
 (ns formious.db.administrator
-  (:require [era.core :refer [now]]
-            [formious.util :refer [update-when]]
+  (:require [formious.util :refer [as-long update-when]]
             [clojure.tools.logging :as log]
-            [formious.db.accesstoken :as AccessToken]
+            [formious.db.accesstoken :as accesstoken]
             [formious.db :as db]))
 
 (defn- hash-with-salt
@@ -17,41 +16,27 @@
          message-bytes (.digest message)]
      (javax.xml.bind.DatatypeConverter/printHexBinary message-bytes))))
 
-; Int String String ZonedDateTime
-(defrecord Administrator [id email password created])
-(def writable-columns
-  ["email"
-   "password"])
-
-(defn blank
-  []
-  (Administrator. "new" "" "" (now)))
-
 (defn all
   []
-  (->> (db/query "SELECT * FROM administrator ORDER BY created DESC")
-       (map map->Administrator)))
+  (db/query "SELECT * FROM administrator ORDER BY created DESC"))
 
 (defn find-by-id
   [id]
-  (some-> (db/query ["SELECT * FROM administrator WHERE id = ?" id])
-          first
-          map->Administrator))
+  (first (db/query ["SELECT * FROM administrator WHERE id = ?" (as-long id)])))
 
 (defn delete!
   [id]
-  (db/delete! "administrator" ["id = ?" id]))
+  (db/delete! "administrator" ["id = ?" (as-long id)]))
 
 (defn insert!
+  "Hashes and sets the password if it is present"
   [row]
-  (->> (update-when row :password hash-with-salt)
-       (db/insert! "administrator")
-       map->Administrator))
+  (db/insert! "administrator" (update-when row :password hash-with-salt)))
 
 (defn update!
-  ; Hashes and sets the password if it is not None
+  "Hashes and sets the password if it is present"
   [id set-map]
-  (db/update! "administrator" (update-when set-map :password hash-with-salt) ["id = ?" id]))
+  (db/update! "administrator" (update-when set-map :password hash-with-salt) ["id = ?" (as-long id)]))
 
 (defn authenticate
   [email password]
@@ -59,7 +44,7 @@
     (when-let [administrator (first (db/query ["SELECT * FROM administrator
                                                 WHERE email = ? AND password = ?" email (hash-with-salt password)]))]
       (log/debug "Authenticating administrator" (:id administrator) "with new or existing token")
-      (AccessToken/find-or-create! "administrators" (:id administrator) 40 nil))))
+      (accesstoken/find-or-create! "administrators" (:id administrator) 40 nil))))
 
 (defn from-token
   "Get administrator object from token.

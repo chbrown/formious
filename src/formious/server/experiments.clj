@@ -29,9 +29,8 @@
 
 (defn- save-response!
   [WorkerId AssignmentId block_id body ip-address user-agent]
-  (let [participant (Participant/find-or-create-by-worker-id! WorkerId
-                                                              :ip_address ip-address
-                                                              :user_agent user-agent)]
+  (let [participant (Participant/find-or-create-by-worker-id! WorkerId {:ip_address ip-address
+                                                                        :user_agent user-agent})]
     (Response/insert! {:participant_id (:id participant)
                        :block_id block_id
                        :data body
