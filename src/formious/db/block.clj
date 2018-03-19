@@ -43,13 +43,11 @@
   (get-in node [:value :id]))
 
 (defn- buildBranchNode
-  ; Take a root block and build it out into a structured tree,
-  ; using children-map to (recursively) find children
-  ;
-  ; @param parent-block Starting block
-  ; @param children-map Mapping from block ID to that block's children (if any)
-  ; @return Structured tree
-  ; parent-block: Block, children-map: Map[Option[Int], Seq[Block]]): BranchNode[Block]
+  "Take a root block and build it out into a structured tree,
+  using children-map to (recursively) find children.
+  * `parent-block` is the starting block
+  * `children-map` is a mapping from block ID to that block's children (if any)
+  Returns a structured tree"
   [parent-block children-map]
   (let [children (get children-map (:id parent-block) [])
         children-nodes (map #(buildBranchNode % children-map) children)]
@@ -113,40 +111,34 @@
       (count children))
     (count children)))
 
-;
-; For the given blockNode, which should be pre-determined to have at least one incomplete child block,
-; determine the next ...
-;
 (defn nextPhysicalBlock
-  ; (parentBlockNode: TreeNode[Block], completedBlocks: Set[Int]): BranchNode[Block]
+  "For the given blockNode, which should be pre-determined to have at least one incomplete child block,
+  determine the next block needing to be completed.
+  * `parentBlockNode` should have in its descendents somewhere an incomplete block
+  * `completedBlocks` is a set of completed block IDs.
+  Returns a block structure."
   [parentBlockNode completedBlocks]
   (let [incompleteBlockNodes (->> parentBlockNode
                                   :children
                                   (remove #(get completedBlocks (get-node-value-id %))))
         [randomize quota] (if-let [value (:value parentBlockNode)]
-                            ; case BranchNode(_, value) =>
-                            [(:randomize value) (:quota value)]
-                            ; case RootNode(_) =>
-                            [false nil])
+                            [(:randomize value) (:quota value)] ; branch node
+                            [false nil]) ; root node
         childBlockNode (sampleBlockNode incompleteBlockNodes randomize quota)]
-    ; 3. recurse downward and randomize as needed. this is recursive since we
-    ; may need to query past responses when randomizing
+    ; recurse downward and randomize as needed.
+    ; this is recursive since we may need to query past responses when randomizing
     (if (get-in childBlockNode [:value :template_id])
       ; only return blocks with a template_id field
       childBlockNode
       (nextPhysicalBlock childBlockNode completedBlocks))))
 
-;
-; Searches for the first block that:
-; 1) is in the same experiment
-; 2) has the lowest view_order
-; 3) that's greater than the current block's view_order
-;
-; @return None if there are no more incomplete blocks in experiment,
-;         or the next block to be completed if there is one
-;
 (defn nextBlock
-  ; (experiment_id: Int, block_id: Int, participant_id: Int): Option[Block]
+  "Searches for the first block that:
+  1) is in the same experiment
+  2) has the lowest view_order
+  3) that's greater than the current block's view_order
+  Returns the next block to be completed,
+  or nil if there are no more incomplete blocks in experiment."
   ; TODO: maybe select only the columns we need? I.e., exclude the bulky context
   [experiment_id block_id participant_id]
   (let [blocks    (all experiment_id)
@@ -196,30 +188,28 @@
       ; }
 
 (defn updateTree
-  ; (root: TreeNode[Block], experiment_id: Int) {
-  ; flatten the structured tree into a flat Array of blocks
+  "Flattens the structured tree into a flat sequence of blocks.
+  * `root` is the root node containing all blocks to be updated
+  * `experiment_id` is the experiment ID"
   [root experiment_id]
   (let [allBlocks_original [] ; root.flatten.map(_.value)]
-          ; 1. instantiate the missing blocks so that they have id's we can use when flattening
+        ; 1. instantiate the missing blocks so that they have id's we can use when flattening
         allBlocks []
         all-blocks-ids (map :id allBlocks)] ; allBlocks_original.map { block =>
-          ;   if (block.id == 0) {
-          ;     Block.create(experiment_id, block.template_id, block.context, block.view_order, block.randomize, block.parent_block_id, block.quota)
-          ;   }
-          ;   else {
-          ;     block
-          ;   }
-          ; }
+        ;   if (block.id == 0) {
+        ;     Block.create(experiment_id, block.template_id, block.context,
+        ;                  block.view_order, block.randomize, block.parent_block_id, block.quota)
+        ;   }
+        ;   else {
+        ;     block
+        ;   }
+        ; }
     ; okay, all blocks should have .id fields now, ready to move on and fix the structure as needed
-
     ; TODO: set parent_block_id = null for rootBlocks
-
     ; TODO: set parent_block_id = the parent's id for the rest of the blocks (persist the tree structure)
     ;childBlock.parent_block_id = block.id
-
     ; now the tree structure is defined on each block, and the 'children' links are no longer needed.
     ;val allBlockIds = allBlocks.map(_.id)
-
     (log/info "Updating" (count allBlocks) "blocks")
     ; 3. brute-force: update them all
     (doseq [block allBlocks]
