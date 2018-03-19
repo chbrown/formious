@@ -4,4 +4,4 @@
             [formious.db :as db]))
 
 (deftest test-administrator-queries
-  (is (pos? (-> (db/query-resource ::resources/administrator {}) count))))
+  (is (pos? (-> (db/query "SELECT * FROM administrator") count))))
