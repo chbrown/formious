@@ -17,7 +17,8 @@
   "This is used by formious.resources.sql/select, a.o.,
   to include/exclude specific columns from certain sensitive resources types."
   {::accesstoken
-   {:writable-columns [:token
+   {:pk-columns [:id]
+    :writable-columns [:token
                        :relation
                        :foreign_id
                        :expires
@@ -27,14 +28,16 @@
             :relation ""
             :foreign_id 0}}
    ::administrator
-   {:writable-columns [:email
+   {:pk-columns [:id]
+    :writable-columns [:email
                        :password]
     :readable-columns [:id :email :created]
     :blank {:id "new"
             :email ""
             :password ""}}
    ::awsaccount
-   {:writable-columns [:name
+   {:pk-columns [:id]
+    :writable-columns [:name
                        :access_key_id
                        :secret_access_key]
     :blank {:id "new"
@@ -42,7 +45,8 @@
             :access_key_id ""
             :secret_access_key ""}}
    ::awsaccount_administrator
-   {:writable-columns [:awsaccount_id
+   {:pk-columns [:awsaccount_id :administrator_id]
+    :writable-columns [:awsaccount_id
                        :administrator_id
                        :priority]
     :blank {:id "new"
@@ -51,13 +55,14 @@
             ; priority is optional
             :priority 0}}
    ::block
-   {:writable-columns [:template_id
+   {:pk-columns [:id :experiment_id]
+    :writable-columns [:template_id
                        :context
                        :view_order
                        :randomize
                        :parent_block_id
                        :quota]
-    :block {:id nil
+    :blank {:id nil
             :experiment_id nil
             :template_id nil
             :context "{}"
@@ -66,7 +71,8 @@
             :parent_block_id nil
             :quota nil}}
    ::experiment
-   {:writable-columns [:name
+   {:pk-columns [:id]
+    :writable-columns [:name
                        :administrator_id
                        :html]
     :blank {:id "new"
@@ -74,19 +80,22 @@
             :administrator_id nil
             :html ""}}
    ::participant
-   {:writable-columns [:name
+   {:pk-columns [:id]
+    :writable-columns [:name
                        :aws_worker_id
                        :aws_bonus_owed
                        :aws_bonus_paid
                        :ip_address
                        :user_agent]}
    ::response
-   {:writable-columns [:participant_id
+   {:pk-columns [:id]
+    :writable-columns [:participant_id
                        :block_id
                        :data
                        :assignment_id]}
    ::template
-   {:writable-columns [:name
+   {:pk-columns [:id]
+    :writable-columns [:name
                        :html]
     :blank {:id "new"
             :name ""
