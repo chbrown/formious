@@ -91,3 +91,20 @@
     :blank {:id "new"
             :name ""
             :html ""}}})
+
+(defn resource-keyword?
+  "Check that `resource`:
+  1. is a keyword
+  2. has the namespace `formious.resources`
+  3. is one of the listed resources in `formious.resources/all`"
+  [resource]
+  (and (keyword? resource)
+       (= (namespace resource) "formious.resources")
+       (contains? all resource)))
+
+(defn table
+  "Return the keyword form of the name of `resource`
+  (which must pass `resource-keyword?`)"
+  [resource]
+  {:pre [(resource-keyword? resource)]}
+  (keyword (name resource)))
