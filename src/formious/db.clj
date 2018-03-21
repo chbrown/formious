@@ -52,3 +52,7 @@
 (def delete!
   "jdbc/delete! preconfigured with the default connection"
   (partial jdbc/delete! db-spec))
+
+(def execute!
+  "jdbc/execute! preconfigured with the default connection"
+  (partial jdbc/execute! db-spec))
