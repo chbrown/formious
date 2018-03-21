@@ -2,11 +2,7 @@
   (:require [clojure.tools.logging :as log]
             [clojure.java.jdbc :as jdbc]
             [clojure.data.json :as json]
-            [era.core :refer [->ZonedDateTime]]
-            [formious.util :refer [keyed]]
-            [formious.resources :as resources]
-            [honeysql.core :as sql]
-            [honeysql.helpers :refer [merge-where]]))
+            [era.core :refer [->ZonedDateTime]]))
 
 (def db-spec
   {:dbtype "postgresql"
@@ -56,31 +52,3 @@
 (def delete!
   "jdbc/delete! preconfigured with the default connection"
   (partial jdbc/delete! db-spec))
-
-;; data-driven (ORM-ish) querying
-
-(def select-cols
-  "This is used by query, below, and lets us exclude specific columns from
-  certain sensitive resources types."
-  {::resources/administrator [:id :email :created]})
-
-(defn query-resource
-  "Mapping from a resource keyword & corresponding params to the matching data
-  in the database, as a sequence of maps."
-  [resource-kw params]
-  (let [select-map {:select (get select-cols resource-kw [:*])
-                    :from [(keyword (name resource-kw))]
-                    :order-by [:id]}
-        sql-map (reduce merge-where select-map (for [[k v] params] [:= k v]))]
-    (log/info "query:sql" (pr-str (sql/format sql-map)))
-    (query (sql/format sql-map))))
-
-(defn update-store
-  [store [resource-kw params]]
-  (let [resource-data (query-resource resource-kw params)
-        store-map (keyed :id resource-data)]
-    (update store resource-kw merge store-map)))
-
-(defn load-store
-  [resources]
-  (reduce update-store {} resources))
