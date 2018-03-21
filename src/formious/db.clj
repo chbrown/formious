@@ -37,9 +37,12 @@
 
 ;; SQL PreparedStatement-driven querying
 
-(def query
+(defn query
   "jdbc/query preconfigured with the default connection"
-  (partial jdbc/query db-spec))
+  ([sql-params] (query sql-params {}))
+  ([sql-params opts]
+   (log/debug "🖳" `query sql-params opts)
+   (jdbc/query db-spec sql-params opts)))
 
 (def insert!
   "jdbc/insert! preconfigured with the default connection"
