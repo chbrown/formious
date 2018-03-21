@@ -3,6 +3,9 @@
             [era.core :refer [now]]
             [formious.util :refer [as-long]]
             [formious.resources :as resources]
+            [formious.resources.sql :as sql]
+            [honeysql.core :as honeysql]
+            [formious.db :as db]
             [formious.db
              [accesstoken :as AccessToken]
              [administrator :as Administrator]
@@ -44,10 +47,9 @@
 
 (defn resource-record
   "Return map of liberator implementation methods,
-  suitable for handling a single instance of a formious.db/* model.
-  "
-  [resource id-key find-by-id update! delete!]
-  (let [{:keys [writable-columns blank]} (get resources/metadata resource)]
+  suitable for handling a single instance of a formious.db/* model."
+  [resource id-key find-by-id update!]
+  (let [{:keys [pk-columns writable-columns blank]} (get resources/metadata resource)]
     {:available-media-types ["application/json"]
      :allowed-methods [:get :put :delete]
      ; The result of initialize-context is merged with the standard fields:
@@ -64,7 +66,10 @@
              (let [body (-> ctx :request :body (select-keys writable-columns))]
                (update! (get ctx id-key) body)))
      :delete! (fn [ctx]
-                (delete! (get ctx id-key)))}))
+                (->> (select-keys ctx pk-columns)
+                     (sql/delete-by-pk resource)
+                     honeysql/format
+                     db/execute!))}))
 
 (def accesstokens
   (resource-list ::resources/accesstoken
@@ -73,7 +78,7 @@
 (def accesstoken
   (resource-record ::resources/accesstoken :id
                    AccessToken/find-by-id
-                   AccessToken/update! AccessToken/delete!))
+                   AccessToken/update!))
 
 (def administrators
   (assoc (resource-list ::resources/administrator Administrator/all Administrator/insert!)
@@ -82,7 +87,7 @@
 (def administrator
   (assoc (resource-record ::resources/administrator :id
                           Administrator/find-by-id
-                          Administrator/update! Administrator/delete!)
+                          Administrator/update!)
     ; TODO: make the password optional and hash it if it is not empty
     :handle-ok (fn [ctx] (dissoc (:record ctx) :password))))
 
@@ -92,7 +97,7 @@
 (def awsaccount
   (resource-record ::resources/awsaccount :id
                    AWSAccount/find-by-id
-                   AWSAccount/update! AWSAccount/delete!))
+                   AWSAccount/update!))
 
 ; Administrator <-> AWS Account many2many relationship
 ; (context "/:administrator_id/awsaccounts" [administrator_id]
@@ -125,7 +130,8 @@
                   Block/insert!))}))
 
 (def block
-  (let [{:keys [writable-columns blank]} (get resources/metadata ::resources/block)]
+  (let [resource ::resources/block
+        {:keys [pk-columns writable-columns blank]} (get resources/metadata resource)]
     {:available-media-types ["application/json"]
      :initialize-context #(get-in % [:request :route-params])
      :allowed-methods [:get :put]
@@ -140,7 +146,10 @@
                  (select-keys writable-columns)
                  (Block/update! (get ctx :id) (:experiment_id ctx))))
      :delete! (fn [ctx]
-                (Block/delete! (get ctx :id) (:experiment_id ctx)))}))
+                (->> (select-keys ctx pk-columns)
+                     (sql/delete-by-pk resource)
+                     honeysql/format
+                     db/execute!))}))
 
 (def block-tree
   ; Special non-REST method to get all blocks and sort them into a tree.
@@ -165,7 +174,7 @@
   ; Experiment.findOrCreateAccessToken(experiment.id)
   (resource-record ::resources/experiment :id
                    Experiment/find-by-id
-                   Experiment/update! Experiment/delete!))
+                   Experiment/update!))
 
 (def responses
   {:available-media-types ["application/json"]
@@ -206,7 +215,7 @@
   ; TODO: maybe set a caching header like (header res "Cache-Control" "max-age=5")
   (resource-record ::resources/template :id
                    Template/find-by-id
-                   Template/update! Template/delete!))
+                   Template/update!))
 
 (def endpoint-mapping
   "Mapping from api-resource-endpoint -> route-keyset -> liberator resource"

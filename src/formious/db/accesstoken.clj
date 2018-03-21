@@ -67,7 +67,3 @@
 (defn find-by-id
   [id]
   (first (db/query ["SELECT * FROM accesstoken WHERE id = ?" (as-long id)])))
-
-(defn delete!
-  [id]
-  (db/delete! "accesstoken" ["id = ?" (as-long id)]))

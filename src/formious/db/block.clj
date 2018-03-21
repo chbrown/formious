@@ -30,10 +30,6 @@
   [id experiment_id set-map]
   (db/update! "block" set-map ["id = ? AND experiment_id = ?" (as-long id) (as-long experiment_id)]))
 
-(defn delete!
-  [id experiment_id]
-  (db/delete! "block" ["id = ? AND experiment_id = ?" (as-long id) (as-long experiment_id)]))
-
 (defrecord TreeNode [children])
 (defrecord BranchNode [children value])
 (defrecord RootNode [children])

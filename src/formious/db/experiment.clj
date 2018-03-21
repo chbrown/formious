@@ -23,7 +23,3 @@
 (defn update!
   [id set-map]
   (db/update! "experiment" set-map ["id = ?" (as-long id)]))
-
-(defn delete!
-  [id]
-  (db/delete! "experiment" ["id = ?" (as-long id)]))

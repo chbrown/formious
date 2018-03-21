@@ -24,10 +24,6 @@
   [id]
   (first (db/query ["SELECT * FROM administrator WHERE id = ?" (as-long id)])))
 
-(defn delete!
-  [id]
-  (db/delete! "administrator" ["id = ?" (as-long id)]))
-
 (defn insert!
   "Hashes and sets the password if it is present"
   [row]

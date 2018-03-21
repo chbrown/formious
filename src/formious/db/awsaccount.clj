@@ -18,10 +18,6 @@
   [id set-map]
   (db/update! "awsaccount" set-map ["id = ?" (as-long id)]))
 
-(defn delete!
-  [id]
-  (db/delete! "awsaccount" ["id = ?" (as-long id)]))
-
 (defn all-by-administrator
   [administrator_id]
   (db/query ["SELECT * FROM awsaccount

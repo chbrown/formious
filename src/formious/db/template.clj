@@ -17,7 +17,3 @@
 (defn update!
   [id set-map]
   (db/update! "template" set-map ["id = ?" (as-long id)]))
-
-(defn delete!
-  [id]
-  (db/delete! "template" ["id = ?" (as-long id)]))
