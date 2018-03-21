@@ -49,7 +49,7 @@
   [resource id-key find-by-id update! delete!]
   (let [{:keys [writable-columns blank]} (get resources/metadata resource)]
     {:available-media-types ["application/json"]
-     :allowed-methods [:get :put]
+     :allowed-methods [:get :put :delete]
      ; The result of initialize-context is merged with the standard fields:
      ; :representation, :request, :resource
      :initialize-context #(get-in % [:request :route-params])
