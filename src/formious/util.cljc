@@ -157,17 +157,21 @@
 
 ;; Transit parsing/serialization
 
+(def ^:private transit-handlers
+  "Custom handlers for transit serialization"
+  #?(:clj  {java.time.ZonedDateTime
+            ; m is the established tag for "point in time"
+            ; https://github.com/cognitect/transit-format
+            (transit/write-handler "m"
+                                   #(.toEpochMilli (.toInstant ^java.time.ZonedDateTime %))
+                                   #(str (.toEpochMilli (.toInstant ^java.time.ZonedDateTime %))))}
+     :cljs {}))
+
 (defn write-transit-str
   "Render `x` as a string in Transit JSON format."
   [x]
   #?(:clj  (with-open [baos (java.io.ByteArrayOutputStream.)]
-             (let [custom-handlers {java.time.ZonedDateTime
-                                    ; m is the established tag for "point in time"
-                                    ; https://github.com/cognitect/transit-format
-                                    (transit/write-handler "m"
-                                      #(.toEpochMilli (.toInstant ^java.time.ZonedDateTime %))
-                                      #(str (.toEpochMilli (.toInstant ^java.time.ZonedDateTime %))))}
-                   transit-writer (transit/writer baos :json {:handlers custom-handlers})]
+             (let [transit-writer (transit/writer baos :json {:handlers transit-handlers})]
                (transit/write transit-writer x)
                (-> (.toString baos)
                    ; replace / with \/ (not required, but handy for embedded HTML)
