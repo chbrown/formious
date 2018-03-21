@@ -47,5 +47,5 @@
 (defn delete-by-pk
   "Same as delete, but checks that `where-params` contains all the resource's pk-columns"
   [resource where-params]
-  {:pre [(contains? (set (keys where-params)) (set (get-in metadata [resource :pk-columns])))]}
+  {:pre [(every? where-params (get-in metadata [resource :pk-columns]))]}
   (delete resource where-params))
