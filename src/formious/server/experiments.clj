@@ -1,17 +1,25 @@
 (ns formious.server.experiments
-  (:require [formious.db.administrator :as Administrator]
+  (:require [formious.db :as db]
             [formious.db.block :as Block]
             [formious.db.experiment :as Experiment]
             [formious.db.participant :as Participant]
             [formious.db.response :as Response]
             [formious.db.template :as Template]
             [formious.views :refer [BlockPage]]
+            [formious.util :refer [as-long]]
             [clojure.string :as str]
             [clojure.data.json :as json]
             [clojure.java.io :as io]
             [rum.core :as rum]
             [clostache.parser :refer [render render-resource]]
             [ring.util.response :refer [not-found redirect response content-type status]]))
+
+(defn- next-block-in-experiment
+  [experiment_id]
+  (first (db/query ["SELECT * FROM block
+                     WHERE experiment_id = ?
+                     ORDER BY view_order ASC
+                     LIMIT 1" (as-long experiment_id)])))
 
 (defn render-static-markup-with-doctype
   "Render static (not marked with React ids & checksums) HTML, complete with DOCTYPE header"
@@ -22,7 +30,7 @@
   "Redirect to next (probably first) block of experiment"
   [request]
   (let [{:keys [experiment-id]} (:route-params request)]
-    (if-let [block (Block/next-in-experiment experiment-id)]
+    (if-let [block (next-block-in-experiment experiment-id)]
       (-> (str "/experiments/" experiment-id "/blocks/" (:id block))
           (redirect :see-other))
       (not-found "No available blocks"))))
@@ -78,7 +86,7 @@
          :or   {WorkerId "WORKER_ID_NOT_AVAILABLE"}} query-params
         {:keys [x-real-ip user-agent x-requested-with]} headers
         response (save-response! WorkerId AssignmentId block-id body x-real-ip user-agent)]
-    (if-let [block (Block/next-in-experiment experiment-id)]
+    (if-let [block (next-block-in-experiment experiment-id)]
       ; redirect with default of 302 (:found)
       (let [resp (redirect (str "/experiments/" experiment-id "/blocks/" (:id block)))]
         (if (str/includes? x-requested-with "XMLHttpRequest")

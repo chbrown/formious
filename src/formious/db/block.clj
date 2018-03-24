@@ -9,13 +9,6 @@
   [experiment_id]
   (db/query ["SELECT * FROM block WHERE experiment_id = ? ORDER BY view_order ASC" (as-long experiment_id)]))
 
-(defn next-in-experiment
-  [experiment_id]
-  (first (db/query ["SELECT * FROM block
-                     WHERE experiment_id = ?
-                     ORDER BY view_order ASC
-                     LIMIT 1" (as-long experiment_id)])))
-
 (defn find-by-id
   [experiment_id id]
   (first (db/query ["SELECT * FROM block
