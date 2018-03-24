@@ -1,5 +1,6 @@
 (ns formious.server.mturk
-  (:require [formious.db.awsaccount :as AWSAccount])
+  (:require [formious.util :refer [as-long]]
+            [formious.db :as db])
   (:import (com.amazonaws.client.builder AwsClientBuilder$EndpointConfiguration)
            (com.amazonaws.auth BasicAWSCredentials
                                AWSStaticCredentialsProvider
@@ -124,7 +125,7 @@
   (let [{:keys [request-params query-params]} request
         {:strs [awsaccount_id environment]} query-params
         {:keys [operation]} request-params
-        {:keys [access_key_id secret_access_key]} (AWSAccount/find-by-id awsaccount_id)
+        {:keys [access_key_id secret_access_key]} (first (db/query ["SELECT * FROM awsaccount WHERE id = ?" (as-long awsaccount_id)]))
         endpoint (get endpoints (keyword environment))]
     (case operation
       "GetAccountBalance" (getAccountBalance endpoint access_key_id secret_access_key)
