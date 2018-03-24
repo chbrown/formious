@@ -1,12 +1,11 @@
 (ns formious.server.experiments
   (:require [formious.db :as db]
-            [formious.db.block :as Block]
-            [formious.db.experiment :as Experiment]
-            [formious.db.response :as Response]
-            [formious.db.template :as Template]
             [formious.views :refer [BlockPage]]
             [formious.util :refer [as-long]]
             [formious.db.util :refer [find-or-create-participant-by-worker-id!]]
+            [formious.resources :as resources]
+            [formious.resources.sql :as sql]
+            [honeysql.core :as honeysql]
             [clojure.string :as str]
             [clojure.data.json :as json]
             [clojure.java.io :as io]
@@ -39,10 +38,14 @@
   [WorkerId AssignmentId block_id body ip-address user-agent]
   (let [participant (find-or-create-participant-by-worker-id! WorkerId {:ip_address ip-address
                                                                         :user_agent user-agent})]
-    (Response/insert! {:participant_id (:id participant)
-                       :block_id block_id
-                       :data body
-                       :assignment_id AssignmentId})))
+    (db/insert! "response" {:participant_id (:id participant)
+                            :block_id block_id
+                            :data body
+                            :assignment_id AssignmentId})))
+
+(defn- select-first
+  [resource where-params]
+  (-> (sql/select resource where-params) honeysql/format db/query first))
 
 (defn render-block
   "GET; Render block as html
@@ -56,9 +59,10 @@
   [request]
   ; otherwise, assume
   (let [{:keys [experiment-id block-id]} (:route-params request)
-        experiment (Experiment/find-by-id experiment-id)
-        block (Block/find-by-id experiment-id block-id)
-        blockTemplateHtml (or (some-> block :template_id Template/find-by-id :html) "")
+        experiment (select-first ::resources/experiment {:id experiment-id})
+        block (select-first ::resources/block {:experiment_id experiment-id :id block-id})
+        template (select-first ::resources/template {:id (:template_id block)})
+        blockTemplateHtml (or (:html template) "")
         ; context: the current state to render the template with
         ; Supply "experiment_id" and "block_id" in the blockContext
         context (into (:context block) {:experiment_id experiment-id
