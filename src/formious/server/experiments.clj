@@ -2,11 +2,11 @@
   (:require [formious.db :as db]
             [formious.db.block :as Block]
             [formious.db.experiment :as Experiment]
-            [formious.db.participant :as Participant]
             [formious.db.response :as Response]
             [formious.db.template :as Template]
             [formious.views :refer [BlockPage]]
             [formious.util :refer [as-long]]
+            [formious.db.util :refer [find-or-create-participant-by-worker-id!]]
             [clojure.string :as str]
             [clojure.data.json :as json]
             [clojure.java.io :as io]
@@ -37,7 +37,7 @@
 
 (defn- save-response!
   [WorkerId AssignmentId block_id body ip-address user-agent]
-  (let [participant (Participant/find-or-create-by-worker-id! WorkerId {:ip_address ip-address
+  (let [participant (find-or-create-participant-by-worker-id! WorkerId {:ip_address ip-address
                                                                         :user_agent user-agent})]
     (Response/insert! {:participant_id (:id participant)
                        :block_id block_id

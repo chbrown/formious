@@ -5,8 +5,8 @@
             [clojure.data.json :as json]
             [formious.db.accesstoken :as AccessToken]
             [formious.db.administrator :as Administrator]
-            [formious.db.participant :as Participant]
             [formious.db.response :as Response]
+            [formious.db.util :refer [find-or-create-participant-by-worker-id!]]
             [rum.core :as rum]
             [ring.util.mime-type :refer [ext-mime-type]]
             [ring.util.request :as request :refer [path-info]]
@@ -83,7 +83,7 @@
         {:strs [workerId assignmentId block_id]
          :or   {workerId "WORKER_ID_NOT_AVAILABLE"
                 block_id 0}} query-params
-        participant (Participant/find-or-create-by-worker-id! workerId nil nil)]
+        participant (find-or-create-participant-by-worker-id! workerId nil nil)]
     (Response/insert! {:participant_id (:id participant)
                        :block_id block_id
                        :body body

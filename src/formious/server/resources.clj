@@ -6,6 +6,7 @@
             [formious.resources.sql :as sql]
             [honeysql.core :as honeysql]
             [formious.db :as db]
+            [formious.db.util :refer [find-or-create-participant!]]
             [formious.db
              [accesstoken :as AccessToken]
              [administrator :as Administrator]
@@ -13,7 +14,6 @@
              [awsaccount-administrator :as AWSAccountAdministrator]
              [block :as Block]
              [experiment :as Experiment]
-             [participant :as Participant]
              [response :as Response]
              [template :as Template]]
             [liberator.core :refer [run-resource]]))
@@ -189,7 +189,7 @@
             (let [{:keys [body query-params]} ctx
                   {:strs [block_id data assignment_id]} body
                   {:strs [participant_id aws_worker_id]} query-params
-                  participant (Participant/find-or-create! participant_id aws_worker_id)]
+                  participant (find-or-create-participant! participant_id aws_worker_id)]
               (when (nil? participant) (throw (Exception. "No matching participant found")))
               (Response/insert! {:participant_id (:id participant)
                                  :block_id block_id
