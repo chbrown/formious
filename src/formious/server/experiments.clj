@@ -1,7 +1,6 @@
 (ns formious.server.experiments
   (:require [formious.db :as db]
-            [formious.views :refer [BlockPage]]
-            [formious.util :refer [as-long]]
+            [formious.util :refer [as-long write-json-str]]
             [formious.db.util :refer [find-or-create-participant-by-worker-id!]]
             [formious.resources :as resources]
             [formious.resources.sql :as sql]
@@ -12,6 +11,24 @@
             [rum.core :as rum]
             [clostache.parser :refer [render render-resource]]
             [ring.util.response :refer [not-found redirect response content-type status]]))
+
+(defn- inject-global
+  [k value-js-str]
+  (let [js-str (str "window." k " = " value-js-str ";")]
+    [:script {:dangerouslySetInnerHTML {:__html js-str}}]))
+
+(rum/defc BlockPage
+  [context header html]
+  [:html
+   [:head
+    [:meta {:charset "UTF-8"}]
+    [:title "Experimental Interface"]
+    [:link {:href "data:;base64,=" :rel "icon" :type "image/x-icon"}]
+    [:script {:src "//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"}]
+    [:script {:src "/public/formious-globals.js"}]
+    (inject-global "formious.context" (write-json-str context))]
+   [:body
+    {:dangerouslySetInnerHTML {:__html (str header \newline html)}}]])
 
 (defn- next-block-in-experiment
   [experiment_id]

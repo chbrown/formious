@@ -1,10 +1,10 @@
 (ns formious.views
   (:require [rum.core :as rum]
-            [formious.util :refer [write-json-str write-transit-str]]
+            [formious.util :refer [write-transit-str]]
             [formious.routes :as routes :refer [generate-path]]
             [formious.resources :as resources]
             [formious.store :refer [app-state]]
-            [formious.views.common :refer [inject-global event-value]]
+            [formious.views.common :refer [event-value]]
             ; resource-specific views
             [formious.views.accesstokens :as accesstokens]
             [formious.views.administrators :as administrators]
@@ -57,19 +57,6 @@
                :style {:width "100%"}}]]
      [:p
       [:button "Login"]]]]])
-
-(rum/defc BlockPage
-  [context header html]
-  [:html
-   [:head
-    [:meta {:charset "UTF-8"}]
-    [:title "Experimental Interface"]
-    [:link {:href "data:;base64,=" :rel "icon" :type "image/x-icon"}]
-    [:script {:src "//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"}]
-    [:script {:src "/public/formious-globals.js"}]
-    (inject-global "formious.context" (write-json-str context))]
-   [:body
-    {:dangerouslySetInnerHTML {:__html (str header \newline html)}}]])
 
 (rum/defc AdminPage
   [children]

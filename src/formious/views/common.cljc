@@ -14,11 +14,6 @@
              event)
      :cljs (.. ^js/Event event -target -value)))
 
-(defn inject-global
-  [k value-js-str]
-  (let [js-str (str "window." k " = " value-js-str ";")]
-    [:script {:dangerouslySetInnerHTML {:__html js-str}}]))
-
 ; (defn- mutation-callback
 ;   "Listen for childList and subtree changes to el.
 ;   Call (on-mutate el) when a change is observed."
