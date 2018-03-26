@@ -1,5 +1,5 @@
-(ns formious.rpc.actions
-  "This module provides action-creator helpers to be subsequently `rpc/dispatch!`ed"
+(ns formious.actions
+  "This module provides helpers to create 'actions' that are subsequently to be `dispatch!`ed"
   (:require [formious.resources :refer [metadata resource-keyword?]]))
 
 ;; Resource-based actions
