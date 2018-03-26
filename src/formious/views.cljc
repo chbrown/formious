@@ -36,27 +36,30 @@
   ; NotifyUI.addPromise(promise)
   (println "TODO: actually login" email password))
 
-(rum/defcs admin-login < (rum/local 0 ::email)
-                         (rum/local 0 ::password)
+(rum/defcs admin-login < (rum/local {:email    ""
+                                     :password ""} ::login-params)
   [state]
-  [:div
-   [:div.shadow {:style {:width "200px"
-                         :margin "80px auto"
-                         :background-color "white"}}
-    [:form {:on-submit (fn [_] (login @(::email state) @(::password state)))
-            :style {:padding "10px"}}
-     [:h3 "Admin Login"]
-     [:label
-      [:div "Email"]
-      [:input {:on-change #(swap! (::email state) (event-value %))
-               :style {:width "100%"}}]]
-     [:label
-      [:div "Password"]
-      [:input {:ng-model #(swap! (::password state) (event-value %))
-               :type "password"
-               :style {:width "100%"}}]]
-     [:p
-      [:button "Login"]]]]])
+  (let [*login-params (::login-params state)
+        {:keys [email password]} @*login-params]
+    [:div
+     [:div.shadow {:style {:width "200px"
+                           :margin "80px auto"
+                           :background-color "white"}}
+      [:form.hpad.vpad {:method "POST"
+                        :action (generate-path {:endpoint ::routes/login})
+                        :on-submit #(rpc/dispatch! (actions/login! email password))}
+       [:h3 "Admin Login"]
+       [:label
+        [:div "Email"]
+        [:input {:on-change #(swap! *login-params assoc :email (event-value %))
+                 :style {:width "100%"}}]]
+       [:label
+        [:div "Password"]
+        [:input {:ng-model #(swap! *login-params assoc :password (event-value %))
+                 :type "password"
+                 :style {:width "100%"}}]]
+       [:p
+        [:button "Login"]]]]]))
 
 (rum/defc AdminPage
   [children]

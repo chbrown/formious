@@ -48,51 +48,47 @@
                 :limit limit}]
     (println "TODO: actually refresh with params:" params)))
 
-(rum/defcs responses < (rum/local 0 ::template_id)
-                       (rum/local 0 ::experiment_id)
-                       (rum/local "created" ::order_column)
-                       (rum/local "DESC" ::order_direction)
-                       (rum/local 250 ::limit)
+(rum/defcs responses < (rum/local {:experiment_id   0
+                                   :template_id     0
+                                   :order_column    "created"
+                                   :order_direction "DESC"
+                                   :limit           250} ::query-params)
   [state responses templates experiments]
   ; templates = Template.query()
   ; experiments = Experiment.query()
   (let [total-response-count (if (empty? responses) 0 (or (:count (first responses)) "N/A"))
-        template_id-atom (::template_id state)
-        experiment_id-atom (::experiment_id state)
-        order_column-atom (::order_column state)
-        order_direction-atom (::order_direction state)
-        limit-atom (::limit state)]
+        *query-params (::query-params state)
+        {:keys [experiment_id template_id order_column order_direction limit]} @*query-params]
     [:div
      [:section.hpad [:h3 "Responses"]]
      [:section.hpad.box
-      [:form {:on-submit (fn [_] (refresh @template_id-atom @experiment_id-atom
-                                          @order_column-atom @order_direction-atom @limit-atom))}
+      [:form {:on-submit #(refresh experiment_id template_id order_column order_direction limit)}
        [:div.controls
         [:label.control
          [:div [:b "Template"]]
-         [:select {:value @template_id-atom}
+         [:select {:value template_id}
           [:option {:value 0} "-- all --"]
           (for [{:keys [id name]} templates]
             [:option {:value id} name])]]
         [:label.control
          [:div [:b "Experiment"]]
-         [:select {:value @experiment_id-atom}
+         [:select {:value experiment_id}
           [:option {:value 0} "-- all --"]
           (for [{:keys [id name]} experiments]
             [:option {:value id} name])]]
         [:div.control
          [:div [:b "Order"]]
-         [:select {:value @order_column-atom}
+         [:select {:value order_column}
           [:option {:value "experiment_id"} "experiment_id"]
           [:option {:value "template_id"} "template_id"]
           [:option {:value "view_order"} "view_order"]
           [:option {:value "created"} "created"]]
-         [:select {:value @order_direction-atom}
+         [:select {:value order_direction}
           [:option {:value "ASC" :title "smallest first"} "ASC"]
           [:option {:value "DESC" :title "largest first"} "DESC"]]]
         [:div.control
          [:div [:b "Limit"]]
-         [:input {:value @limit-atom
+         [:input {:value limit
                   :type "number"}]]]]]
      [:section.hpad
       [:p "Showing " (count responses) " out of " total-response-count " responses"]]
