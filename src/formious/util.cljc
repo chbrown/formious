@@ -61,6 +61,11 @@
   [f xs]
   (into {} (map (juxt f identity) xs)))
 
+(defn as-coll
+  "If `x` is not coll?, wrap it in a list"
+  [x]
+  (if (coll? x) x (list x)))
+
 ;; clojure.string add-ons
 
 (defn elide
