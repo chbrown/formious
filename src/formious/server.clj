@@ -3,7 +3,10 @@
   (:require [clojure.tools.logging :as log]
             [clojure.string :as str]
             [clojure.data.json :refer [JSONWriter write]]
-            [formious.store :refer [app-state]]
+            [formious.util :refer [elide]]
+            [formious.store :refer [app-state dispatch!]]
+            [formious.rpc] ; for the dispatch! defmethods
+            [formious.actions :as actions]
             [formious.db :as db]
             [formious.resources :as resources]
             [formious.routes :as routes :refer [resolve-endpoint generate-path]]
@@ -73,9 +76,9 @@
       :admin (let [components (get-in views/endpoint-mapping [endpoint route-keyset])
                    component-fn (apply comp views/AppLayout components)]
                (fn [request]
-                 (let [store (-> (db/load-store [[endpoint (dissoc route-params :group)]])
+                 (let [store (-> (dispatch! (actions/select endpoint (dissoc route-params :group)))
                                  (assoc :route (assoc route-params :endpoint endpoint)))]
-                   (log/debug "response with store" store)
+                   (log/debug "response with store" (elide (str store) 500))
                    ; update app-state for side-effect reading in component-fn
                    (reset! app-state store)
                    (-> (render-html+static-markup-with-doctype views/AdminPage (component-fn))

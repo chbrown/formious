@@ -3,10 +3,11 @@
             [era.core :as era]
             [formious.resources :as resources]
             [formious.util :refer [read-transit-str]]
-            [formious.store :refer [app-state]]
+            [formious.store :refer [app-state dispatch!]]
+            [formious.rpc] ; for the dispatch! defmethods
+            [formious.actions :as actions]
             [formious.routes :as routes :refer [resolve-endpoint generate-path]]
             [formious.views :as views]
-            [formious.client.api :as api]
             [rum.core :as rum]))
 
 (enable-console-print!)
@@ -26,7 +27,7 @@
         components (get-in views/endpoint-mapping [endpoint route-keyset])
         component-fn (apply comp views/AppLayout components)]
     ; fetch-resource! has a (async) side-effect of updating the app-state atom
-    (api/fetch-resource! endpoint route-params)
+    (dispatch! (actions/select endpoint route-params))
     (component-fn)))
 
 (defn render!

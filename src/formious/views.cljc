@@ -3,7 +3,8 @@
             [formious.util :refer [write-transit-str]]
             [formious.routes :as routes :refer [generate-path]]
             [formious.resources :as resources]
-            [formious.store :refer [app-state]]
+            [formious.store :refer [app-state dispatch!]]
+            [formious.actions :as actions]
             [formious.views.common :refer [event-value]]
             ; resource-specific views
             [formious.views.accesstokens :as accesstokens]
@@ -28,14 +29,6 @@
    [:p
     [:a {:href "javascript:back"} "back"]]])
 
-(defn- login
-  [email password]
-  ; (js/fetch "/login" {:email email :password password})
-  ; .then(function(res) {$state.go($state.params.to) return res.data.message},
-  ;       function(res) {return res.data.message}))
-  ; NotifyUI.addPromise(promise)
-  (println "TODO: actually login" email password))
-
 (rum/defcs admin-login < (rum/local {:email    ""
                                      :password ""} ::login-params)
   [state]
@@ -47,7 +40,7 @@
                            :background-color "white"}}
       [:form.hpad.vpad {:method "POST"
                         :action (generate-path {:endpoint ::routes/login})
-                        :on-submit #(rpc/dispatch! (actions/login! email password))}
+                        :on-submit #(dispatch! (actions/login! email password))}
        [:h3 "Admin Login"]
        [:label
         [:div "Email"]
@@ -76,14 +69,6 @@
               :dangerouslySetInnerHTML {:__html (write-transit-str @app-state)}}]
     [:script {:src "/build/bundle.js"}]]])
 
-(defn logout
-  [& [event]]
-  ; NotifyUI.add('Deleted administrator token')
-  ; $state.go('.', {}, {reload: true})
-  ; https://google.github.io/closure-library/api/goog.net.Cookies.html
-  #?(:clj nil
-     :cljs (.remove goog.net.cookies "administrator_token" "/")))
-
 (rum/defc AppLayout
   [children]
   [:div
@@ -96,7 +81,7 @@
     [:a.tab {:href (generate-path {:group :admin :endpoint ::resources/template})} "Templates"]
     [:a.tab {:href (generate-path {:group :admin :endpoint ::resources/response})} "Responses"]
     [:div {:style {:float "right"}}
-     [:button.anchor.tab {:on-click logout} "Logout"]]]
+     [:button.anchor.tab {:on-click #(dispatch! (actions/logout!))} "Logout"]]]
    children])
 
 (def endpoint-mapping
