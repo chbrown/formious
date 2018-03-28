@@ -4,33 +4,26 @@ import * as async from 'async'
 import db from '../db'
 import {recursiveFind} from '../lib/tree'
 
-export interface BlockRow {
-  id: number
-  // experiment_id?: number
-  template_id?: number
-  // context?: string
-  randomize: boolean
-  quota?: number
-  parent_block_id?: number
-  view_order?: number
-  // created?: Date
-  // enhancements
-  children?: BlockRow[]
-  completed?: Date
-  responses?: number
-}
-
-export default class Block {
+export interface Row {
   id: number
   experiment_id: number
   template_id?: number
-  context: any
+  context?: any
   view_order: number
   created: Date
   randomize: boolean
   parent_block_id?: number
   quota?: number
+}
 
+// tree-built extension
+export interface ExtendedRow extends Row {
+  children?: ExtendedRow[]
+  completed?: Date
+  responses?: number
+}
+
+export default class Block {
   static columns = [
     'id',
     'experiment_id',
@@ -47,12 +40,12 @@ export default class Block {
   shapeTree takes a list of blocks and returns a subset of that list, but where
   all given blocks can be found within the tree structure of each block in that list.
   */
-  static shapeTree(blocks: BlockRow[]): BlockRow[] {
-    const block_hash: {[id: number]: BlockRow} = {}
+  static shapeTree(blocks: Row[]): ExtendedRow[] {
+    const block_hash: {[id: number]: ExtendedRow} = {}
     blocks.forEach(block => {
       block_hash[block.id] = {...block, children: []}
     })
-    const root_blocks: BlockRow[] = []
+    const root_blocks: ExtendedRow[] = []
     blocks.forEach(block => {
       if (block.parent_block_id) {
         // block_hash and root blocks contents are linked by reference, so order doesn't matter here
@@ -90,16 +83,19 @@ export default class Block {
         AS participant_responses ON participant_responses.block_id = blocks.id
       WHERE blocks.experiment_id = $2
       ORDER BY view_order ASC
-    `, [participant_id, experiment_id], (err, blocks: BlockRow[]) => {
+    `, [participant_id, experiment_id], (err, blocks: Row[]) => {
       if (err) return callback(err)
 
       // should id = null?
-      const root: BlockRow = {
+      const root: ExtendedRow = {
         id: null,
+        experiment_id,
+        view_order: -1,
+        created: new Date(),
         randomize: false,
         children: Block.shapeTree(blocks),
       }
-      function findBlock(id: number): BlockRow {
+      function findBlock(id: number): ExtendedRow {
         return recursiveFind([root], block => block.id === id)
       }
 
@@ -116,7 +112,7 @@ export default class Block {
       Returns a list from nearest to root, e.g.:
           [parent_of_most_recent, grandparent_of_most_recent, ..., null]
       */
-      function findPath(current_block_id: number): BlockRow[] {
+      function findPath(current_block_id: number): ExtendedRow[] {
         const block = findBlock(current_block_id)
         if (block.parent_block_id) {
           return [block].concat(findPath(block.parent_block_id))
@@ -162,7 +158,7 @@ export default class Block {
 
         // 3. recurse downward and randomize as needed. this is async since we
         // may need to query past responses when randomizing
-        (function next(next_parent_block: BlockRow) {
+        (function next(next_parent_block: Row) {
           nextChildBlock(next_parent_block, (ncbError, next_block) => {
             if (ncbError) return callback(ncbError)
 
@@ -184,7 +180,7 @@ export default class Block {
   }
 }
 
-function nextChildBlock(parent_block: BlockRow, callback: (error: Error, block?: BlockRow) => void) {
+function nextChildBlock(parent_block: ExtendedRow, callback: (error: Error, block?: Row) => void) {
   const incomplete_child_blocks = parent_block.children.filter(block => !block.completed)
   // if next_parent_block was `root` all the children might be completed
   if (incomplete_child_blocks.length === 0) {

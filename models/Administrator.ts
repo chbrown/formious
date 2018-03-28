@@ -12,27 +12,14 @@ function sha256(string: string) {
   return shasum.digest('hex')
 }
 
-export interface IAdministrator {
-  id?: string
-  email?: string
-  password?: string
-  created?: Date
+export interface Row {
+  id: number
+  email: string
+  password: string
+  created: Date
 }
 
-export default class Administrator implements IAdministrator {
-  id?: string
-  email?: string
-  password?: string
-  created?: Date
-
-  constructor(administrator: IAdministrator) {
-    const {id, email, password, created} = administrator
-    this.id = id
-    this.email = email
-    this.password = password
-    this.created = created
-  }
-
+export default class Administrator {
   static columns = [
     'id',
     'email',
@@ -42,7 +29,7 @@ export default class Administrator implements IAdministrator {
 
   static add(email: string,
              password: string,
-             callback: (error: Error, administrator?: Administrator) => void): void {
+             callback: (error: Error, administrator?: Row) => void): void {
     db.InsertOne('administrators')
     .set({
       email,
@@ -52,12 +39,13 @@ export default class Administrator implements IAdministrator {
     .execute(callback)
   }
 
-  update(email: string,
-         password: string,
-         callback: (error: Error, administrator?: Administrator) => void): void {
+  static update(id: number,
+                email: string,
+                password: string,
+                callback: (error: Error, administrator?: Row) => void): void {
     let query = db.Update('administrators')
     .setEqual({email})
-    .whereEqual({id: this.id})
+    .whereEqual({id})
     .returning('*')
 
     // empty-string password means: don't change the password
@@ -81,7 +69,7 @@ export default class Administrator implements IAdministrator {
       email,
       password: sha256(password),
     })
-    .execute((err, administrator) => {
+    .execute((err, administrator: Row) => {
       if (err) return callback(err)
       if (!administrator) return callback(new Error('Authentication failed'))
 
@@ -98,7 +86,7 @@ export default class Administrator implements IAdministrator {
   Get administrator object from token.
   */
   static fromToken(token: string,
-                   callback: (error: Error, administrator?: Administrator) => void): void {
+                   callback: (error: Error, administrator?: Row) => void): void {
     db.Select('access_tokens')
     .where('token = ?', token || '')
     .where('relation = ?', 'administrators')

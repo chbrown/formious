@@ -1,19 +1,21 @@
 import db from '../db'
 
-import Response from './Response'
+import Response, {Row as ResponseRow} from './Response'
 
-export default class Participant {
-  id?: number
+export interface Row {
+  id: number
   name?: string
   aws_worker_id?: string
   aws_bonus_owed?: number
   aws_bonus_paid?: number
   ip_address?: string
   user_agent?: string
-  created?: Date
+  created: Date
+}
 
-  static findOrCreate(participant: Participant,
-                      callback: (error: Error, participant?: Participant) => void): void {
+export default class Participant {
+  static findOrCreate(participant: Partial<Row>,
+                      callback: (error: Error, participant?: Row) => void): void {
     db.SelectOne('participants')
     .whereEqual({aws_worker_id: participant.aws_worker_id})
     .execute((err, existing_participant) => {
@@ -34,9 +36,9 @@ export default class Participant {
    * Find or create a Participant matching the subset of fields provided in
    * {@link participant}, and insert a corresponding Response row in the database.
    */
-  static addResponse(participant: Participant & {aws_worker_id: string},
-                     response: Response,
-                     callback: (error: Error, participant?: Participant, response?: Response) => void): void {
+  static addResponse(participant: Partial<Row> & {aws_worker_id: string},
+                     response: Partial<ResponseRow>,
+                     callback: (error: Error, participant?: Row, response?: ResponseRow) => void): void {
     Participant.findOrCreate({aws_worker_id: participant.aws_worker_id}, (err, participant) => {
       if (err) return callback(err)
 
@@ -44,7 +46,7 @@ export default class Participant {
       db.InsertOne('responses')
       .set(response)
       .returning('*')
-      .execute((err, response: Response) => {
+      .execute((err, response: ResponseRow) => {
         if (err) return callback(err)
 
         callback(err, participant, response)

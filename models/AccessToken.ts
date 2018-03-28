@@ -5,7 +5,7 @@ export interface AccessTokenOptions {
   expires?: Date
 }
 
-export default class AccessToken {
+export interface Row {
   id: number
   token: string
   relation: string
@@ -13,7 +13,9 @@ export default class AccessToken {
   expires?: Date
   redacted?: Date
   created: Date
+}
 
+export default class AccessToken {
   static columns = [
     'token',
     'relation',
@@ -35,7 +37,7 @@ export default class AccessToken {
   static check(token: string,
                relation: string,
                foreign_id: string,
-               callback: (error: Error, accessToken?: AccessToken) => void): void {
+               callback: (error: Error, accessToken?: Row) => void): void {
     let select = db.Select('access_tokens')
     .whereEqual({token, relation})
     .where('(expires IS NULL OR expires > NOW())')
@@ -63,7 +65,7 @@ export default class AccessToken {
   static findOrCreate(relation: string,
                       foreign_id: string,
                       options: AccessTokenOptions,
-                      callback: (error: Error, accessToken?: AccessToken) => void): void {
+                      callback: (error: Error, accessToken?: Row) => void): void {
     const {expires = null, length = 40} = options
     db.SelectOne('access_tokens')
     .whereEqual({relation, foreign_id})
