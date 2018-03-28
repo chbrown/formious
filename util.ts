@@ -1,4 +1,4 @@
-import {createHash} from 'crypto'
+import {createHash, createCipher} from 'crypto'
 
 /**
 This constant was created by calling `openssl rand -hex 32`.
@@ -16,9 +16,17 @@ export function readSalt(environmentVariable: string = 'FORMIOUS_SALT'): Buffer 
   return defaultSalt
 }
 
-export function sha256(data: string, encoding: 'utf8' | 'ascii' | 'latin1' = 'utf8') {
+export function sha256(data: string, encoding: 'utf8' | 'ascii' | 'latin1' = 'utf8'): string {
   const hash = createHash('sha256')
   hash.update(readSalt())
   hash.update(data, encoding)
   return hash.digest('hex')
+}
+
+export function blowfish(data: string, encoding: 'utf8' | 'ascii' | 'binary' = 'utf8'): string {
+  const cipher = createCipher('bf-cbc', readSalt())
+  const prefix = cipher.update(data, encoding)
+  const suffix = cipher.final()
+  const encrypted = Buffer.concat([prefix, suffix])
+  return encrypted.toString('hex')
 }
