@@ -139,7 +139,9 @@ R.get(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, (req, res, m) => {
       return Participant.findOrCreate({aws_worker_id}, (err, participant) => {
         if (err) return httpUtil.writeError(res, err)
 
-        return Block.nextBlockId(experiment_id, parseInt(block_id, 10), participant.id, (err, next_block_id) => {
+        return Block.nextBlockId(parseInt(experiment_id, 10),
+                                 parseInt(block_id, 10),
+                                 participant.id, (err, next_block_id) => {
           if (err) return httpUtil.writeError(res, err)
 
           const pathname = `/experiments/${experiment_id}/blocks/${next_block_id}`
