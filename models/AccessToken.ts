@@ -36,7 +36,7 @@ export default class AccessToken {
 
   static check(token: string,
                relation: string,
-               foreign_id: string,
+               foreign_id: number,
                callback: (error: Error, accessToken?: Row) => void): void {
     let select = db.Select('access_tokens')
     .whereEqual({token, relation})
@@ -63,7 +63,7 @@ export default class AccessToken {
    * @param [options.expires=null] - When the created token should expire
    */
   static findOrCreate(relation: string,
-                      foreign_id: string,
+                      foreign_id: number,
                       options: AccessTokenOptions,
                       callback: (error: Error, accessToken?: Row) => void): void {
     const {expires = null, length = 40} = options

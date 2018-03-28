@@ -222,7 +222,7 @@ R.post(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, (req, res, m) => {
 Requires authorization, but only by access token.
 Show only the responses that reference this Experiment. */
 R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, (req, res, m) => {
-  const experiment_id = m[1]
+  const experiment_id = parseInt(m[1], 10)
 
   const urlObj = url.parse(req.url, true)
   const token = httpUtil.asString(urlObj.query.token)
