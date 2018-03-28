@@ -11,7 +11,7 @@ const cookie_defaults = {
 }
 
 function nodesToJSON(nodes) {
-  var pairs = _.map(nodes, function(node) {
+  var pairs = [...nodes].map(node => {
     if (node.children && node.children.length > 0) {
       return [node.tagName, nodesToJSON(node.children)]
     }
@@ -64,7 +64,7 @@ function parseAnswer(answer_escaped) {
   */
   var answer_xml = answer_escaped.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
   var answer_doc = new DOMParser().parseFromString(answer_xml, 'text/xml')
-  var pairs = _.map(answer_doc.querySelectorAll('Answer'), function(Answer) {
+  var pairs = [...answer_doc.querySelectorAll('Answer')].map(function(Answer) {
     var key = Answer.querySelector('QuestionIdentifier').textContent
     // TODO: handle other types of values besides FreeText
     var value = Answer.querySelector('FreeText').textContent
@@ -85,20 +85,17 @@ function createExternalQuestionString(ExternalURL, FrameHeight) {
 
 class QualificationType {
   static query(data, callback) {
-    _.defaults(data, {
+    sendTurkRequest({
       Operation: 'SearchQualificationTypes',
       MustBeOwnedByCaller: true,
-    })
-    sendTurkRequest(data, callback)
+      ...data,
+    }, callback)
   }
   static get(data, callback) {
     if (data.QualificationTypeId === undefined) {
       setTimeout(() => callback(new Error('The QualificationTypeId parameter is required')), 0)
     }
-    _.defaults(data, {
-      Operation: 'GetQualificationType',
-    })
-    sendTurkRequest(data, callback)
+    sendTurkRequest({Operation: 'GetQualificationType', ...data}, callback)
   }
   static assign(data, callback) {
     if (data.QualificationTypeId === undefined) {
@@ -107,12 +104,12 @@ class QualificationType {
     if (data.WorkerId === undefined) {
       setTimeout(() => callback(new Error('The WorkerId parameter is required')), 0)
     }
-    _.defaults(data, {
+    sendTurkRequest({
       Operation: 'AssignQualification',
       IntegerValue: 1,
       SendNotification: false,
-    })
-    sendTurkRequest(data, callback)
+      ...data,
+    }, callback)
   }
   static revoke(data, callback) {
     var {
@@ -191,7 +188,7 @@ app
     SortDirection: 'Descending',
     PageSize: 100,
   }).then(function(document) {
-    $scope.hits = _.map(document.querySelectorAll('HIT'), HIT => nodesToJSON(HIT.children))
+    $scope.hits = [...document.querySelectorAll('HIT')].map(HIT => nodesToJSON(HIT.children))
   })
 })
 .controller('admin.mturk.hits.new', function($scope, $http, $location, $sce, $state, $localStorage, $turk) {
@@ -239,7 +236,7 @@ app
       LifetimeInSeconds,
       AutoApprovalDelayInSeconds,
     }
-    _.extend(data, $scope.$storage.extra)
+    Object.assign(data, $scope.$storage.extra)
     var promise = $turk(data).then(function(document) {
       var HITId = document.querySelector('HITId').textContent
       // var HITTypeId = document.querySelector('HITTypeId').textContent
@@ -254,7 +251,7 @@ app
   $scope.$watch('$storage.ExternalURL', function(ExternalURL) {
     if (ExternalURL !== '') {
       var url = Url.parse(ExternalURL)
-      _.extend(url.query, {
+      Object.assign(url.query, {
         // Once assigned, assignmentId is a 30-character alphadecimal mess
         // assignmentId: 'ASSIGNMENT_ID_NOT_AVAILABLE',
         assignmentId: '1234567890abcdef',
@@ -299,7 +296,7 @@ app
     SortDirection: 'Ascending',
   }).then(document => {
     // document is a Document instance, with GetAssignmentsForHITResponse as its root element
-    $scope.assignments = _.map(document.querySelectorAll('Assignment'), Assignment => {
+    $scope.assignments = [...document.querySelectorAll('Assignment')].map(Assignment => {
       var assignment_json = nodesToJSON(Assignment.children)
       assignment_json.Answer = parseAnswer(assignment_json.Answer)
       return assignment_json
@@ -323,7 +320,7 @@ app
   $scope.import = function() {
     var promises = $scope.assignments.map(assignment => {
       const {HITId, AutoApprovalTime, AcceptTime, SubmitTime, ApprovalTime} = assignment
-      var params = _.assign({
+      var params = Object.assign({
         value: {HITId, AutoApprovalTime, AcceptTime, SubmitTime, ApprovalTime},
         assignment_id: assignment.AssignmentId,
         // block_id isn't required, but if it's provided, it had better be an actual stim!
@@ -349,8 +346,9 @@ app
 
   QualificationType.query({}, (err, document) => {
     if (err) throw err
-    $scope.QualificationTypes = _.map(document.querySelectorAll('QualificationType'),
-      QualificationType => nodesToJSON(QualificationType.children))
+    $scope.QualificationTypes = [
+      ...document.querySelectorAll('QualificationType')
+    ].map(QualificationType => nodesToJSON(QualificationType.children))
   })
 
   $scope.assignQualifications = () => {
@@ -456,8 +454,9 @@ app
       if (err) throw err
       // document is a Document instance.
       $timeout(() => {
-        $scope.QualificationTypes = _.map(document.querySelectorAll('QualificationType'),
-          QualificationType => nodesToJSON(QualificationType.children))
+        $scope.QualificationTypes = [
+          ...document.querySelectorAll('QualificationType'),
+        ].map(QualificationType => nodesToJSON(QualificationType.children))
       })
     })
   }
@@ -526,8 +525,9 @@ app
     PageSize: 100,
     PageNumber: 1,
   }).then(function(document) {
-    $scope.Qualifications = _.map(document.querySelectorAll('Qualification'),
-      Qualification => nodesToJSON(Qualification.children))
+    $scope.Qualifications = [
+      ...document.querySelectorAll('Qualification'),
+    ].map(Qualification => nodesToJSON(Qualification.children))
   })
 
   $scope.assignQualification = () => {

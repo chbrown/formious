@@ -56,7 +56,7 @@ app
   })
 
   function getNextViewOrder() {
-    var max_view_order = Math.max.apply(Math, _.pluck(root.children, 'view_order'))
+    var max_view_order = Math.max.apply(Math, root.children.map(child => child.view_order))
     return Math.max(max_view_order, 0) + 1
   }
 
@@ -71,7 +71,7 @@ app
   $scope.$on('collapseBlock', function(ev, collapsed_block) {
     // 1. find the parent of the collapsed_block
     var parent_block = Node.recursiveSearch([root], block => {
-      return _.includes(block.children, collapsed_block)
+      return block.children.includes(collapsed_block)
     }).next().value
     // 2. add the collapsed_block's children to the parent
     parent_block.children = parent_block.children.concat(collapsed_block.children)
@@ -93,7 +93,7 @@ app
     //   inside it, otherwise, group them inside the root block.
     var original_parent_blocks = selected_blocks.map(selected_block => {
       return Node.recursiveSearch([root], block => {
-        return _.includes(block.children, selected_block)
+        return block.children.includes(selected_block)
       }).next().value
     })
     // determine if all the items in original_parent_blocks are the same
@@ -105,7 +105,7 @@ app
       // compute the new_children as children without selected_blocks
       var new_children = block.children
       .filter(child_block => {
-        return !_.includes(selected_blocks, child_block)
+        return !selected_blocks.includes(child_block)
       })
       .map(transformFunction)
       if (block === parent_block) {
@@ -262,7 +262,7 @@ app
           }
         })
         delete parameters_object.template
-        var parameters = _.keys(parameters_object)
+        var parameters = Object.keys(parameters_object)
         scope.parameters = parameters
       })
     },

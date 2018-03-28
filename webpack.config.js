@@ -34,7 +34,7 @@ module.exports = {
             presets: ['env'],
             // ng-annotate is deprecated and points to its successor:
             // babel-plugin-angularjs-annotate
-            plugins: ['angularjs-annotate'],
+            plugins: ['transform-object-rest-spread', 'angularjs-annotate'],
           },
         },
       },

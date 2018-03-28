@@ -136,7 +136,7 @@ app
         // presumably, context.template is the desired Template's name
         var templates = Template.query()
         templates.$promise.then(function() {
-          var template = _.findWhere(templates, {name: context.template})
+          var template = templates.find(template => template.name === context.template)
           return template ? template : new Template({name: name}).$save()
         }).then(resolve, reject)
       }

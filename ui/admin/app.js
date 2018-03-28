@@ -222,12 +222,6 @@ app.directive('object', function() {
   }
 })
 
-app.filter('where', function() {
-  return function(list, predicate) {
-    return _.where(list, predicate)
-  }
-})
-
 app.filter('valueWhere', function() {
   return function(list, predicate, prop) {
     var match = _.findWhere(list, predicate)
@@ -262,7 +256,7 @@ export function sendTurkRequest(data, callback) {
     var valid = res.querySelector('IsValid').textContent === 'True'
     if (!valid) {
       var Messages = res.querySelectorAll('Errors > Error > Message')
-      var errors = _.map(Messages, Message => Message.textContent)
+      var errors = [...Messages].map(Message => Message.textContent)
       var message = `AWS API Error: ${errors.join(', ')}`
       return callback(new Error(message))
     }
