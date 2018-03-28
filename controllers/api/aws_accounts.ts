@@ -3,7 +3,7 @@ import Router from 'regex-router'
 
 import db from '../../db'
 import * as httpUtil from '../../http-util'
-import AWSAccount from '../../models/AWSAccount'
+import AWSAccount, {Row as AWSAccountRow} from '../../models/AWSAccount'
 
 const R = new Router()
 
@@ -28,10 +28,8 @@ R.get(/^\/api\/aws_accounts\/new$/, (req, res) => {
 /** POST /api/aws_accounts
 Create new AWS account. */
 R.post(/^\/api\/aws_accounts$/, (req, res) => {
-  httpUtil.readData(req, (err, data) => {
+  httpUtil.readFields<AWSAccountRow>(req, AWSAccount.columns, (err, fields) => {
     if (err) return httpUtil.writeError(res, err)
-
-    const fields = _.pick(data, AWSAccount.columns)
 
     db.InsertOne('aws_accounts')
     .set(fields)
@@ -60,10 +58,8 @@ R.get(/^\/api\/aws_accounts\/(\d+)$/, (req, res, m) => {
 /** POST /api/aws_accounts/:id
 Update existing AWS account. */
 R.post(/^\/api\/aws_accounts\/(\d+)/, (req, res, m) => {
-  httpUtil.readData(req, (err, data) => {
+  httpUtil.readFields<AWSAccountRow>(req, AWSAccount.columns, (err, fields) => {
     if (err) return httpUtil.writeError(res, err)
-
-    const fields = _.pick(data, AWSAccount.columns)
 
     db.Update('aws_accounts')
     .setEqual(fields)

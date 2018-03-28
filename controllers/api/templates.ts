@@ -3,7 +3,7 @@ import Router from 'regex-router'
 
 import db from '../../db'
 import * as httpUtil from '../../http-util'
-import Template from '../../models/Template'
+import Template, {Row as TemplateRow} from '../../models/Template'
 
 const R = new Router()
 
@@ -28,10 +28,8 @@ R.get(/^\/api\/templates\/new$/, (req, res) => {
 /** POST /api/templates
 Create new template. */
 R.post(/^\/api\/templates$/, (req, res) => {
-  httpUtil.readData(req, (err, data) => {
+  httpUtil.readFields<TemplateRow>(req, Template.columns, (err, fields) => {
     if (err) return httpUtil.writeError(res, err)
-
-    const fields = _.pick(data, Template.columns)
 
     db.InsertOne('templates')
     .set(fields)
@@ -67,10 +65,8 @@ R.get(/^\/api\/templates\/(\d+)$/, (req, res, m) => {
 /** POST /api/templates/:id
 Update existing template. */
 R.post(/^\/api\/templates\/(\d+)/, (req, res, m) => {
-  httpUtil.readData(req, (err, data) => {
+  httpUtil.readFields<TemplateRow>(req, Template.columns, (err, fields) => {
     if (err) return httpUtil.writeError(res, err)
-
-    const fields = _.pick(data, Template.columns)
 
     db.Update('templates')
     .setEqual(fields)

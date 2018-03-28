@@ -6,7 +6,7 @@ import Router from 'regex-router'
 import db from '../../../db'
 import * as httpUtil from '../../../http-util'
 import {recursiveEach} from '../../../lib/tree'
-import Block, {BlockRow} from '../../../models/Block'
+import Block, {Row as BlockRow, ExtendedRow as BlockExtendedRow} from '../../../models/Block'
 
 const R = new Router()
 
@@ -71,10 +71,8 @@ R.get(/\/api\/experiments\/(\d+)\/blocks\/(\d+)$/, (req, res, m) => {
 Update existing block
 */
 R.post(/\/api\/experiments\/(\d+)\/blocks\/(\d+)$/, (req, res, m) => {
-  httpUtil.readData(req, (err, data) => {
+  httpUtil.readFields<BlockRow>(req, Block.columns, (err, fields) => {
     if (err) return httpUtil.writeError(res, err)
-
-    const fields = _.pick(data, Block.columns)
 
     db.Update('blocks')
     .setEqual(fields)
@@ -128,7 +126,7 @@ Special non-REST method to store a tree structure of blocks and in a tree struct
 */
 R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, (req, res, m) => {
   const experiment_id = m[1]
-  httpUtil.readData(req, (err, rootBlocks: BlockRow[]) => {
+  httpUtil.readData(req, (err, rootBlocks: BlockExtendedRow[]) => {
     if (err) return httpUtil.writeError(res, err)
 
     // 1. instantiate the missing blocks so that they have id's we can use when flattening

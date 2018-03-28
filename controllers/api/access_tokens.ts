@@ -3,7 +3,7 @@ import Router from 'regex-router'
 
 import db from '../../db'
 import * as httpUtil from '../../http-util'
-import AccessToken from '../../models/AccessToken'
+import AccessToken, {Row as AccessTokenRow} from '../../models/AccessToken'
 
 const R = new Router()
 
@@ -28,10 +28,8 @@ R.get(/^\/api\/access_tokens\/new$/, (req, res) => {
 /** POST /api/access_tokens
 Create new access token. */
 R.post(/^\/api\/access_tokens$/, (req, res) => {
-  httpUtil.readData(req, (err, data) => {
+  httpUtil.readFields<AccessTokenRow>(req, AccessToken.columns, (err, fields) => {
     if (err) return httpUtil.writeError(res, err)
-
-    const fields = _.pick(data, AccessToken.columns)
 
     db.InsertOne('access_tokens')
     .set(fields)
@@ -60,10 +58,8 @@ R.get(/^\/api\/access_tokens\/(\d+)$/, (req, res, m) => {
 /** POST /api/access_tokens/:id
 Update existing access token. */
 R.post(/^\/api\/access_tokens\/(\d+)/, (req, res, m) => {
-  httpUtil.readData(req, (err, data) => {
+  httpUtil.readFields<AccessTokenRow>(req, AccessToken.columns, (err, fields) => {
     if (err) return httpUtil.writeError(res, err)
-
-    const fields = _.pick(data, AccessToken.columns)
 
     db.Update('access_tokens')
     .setEqual(fields)

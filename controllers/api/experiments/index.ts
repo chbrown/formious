@@ -5,13 +5,13 @@ import Router from 'regex-router'
 import db from '../../../db'
 import * as httpUtil from '../../../http-util'
 import AccessToken from '../../../models/AccessToken'
-import Administrator from '../../../models/Administrator'
-import Experiment from '../../../models/Experiment'
+import Administrator, {Row as AdministratorRow} from '../../../models/Administrator'
+import Experiment, {Row as ExperimentRow} from '../../../models/Experiment'
 
 // sub-controllers
 import blocks from './blocks'
 
-type ExperimentWithAccessToken = Experiment & {access_token?: string}
+type ExperimentRowWithAccessToken = ExperimentRow & {access_token?: string}
 
 const R = new Router()
 
@@ -21,8 +21,8 @@ R.any(/^\/api\/experiments\/(\d+)\/blocks/, blocks)
 Take a pre-joined (with access_tokens) row from the experiments table and insert
 a new access_tokens row if there is no access_token available.
 */
-function ensureAccessToken(experiment: ExperimentWithAccessToken,
-                           callback: (error: Error, experiment?: ExperimentWithAccessToken) => void): void {
+function ensureAccessToken(experiment: ExperimentRowWithAccessToken,
+                           callback: (error: Error, experiment?: ExperimentRowWithAccessToken) => void): void {
   if (experiment.access_token) {
     return setImmediate(() => {
       callback(null, experiment)
@@ -70,10 +70,8 @@ R.get(/^\/api\/experiments$/, (req, res) => {
 /** POST /api/experiments
 Create new experiment. */
 R.post(/^\/api\/experiments$/, (req, res) => {
-  httpUtil.readData(req, (err, data) => {
+  httpUtil.readFields<ExperimentRow>(req, Experiment.columns, (err, fields) => {
     if (err) return httpUtil.writeError(res, err)
-
-    const fields = _.pick(data, Experiment.columns)
 
     db.InsertOne('experiments')
     .set(fields)
@@ -90,7 +88,7 @@ R.post(/^\/api\/experiments$/, (req, res) => {
 /** GET /api/experiments/new
 Generate blank experiment. */
 R.get(/^\/api\/experiments\/new$/, (req, res) => {
-  const contextAdministrator = req['administrator'] as Administrator
+  const contextAdministrator = req['administrator'] as AdministratorRow
   httpUtil.writeJson(res, {
     administrator_id: contextAdministrator.id,
     html: '',
@@ -120,10 +118,8 @@ R.get(/^\/api\/experiments\/(\d+)$/, (req, res, m) => {
 /** POST /api/experiments/:id
 Update existing experiment */
 R.post(/^\/api\/experiments\/(\d+)/, (req, res, m) => {
-  httpUtil.readData(req, (err, data) => {
+  httpUtil.readFields<ExperimentRow>(req, Experiment.columns, (err, fields) => {
     if (err) return httpUtil.writeError(res, err)
-
-    const fields = _.pick(data, Experiment.columns)
 
     db.Update('experiments')
     .setEqual(fields)
