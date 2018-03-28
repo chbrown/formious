@@ -11,6 +11,7 @@ import * as url from 'url'
 
 import db from '../db'
 import * as httpUtil from '../http-util'
+import {blowfish} from '../util'
 import AccessToken from '../models/AccessToken'
 import Block, {Row as BlockRow} from '../models/Block'
 import Experiment, {Row as ExperimentRow} from '../models/Experiment'
@@ -252,7 +253,7 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, (req, res, m) => {
         const response_object = {
           response_id: response.id,
           participant_id: response.participant_id,
-          participant_name: response.name || response.aws_worker_id,
+          participant_name: response.name || blowfish(response.aws_worker_id),
           experiment_id: response.experiment_id,
           block_id: response.block_id,
           created: response.created,
