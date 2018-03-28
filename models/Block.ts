@@ -48,10 +48,10 @@ export default class Block {
   all given blocks can be found within the tree structure of each block in that list.
   */
   static shapeTree(blocks: BlockRow[]): BlockRow[] {
-    const block_hash: {[index: number]: BlockRow} = _.object(blocks.map(block => {
-      block.children = []
-      return [block.id, block]
-    }))
+    const block_hash: {[id: number]: BlockRow} = {}
+    blocks.forEach(block => {
+      block_hash[block.id] = {...block, children: []}
+    })
     const root_blocks: BlockRow[] = []
     blocks.forEach(block => {
       if (block.parent_block_id) {
@@ -223,7 +223,7 @@ function nextChildBlock(parent_block: BlockRow, callback: (error: Error, block?:
   }
   else {
     setImmediate(() => {
-      const next_block = _.first(incomplete_child_blocks)
+      const next_block = incomplete_child_blocks[0]
       callback(null, next_block)
     })
   }
