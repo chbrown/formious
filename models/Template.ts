@@ -4,10 +4,8 @@ export default class Template {
   html: string
   created: Date
 
-  static get columns() {
-    return [
-      'name',
-      'html',
-    ]
-  }
+  static columns = [
+    'name',
+    'html',
+  ]
 }

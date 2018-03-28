@@ -14,16 +14,14 @@ export default class AccessToken {
   redacted?: Date
   created: Date
 
-  static get columns() {
-    return [
-      'token',
-      'relation',
-      'foreign_id',
-      'expires',
-      'redacted',
-      'created',
-    ]
-  }
+  static columns = [
+    'token',
+    'relation',
+    'foreign_id',
+    'expires',
+    'redacted',
+    'created',
+  ]
 
   static randomString(length: number) {
     const store = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'

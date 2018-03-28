@@ -5,11 +5,9 @@ export default class Experiment {
   html?: string
   created?: Date
 
-  static get columns() {
-    return [
-      'name',
-      'administrator_id',
-      'html',
-    ]
-  }
+  static columns = [
+    'name',
+    'administrator_id',
+    'html',
+  ]
 }

@@ -1,9 +1,7 @@
 export default class AWSAccount {
-  static get columns() {
-    return [
-      'name',
-      'access_key_id',
-      'secret_access_key',
-    ]
-  }
+  static columns = [
+    'name',
+    'access_key_id',
+    'secret_access_key',
+  ]
 }

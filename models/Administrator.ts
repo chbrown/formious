@@ -33,14 +33,12 @@ export default class Administrator implements IAdministrator {
     this.created = created
   }
 
-  static get columns() {
-    return [
-      'id',
-      'email',
-      'password',
-      'created',
-    ]
-  }
+  static columns = [
+    'id',
+    'email',
+    'password',
+    'created',
+  ]
 
   static add(email: string,
              password: string,

@@ -31,19 +31,17 @@ export default class Block {
   parent_block_id?: number
   quota?: number
 
-  static get columns(): string[] {
-    return [
-      'id',
-      'experiment_id',
-      'template_id',
-      'context',
-      'view_order',
-      'created',
-      'randomize',
-      'parent_block_id',
-      'quota',
-    ]
-  }
+  static columns = [
+    'id',
+    'experiment_id',
+    'template_id',
+    'context',
+    'view_order',
+    'created',
+    'randomize',
+    'parent_block_id',
+    'quota',
+  ]
 
   /**
   shapeTree takes a list of blocks and returns a subset of that list, but where
