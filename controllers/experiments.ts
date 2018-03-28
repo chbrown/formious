@@ -14,8 +14,9 @@ import * as httpUtil from '../http-util'
 import AccessToken from '../models/AccessToken'
 import Block, {Row as BlockRow} from '../models/Block'
 import Experiment, {Row as ExperimentRow} from '../models/Experiment'
-import Participant from '../models/Participant'
+import Participant, {Row as ParticipantRow} from '../models/Participant'
 import Template, {Row as TemplateRow} from '../models/Template'
+import {Row as ResponseRow} from '../models/Response'
 
 /**
 Return a WritableStream, which we will generally pipe into res, and then
@@ -238,7 +239,7 @@ R.get(/^\/experiments\/(\d+)\/responses(\?|$)/, (req, res, m) => {
     .add('responses.*', 'blocks.context', 'blocks.experiment_id', 'participants.name', 'participants.aws_worker_id')
     .whereEqual({experiment_id})
     .orderBy('responses.id DESC')
-    .execute((err, responses) => {
+    .execute((err, responses: Array<ResponseRow & ParticipantRow & BlockRow>) => {
       if (err) return httpUtil.writeError(res, err)
 
       const accept = httpUtil.asString(urlObj.query.accept) || req.headers.accept || 'application/json; boundary=LF'
