@@ -32,6 +32,7 @@
     "test/flat.ts",
     "db.ts",
     "http-util.ts",
-    "server.ts"
+    "server.ts",
+    "util.ts"
   ]
 }

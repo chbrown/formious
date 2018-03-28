@@ -1,16 +1,6 @@
-import {createHash} from 'crypto'
-
 import db from '../db'
+import {sha256} from '../util'
 import AccessToken from './AccessToken'
-
-const salt = 'rNxROdgCbAkBI2WvZJtH'
-
-function sha256(data: string) {
-  const hash = createHash('sha256')
-  hash.update(salt, 'utf8')
-  hash.update(data, 'utf8')
-  return hash.digest('hex')
-}
 
 export interface Row {
   id: number
