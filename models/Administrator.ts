@@ -5,11 +5,11 @@ import AccessToken from './AccessToken'
 
 const salt = 'rNxROdgCbAkBI2WvZJtH'
 
-function sha256(string: string) {
-  const shasum = createHash('sha256')
-  shasum.update(salt, 'utf8')
-  shasum.update(string, 'utf8')
-  return shasum.digest('hex')
+function sha256(data: string) {
+  const hash = createHash('sha256')
+  hash.update(salt, 'utf8')
+  hash.update(data, 'utf8')
+  return hash.digest('hex')
 }
 
 export interface Row {
@@ -28,20 +28,18 @@ export default class Administrator {
   ]
 
   static add(email: string,
-             password: string,
+             passwordRaw: string,
              callback: (error: Error, administrator?: Row) => void): void {
+    const password = sha256(passwordRaw)
     db.InsertOne('administrators')
-    .set({
-      email,
-      password: sha256(password),
-    })
+    .set({email, password})
     .returning('*')
     .execute(callback)
   }
 
   static update(id: number,
                 email: string,
-                password: string,
+                passwordRaw: string,
                 callback: (error: Error, administrator?: Row) => void): void {
     let query = db.Update('administrators')
     .setEqual({email})
@@ -49,8 +47,9 @@ export default class Administrator {
     .returning('*')
 
     // empty-string password means: don't change the password
-    if (password) {
-      query = query.setEqual({password: sha256(password)})
+    if (passwordRaw) {
+      const password = sha256(passwordRaw)
+      query = query.setEqual({password})
     }
 
     query.execute((err, rows) => {
@@ -58,17 +57,12 @@ export default class Administrator {
     })
   }
 
-  /**
-  callback signature:
-  */
   static authenticate(email: string,
-                      password: string,
+                      passwordRaw: string,
                       callback: (error: Error, token?: string) => void): void {
+    const password = sha256(passwordRaw)
     db.SelectOne('administrators')
-    .whereEqual({
-      email,
-      password: sha256(password),
-    })
+    .whereEqual({email, password})
     .execute((err, administrator: Row) => {
       if (err) return callback(err)
       if (!administrator) return callback(new Error('Authentication failed'))
