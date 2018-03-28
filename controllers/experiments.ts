@@ -1,4 +1,3 @@
-import * as _ from 'lodash'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as async from 'async'
@@ -13,10 +12,10 @@ import * as url from 'url'
 import db from '../db'
 import * as httpUtil from '../http-util'
 import AccessToken from '../models/AccessToken'
-import Block from '../models/Block'
-import Experiment from '../models/Experiment'
+import Block, {Row as BlockRow} from '../models/Block'
+import Experiment, {Row as ExperimentRow} from '../models/Experiment'
 import Participant from '../models/Participant'
-import Template from '../models/Template'
+import Template, {Row as TemplateRow} from '../models/Template'
 
 /**
 Return a WritableStream, which we will generally pipe into res, and then
@@ -109,7 +108,7 @@ Render block as html
 R.get(/^\/experiments\/(\d+)\/blocks\/(\d+)(\?|$)/, (req, res, m) => {
   const [, experiment_id, block_id] = m
 
-  async.auto<{experiment?: Experiment, block?: Block, template?: Template}, Error>({
+  async.auto<{experiment?: ExperimentRow, block?: BlockRow, template?: TemplateRow}, Error>({
     experiment: (callback) => {
       db.SelectOne('experiments')
       .whereEqual({id: experiment_id})

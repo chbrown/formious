@@ -49,11 +49,11 @@ Show existing administrator. */
 R.get(/^\/api\/administrators\/(\d+)$/, (req, res, m) => {
   db.SelectOne('administrators')
   .whereEqual({id: m[1]})
-  .execute((err, full_administrator) => {
+  .execute((err, administrator) => {
     if (err) return httpUtil.writeError(res, err)
 
-    const administrator = _.omit(full_administrator, 'password')
-    httpUtil.writeJson(res, administrator)
+    const {id, email, created} = administrator
+    httpUtil.writeJson(res, {id, email, created})
   })
 })
 
@@ -64,9 +64,9 @@ R.post(/^\/api\/administrators\/(\d+)$/, (req, res, m) => {
   httpUtil.readData(req, (err, data) => {
     if (err) return httpUtil.writeError(res, err)
 
-    const administrator = new Administrator({id: m[1]})
+    const id = parseInt(m[1], 10)
     // Administrator#update is like db.Update('administrators') but hashes the password if it is not ''
-    administrator.update(data.email, data.password, (err) => {
+    Administrator.update(id, data.email, data.password, (err) => {
       if (err) return httpUtil.writeError(res, err)
 
       res.statusCode = 204

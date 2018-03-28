@@ -145,7 +145,7 @@ R.put(/\/api\/experiments\/(\d+)\/blocks\/tree$/, (req, res, m) => {
       .execute((err, full_block) => {
         if (err) return callback(err)
         // update by reference
-        _.assign(block, full_block)
+        Object.assign(block, full_block)
         // okay, all blocks should have .id fields now; ready to move on
         callback()
       })
