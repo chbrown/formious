@@ -252,11 +252,12 @@ app
     },
     templateUrl: '/ui/admin/experiments/blocks/tree.html',
     replace: true,
-    link: function(scope) {
+    link(scope) {
       scope.$watchCollection('blocks', () => {
         // whenever blocks change, we may need to update the parameters list
         var parameters_object = {}
-        scope.blocks.forEach(block => {
+        var {blocks = []} = scope
+        blocks.forEach(block => {
           for (var key in block.context) {
             parameters_object[key] = 1
           }
@@ -266,7 +267,7 @@ app
         scope.parameters = parameters
       })
     },
-    compile: function(element) {
+    compile(element) {
       // Use the compile function from the RecursionHelper,
       // And return the linking function(s) which it returns
       return RecursionHelper.compile(element, this.link)

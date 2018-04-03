@@ -327,7 +327,6 @@ app
         block_id: assignment.Answer.block_id,
         aws_worker_id: assignment.WorkerId,
       }, assignment.Answer)
-      console.log('assignment params', params)
 
       var response = new Response(params)
       return response.$save().then(res => {
@@ -375,7 +374,7 @@ app
     scope: {
       assignment: '=',
     },
-    link: function(scope) {
+    link(scope) {
       scope.$storage = $localStorage
       var responses = Response.query({aws_worker_id: scope.assignment.WorkerId}, function() {
         var transform_functionBody = $localStorage.responses_summarizer || 'return responses;'
@@ -392,9 +391,7 @@ app
           WorkerId: scope.assignment.WorkerId,
           Reason: Reason,
         }).then(function(document) {
-          var xml = new XMLSerializer().serializeToString(document)
-          console.log('BlockWorker response', xml)
-          return xml
+          return new XMLSerializer().serializeToString(document)
         })
         NotifyUI.addPromise(promise)
       }

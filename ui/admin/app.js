@@ -41,7 +41,7 @@ app.directive('help', function() {
       '<span class="full" ng-show="expanded" ng-click="expanded = false" ng-transclude></span>',
     transclude: true,
     scope: {},
-    link: function(scope, el) {
+    link(scope, el) {
       var summary_el = el.children().eq(0)
       var full_el = el.children().eq(1)
       scope.expanded = false
@@ -58,31 +58,31 @@ app.directive('jsonTransform', function() {
   return {
     restrict: 'A',
     require: 'ngModel',
-    link: function(scope, el, attrs, ngModel) {
+    link(scope, el, attrs, ngModel) {
       // set up communicating from DOM to model
-      el.on('blur keyup change', function() {
-        scope.$apply(function() {
+      el.on('blur keyup change', () => {
+        scope.$apply(() => {
           ngModel.$setViewValue(el.val())
           // if we wanted to read from page's html before from the model, we'd
           // run this function at the link level (but usually we want the model)
         })
       })
       // set up communicating from model to DOM
-      ngModel.$render = function() {
+      ngModel.$render = () => {
         el.val(ngModel.$viewValue)
         // this would trigger a textarea to resizeToFit, for example. kind of awkward, though.
         el[0].dispatchEvent(new Event('input'))
       }
 
       // set up translations
-      ngModel.$formatters.push(function(value) {
+      ngModel.$formatters.push((value) => {
         if (value === null) {
           return ''
         }
         // signature: angular.toJson(obj, [pretty])
         return angular.toJson(value, true)
       })
-      ngModel.$parsers.push(function(stringValue) {
+      ngModel.$parsers.push((stringValue) => {
         // we'll interpret the empty string as 'null'
         var value
         if (stringValue === '') {
@@ -107,7 +107,6 @@ app.directive('jsonTransform', function() {
 })
 
 function renderObject(object) {
-  // console.log('renderObject', object)
   if (object === undefined) {
     return h('i.undefined', 'undefined')
   }
@@ -116,21 +115,21 @@ function renderObject(object) {
   }
   else if (Array.isArray(object)) {
     // check for tabular arrays (all of the items are objects with the same keys)
-    var items_are_objects = object.every(function(value) {
+    var items_are_objects = object.every((value) => {
       return (value !== null) && (value !== undefined) && (typeof value === 'object')
     })
     if (object.length > 0 && items_are_objects) {
       // now check that all the keys are the same
       var columns = Object.keys(object[0])
-      var items_have_indentical_keys = object.slice(1).every(function(value) {
+      var items_have_indentical_keys = object.slice(1).every((value) => {
         return _.isEqual(Object.keys(value), columns)
       })
       if (items_have_indentical_keys) {
-        var thead_children = h('tr', columns.map(function(column) {
+        var thead_children = h('tr', columns.map((column) => {
           return h('th', column)
         }))
-        var tbody_children = object.map(function(value) {
-          var cells = columns.map(function(column) {
+        var tbody_children = object.map((value) => {
+          var cells = columns.map((column) => {
             return h('td', renderObject(value[column]))
           })
           return h('tr', cells)
@@ -148,7 +147,7 @@ function renderObject(object) {
     return h('div.array', array_children)
   }
   else if (typeof object === 'object') {
-    var object_children = _.map(object, function(value, key) {
+    var object_children = _.map(object, (value, key) => {
       return h('tr', [
         h('td', key), h('td', renderObject(value)),
       ])
@@ -170,7 +169,7 @@ app.directive('uiSrefActiveAny', function($state) {
     scope: {
       uiSrefActiveAny: '=',
     },
-    link: function(scope, el) {
+    link(scope, el) {
       var activeClasses = scope.uiSrefActiveAny
       function updateSrefActiveAny() {
         for (var key in activeClasses) {
@@ -212,9 +211,9 @@ app.directive('object', function() {
     scope: {
       object: '=',
     },
-    link: function(scope, el) {
+    link(scope, el) {
       var component = new VComponent(el[0], renderObject)
-      scope.$watch('object', function(newVal) {
+      scope.$watch('object', (newVal) => {
         var object = angular.copy(newVal)
         component.update(object)
       }, true)
@@ -223,7 +222,7 @@ app.directive('object', function() {
 })
 
 app.filter('valueWhere', function() {
-  return function(list, predicate, prop) {
+  return (list, predicate, prop) => {
     var match = _.findWhere(list, predicate)
     if (match) {
       return match[prop]
@@ -232,15 +231,12 @@ app.filter('valueWhere', function() {
 })
 
 app.filter('keys', function() {
-  return function(object) {
-    return Object.keys(object)
-  }
+  return object => Object.keys(object)
 })
 
 export function sendTurkRequest(data, callback) {
   // ui-router reloads the controllers before changing the location URL, which
   // means this will get called with the wrong url after a account/environment change
-  // console.log('sendTurkRequest pathname', location.pathname, data)
   var path_match = window.location.pathname.match(/^\/admin\/mturk\/(\w+)\/(\d+)/)
   if (path_match === null) {
     throw new Error('Cannot find AWS Account ID and MTurk environment parameters in URL')
@@ -265,9 +261,9 @@ export function sendTurkRequest(data, callback) {
 }
 
 app.factory('$turk', function($q) {
-  return function(data) {
-    return $q(function(resolve, reject) {
-      sendTurkRequest(data, function(err, response) {
+  return (data) => {
+    return $q((resolve, reject) => {
+      sendTurkRequest(data, (err, response) => {
         return err ? reject(err) : resolve(response)
       })
     })
@@ -288,7 +284,7 @@ app.service('Cache', function($q, $localStorage) {
     if (now - fetched > max_age) {
       // fetch and cache
       // fetchFunction() will return something like an $http with successes filtered to a single value
-      return fetchFunction().then(function(res) {
+      return fetchFunction().then((res) => {
         cache[key] = {
           fetched: now,
           value: res,
@@ -319,18 +315,18 @@ app.directive('jsonarea', function() {
     },
     require: 'ngModel',
     replace: true,
-    link: function(scope, el, attrs, ngModel) {
+    link(scope, el, attrs, ngModel) {
       scope.model = ngModel
 
       // not sure why Angular decides to automatically transclude all the attributes when we say 'replace: true'
       el.attr({style: ''})
 
       // scope.raw.viewChangeListeners = []
-      scope.change = function() {
+      scope.change = () => {
         ngModel.$setViewValue(scope.raw)
       }
 
-      ngModel.$parsers = [function(string) {
+      ngModel.$parsers = [(string) => {
         try {
           var obj = angular.fromJson(string)
           ngModel.$setValidity('jsonInvalid', true)
@@ -344,7 +340,7 @@ app.directive('jsonarea', function() {
         }
       }]
 
-      ngModel.$render = function() {
+      ngModel.$render = () => {
         // just set the textarea to the JSON, but only if the current raw value is valid JSON
         if (ngModel.$valid) {
           scope.raw = angular.toJson(ngModel.$modelValue, true)
@@ -361,10 +357,10 @@ files[i] property.
 */
 function readBinaryFile(file, callback) {
   var reader = new FileReader()
-  reader.onerror = function(error) {
+  reader.onerror = (error) => {
     callback(error)
   }
-  reader.onload = function() {
+  reader.onload = () => {
     var data = new Uint8Array(reader.result)
     // data is an arraybufferview as basic bytes / chars
     callback(null, data)
@@ -381,7 +377,7 @@ This method will read the file's contents, send it via AJAX to the
 /util/parseTable endpoint to be parsed as an Excel spreadsheet or CSV, as needed.
 */
 function parseTabularFile(file, callback) {
-  readBinaryFile(file, function(error, data) {
+  readBinaryFile(file, (error, data) => {
     if (error) return callback(error)
 
     // send excel data off to the server to parse
@@ -389,10 +385,10 @@ function parseTabularFile(file, callback) {
     xhr.open('POST', '/util/parse-table')
     xhr.setRequestHeader('Content-Type', file.type)
     xhr.setRequestHeader('X-Filename', file.name)
-    xhr.onerror = function(error) {
+    xhr.onerror = (error) => {
       callback(error)
     }
-    xhr.onload = function() {
+    xhr.onload = () => {
       if (xhr.status >= 300) {
         var error = new Error(xhr.responseText)
         return callback(error)
@@ -415,9 +411,9 @@ Wrap the non-Angular parseTabularFile function as a injectable that returns
 a promise.
 */
 app.factory('parseTabularFile', function($q) {
-  return function(file) {
-    return $q(function(resolve, reject) {
-      parseTabularFile(file, function(err, data) {
+  return (file) => {
+    return $q((resolve, reject) => {
+      parseTabularFile(file, (err, data) => {
         // split out typical async callback into reject/resolve calls:
         return err ? reject(err) : resolve(data)
       })
@@ -431,7 +427,7 @@ app.config(function($httpProvider) {
   // inject $state
   $httpProvider.interceptors.push(function($q, $rootScope) {
     return {
-      responseError: function(res) {
+      responseError(res) {
         if (res.status == 401) {
           $rootScope.$broadcast('unauthorized', res)
         }
@@ -451,9 +447,9 @@ be called as many times as there were errors at the same time, but they'll all
 be 'to' the original state name (since it's scoped outside the $timeout).
 */
 app.run(function($rootScope, $state, $timeout) {
-  $rootScope.$on('unauthorized', function() {
+  $rootScope.$on('unauthorized', () => {
     var to = $state.current.name
-    $timeout(function() {
+    $timeout(() => {
       $state.go('admin.login', {to: to})
     })
   })
@@ -465,7 +461,7 @@ global listener for command+S keypresses
 Broadcasts global "save" event and prevents the browser's default save action.
 */
 app.run(function($rootScope) {
-  document.addEventListener('keydown', function(ev) {
+  document.addEventListener('keydown', (ev) => {
     if (ev.which == 83 && ev.metaKey) { // command+S
       ev.preventDefault()
       $rootScope.$broadcast('save')
@@ -474,7 +470,7 @@ app.run(function($rootScope) {
 })
 
 app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
-  $urlRouterProvider.otherwise(function() {
+  $urlRouterProvider.otherwise(() => {
     // the returned value should be a url expressed relative to the page's base[href]
     return 'admin/administrators/'
   })
@@ -652,20 +648,20 @@ app.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
 })
 
 app.controller('admin', function($scope, $state, $http) {
-  $scope.login = function(email, password) {
+  $scope.login = (email, password) => {
     var promise = $http.post('/login', {
       email: email,
       password: password,
-    }).then(function(res) {
+    }).then((res) => {
       $state.go($state.params.to)
       return res.data.message
-    }, function(res) {
+    }, (res) => {
       return res.data.message
     })
     NotifyUI.addPromise(promise)
   }
 
-  $scope.logout = function() {
+  $scope.logout = () => {
     var cookies = new CookieMonster(document)
     cookies.del('administrator_token', {path: '/'})
     NotifyUI.add('Deleted administrator token')
@@ -684,7 +680,7 @@ app.factory('RecursionHelper', function($compile) {
      * @param [link] A post-link function, or an object with function(s) registered via pre and post properties.
      * @returns An object containing the linking functions.
      */
-    compile: function(element, link) {
+    compile(element, link) {
       // Normalize the link parameter and extract pre/post
       var {pre = null, post} = angular.isFunction(link) ? {post: link} : link
 
@@ -696,19 +692,19 @@ app.factory('RecursionHelper', function($compile) {
         /**
          * Compiles and re-adds the contents
          */
-        post: function(scope, element) {
+        post(scope, element) {
           // Compile the contents
           if (!compiledContents) {
             compiledContents = $compile(contents)
           }
           // Re-add the compiled contents to the element
-          compiledContents(scope, function(clone) {
+          compiledContents(scope, clone => {
             element.append(clone)
           })
 
           // Call the post-linking function, if any
           if (post) {
-            link.post.apply(null, arguments)
+            post.apply(null, arguments)
           }
         },
       }
@@ -724,7 +720,7 @@ app.directive('selectTemplate', function(Template) {
     },
     template: '<select ng-model="model" ng-options="template.id as template.name for template in templates"></select>',
     replace: true,
-    link: function(scope) {
+    link(scope) {
       scope.templates = Template.query()
     },
   }
@@ -738,7 +734,7 @@ app.directive('aTemplate', function(Template) {
     },
     template: '<a ui-sref="admin.templates.edit({id: template.id})">{{template.name}}</a>',
     replace: true,
-    link: function(scope) {
+    link(scope) {
       scope.template = Template.get({id: scope.id})
     },
   }
@@ -817,7 +813,7 @@ app.directive('durationString', function() {
   return {
     restrict: 'A',
     require: 'ngModel',
-    link: function(scope, el, attrs, ngModel) {
+    link(scope, el, attrs, ngModel) {
       ngModel.$formatters.push(formatDuration)
       ngModel.$parsers.push(parseDuration)
     },
