@@ -43,7 +43,9 @@ export default class Block {
   static shapeTree(blocks: Row[]): ExtendedRow[] {
     const block_hash: {[id: number]: ExtendedRow} = {}
     blocks.forEach(block => {
-      block_hash[block.id] = {...block, children: []}
+      // this has to be Object.assign instead of {...block, children: []}
+      // since we add children by reference (we don't want a new object)
+      block_hash[block.id] = Object.assign(block, {children: []})
     })
     const root_blocks: ExtendedRow[] = []
     blocks.forEach(block => {
