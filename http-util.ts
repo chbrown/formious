@@ -1,7 +1,6 @@
 import {parse as parseUrl, format as formatUrl, Url} from 'url'
 import {parse as parseQuerystring} from 'querystring'
 import {IncomingMessage, ServerResponse} from 'http'
-import {pick} from 'lodash'
 import {readToEnd} from 'streaming'
 
 /**
@@ -44,6 +43,14 @@ export function readData(req: IncomingMessage,
   }
 }
 
+function pick<T extends {}>(object: T, keys: string[]): Partial<T> {
+  const newObject: Partial<T> = {}
+  for (const key of keys) {
+    newObject[key] = object[key]
+  }
+  return newObject
+}
+
 export function readFields<T extends {}>(req: IncomingMessage,
                                          keys: string[],
                                          callback: (error: Error, fields?: Partial<T>) => void): void {
@@ -51,7 +58,8 @@ export function readFields<T extends {}>(req: IncomingMessage,
     if (err) {
       return callback(err)
     }
-    return callback(null, _.pick(data, keys))
+
+    return callback(null, pick<T>(data, keys))
   })
 }
 
