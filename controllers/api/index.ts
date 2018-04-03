@@ -1,6 +1,6 @@
 import Router from 'regex-router'
 import {IncomingMessage, ServerResponse} from 'http'
-import Cookies from 'cookies'
+import Cookies from '../../http-cookies'
 
 import * as httpUtil from '../../http-util'
 import Administrator from '../../models/Administrator'

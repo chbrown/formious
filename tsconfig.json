@@ -31,6 +31,7 @@
     "models/Template.ts",
     "test/flat.ts",
     "db.ts",
+    "http-cookies.ts",
     "http-util.ts",
     "server.ts",
     "util.ts"

@@ -1,5 +1,5 @@
 import Router from 'regex-router'
-import Cookies from 'cookies'
+import Cookies from '../http-cookies'
 import {logger} from 'loge'
 
 import * as httpUtil from '../http-util'

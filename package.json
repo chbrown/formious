@@ -17,7 +17,6 @@
     "async": "2.6.0",
     "checkbox-sequence": "0.0.1",
     "cookiemonster": "1.1.0",
-    "cookies": "chbrown/cookies#v1.0.0",
     "flow-copy": "0.1.2",
     "handlebars": "4.0.11",
     "httprequest": "0.1.3",
