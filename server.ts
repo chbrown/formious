@@ -1,5 +1,5 @@
 import * as path from 'path'
-import * as optimist from 'optimist'
+import * as program from 'commander'
 
 import * as http from 'http'
 import {logger, Level} from 'loge'
@@ -7,6 +7,7 @@ import {executePatches} from 'sql-patch'
 
 import controllers from './controllers'
 import db from './db'
+import Administrator from './models/Administrator'
 
 export const server = http.createServer((req, res) => {
   logger.debug('%s %s', req.method, req.url)
@@ -18,53 +19,78 @@ server.on('listening', () => {
   logger.info('server listening on http://%s:%d', address.address, address.port)
 })
 
-interface CLIArgv {
-  hostname: string
-  port: string
-  help: boolean
-  verbose: boolean
-  version: boolean
+function readPassword(tty: NodeJS.ReadStream, callback: (error: Error, password: string) => void) {
+  const chars: string[] = []
+  tty.setRawMode(true) // to get input character by character
+  tty.on('readable', () => {
+    const chunk = tty.read()
+    if (chunk !== null) {
+      const char = chunk.toString()
+      chars.push(char)
+      if (char == '\n' || char == '\r' || char == '\x04') {
+        tty.setRawMode(false)
+        callback(null, chars.join(''))
+      }
+      else {
+        process.stdout.write('*')
+      }
+    }
+  })
+}
+
+function migrate(callback: (error: Error) => void) {
+  db.createDatabaseIfNotExists(createDbError => {
+    if (createDbError) return callback(createDbError)
+    const migrations_dirpath = path.join(__dirname, 'migrations')
+    executePatches(db, '_migrations', migrations_dirpath, migrationError => {
+      return callback(migrationError)
+    })
+  })
 }
 
 export function main() {
-  const argvparser = optimist
-  .usage('formious --port 1451 -v')
-  .describe({
-    hostname: 'hostname to listen on',
-    port: 'port to listen on',
-    help: 'print this help message',
-    verbose: 'print extra output',
-    version: 'print version',
-  })
-  .boolean(['help', 'verbose', 'version'])
-  .alias({verbose: 'v'})
-  .default({
-    hostname: process.env.HOSTNAME || '127.0.0.1',
-    port: parseInt(process.env.PORT, 10) || 80,
-    verbose: process.env.DEBUG !== undefined,
+  program
+  .version(require('./package').version)
+  .option('-v, --verbose', 'print extra output', process.env.DEBUG !== undefined)
+  // .usage('--port 1451 -v')
+
+  // set up 'server' command
+  program
+  .command('server')
+  .option('--hostname <name or ip>', 'hostname to listen on', process.env.HOSTNAME || '127.0.0.1')
+  .option('--port <integer>', 'port to listen on', s => parseInt(s, 10), process.env.PORT || '80')
+  .action(options => {
+    server.listen(options.port, options.hostname)
   })
 
-  const argv: CLIArgv = argvparser.argv
-  logger.level = argv.verbose ? Level.debug : Level.info
-
-  if (argv.help) {
-    argvparser.showHelp()
-  }
-  else if (argv.version) {
-    console.log(require('./package').version)
-  }
-  else {
-    db.createDatabaseIfNotExists((err) => {
+  // set up 'migrate' command
+  program
+  .command('migrate')
+  .action(options => {
+    migrate(err => {
       if (err) throw err
+      process.exit(0)
+    })
+  })
 
-      const migrations_dirpath = path.join(__dirname, 'migrations')
-      executePatches(db, '_migrations', migrations_dirpath, (err) => {
-        if (err) throw err
-
-        server.listen(parseInt(argv.port, 10), argv.hostname)
+  // set up 'configure-administrator' command
+  program
+  .command('configure-administrator <email>')
+  .action(email => {
+    process.stdout.write('Enter password: ')
+    readPassword(process.stdin, (stdinError, rawPassword) => {
+      if (stdinError) throw stdinError
+      process.stdout.write('\n')
+      Administrator.upsert(email, rawPassword, (upsertError, administrator) => {
+        if (upsertError) throw upsertError
+        console.log('Administrator:', administrator)
+        process.exit(0)
       })
     })
-  }
+  })
+
+  program.parse(process.argv)
+  logger.level = program.verbose ? Level.debug : Level.info
 }
 
 export default server
