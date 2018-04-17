@@ -47,6 +47,24 @@ export default class Administrator {
     })
   }
 
+  static upsert(email: string,
+                passwordRaw: string,
+                callback: (error: Error, administrator?: Row) => void): void {
+    Administrator.add(email, passwordRaw, (addError, administrator) => {
+      if (addError) {
+        const password = sha256(passwordRaw)
+        return db.Update('administrators')
+        .setEqual({password})
+        .whereEqual({email})
+        .returning('*')
+        .execute((err, rows) => {
+          callback(err, err ? null : rows[0])
+        })
+      }
+      return callback(null, administrator)
+    })
+  }
+
   static authenticate(email: string,
                       passwordRaw: string,
                       callback: (error: Error, token?: string) => void): void {
