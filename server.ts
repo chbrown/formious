@@ -1,5 +1,5 @@
 import * as path from 'path'
-import * as program from 'commander'
+import {program} from 'commander'
 
 import * as http from 'http'
 import {logger, Level} from 'loge'
@@ -16,7 +16,7 @@ export const server = http.createServer((req, res) => {
 
 server.on('listening', () => {
   const address = server.address()
-  logger.info('server listening on http://%s:%d', address.address, address.port)
+  logger.info('server listening on %s', address)
 })
 
 function readPassword(tty: NodeJS.ReadStream, callback: (error: Error, password: string) => void) {
@@ -58,9 +58,9 @@ export function main() {
   program
   .command('server')
   .option('--hostname <name or ip>', 'hostname to listen on', process.env.HOSTNAME || '127.0.0.1')
-  .option('--port <integer>', 'port to listen on', s => parseInt(s, 10), process.env.PORT || '80')
+  .option('--port <integer>', 'port to listen on', process.env.PORT || '80')
   .action(options => {
-    server.listen(options.port, options.hostname)
+    server.listen(parseInt(options.port, 10), options.hostname)
   })
 
   // set up 'migrate' command
@@ -90,7 +90,7 @@ export function main() {
   })
 
   program.parse(process.argv)
-  logger.level = program.verbose ? Level.debug : Level.info
+  logger.level = program.opts().verbose ? Level.debug : Level.info
 }
 
 export default server

@@ -1,7 +1,7 @@
 import Router from 'regex-router'
 import {readToEnd} from 'streaming'
 import {Parser, ArrayStringifier} from 'streaming/json'
-import * as sv from 'sv'
+import * as sv from '@chbrown/sv'
 
 import * as httpUtil from '../http-util'
 import {parseXlsx} from '../lib/excel'

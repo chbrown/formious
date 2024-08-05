@@ -5,7 +5,7 @@ import * as stream from 'stream'
 import * as handlebars from 'handlebars'
 import {logger} from 'loge'
 import * as streamingJSON from 'streaming/json'
-import * as sv from 'sv'
+import * as sv from '@chbrown/sv'
 import Router from 'regex-router'
 import * as url from 'url'
 

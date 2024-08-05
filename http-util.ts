@@ -125,7 +125,7 @@ export function writeRedirect(res: ServerResponse,
 
 export function writeRelativeRedirect(res: ServerResponse,
                                       req: IncomingMessage,
-                                      partialUrlObj: Url): ServerResponse {
+                                      partialUrlObj: Partial<Url>): ServerResponse {
   const urlObj = parseUrl(req.url, true)
   const location = formatUrl({...urlObj, ...partialUrlObj})
   // check whether the request originated from the client code (ajax)

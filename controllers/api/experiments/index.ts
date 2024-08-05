@@ -24,9 +24,10 @@ a new access_tokens row if there is no access_token available.
 function ensureAccessToken(experiment: ExperimentRowWithAccessToken,
                            callback: (error: Error, experiment?: ExperimentRowWithAccessToken) => void): void {
   if (experiment.access_token) {
-    return setImmediate(() => {
+    setImmediate(() => {
       callback(null, experiment)
     })
+    return
   }
 
   // AccessToken.findOrCreate('experiments', experiment.id, {length: 10}, (err, access_token) => {
